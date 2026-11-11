@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>बारबरीक — खाटू श्याम (2 min Short)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  #stage{position:relative;width:540px;height:960px;overflow:hidden;transform-origin:center;background:#07081a}
+  .scene{position:absolute;inset:0;opacity:0;display:none;will-change:transform,opacity}
+  .scene svg,#over{position:absolute;inset:0;width:540px;height:960px}
+  canvas{position:absolute;inset:0;pointer-events:none;z-index:5}
+  #over{z-index:6;pointer-events:none}
+  #shade{position:absolute;left:0;right:0;bottom:0;height:240px;z-index:7;pointer-events:none;background:linear-gradient(transparent,rgba(0,0,0,.72))}
+  #cap{position:absolute;left:0;right:0;top:812px;z-index:8;text-align:center;padding:0 22px;box-sizing:border-box;min-height:90px;
+       font-family:'Mukta','Kohinoor Devanagari','Noto Sans Devanagari','Nirmala UI','Mangal',sans-serif;font-weight:800;font-size:36px;line-height:1.3;color:#f1e6c8;
+       text-shadow:0 2px 3px #000,0 0 12px rgba(0,0,0,.95)}
+  #cap .w{display:inline-block;margin:0 5px;opacity:.82;transition:color .1s,transform .1s}
+  #cap .w.on{color:#ffd25e;opacity:1;transform:scale(1.08);text-shadow:0 0 16px rgba(255,190,80,.8),0 2px 3px #000}
+  #cap .w.hl.on{color:#ff9d3c}
+  svg text{font-family:'Mukta','Kohinoor Devanagari','Noto Sans Devanagari','Nirmala UI','Mangal',sans-serif;font-weight:800}
+  #bar{position:absolute;left:0;bottom:0;height:4px;background:#e0453a;width:0;z-index:9}
+  #ui{position:fixed;top:10px;left:10px;z-index:10;display:flex;gap:8px}
+  #ui button{background:#222c;color:#fff;border:1px solid #555;border-radius:6px;padding:6px 12px;cursor:pointer;font:14px sans-serif}
+  body.clean #ui,body.clean #bar{display:none}
+</style>
+</head>
+<body>
+<div id="ui"><button id="restart">Restart</button><button id="toggle">Pause</button></div>
+<div id="wrap"><div id="stage">
+  <svg width="0" height="0" style="position:absolute" id="defs"></svg>
+  <div id="scenes"></div>
+  <canvas id="fx" width="540" height="960"></canvas>
+  <svg id="over" viewBox="0 0 540 960"></svg>
+  <div id="shade"></div>
+  <div id="cap"></div>
+  <div id="bar"></div>
+</div></div>
+
+<script>
+(function(){
+/* =====================================================================
+   SCRIPT — one entry = one shot.   TARGET = total length in seconds.
+   When your voiceover is ready: set audioSrc, and give each shot a real
+   `dur` (seconds) — or use the Mac renderer's Whisper sync.
+   ===================================================================== */
+const TARGET = 120;
+const audioSrc = null;
+const SCENES = [
+ { art:"warWide",  cam:"in",   fx:"dust",   text:"कुरुक्षेत्र का युद्ध 18 दिन चला..." },
+ { art:"hero",     cam:"out",  fx:"dust",   text:"पर कहते हैं, एक योद्धा उसे सिर्फ 1 मिनट में खत्म कर सकता था!" },
+ { art:"question", cam:"in",   fx:"stars",  text:"फिर वह लड़ा क्यों नहीं?" },
+ { art:"daan",     cam:"in",   fx:"sparks", text:"जवाब एक दान में छिपा है..." },
+ { art:"offer",    cam:"up",   fx:"sparks", text:"जिसके पास सबसे बड़ी जीत थी, उसने वही जीत दान कर दी!" },
+ { art:"name",     cam:"in",   fx:"flies",  text:"नाम था — बारबरीक," },
+ { art:"family",   cam:"panL", fx:"stars",  text:"घटोत्कच का बेटा, भीम का पोता।" },
+ { art:"scroll",   cam:"in",   fx:"embers", text:"स्कंद पुराण की परंपरा कहती है —" },
+ { art:"devi",     cam:"out",  fx:"sparks", text:"देवी से उसे तीन अचूक बाण मिले।" },
+ { art:"arrow1",   cam:"panR", fx:"dust",   text:"पहला बाण निशान लगाता," },
+ { art:"arrow2",   cam:"panL", fx:"dust",   text:"दूसरा बाण बचाने वालों को चुनता," },
+ { art:"arrow3",   cam:"in",   fx:"sparks", text:"और तीसरा निशान वालों को मिटा देता!" },
+ { art:"mother",   cam:"in",   fx:"flies",  text:"वह मां को वचन दे चुका था: 'मैं कमजोर पक्ष की तरफ से लड़ूंगा।'" },
+ { art:"arrive",   cam:"in",   fx:"embers", text:"युद्ध से पहले ब्राह्मण के वेश में कृष्ण उसके पास आए" },
+ { art:"tree",     cam:"up",   fx:"flies",  text:"और बोले — 'इस पीपल के सारे पत्ते एक बाण से बींधो!'" },
+ { art:"pierce",   cam:"in",   fx:"sparks", text:"बाण ने हर पत्ता बींध दिया," },
+ { art:"foot",     cam:"in",   fx:"sparks", text:"पर एक पत्ता कृष्ण ने पैर के नीचे छुपा लिया था... और बाण उसी के चारों ओर घूमने लगा!" },
+ { art:"scales",   cam:"out",  fx:"stars",  text:"कृष्ण समझ गए — कमजोर का साथ देने वाला कभी इधर जाएगा, कभी उधर!" },
+ { art:"reveal",   cam:"in",   fx:"sparks", text:"तब कृष्ण ने दान में मांगा — 'तुम्हारा शिर!'" },
+ { art:"yes",      cam:"in",   fx:"petals", text:"बारबरीक ने बिना झिझके हां कह दिया," },
+ { art:"headHill", cam:"out",  fx:"embers", text:"और बस इतना मांगा कि वह युद्ध देख सके।" },
+ { art:"pandavas", cam:"panR", fx:"dust",   text:"युद्ध खत्म हुआ तो पांडव जीत का श्रेय लेने लगे।" },
+ { art:"chakra",   cam:"in",   fx:"sparks", text:"शिर ने कहा — 'मैंने बस कृष्ण का चक्र देखा!'" },
+ { art:"bless",    cam:"in",   fx:"petals", text:"तब कृष्ण ने वरदान दिया — 'कलयुग में तुम मेरे ही नाम से पूजे जाओगे!'" },
+ { art:"shyam",    cam:"out",  fx:"petals", text:"आज वही खाटू श्याम कहलाते हैं।" }
+];
+const HIGHLIGHT = ["बारबरीक","कृष्ण","खाटू","श्याम","बाण","शिर","चक्र","दान","भीम","घटोत्कच","देवी"];
+const FADE = 0.45;
+
+/* ============================ HELPERS ============================ */
+const r1=n=>Math.round(n*10)/10;
+let seed=11; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+const A=(spec,inner)=>`<g data-a="${spec}">${inner}</g>`;   // animated wrapper
+
+document.getElementById('defs').innerHTML = `<defs>
+ <linearGradient id="skyN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#060920"/><stop offset=".55" stop-color="#151f4a"/><stop offset=".85" stop-color="#352a4e"/><stop offset="1" stop-color="#4e2f40"/></linearGradient>
+ <linearGradient id="skyW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a0608"/><stop offset=".45" stop-color="#5e1a14"/><stop offset=".75" stop-color="#b9522a"/><stop offset="1" stop-color="#e08a3a"/></linearGradient>
+ <linearGradient id="skyDusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c0a24"/><stop offset=".5" stop-color="#3a1c3a"/><stop offset=".8" stop-color="#8a3a2a"/><stop offset="1" stop-color="#c0602a"/></linearGradient>
+ <linearGradient id="skyDawn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14183e"/><stop offset=".45" stop-color="#6a3a5a"/><stop offset=".75" stop-color="#e0805a"/><stop offset="1" stop-color="#f6c070"/></linearGradient>
+ <linearGradient id="skyDiv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a0714"/><stop offset="1" stop-color="#241228"/></linearGradient>
+ <linearGradient id="skyRed" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#160508"/><stop offset="1" stop-color="#4a1418"/></linearGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7da7e"/><stop offset="1" stop-color="#b98428"/></linearGradient>
+ <linearGradient id="gnd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2236"/><stop offset="1" stop-color="#100d18"/></linearGradient>
+ <linearGradient id="gndW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a1810"/><stop offset="1" stop-color="#140806"/></linearGradient>
+ <linearGradient id="fog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9aa0d0" stop-opacity="0"/><stop offset=".5" stop-color="#9aa0d0" stop-opacity=".2"/><stop offset="1" stop-color="#9aa0d0" stop-opacity="0"/></linearGradient>
+ <linearGradient id="fogW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb070" stop-opacity="0"/><stop offset=".5" stop-color="#ffb070" stop-opacity=".28"/><stop offset="1" stop-color="#ffb070" stop-opacity="0"/></linearGradient>
+ <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1610"/><stop offset="1" stop-color="#120806"/></linearGradient>
+ <radialGradient id="saf"><stop offset="0" stop-color="#ffc56a" stop-opacity=".95"/><stop offset=".4" stop-color="#ff9a3c" stop-opacity=".35"/><stop offset="1" stop-color="#ff8a2a" stop-opacity="0"/></radialGradient>
+ <radialGradient id="gw"><stop offset="0" stop-color="#fff2c8" stop-opacity=".95"/><stop offset=".45" stop-color="#ffd27a" stop-opacity=".35"/><stop offset="1" stop-color="#ffc060" stop-opacity="0"/></radialGradient>
+ <radialGradient id="gr"><stop offset="0" stop-color="#ff7a5a" stop-opacity=".9"/><stop offset="1" stop-color="#ff3a2a" stop-opacity="0"/></radialGradient>
+ <radialGradient id="gg"><stop offset="0" stop-color="#8affb0" stop-opacity=".85"/><stop offset="1" stop-color="#3aff8a" stop-opacity="0"/></radialGradient>
+ <radialGradient id="gb"><stop offset="0" stop-color="#9fbcff" stop-opacity=".6"/><stop offset="1" stop-color="#5f7cff" stop-opacity="0"/></radialGradient>
+ <radialGradient id="moonG"><stop offset="0" stop-color="#fff6dc" stop-opacity=".9"/><stop offset="1" stop-color="#bcc8ff" stop-opacity="0"/></radialGradient>
+ <radialGradient id="vg" cx="50%" cy="45%" r="75%"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></radialGradient>
+ <filter id="b4"><feGaussianBlur stdDeviation="4"/></filter>
+ <filter id="b10"><feGaussianBlur stdDeviation="10"/></filter>
+ <filter id="b24"><feGaussianBlur stdDeviation="24"/></filter>
+ <filter id="sil"><feColorMatrix type="matrix" values="0 0 0 0 .05  0 0 0 0 .03  0 0 0 0 .05  0 0 0 1 0"/></filter>
+ <filter id="paper" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" seed="4"/><feColorMatrix type="matrix" values="0 0 0 0 .62  0 0 0 0 .52  0 0 0 0 .38  0 0 0 .55 -.12"/></filter>
+ <filter id="blotch" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".004 .009" numOctaves="2" seed="9"/><feColorMatrix type="matrix" values="0 0 0 0 .1  0 0 0 0 .08  0 0 0 0 .14  0 0 0 .9 -.35"/></filter>
+</defs>`;
+
+/* ---------- environment pieces ---------- */
+function stars(n,h){ let s=''; for(let i=0;i<n;i++){ s+=A('flick:'+(1+rnd()*2).toFixed(2), `<circle cx="${r1(rnd()*540)}" cy="${r1(rnd()*h)}" r="${rnd()<.15?1.6:.9}" fill="#f4ecd4"/>`); } return s; }
+function moon(x,y,r){ return `<circle cx="${x}" cy="${y}" r="${r*4}" fill="url(#moonG)" opacity=".45"/><circle cx="${x}" cy="${y}" r="${r}" fill="#f3ecd2"/><circle cx="${r1(x+r*.42)}" cy="${r1(y-r*.18)}" r="${r1(r*.92)}" fill="#111a40"/>`; }
+function clouds(col,line){ let s=''; [[38,30,0,col||'#1b2150'],[14,22,14,'#141940']].forEach(([y,r,off,c])=>{ s+=`<g fill="${c}">`; for(let x=-r+off;x<540+r;x+=r*1.25) s+=`<circle cx="${r1(x)}" cy="${r1(y+Math.sin(x*.05)*r*.25)}" r="${r}"/>`; s+=`<rect width="540" height="${y}"/></g>`; for(let x=-r+off;x<540+r;x+=r*1.25){ const yy=y+Math.sin(x*.05)*r*.25+r*.35; s+=`<path d="M${r1(x-r*.8)} ${r1(yy)} A${r} ${r} 0 0 1 ${r1(x+r*.8)} ${r1(yy)}" fill="none" stroke="${line||'#3b4278'}" stroke-width="1.4" opacity=".7"/>`; } }); return s; }
+function hills(y,amp,col,step){ let d=`M0 ${y}`; for(let x=0;x<=540+step;x+=step){ d+=` Q${r1(x+step/2)} ${r1(y-amp*(0.4+rnd()*0.8))} ${r1(x+step)} ${y}`; } return `<path d="${d} L700 1200 L0 1200Z" fill="${col}"/>`; }
+function ground(y,fill,line){ return `<path d="M0 ${y} Q270 ${y-30} 540 ${y-6} L540 1000 L0 1000Z" fill="${fill||'url(#gnd)'}"/><path d="M0 ${y} Q270 ${y-30} 540 ${y-6}" stroke="${line||'#4a3e5a'}" stroke-width="2" fill="none" opacity=".7"/>`; }
+function tufts(y,col,n){ let s=''; for(let i=0;i<n;i++){ const x=rnd()*540, yy=y+rnd()*60, h=6+rnd()*10; s+=`<path d="M${r1(x)} ${r1(yy)} l-3 -${r1(h)} M${r1(x)} ${r1(yy)} l0 -${r1(h*1.2)} M${r1(x)} ${r1(yy)} l3 -${r1(h)}" stroke="${col}" stroke-width="1.4" fill="none"/>`; } return s; }
+function flowers(y,n){ let s=''; for(let i=0;i<n;i++){ const x=rnd()*540, yy=y+rnd()*60; s+=`<path d="M${r1(x)} ${r1(yy)} l0 -10" stroke="#2d3a2a" stroke-width="1.2"/><circle cx="${r1(x)}" cy="${r1(yy-11)}" r="2.2" fill="${rnd()<.5?'#c96b4a':'#d8c27a'}" opacity=".7"/>`; } return s; }
+function fg(){ return `<path d="M-20 975 Q160 905 330 935 T560 915 L560 1000 L-20 1000Z" fill="#07060c"/>`+tufts(918,'#121018',40); }
+function chhatri(x,y,s,c){ return `<g transform="translate(${x} ${y}) scale(${s})" fill="${c}"><rect x="-14" y="-30" width="28" height="30"/><path d="M-18 -30 Q0 -58 18 -30Z"/><rect x="-1.5" y="-66" width="3" height="10"/><circle cx="0" cy="-56" r="3"/></g>`; }
+function fort(x,y,s){ const c='#272a52',c2='#1d1f40'; let w='',cr=''; for(let i=0;i<7;i++) w+=A('flick:'+(2+rnd()*2).toFixed(2),`<rect x="${-150+i*48}" y="-38" width="5" height="8" fill="#ffb85c"/>`); for(let i=-180;i<180;i+=14) cr+=`<rect x="${i}" y="-62" width="8" height="8"/>`;
+  return `<g transform="translate(${x} ${y}) scale(${s})" fill="${c}"><rect x="-180" y="-56" width="360" height="56"/>${cr}<rect x="-200" y="-96" width="40" height="96" fill="${c2}"/><path d="M-206 -96 Q-180 -140 -154 -96Z" fill="${c2}"/><rect x="160" y="-96" width="40" height="96" fill="${c2}"/><path d="M154 -96 Q180 -140 206 -96Z" fill="${c2}"/><rect x="-40" y="-110" width="80" height="54"/><path d="M-52 -110 Q0 -176 52 -110Z"/><rect x="-2" y="-196" width="4" height="26"/><path d="M2 -196 L22 -190 L2 -184Z" fill="#a8432a"/>${chhatri(-80,-56,1,c)}${chhatri(80,-56,1,c)}<path d="M-18 0 L-18 -26 Q0 -46 18 -26 L18 0Z" fill="#0f1030"/>${w}</g>`; }
+function tent(x,y,s,c){ return `<g transform="translate(${r1(x)} ${r1(y)}) scale(${r1(s)})"><path d="M-22 0 L0 -28 L22 0Z" fill="${c}"/><path d="M0 -28 L4 0 L-4 0Z" fill="#0b0a18" opacity=".6"/><line x1="0" y1="-28" x2="0" y2="-40" stroke="${c}" stroke-width="1.5"/><path d="M0 -40 L9 -37 L0 -34Z" fill="#a8432a"/></g>`; }
+function fire(x,y,s){ return `<g transform="translate(${r1(x)} ${r1(y)}) scale(${r1(s)})">${A('flick:'+(5+rnd()*4).toFixed(2),'<circle r="34" fill="url(#saf)"/>')}${A('flick:'+(7+rnd()*4).toFixed(2),'<path d="M0 2 Q-6 -6 0 -16 Q6 -6 0 2Z" fill="#ffd27a"/>')}</g>`; }
+function camps(y,sc){ let s=''; for(let x=0;x<560;x+=38+rnd()*30){ const yy=y+rnd()*18, k=sc*(0.7+rnd()*.5); s+=tent(x,yy,k,rnd()<.5?'#2c2848':'#352a44'); if(rnd()<.45) s+=fire(x+18*k,yy-2,k*.8); } return s; }
+function leaf(x,y,rot,sc,col){ return `<path transform="translate(${r1(x)} ${r1(y)}) rotate(${rot|0}) scale(${sc})" d="M0 -12 Q11 -3 0 14 Q-11 -3 0 -12Z" fill="${col}"/>`; }
+function peepal(x,y,s){ let lv=''; const cols=['#14261c','#1a3224','#203c2b','#172b20'];
+  for(let i=0;i<300;i++){ const a=i*2.399, r=Math.sqrt(i)*11.5; lv+=leaf(Math.cos(a)*r*1.25,-330+Math.sin(a)*r*.75,(i*53)%360,.75,cols[i%4]); }
+  let rim=''; for(let i=0;i<46;i++){ const a=-Math.PI*.12-i*0.065, r=196+rnd()*14; rim+=leaf(Math.cos(a)*r*1.05+30,-330+Math.sin(a)*r*.72,rnd()*360,.7,'#3e6650'); }
+  return `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-26 0 C-20 -60 -34 -120 -60 -170 L-40 -176 C-18 -140 -6 -110 -2 -90 C4 -120 20 -150 52 -186 L66 -176 C34 -140 22 -80 24 0Z" fill="#1a1222"/><path d="M-2 -90 C-6 -150 -10 -220 -6 -290" stroke="#1a1222" stroke-width="16" fill="none"/><path d="M-40 -176 C-80 -220 -120 -250 -150 -260 M52 -186 C90 -230 130 -250 170 -262" stroke="#1a1222" stroke-width="10" fill="none" stroke-linecap="round"/><ellipse cx="0" cy="-330" rx="235" ry="150" fill="#0e1d15"/>${lv}<g opacity=".5">${rim}</g></g>`; }
+function sol(x,y,s,c,flip){ return `<g transform="translate(${r1(x)} ${r1(y)}) scale(${flip?-s:s} ${s})" fill="${c}"><circle cx="0" cy="-34" r="6"/><path d="M-7 -28 L7 -28 L9 0 L-9 0Z"/><path d="M-6 -42 L0 -50 L6 -42Z"/><line x1="12" y1="2" x2="14" y2="-62" stroke="${c}" stroke-width="2"/><path d="M11 -62 L14 -72 L17 -62Z"/><ellipse cx="-8" cy="-18" rx="6" ry="9"/></g>`; }
+function banner(x,y,h,col,flip){ return `<g><line x1="${x}" y1="${y}" x2="${x}" y2="${y-h}" stroke="#140808" stroke-width="3"/>${A('rock:7:1.6:'+x+':'+(y-h),`<path d="M${x} ${y-h} L${x+(flip?-46:46)} ${y-h+10} L${x} ${y-h+24}Z" fill="${col}"/>`)}</g>`; }
+function armies(y,colL,colR,scale){ let s=''; scale=scale||1; for(let r=0;r<4;r++){ const yy=y+r*28, sc=(1+r*.25)*scale; for(let i=0;i<8;i++){ s+=sol(14+i*28+r*6,yy,sc,'#120607',false); s+=sol(526-i*28-r*6,yy,sc,'#120607',true); } } s+=banner(60,y+10,110,colL)+banner(170,y+20,90,colL)+banner(480,y+10,110,colR,true)+banner(370,y+20,90,colR,true); return s; }
+function warSky(sunY,sunR){ return `<rect width="540" height="960" fill="url(#skyW)"/><circle cx="270" cy="${sunY}" r="${sunR*2.2}" fill="url(#saf)" opacity=".85" filter="url(#b24)"/><circle cx="270" cy="${sunY}" r="${sunR}" fill="#ffd98a"/>`+clouds('#3a1410','#7a3a24'); }
+function divine(cx,cy,col,ray){ let rays=''; for(let i=0;i<18;i++) rays+=`<path d="M${cx} ${cy} L${cx+14} ${cy-460} L${cx-14} ${cy-460}Z" transform="rotate(${i*20} ${cx} ${cy})" fill="${ray||'#fff0b8'}" opacity=".12"/>`;
+  return `<rect width="540" height="960" fill="url(#skyDiv)"/><circle cx="${cx}" cy="${cy}" r="300" fill="url(#${col||'gw'})" opacity=".75" filter="url(#b24)"/>`+A(`spin:60:${cx}:${cy}`,rays)+
+    `<circle cx="${cx}" cy="${cy}" r="150" fill="none" stroke="#f0d79a" stroke-opacity=".45" stroke-width="1.5"/>`+A(`spin:40:${cx}:${cy}`,`<circle cx="${cx}" cy="${cy}" r="215" fill="none" stroke="#f0d79a" stroke-opacity=".25" stroke-width="1.5" stroke-dasharray="4 10"/><circle cx="${cx}" cy="${cy-215}" r="4" fill="#ffe9a8"/>`); }
+function nightBase(o){ o=Object.assign({moon:[420,170,36],fort:null,camps:null,gy:740,hillsY:610},o||{});
+  return `<rect width="540" height="960" fill="url(#skyN)"/>`+stars(70,560)+(o.moon?moon(...o.moon):'')+clouds()+hills(o.hillsY,40,'#1d1d40',140)+(o.fort?fort(...o.fort):'')+
+   `<rect y="${o.hillsY-30}" width="540" height="70" fill="url(#fog)"/>`+(o.camps?hills(o.camps-18,16,'#231f3c',90)+camps(o.camps,1.1)+`<rect y="${o.camps-10}" width="540" height="60" fill="url(#fog)" opacity=".8"/>`:'')+
+   ground(o.gy)+tufts(o.gy-10,'#3a3a4a',60)+flowers(o.gy,24); }
+
+/* ---------- side-profile figure (faces right, feet at y=0, ~330 tall) ---------- */
+const ARMS={ down:['M16 -220 C24 -190 26 -170 24 -150',24,-148], forward:['M16 -220 C34 -200 44 -180 50 -168',50,-168],
+  point:['M16 -222 C40 -232 60 -252 76 -268',76,-268], up:['M16 -222 C30 -244 36 -270 36 -296',36,-298],
+  fold:['M16 -218 C34 -200 36 -188 28 -180',28,-184], offer:['M16 -218 C38 -196 52 -188 64 -186',64,-186] };
+function fig(o){
+  o=Object.assign({skin:'#8c6248',top:'#1f2640',bottom:'#8e1d24',trim:'url(#gold)',hair:'long',head:'crown',beard:null,mus:false,cape:null,quiver:false,
+    bow:false,mace:false,lantern:false,staff:false,arm:'forward',pose:'stand',saree:false,veil:null,eye:'open',garland:null,sash:null,wild:false,turban:'#ece5d4',
+    prop:null,sil:false,aura:null,tilak:false},o);
+  const k = o.pose==='kneel'?88:0, dark='#5a3a28';
+  let low='', up='';
+  low+=`<ellipse cx="4" cy="0" rx="56" ry="9" fill="#000" opacity=".35"/>`;
+  if(o.pose==='kneel'){
+    low+=`<path d="M-30 -62 C-34 -40 -36 -20 -38 -4 L-4 -4 L-2 -30 L30 -30 L34 -4 L62 -4 L60 -30 C56 -48 40 -60 26 -62Z" fill="${o.bottom}"/><path d="M-44 -4 l-4 5 h22 l0 -5Z M40 -4 l0 5 h26 l-4 -5Z" fill="${dark}"/>`;
+  } else if(o.saree){
+    low+=`<path d="M-30 -150 C-36 -100 -44 -50 -50 -2 L46 -2 C40 -50 34 -100 28 -150Z" fill="${o.bottom}"/><path d="M-50 -10 L46 -10 L46 -2 L-50 -2Z" fill="url(#gold)"/><path d="M-10 -150 C-8 -100 -4 -50 0 -2" stroke="#000" stroke-opacity=".18" stroke-width="6" fill="none"/>`;
+  } else {
+    low+=`<path d="M-28 -148 C-30 -100 -36 -50 -40 -4 L-6 -4 L2 -90 L10 -4 L40 -4 C36 -50 30 -100 26 -148Z" fill="${o.bottom}"/><path d="M2 -90 L10 -4 L20 -4Z" fill="#000" opacity=".25"/><path d="M-36 -4 l-6 5 h22 l0 -5Z M14 -4 l0 5 h28 l-4 -5Z" fill="${dark}"/>`;
+  }
+  if(o.staff && o.pose!=='kneel') low+=`<line x1="-20" y1="-300" x2="-26" y2="-2" stroke="#5a3c1c" stroke-width="5" stroke-linecap="round"/>`;
+  if(o.cape) up+=`<path d="M-20 -232 C-56 -200 -78 -110 -96 ${-6-k} L-30 ${-6-k} C-36 -80 -30 -160 -10 -226Z" fill="${o.cape}"/><path d="M-20 -232 C-56 -200 -78 -110 -96 ${-6-k} L-80 ${-6-k} C-62 -100 -44 -180 -16 -228Z" fill="#000" opacity=".25"/>`;
+  if(o.veil) up+=`<path d="M-18 -292 C-40 -270 -50 -220 -56 -150 L-30 -150 C-28 -210 -20 -250 -8 -276Z" fill="${o.veil}"/>`;
+  if(o.hair==='long' && !o.veil) up+=`<path d="M-12 -244 C-26 -250 -32 -226 -38 -196 L-20 -204 C-18 -226 -14 -238 -8 -242Z" fill="#0d0a10"/>`;
+  if(o.wild) up+=`<path d="M-18 -282 C-60 -310 -74 -250 -84 -214 C-66 -228 -60 -206 -56 -186 C-44 -222 -36 -246 -14 -262Z" fill="#0d0a10"/><path d="M-10 -292 L-24 -322 L-2 -298 L4 -330 L10 -294Z" fill="#0d0a10"/>`;
+  if(o.quiver) up+=`<g transform="rotate(-18 -18 -200)"><rect x="-34" y="-260" width="18" height="110" rx="5" fill="#4a2c18" stroke="#c99a3a" stroke-width="2"/><path d="M-31 -260 l3 -18 l3 18Z" fill="#ff4a3c"/><path d="M-26 -260 l3 -24 l3 24Z" fill="#4ee08a"/><path d="M-21 -260 l3 -18 l3 18Z" fill="#ffd25e"/></g>`;
+  up+=`<path d="M-8 -238 C-28 -234 -34 -214 -34 -192 L-28 -148 L26 -148 L28 -194 C28 -222 18 -236 8 -238Z" fill="${o.top}"/>`;
+  if(o.saree) up+=`<path d="M-30 -148 C-30 -170 -28 -190 -26 -200 L28 -160 L26 -148Z" fill="${o.bottom}"/>`;
+  else up+=`<path d="M-30 -156 L28 -156 L28 -146 L-30 -146Z" fill="${o.trim}"/>`;
+  if(o.sash) up+=`<path d="M-34 -220 C-10 -200 10 -170 26 -150 L10 -150 C-6 -176 -22 -196 -36 -206Z" fill="${o.sash}"/>`;
+  if(o.top!=='#d9d1bf' && !o.saree && o.trim) up+=`<path d="M-24 -228 Q0 -196 24 -226" stroke="url(#gold)" stroke-width="3" fill="none"/>`;
+  if(o.garland) up+=`<path d="M-22 -234 Q2 -160 22 -230" stroke="${o.garland}" stroke-width="6" fill="none" stroke-dasharray="1 5" stroke-linecap="round"/>`;
+  up+=`<rect x="-6" y="-252" width="14" height="18" fill="${o.skin}"/><path d="M-6 -252 L8 -252 L8 -234 L-6 -234Z" fill="#000" opacity=".15"/>`;
+  up+=`<path d="M-14 -262 C-16 -286 0 -294 14 -288 C22 -284 24 -276 24 -270 L32 -260 L24 -258 C24 -252 22 -248 16 -246 L-6 -244Z" fill="${o.skin}"/>`;
+  if(o.head!=='turban' && !o.veil && !o.wild) up+=`<path d="M-16 -268 C-20 -292 0 -300 18 -290 L14 -280 C2 -284 -8 -282 -12 -262Z" fill="#0d0a10"/>`;
+  if(o.beard) up+=`<path d="M6 -248 Q26 -246 22 -222 Q12 -210 2 -222 Q-4 -236 -2 -246Z" fill="${o.beard==='white'?'#e7e1d4':'#0d0a10'}"/>`;
+  up+= o.eye==='closed' ? `<path d="M9 -269 q5 3 10 0" stroke="#1a0f08" stroke-width="2.2" fill="none"/><path d="M9 -276 l10 -2" stroke="#0d0a10" stroke-width="2.4"/>`
+                        : `<circle cx="14" cy="-270" r="2.2" fill="#1a0f08"/><path d="M9 -276 l10 -2" stroke="#0d0a10" stroke-width="2.4"/>`;
+  if(o.mus) up+=`<path d="M12 -254 q8 -4 15 1" stroke="#0d0a10" stroke-width="3.2" fill="none" stroke-linecap="round"/>`;
+  else if(!o.beard) up+=`<path d="M17 -251 q4 0 7 -1" stroke="#3a1a10" stroke-width="2" fill="none"/>`;
+  if(o.tilak) up+=`<path d="M20 -286 l1 7" stroke="#d63a2a" stroke-width="2.2"/>`;
+  if(o.head==='turban') up+=`<path d="M-22 -270 C-24 -296 2 -306 24 -290 C30 -284 28 -276 22 -276 C10 -280 -4 -282 -18 -264Z" fill="${o.turban}"/><circle cx="-22" cy="-286" r="9" fill="${o.turban}"/>`;
+  if(o.head==='crown'||o.head==='feather') up+=`<path d="M-16 -286 L-12 -318 L-4 -300 L2 -326 L8 -300 L16 -316 L18 -286Z" fill="url(#gold)"/><circle cx="2" cy="-296" r="3" fill="#d63a2a"/>`;
+  if(o.head==='feather') up+=`<g transform="translate(0 -322) rotate(-14)"><path d="M0 0 Q-6 -24 0 -46" stroke="#3a7a4f" stroke-width="2.5" fill="none"/><ellipse cx="0" cy="-48" rx="9" ry="15" fill="#2e9a86"/><ellipse cx="0" cy="-48" rx="5.5" ry="9" fill="#1f5fb0"/><ellipse cx="0" cy="-48" rx="2.5" ry="4.5" fill="#e8c24a"/></g>`;
+  if(o.head==='band') up+=`<path d="M-16 -282 Q2 -292 20 -284 L20 -277 Q2 -285 -16 -275Z" fill="url(#gold)"/><circle cx="4" cy="-286" r="2.6" fill="#d63a2a"/>`;
+  if(o.head==='big') up+=`<path d="M-18 -284 L-16 -326 L-6 -308 L2 -340 L10 -308 L20 -324 L20 -284Z" fill="url(#gold)"/><circle cx="2" cy="-300" r="4" fill="#d63a2a"/><circle cx="-8" cy="-292" r="2" fill="#2ec28a"/><circle cx="12" cy="-292" r="2" fill="#2ec28a"/>`;
+  if(o.veil) up+=`<path d="M-20 -290 C0 -306 22 -300 24 -284 C14 -290 0 -290 -12 -278 C-16 -270 -18 -262 -16 -250 L-24 -250 C-26 -270 -26 -284 -20 -290Z" fill="${o.veil}"/><path d="M-20 -290 C0 -306 22 -300 24 -284" stroke="url(#gold)" stroke-width="2.4" fill="none"/>`;
+  if(o.head!=='turban') up+=`<circle cx="-4" cy="-256" r="4" fill="none" stroke="#e8b83a" stroke-width="2"/>`;
+  const [d,hx,hy]=ARMS[o.arm]||ARMS.forward;
+  up+=`<path d="${d}" stroke="${o.skin}" stroke-width="12" fill="none" stroke-linecap="round"/>`;
+  up+= o.arm==='fold' ? `<ellipse cx="${hx+2}" cy="${hy-6}" rx="5" ry="12" fill="${o.skin}"/>` : `<circle cx="${hx}" cy="${hy}" r="6.5" fill="${o.skin}"/>`;
+  if(o.bow) up+=`<path d="M${hx-6} ${hy-162} Q${hx+46} ${hy-32} ${hx-6} ${hy+128}" stroke="#6a4218" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M${hx-6} ${hy-162} Q${hx+46} ${hy-32} ${hx-6} ${hy+128}" stroke="#d9a73a" stroke-width="2" fill="none"/><line x1="${hx-6}" y1="${hy-162}" x2="${hx-6}" y2="${hy+128}" stroke="#e9e1c8" stroke-width="1.2"/>`;
+  if(o.mace) up+=`<line x1="${hx-4}" y1="${hy+24}" x2="${hx+10}" y2="${hy-96}" stroke="#6a4218" stroke-width="7" stroke-linecap="round"/><ellipse cx="${hx+12}" cy="${hy-118}" rx="20" ry="32" fill="url(#gold)"/><path d="M${hx-6} ${hy-118} h36" stroke="#8a5a1a" stroke-width="2"/><circle cx="${hx+12}" cy="${hy-152}" r="5" fill="url(#gold)"/>`;
+  if(o.lantern) up+=`<g transform="translate(${hx} ${hy+18})"><line x1="0" y1="-16" x2="0" y2="0" stroke="#6a4a22" stroke-width="2"/>${A('flick:9','<circle r="90" fill="url(#saf)"/>')}<path d="M-8 0 h16 l-2 20 h-12Z" fill="#7a5420"/><rect x="-5" y="3" width="10" height="13" fill="#ffd27a"/><path d="M-9 0 L0 -8 L9 0Z" fill="#5a3a14"/></g>`;
+  if(o.prop==='arrows3') up+=`<g transform="translate(${hx} ${hy})">${['#ff4a3c','#4ee08a','#ffd25e'].map((c,i)=>`<g transform="rotate(${-62+i*14})"><line x1="0" y1="0" x2="70" y2="0" stroke="${c}" stroke-width="3"/><polygon points="70,-6 86,0 70,6" fill="${c}"/><circle cx="80" cy="0" r="16" fill="${c}" opacity=".35" filter="url(#b4)"/></g>`).join('')}</g>`;
+  if(o.prop==='orb') up+=`<g transform="translate(${hx+16} ${hy-8})">${A('pulse:2','<circle r="54" fill="url(#gw)"/>')}<circle r="18" fill="#fff3c4"/><path d="M-12 6 l6 -16 l6 8 l6 -8 l6 16Z" fill="#d9a73a"/></g>`;
+  if(o.prop==='diya') up+=`<g transform="translate(${hx+6} ${hy-4})">${A('flick:7','<circle cy="-14" r="46" fill="url(#saf)"/>')}<path d="M-14 0 Q0 12 14 0 L10 -6 L-10 -6Z" fill="#a8582a"/><path d="M8 -6 Q12 -18 6 -26 Q2 -16 8 -6Z" fill="#ffd27a"/></g>`;
+  let body = low + (k?`<g transform="translate(0 ${k})">${up}</g>`:up);
+  if(o.sil) body=`<g filter="url(#sil)">${body}</g>`+(o.quiver?`<g transform="translate(0 ${k}) rotate(-18 -18 -200)">${A('pulse:2.4','<circle cx="-25" cy="-272" r="20" fill="url(#saf)"/>')}<path d="M-31 -260 l3 -18 l3 18Z" fill="#ff4a3c"/><path d="M-26 -260 l3 -24 l3 24Z" fill="#4ee08a"/><path d="M-21 -260 l3 -18 l3 18Z" fill="#ffd25e"/></g>`:'');
+  if(o.aura) body=`<circle cx="0" cy="${-170+k}" r="190" fill="url(#${o.aura})" opacity=".55"/>`+body;
+  return body;
+}
+const place=(x,y,s,inner,flip)=>`<g transform="translate(${x} ${y}) scale(${flip?-s:s} ${s})">${inner}</g>`;
+const BARB={skin:'#8c6248',top:'#1f2640',bottom:'#8e1d24',cape:'#7a1820',quiver:true,head:'crown'};
+const BRAH={skin:'#8a5a3c',top:'#cdbf9e',bottom:'#d9d1bf',head:'turban',beard:'white',hair:'none',sash:'#c98a2e',trim:null,tilak:true};
+const KRISH={skin:'#3d5fa8',top:'#2a3f7a',bottom:'#e5b324',head:'feather',garland:'#f0e6d0',sash:'#e5b324',tilak:true};
+function headOnly(x,y,s,eye){ // Barbarik's head (respectful, crowned), chin at y
+  return `<g transform="translate(${x} ${y}) scale(${s})"><g transform="translate(-6 260)">
+   <path d="M-12 -272 C-26 -270 -28 -254 -22 -244 L-8 -244 C-12 -252 -12 -262 -8 -270Z" fill="#0d0a10"/>
+   <path d="M-14 -262 C-16 -286 0 -294 14 -288 C22 -284 24 -276 24 -270 L32 -260 L24 -258 C24 -252 22 -248 16 -246 L-6 -244Z" fill="#8c6248"/>
+   <path d="M-16 -268 C-20 -292 0 -300 18 -290 L14 -280 C2 -284 -8 -282 -12 -262Z" fill="#0d0a10"/>
+   <path d="M-16 -286 L-12 -318 L-4 -300 L2 -326 L8 -300 L16 -316 L18 -286Z" fill="url(#gold)"/><circle cx="2" cy="-296" r="3" fill="#d63a2a"/>
+   ${eye==='closed'?'<path d="M9 -269 q5 3 10 0" stroke="#1a0f08" stroke-width="2.2" fill="none"/>':'<circle cx="14" cy="-270" r="2.2" fill="#1a0f08"/>'}<path d="M9 -276 l10 -2" stroke="#0d0a10" stroke-width="2.4"/>
+   <path d="M17 -251 q4 0 7 -1" stroke="#3a1a10" stroke-width="2" fill="none"/><circle cx="-4" cy="-256" r="4" fill="none" stroke="#e8b83a" stroke-width="2"/></g></g>`;
+}
+function pedestal(x,y,s){ let mg=''; for(let i=0;i<14;i++){ const a=Math.PI*(i/13); mg+=`<circle cx="${r1(Math.cos(a)*44)}" cy="${r1(-Math.sin(a)*10+6)}" r="5" fill="${i%2?'#ff9d2a':'#ffd23a'}"/>`; }
+  return `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-46 0 L46 0 L38 30 L-38 30Z" fill="#8a3a22"/><path d="M-40 14 L40 14" stroke="#e8b83a" stroke-width="2"/><path d="M-56 30 L56 30 L56 44 L-56 44Z" fill="#5a2a1a"/><path d="M-56 30 L56 30" stroke="#e8b83a" stroke-width="2"/><path d="M-46 0 L46 0" stroke="#d9c9a3" stroke-width="2"/>${mg}</g>`; }
+function field(mode){ let s='';
+  for(let r=0;r<3;r++) for(let i=0;i<11;i++){
+    const x=24+i*48+(r%2)*24, yy=660+r*58, sc=1+r*.28, marked=((i*7+r*3)%3)!==0, hy=yy-34*sc;
+    const one=sol(x,yy,sc,'#0d0910',i%2===0);
+    if(mode==='erase' && marked) s+=A('fadeout:'+(0.6+(i+r*2)*.1).toFixed(2)+':1.2', one+`<circle cx="${x}" cy="${r1(hy)}" r="${r1(20*sc)}" fill="url(#gw)"/>`);
+    else s+=one;
+    if(mode==='mark' && marked) s+=A('pop:'+(0.5+(i+r)*.07).toFixed(2), A('pulse:3',`<circle cx="${x}" cy="${r1(hy)}" r="${r1(15*sc)}" fill="none" stroke="#ff4a3c" stroke-width="2.6"/><path d="M${r1(x-9*sc)} ${r1(hy)} h${r1(18*sc)} M${x} ${r1(hy-9*sc)} v${r1(18*sc)}" stroke="#ff4a3c" stroke-width="1.8"/>`));
+    if(mode==='save' && !marked) s+=A('pop:'+(0.5+(i+r)*.08).toFixed(2), A('pulse:2.5',`<circle cx="${x}" cy="${r1(yy-24*sc)}" r="${r1(34*sc)}" fill="url(#gg)" opacity=".7"/><circle cx="${x}" cy="${r1(yy-24*sc)}" r="${r1(26*sc)}" fill="none" stroke="#5cff9a" stroke-width="2.4"/>`));
+  } return s; }
+function flyArrow(col,glow){ return A('slide:-560:60:1.1:0.2',`<g transform="translate(70 300) rotate(-6)"><line x1="-200" y1="0" x2="360" y2="0" stroke="${col}" stroke-width="16" opacity=".25" filter="url(#b10)"/><line x1="0" y1="0" x2="360" y2="0" stroke="${col}" stroke-width="4" stroke-linecap="round"/><polygon points="360,-11 390,0 360,11" fill="${col}"/><polygon points="0,0 -20,-11 -9,0 -20,11" fill="${col}"/><circle cx="380" cy="0" r="50" fill="url(#${glow})"/></g>`); }
+const big=(x,y,size,col,str,delay)=>A('pop:'+(delay||0.4),`<text x="${x}" y="${y}" text-anchor="middle" font-size="${size}" fill="${col}" style="filter:drop-shadow(0 0 12px ${col})">${str}</text>`);
+
+/* ============================== SHOTS ============================== */
+const ART={
+ warWide:()=> warSky(430,95)+hills(600,30,'#3a120e',120)+`<rect y="560" width="540" height="90" fill="url(#fogW)"/>`+ground(700,'url(#gndW)','#6a2a1a')+armies(690,'#1f3e8a','#a8231a')+
+    Array.from({length:9},(_,i)=>A('flick:'+(3+i%3),`<g transform="translate(${30+i*58} ${330+((i*47)%150)}) rotate(${-14+(i%3)*10})"><line x1="0" y1="0" x2="44" y2="0" stroke="#ffcf7a" stroke-width="2"/><polygon points="44,-4 54,0 44,4" fill="#ffcf7a"/></g>`)).join('')+fg(),
+ hero:()=> warSky(520,175)+`<circle cx="270" cy="520" r="220" fill="none" stroke="#ffe6b0" stroke-opacity=".35"/>`+A('spin:50:270:520',`<circle cx="270" cy="520" r="265" fill="none" stroke="#ffe6b0" stroke-opacity=".22" stroke-dasharray="3 9"/>`)+
+    hills(690,24,'#2a0c0a',100)+`<path d="M60 960 Q150 740 270 712 Q390 740 480 960Z" fill="#0d0507"/>`+place(270,722,1.0,fig(Object.assign({},BARB,{sil:true,bow:true,arm:'forward'})))+big(270,180,64,'#ffd25e','१ मिनट',1.4)+fg(),
+ question:()=> nightBase({moon:[400,190,40],gy:900,hillsY:760})+Array.from({length:6},(_,i)=>A('bob:8:'+(0.6+i*.1).toFixed(2),`<text x="${60+i*80}" y="${170+((i*97)%240)}" font-size="${36+(i%3)*12}" fill="#ffd25e" opacity=".45">?</text>`)).join('')+
+    A('bob:3:0.5',place(250,1180,2.35,fig(Object.assign({},BARB,{arm:'down'})))),
+ daan:()=> divine(300,380,'gw')+`<path d="M0 760 L540 760 L540 960 L0 960Z" fill="#1a1020"/><path d="M60 700 L480 700 L500 730 L40 730Z" fill="#2a1a2a"/><path d="M20 730 L520 730 L540 760 L0 760Z" fill="#221624"/>`+
+    A('slide:-80:0:1.4:0.1',`<path d="M-30 520 C80 498 170 496 232 506 Q252 512 250 528 Q244 546 222 548 C160 552 70 566 -30 590Z" fill="#8c6248"/><path d="M-30 520 C80 498 170 496 232 506" stroke="#d9a73a" stroke-width="3" fill="none"/><path d="M-30 540 L60 532 L64 578 L-30 588Z" fill="#7a1820"/><path d="M200 506 Q226 492 246 506" stroke="#6c4a34" stroke-width="3" fill="none"/>`+
+    `<g transform="translate(236 500)">${A('flick:7','<circle cy="-20" r="90" fill="url(#saf)"/>')}<path d="M-24 0 Q0 18 24 0 L18 -8 L-18 -8Z" fill="#a8582a"/><path d="M14 -8 Q20 -26 10 -38 Q4 -22 14 -8Z" fill="#ffd27a"/></g>`)+big(270,840,0,'#000','',9),
+ offer:()=> divine(420,300,'gw')+`<path d="M0 800 Q270 760 540 800 L540 960 L0 960Z" fill="#140c18"/>`+A('rise:30:1.6:0.1',place(210,820,1.0,fig(Object.assign({},BARB,{pose:'kneel',arm:'offer',prop:'orb'}))))+fg(),
+ name:()=> nightBase({moon:[110,170,34],gy:760})+peepal(360,800,1.05)+A('rise:40:1.4:0.1',place(290,812,.95,fig(Object.assign({},BARB,{bow:true,arm:'forward'}))))+big(270,200,74,'#ffd25e','बारबरीक',1.0)+fg(),
+ family:()=> { let arch=''; [110,280,440].forEach(x=>{ arch+=`<path d="M${x-70} 760 L${x-70} 470 Q${x} 360 ${x+70} 470 L${x+70} 760Z" fill="#0f0c22"/><path d="M${x-70} 470 Q${x} 360 ${x+70} 470" stroke="#c9a050" stroke-width="3" fill="none" opacity=".6"/>`; });
+   return `<rect width="540" height="960" fill="url(#skyN)"/>`+stars(30,300)+`<rect y="300" width="540" height="460" fill="#25203f"/><path d="M0 300 h540" stroke="#c9a050" stroke-width="3" opacity=".5"/>`+arch+
+    `<path d="M0 760 L540 760 L540 960 L0 960Z" fill="#191428"/><path d="M0 760 h540" stroke="#c9a050" stroke-width="2" opacity=".5"/>`+
+    A('pop:0.2',place(110,780,.62,fig({skin:'#8a5a3c',top:'#6a2a14',bottom:'#b5651d',head:'band',mus:true,mace:true,arm:'down'}))+big(110,545,30,'#ffd25e','भीम',0.5))+
+    A('pop:1.2',place(280,780,.8,fig({skin:'#4a4458',top:'#2a1a1a',bottom:'#5a1a1a',head:'band',wild:true,mus:true,arm:'down',hair:'none'}))+big(280,480,30,'#ffd25e','घटोत्कच',1.5))+
+    A('pop:2.2',place(440,780,.62,fig(Object.assign({},BARB,{arm:'down'})))+big(440,545,30,'#ffd25e','बारबरीक',2.5))+
+    `<path d="M150 545 h70 M345 545 h55" stroke="#ffd25e" stroke-width="2" opacity=".0"/>`; },
+ scroll:()=> { let lines=''; for(let i=0;i<9;i++) lines+=`<path d="M130 ${360+i*40} q25 -10 50 0 t50 0 t50 0 t50 0 t50 0" stroke="#7a4b20" stroke-width="3" fill="none" opacity=".55"/>`;
+   const lamp=x=>`<g transform="translate(${x} 800)"><path d="M-30 0 Q0 22 30 0 L22 -10 L-22 -10Z" fill="#a8582a"/>${A('flick:6','<circle cy="-30" r="70" fill="url(#saf)"/>')}<path d="M14 -10 Q20 -30 10 -44 Q4 -26 14 -10Z" fill="#ffd27a"/></g>`;
+   return `<rect width="540" height="960" fill="url(#wood)"/><circle cx="270" cy="470" r="330" fill="url(#saf)" opacity=".25" filter="url(#b24)"/>`+
+    A('rise:30:1.5:0.1',`<rect x="80" y="180" width="380" height="560" rx="8" fill="#e2cfa0"/><rect x="96" y="196" width="348" height="528" fill="none" stroke="#8a2a1a" stroke-width="4"/><rect x="104" y="204" width="332" height="512" fill="none" stroke="#c99a3a" stroke-width="2"/>`+
+    `<rect x="60" y="164" width="420" height="30" rx="15" fill="#6a3a14"/><rect x="60" y="726" width="420" height="30" rx="15" fill="#6a3a14"/><text x="270" y="290" text-anchor="middle" font-size="54" fill="#6b2a12">स्कंद पुराण</text>`+lines+
+    `<g transform="translate(270 640)"><circle r="44" fill="none" stroke="#8a2a1a" stroke-width="3"/><path d="M-26 20 L20 -26 M-14 26 L26 -14 M-30 6 L6 -30" stroke="#8a2a1a" stroke-width="3"/></g>`)+lamp(70)+lamp(470); },
+ devi:()=> divine(190,420,'gr','#ffd0b0')+`<path d="M0 800 Q270 770 540 800 L540 960 L0 960Z" fill="#1a0a10"/>`+
+    A('rise:30:1.6:0.1',place(190,812,.98,fig({skin:'#d9a07a',top:'#c0303a',bottom:'#a8202a',saree:true,veil:'#b82230',head:'big',arm:'offer',prop:'arrows3',aura:'gw',hair:'none'})))+
+    A('pop:1.0',place(420,820,.8,fig(Object.assign({},BARB,{pose:'kneel',arm:'fold'})),true))+fg(),
+ arrow1:()=> `<rect width="540" height="960" fill="url(#skyDusk)"/>`+stars(30,300)+clouds('#2a1430','#5a3a5a')+hills(600,30,'#2a1424',120)+ground(640,'url(#gndW)','#5a2a2a')+field('mark')+flyArrow('#ff4a3c','gr')+big(270,200,130,'#ff7a6a','१',0.9)+fg(),
+ arrow2:()=> `<rect width="540" height="960" fill="url(#skyDusk)"/>`+stars(30,300)+clouds('#2a1430','#5a3a5a')+hills(600,30,'#2a1424',120)+ground(640,'url(#gndW)','#5a2a2a')+field('save')+flyArrow('#4ee08a','gg')+big(270,200,130,'#7dffb0','२',0.9)+fg(),
+ arrow3:()=> `<rect width="540" height="960" fill="url(#skyDusk)"/>`+stars(30,300)+clouds('#2a1430','#5a3a5a')+hills(600,30,'#2a1424',120)+ground(640,'url(#gndW)','#5a2a2a')+field('erase')+flyArrow('#ffd25e','gw')+big(270,200,130,'#ffe28a','३',0.9)+fg(),
+ mother:()=> nightBase({moon:[440,160,32],gy:770})+
+    `<g transform="translate(90 790)"><path d="M-90 0 L-90 -150 L90 -150 L90 0Z" fill="#3a2a2a"/><path d="M-110 -140 L0 -230 L110 -140Z" fill="#5a4426"/><path d="M-110 -140 L0 -230 L110 -140" stroke="#7a6034" stroke-width="3" fill="none"/><path d="M-24 0 L-24 -80 Q0 -100 24 -80 L24 0Z" fill="#120a0a"/>${A('flick:3','<path d="M-20 0 L-20 -76 Q0 -94 20 -76 L20 0Z" fill="#ffb04a" opacity=".35"/>')}</g>`+
+    A('pop:0.2',place(190,816,.82,fig(Object.assign({},BARB,{pose:'kneel',arm:'fold'}))))+
+    A('rise:30:1.4:0.4',place(390,812,.86,fig({skin:'#c58f6c',top:'#d97b2a',bottom:'#c8641e',saree:true,veil:'#e08a3a',head:'none',arm:'up',hair:'none'}),true))+
+    `<g transform="translate(292 812)"><path d="M-14 0 Q0 10 14 0 L10 -6 L-10 -6Z" fill="#a8582a"/>${A('flick:7','<circle cy="-12" r="60" fill="url(#saf)"/>')}<path d="M8 -6 Q12 -18 6 -26 Q2 -16 8 -6Z" fill="#ffd27a"/></g>`+fg(),
+ arrive:()=> nightBase({moon:[410,180,40],fort:[110,580,.75],camps:628,gy:705,hillsY:575})+peepal(425,790,1.05)+place(400,830,.86,fig(Object.assign({},BARB,{bow:true,arm:'forward'})),true)+
+    A('walk:-300:6.5:0.2',`<g transform="translate(190 836)"><circle cx="0" cy="-140" r="150" fill="url(#gb)" opacity=".45"/><ellipse cx="40" cy="0" rx="130" ry="20" fill="url(#saf)" opacity=".5"/><g transform="scale(.84)">${fig(Object.assign({},BRAH,{lantern:true,staff:true,arm:'forward'}))}</g></g>`)+fg(),
+ tree:()=> nightBase({moon:[90,150,30],gy:760})+peepal(290,800,1.12)+
+    A('rise:20:1.2:0.1',place(120,840,.82,fig(Object.assign({},BRAH,{arm:'point',staff:true}))))+place(430,846,.82,fig(Object.assign({},BARB,{bow:true,arm:'forward'})),true)+fg(),
+ pierce:()=> { let hits=''; for(let i=0;i<46;i++){ const a=i*2.399*1.7, r=30+((i*41)%170); hits+=A('pop:'+(0.4+i*0.06).toFixed(2),A('flick:'+(2+i%4),(()=>{const X=r1(270+Math.cos(a)*r*1.35),Y=r1(400+Math.sin(a)*r*.85);return `<g transform="translate(${X} ${Y}) rotate(${(i*47)%360})"><circle r="15" fill="#ffd25e" opacity=".12"/><circle r="9" fill="#ffd25e" opacity=".22"/><path d="M-7 0 Q0 -6 7 0 Q0 6 -7 0Z" fill="#ffe08a"/><circle r="2" fill="#fff"/></g>`;})())); }
+   return `<rect width="540" height="960" fill="url(#skyN)"/>`+stars(40,400)+peepal(270,920,1.55)+hits+
+    A('slide:-600:120:1.2:0.1',`<path d="M-80 620 Q140 240 620 340" stroke="#ffd25e" stroke-width="3" fill="none" opacity=".5" filter="url(#b4)"/><g transform="translate(330 330) rotate(-8)"><line x1="-160" y1="0" x2="120" y2="0" stroke="#ffd25e" stroke-width="12" opacity=".3" filter="url(#b10)"/><line x1="0" y1="0" x2="120" y2="0" stroke="#ffd25e" stroke-width="3.5"/><polygon points="120,-9 144,0 120,9" fill="#ffd25e"/></g>`)+ground(880)+fg(); },
+ foot:()=> `<rect width="540" height="960" fill="#0c0a14"/>`+stars(40,500)+`<ellipse cx="300" cy="700" rx="230" ry="80" fill="url(#gw)" opacity=".45" filter="url(#b24)"/><path d="M0 700 L540 700 L540 960 L0 960Z" fill="#221a2a"/>`+tufts(700,'#3a3044',40)+
+    `<ellipse cx="300" cy="702" rx="74" ry="22" fill="#c8ee7c" opacity=".6" filter="url(#b4)"/><path d="M236 702 Q300 662 372 702 Q300 728 236 702Z" fill="#9ccc60"/><path d="M240 702 L368 702" stroke="#5a8a3a" stroke-width="2"/>`+
+    `<g transform="translate(250 640)"><path d="M-110 60 Q-124 6 -56 -20 L92 -20 Q166 -16 166 28 Q166 58 118 62 L-92 66 Q-110 66 -110 60Z" fill="#8a5a3c"/><circle cx="148" cy="30" r="8" fill="#9a6a4a"/><circle cx="126" cy="34" r="7" fill="#9a6a4a"/><circle cx="106" cy="38" r="6" fill="#9a6a4a"/>`+
+    `<path d="M-56 -20 Q-68 -160 -40 -330 L64 -330 Q80 -160 70 -20Z" fill="#8a5a3c"/><path d="M-70 -200 L84 -200 L96 -360 L-72 -360Z" fill="#d9d1bf"/><path d="M-70 -200 L84 -200" stroke="#c98a2e" stroke-width="6"/><circle cx="-30" cy="-30" r="5" fill="#d9a73a"/><path d="M-50 -24 Q10 -40 70 -24" stroke="#d9a73a" stroke-width="3" fill="none"/></g>`+
+    `<ellipse cx="300" cy="690" rx="230" ry="66" fill="none" stroke="#ffe9a8" stroke-width="1.6" stroke-dasharray="6 10" opacity=".7"/>`+A('orbit:230:66:300:690:2.2',`<g transform="translate(-50 0)"><line x1="-40" y1="0" x2="50" y2="0" stroke="#ffd25e" stroke-width="10" opacity=".35" filter="url(#b4)"/><line x1="0" y1="0" x2="50" y2="0" stroke="#ffd25e" stroke-width="3.5"/><polygon points="50,-8 70,0 50,8" fill="#ffd25e"/><polygon points="0,0 -14,-8 -6,0 -14,8" fill="#ffd25e"/></g>`)+
+    big(270,190,48,'#e8ffb0','एक पत्ता...',0.5)+fg(),
+ scales:()=> `<rect width="540" height="960" fill="url(#skyN)"/>`+stars(50,500)+clouds()+hills(560,30,'#1d1d40',120)+
+    A('pulse:1.1',`<g>${Array.from({length:7},(_,i)=>sol(40+i*22,560,1.1,'#1f3e8a')).join('')}<circle cx="110" cy="530" r="70" fill="url(#gb)"/></g>`)+
+    A('pulse:1.1:3.14',`<g>${Array.from({length:7},(_,i)=>sol(380+i*22,560,1.1,'#a8231a',true)).join('')}<circle cx="450" cy="530" r="70" fill="url(#gr)"/></g>`)+
+    `<g transform="translate(270 250)"><rect x="-4" y="0" width="8" height="150" fill="#c8a050"/>${A('rock:12:1.1:270:250',`<rect x="-160" y="-6" width="320" height="8" rx="4" fill="#f4cf5a"/><g transform="translate(-150 2)"><path d="M0 0 L-30 60 M0 0 L30 60" stroke="#f4cf5a"/><path d="M-44 60 h88 q-8 22 -44 22 q-36 0 -44 -22Z" fill="#c8a050"/></g><g transform="translate(150 2)"><path d="M0 0 L-30 60 M0 0 L30 60" stroke="#f4cf5a"/><path d="M-44 60 h88 q-8 22 -44 22 q-36 0 -44 -22Z" fill="#c8a050"/></g>`)}</g>`+
+    `<path d="M0 820 Q270 780 540 820 L540 960 L0 960Z" fill="#100c18"/>`+A('rise:30:1.4:0.1',place(240,1190,2.2,fig(Object.assign({},BRAH,{arm:'fold',staff:false}))))+fg(),
+ reveal:()=> divine(240,430,'gw')+`<path d="M0 820 Q270 790 540 820 L540 960 L0 960Z" fill="#140c18"/>`+
+    A('fadeout:0.4:1.4',place(240,830,1.0,fig(Object.assign({},BRAH,{arm:'forward',staff:true}))))+
+    A('pop:1.0',place(240,830,1.0,fig(Object.assign({},KRISH,{arm:'up',aura:'gw'}))))+
+    A('pop:1.8',place(445,836,.74,fig(Object.assign({},BARB,{pose:'kneel',arm:'fold'})),true))+fg(),
+ yes:()=> divine(270,200,'gw')+`<path d="M0 800 Q270 770 540 800 L540 960 L0 960Z" fill="#140c18"/>`+
+    `<path d="M200 0 L340 0 L420 820 L120 820Z" fill="#fff0c0" opacity=".08"/>`+A('rise:20:1.6:0.1',place(260,830,1.15,fig(Object.assign({},BARB,{pose:'kneel',arm:'fold',eye:'closed'}))))+fg(),
+ headHill:()=> `<rect width="540" height="960" fill="url(#skyDusk)"/>`+stars(40,360)+clouds('#2a1430','#5a3a5a')+hills(640,26,'#2a1424',110)+armies(700,'#1f3e8a','#a8231a',.7)+
+    `<path d="M-40 960 Q120 620 300 600 Q480 620 600 960Z" fill="#0c0610"/>`+
+    A('rise:30:1.6:0.1',`<circle cx="300" cy="500" r="170" fill="url(#gw)" opacity=".75" filter="url(#b10)"/><circle cx="300" cy="500" r="110" fill="none" stroke="#ffe9a8" stroke-opacity=".6" stroke-width="2"/>`+pedestal(300,600,1.2)+headOnly(300,600,1.25,'open'))+
+    A('spin:30:300:500',`<circle cx="300" cy="500" r="150" fill="none" stroke="#ffe9a8" stroke-opacity=".3" stroke-dasharray="3 9"/><circle cx="300" cy="350" r="4" fill="#ffe9a8"/>`)+fg(),
+ pandavas:()=> { const P=[[70,'#7a1f1a','up',false],[170,'#1f3e8a','point',false],[270,'#c8a020','up',false],[370,'#2a6a3a','point',true],[470,'#8a3a8a','up',true]];
+   return warSky(360,80)+hills(640,26,'#3a120e',110)+ground(760,'url(#gndW)','#6a2a1a')+tufts(760,'#4a2016',40)+
+    P.map(([x,c,a,f],i)=>A('pop:'+(0.2+i*.35).toFixed(2),place(x,850,.56,fig({skin:'#a9795a',top:c,bottom:c,head:'band',mus:i%2===0,arm:a,cape:i===2?'#8a6a14':null}),f))).join('')+
+    `<g opacity=".8">${Array.from({length:6},(_,i)=>`<line x1="${40+i*90}" y1="${900-i%2*10}" x2="${80+i*90}" y2="${880}" stroke="#2a1410" stroke-width="3"/>`).join('')}</g>`+fg(); },
+ chakra:()=> { let t='',sp=''; for(let i=0;i<24;i++) t+=`<path d="M0 -176 L10 -200 L-10 -200Z" transform="rotate(${i*15})" fill="#ffd25e"/>`; for(let i=0;i<12;i++) sp+=`<path d="M0 -20 L6 -150 L-6 -150Z" transform="rotate(${i*30})" fill="#ffb43c" opacity=".85"/>`;
+   return `<rect width="540" height="960" fill="url(#skyDusk)"/>`+stars(40,500)+`<circle cx="290" cy="360" r="300" fill="url(#gw)" opacity=".8" filter="url(#b24)"/>`+
+    `<g transform="translate(290 360) scale(.95)">${A('spin:4:0:0',t+`<circle r="176" fill="none" stroke="#ffd25e" stroke-width="12"/><circle r="150" fill="none" stroke="#ffb43c" stroke-width="3"/>`+sp+`<circle r="26" fill="#fff0b0"/>`)}</g>`+
+    hills(690,26,'#2a1424',110)+armies(730,'#1f3e8a','#a8231a',.6)+`<path d="M-40 960 Q60 760 160 750 Q260 760 330 960Z" fill="#0c0610"/>`+
+    `<circle cx="150" cy="700" r="80" fill="url(#gw)" opacity=".7"/>`+pedestal(150,752,.7)+headOnly(150,752,.72,'open')+fg(); },
+ bless:()=> divine(380,420,'gw')+`<path d="M0 820 Q270 790 540 820 L540 960 L0 960Z" fill="#140c18"/>`+
+    A('rise:30:1.4:0.1',place(390,836,.98,fig(Object.assign({},KRISH,{arm:'up',aura:'gw'})),true))+
+    `<circle cx="140" cy="640" r="110" fill="url(#gw)" opacity=".7"/>`+pedestal(140,700,.95)+headOnly(140,700,1.0,'open')+fg(),
+ shyam:()=> { const flags=[200,270,340].map((x,i)=>`<line x1="${x}" y1="${i===1?210:290}" x2="${x}" y2="${i===1?150:240}" stroke="#3a2010" stroke-width="3"/>`+A('rock:8:1.8:'+x+':'+(i===1?150:240),`<path d="M${x} ${i===1?150:240} L${x+44} ${i===1?162:252} L${x} ${i===1?176:266}Z" fill="#ff8a1a"/>`)).join('');
+   let mg=''; for(let i=0;i<22;i++){ const a=Math.PI*(0.05+0.9*i/21); mg+=`<circle cx="${r1(270+Math.cos(a)*86)}" cy="${r1(560+Math.sin(a)*86)}" r="7" fill="${i%2?'#ff9d2a':'#ffd23a'}"/>`; }
+   let diyas=''; for(let i=0;i<9;i++){ const x=60+i*52; diyas+=`<g transform="translate(${x} 790)"><path d="M-9 0 Q0 7 9 0 L6 -4 L-6 -4Z" fill="#a8582a"/>${A('flick:'+(5+i%4),'<circle cy="-8" r="26" fill="url(#saf)"/>')}<path d="M4 -4 Q7 -12 3 -17 Q1 -10 4 -4Z" fill="#ffd27a"/></g>`; }
+   return `<rect width="540" height="960" fill="url(#skyDawn)"/><circle cx="270" cy="760" r="300" fill="url(#saf)" opacity=".5" filter="url(#b24)"/>`+
+    `<path d="M120 780 L120 430 Q130 300 200 290 L220 230 Q270 130 320 230 L340 290 Q410 300 420 430 L420 780Z" fill="#e8d6b6"/><path d="M200 290 L220 230 Q270 130 320 230 L340 290Z" fill="#d9c09a"/><path d="M262 160 L270 120 L278 160Z" fill="url(#gold)"/>`+flags+
+    `<path d="M120 430 h300" stroke="#b5946a" stroke-width="4"/><path d="M150 780 L150 520 Q270 380 390 520 L390 780Z" fill="#6a1a1a"/><path d="M168 780 L168 528 Q270 404 372 528 L372 780Z" fill="#2a0a0a"/>`+
+    `<circle cx="270" cy="570" r="140" fill="url(#gw)" opacity=".55"/>`+
+    A('pop:0.3',`<g><path d="M200 520 Q270 430 340 520 L330 540 L210 540Z" fill="#c8202a"/><path d="M206 524 L216 470 L240 500 L270 446 L300 500 L324 470 L334 524Z" fill="url(#gold)"/><circle cx="270" cy="490" r="7" fill="#2ec28a"/>`+
+      `<ellipse cx="270" cy="580" rx="60" ry="66" fill="#2c2a3e"/><path d="M226 572 Q246 552 262 570 Q246 582 226 572Z M314 572 Q294 552 278 570 Q294 582 314 572Z" fill="#fff"/><circle cx="246" cy="570" r="6" fill="#0a0a10"/><circle cx="294" cy="570" r="6" fill="#0a0a10"/>`+
+      `<path d="M266 540 L270 560 L274 540Z" fill="#d63a2a"/><path d="M244 610 Q258 600 270 608 Q282 600 296 610 Q282 614 270 612 Q258 614 244 610Z" fill="#0a0a10"/><path d="M258 626 q12 6 24 0" stroke="#c0392b" stroke-width="3" fill="none"/>${mg}</g>`)+
+    `<path d="M0 780 L540 780 L540 960 L0 960Z" fill="#2a1a14"/><path d="M0 780 h540" stroke="#c9a050" stroke-width="2" opacity=".6"/>`+diyas+
+    [70,150,390,470].map((x,i)=>place(x,880,.5,fig({skin:'#8a5a3c',top:'#c8641e',bottom:'#efe9da',head:i%2?'turban':'none',turban:'#ff8a1a',arm:'fold',pose:'kneel',sil:true}),x>270)).join('')+
+    big(270,250,0,'#000','',9)+big(270,108,58,'#ffd25e','खाटू श्याम',1.2); }
+};
+
+/* ===================== BUILD + TIMING ===================== */
+const stage=document.getElementById('stage'), scenesEl=document.getElementById('scenes'), cap=document.getElementById('cap');
+document.getElementById('over').innerHTML=`<rect width="540" height="960" filter="url(#blotch)" style="mix-blend-mode:multiply"/><rect width="540" height="960" filter="url(#paper)" style="mix-blend-mode:overlay" opacity=".5"/><rect width="540" height="960" fill="url(#vg)"/>`;
+const strip=s=>s.replace(/[.,!?'"‘’“”—\-…:।]/g,'');
+SCENES.forEach(sc=>{ sc.words=sc.text.split(/\s+/).filter(w=>w&&!/^[—\-]+$/.test(w)); sc.weights=sc.words.map(w=>strip(w).length+2); sc.raw=sc.weights.reduce((a,b)=>a+b,0)/13+0.35; });
+const rawSum=SCENES.reduce((a,s)=>a+(s.dur||s.raw),0), scale=TARGET/rawSum;
+let T=0;
+SCENES.forEach(sc=>{
+  sc.start=T; sc.dur=sc.dur||Math.max(2.4, sc.raw*scale); sc.end=T+sc.dur; T=sc.end;
+  const total=sc.weights.reduce((a,b)=>a+b,0), speak=sc.dur-0.35; let acc=0;
+  sc.wt=sc.words.map((w,k)=>{ const o={text:w,t:sc.start+acc/total*speak}; acc+=sc.weights[k]; return o; });
+  const d=document.createElement('div'); d.className='scene';
+  d.innerHTML=`<svg viewBox="0 0 540 960">${ART[sc.art]()}</svg>`; scenesEl.appendChild(d); sc.el=d;
+  sc.anims=[...d.querySelectorAll('[data-a]')].map(e=>{ const p=e.dataset.a.split(':'); return {e,type:p[0],a:p.slice(1).map(Number),ph:rnd()*6.28}; });
+  sc.groups=[]; for(let k=0;k<sc.wt.length;k+=4) sc.groups.push(sc.wt.slice(k,k+4));
+  sc.gEls=sc.groups.map(g=>{ const el=document.createElement('div'); el.style.display='none';
+    g.forEach(w=>{ const s=document.createElement('span'); s.className='w'+(HIGHLIGHT.some(h=>strip(w.text).includes(h))?' hl':''); s.textContent=w.text; w.el=s; el.appendChild(s); });
+    cap.appendChild(el); return el; });
+});
+const DURATION=T;
+
+/* ===================== ANIMATION ENGINE ===================== */
+const easeOut=k=>1-Math.pow(1-Math.min(1,Math.max(0,k)),3);
+function animate(sc,lt,t){
+  sc.anims.forEach(({e,type,a,ph})=>{
+    let tr='', op=null;
+    switch(type){
+      case 'flick': op=0.55+0.45*(0.5+0.5*Math.sin(t*a[0]+ph)); break;
+      case 'pulse': op=0.55+0.45*(0.5+0.5*Math.sin(t*a[0]+(a[1]!==undefined?a[1]:ph))); break;
+      case 'bob':   tr=`translate(0 ${r1(-a[0]*Math.sin(t*a[1]*6.28+ph))})`; break;
+      case 'spin':  tr=`rotate(${r1((lt/a[0])*360)} ${a[1]} ${a[2]})`; break;
+      case 'rock':  tr=`rotate(${r1(a[0]*Math.sin(t*a[1]*2+ph)/2)} ${a[2]} ${a[3]})`; break;
+      case 'pop':  { const k=easeOut((lt-a[0])/0.7); op=k; tr=`translate(0 ${r1((1-k)*24)})`; break; }
+      case 'rise': { const k=easeOut((lt-a[2])/a[1]); op=Math.min(1,k*1.4); tr=`translate(0 ${r1((1-k)*a[0])})`; break; }
+      case 'slide':{ const k=easeOut((lt-a[3])/a[2]); tr=`translate(${r1((1-k)*a[0])} ${r1((1-k)*a[1])})`; op=lt<a[3]?0:1; break; }
+      case 'walk': { const k=Math.min(1,Math.max(0,(lt-a[2])/a[1])), kk=1-Math.pow(1-k,1.6); tr=`translate(${r1((1-kk)*a[0])} ${k<1?r1(-Math.abs(Math.sin(lt*4.2))*4):0})`; break; }
+      case 'fadeout':{ op=1-Math.min(1,Math.max(0,(lt-a[0])/a[1])); break; }
+      case 'orbit':{ const ang=(lt/a[4])*6.283; const x=a[2]+a[0]*Math.cos(ang), y=a[3]+a[1]*Math.sin(ang); const tang=Math.atan2(a[1]*Math.cos(ang),-a[0]*Math.sin(ang))*57.3; tr=`translate(${r1(x)} ${r1(y)}) rotate(${r1(tang)})`; op=Math.sin(ang)<-0.2?0.55:1; break; }
+    }
+    if(tr) e.setAttribute('transform',tr);
+    if(op!==null) e.setAttribute('opacity',op.toFixed(3));
+  });
+}
+function cam(c,k){ const e=easeOut(k*0.9+0.05);
+  if(c==='out') return `scale(${(1.1-0.1*e).toFixed(4)})`;
+  if(c==='panL') return `scale(1.08) translateX(${r1(16-32*e)}px)`;
+  if(c==='panR') return `scale(1.08) translateX(${r1(-16+32*e)}px)`;
+  if(c==='up') return `scale(1.06) translateY(${r1(18-24*e)}px)`;
+  return `scale(${(1+0.08*e).toFixed(4)})`; }
+
+/* particles */
+const cv=document.getElementById('fx'), cx=cv.getContext('2d');
+const PART=Array.from({length:70},()=>({x:rnd()*540,y:rnd()*960,s:6+rnd()*14,r:.6+rnd()*1.6,ph:rnd()*6.28,w:rnd()}));
+const FXC={dust:'#ffcf9a',embers:'#ffb45a',sparks:'#ffe7a8',stars:'#e8ecff',flies:'#e8ff9a',petals:'#f2a0b8'};
+function drawFx(kind,t,alpha){
+  if(!kind||alpha<=0) return; cx.globalAlpha=1;
+  PART.forEach((p,i)=>{
+    let x,y,r=p.r,a=alpha;
+    if(kind==='petals'){ y=(p.y+t*(p.s*3+20))%1000-20; x=p.x+Math.sin(t*.8+p.ph)*30; cx.save(); cx.translate(x,y); cx.rotate(t+p.ph); cx.globalAlpha=a*.85; cx.fillStyle=i%3?'#f2a0b8':'#ffb43c'; cx.beginPath(); cx.ellipse(0,0,4,7,0,0,6.283); cx.fill(); cx.restore(); return; }
+    if(kind==='flies'){ if(i>26) return; x=p.x+Math.sin(t*.7+p.ph)*18; y=400+(p.y%420)+Math.cos(t*.9+p.ph)*12; a*=Math.max(0,Math.sin(t*1.6+p.ph)); r=1.8; cx.shadowColor=FXC.flies; cx.shadowBlur=8; }
+    else if(kind==='embers'||kind==='sparks'){ const life=4+p.w*4, lt=((t+p.ph)%life)/life; x=p.x+Math.sin(t+p.ph)*10; y=(kind==='embers'?960:900)-lt*(500+p.s*20); a*=(1-lt)*.9; }
+    else { y=(p.y-t*p.s+9600)%960; x=p.x+Math.sin(t*.5+p.ph)*8; a*=.35+.4*Math.sin(t*2+p.ph); }
+    cx.globalAlpha=Math.max(0,a); cx.fillStyle=FXC[kind]; cx.beginPath(); cx.arc(x,y,r,0,6.283); cx.fill(); cx.shadowBlur=0;
+  }); cx.globalAlpha=1;
+}
+
+function render(t){
+  let active=-1; cx.clearRect(0,0,540,960);
+  SCENES.forEach((sc,i)=>{
+    let o=0; if(t>=sc.start-FADE && t<sc.end) o=Math.min(1,(t-(sc.start-FADE))/FADE); if(i===0&&t<FADE) o=1;
+    const on=o>0; sc.el.style.display=on?'block':'none'; if(!on) return;
+    const isA=t>=sc.start&&t<sc.end; if(isA) active=i;
+    sc.el.style.opacity=o.toFixed(3); sc.el.style.zIndex=isA?2:1;
+    const lt=t-sc.start, k=Math.max(0,Math.min(1,lt/sc.dur));
+    sc.el.style.transform=cam(sc.cam,k); animate(sc,Math.max(0,lt),t); drawFx(sc.fx,t,o);
+  });
+  SCENES.forEach((sc,i)=>{ let ag=-1; if(i===active) sc.groups.forEach((g,gi)=>{ if(t>=g[0].t-0.05) ag=gi; });
+    sc.gEls.forEach((el,gi)=>el.style.display=gi===ag?'block':'none'); if(ag>=0) sc.groups[ag].forEach(w=>w.el.classList.toggle('on',t>=w.t)); });
+  document.getElementById('bar').style.width=(100*t/DURATION)+'%';
+}
+
+/* ===================== PLAYER ===================== */
+function fit(){ stage.style.transform=`scale(${Math.min(innerWidth/540,innerHeight/960)})`; }
+addEventListener('resize',fit); fit();
+const qs=new URLSearchParams(location.search);
+if(qs.has('clean')) document.body.classList.add('clean');
+if(qs.has('notext')){ cap.style.display='none'; stage.querySelectorAll('.scene svg text').forEach(e=>e.style.display='none'); }
+let fixed=null; if(qs.has('shot')){ const sc=SCENES[+qs.get('shot')]; fixed=sc.start+Math.min(sc.dur*0.75,3.6); } else if(qs.has('t')) fixed=parseFloat(qs.get('t'));
+const audio=audioSrc?new Audio(audioSrc):null;
+let t0=performance.now(), paused=false, pausedAt=0, last=0;
+const now=()=> fixed!==null?fixed:(paused?pausedAt:((performance.now()-t0)/1000)%DURATION);
+(function loop(){ const t=now(); if(audio&&t<last){audio.currentTime=0;audio.play().catch(()=>{});} last=t; render(t); requestAnimationFrame(loop); })();
+document.getElementById('restart').onclick=()=>{ t0=performance.now(); paused=false; document.getElementById('toggle').textContent='Pause'; if(audio){audio.currentTime=0;audio.play().catch(()=>{});} };
+document.getElementById('toggle').onclick=e=>{ if(!paused){pausedAt=now();paused=true;e.target.textContent='Play';audio&&audio.pause();} else {t0=performance.now()-pausedAt*1000;paused=false;e.target.textContent='Pause';audio&&audio.play().catch(()=>{});} };
+window.__DUR=DURATION;
+})();
+</script>
+</body>
+</html>
