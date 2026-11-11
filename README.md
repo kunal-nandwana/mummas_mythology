@@ -42,7 +42,17 @@ Each video is one short file, `<topic>-short-form/story.js`. It lists the shots:
 2. **Build.** Run `node tools/build.js <topic>-short-form`. This writes `index.html` (the video) and `script.md` (your recording script).
 3. **Check.** Open `index.html` in Chrome. If something is wrong, send all the fixes in **one** message, using shot numbers (for example: "shot 4: Krishna should smile; shot 6 needs 1 more second").
 4. **Record your voice.** Open `index.html?prompter=1`. Start your phone or Mac recorder, press **Start**, and after the 3-2-1 count read each line as it appears. `script.md` has the same lines with their timings.
-5. **Render the MP4.** Run the render tool on your Mac (coming next). It produces a 1080×1920 MP4 with your voice.
+5. **Render the MP4.** Save your recording as `voice.m4a` in the topic folder, then double-click `make-video.command`. It produces a 1080×1920 MP4 with your voice, and the silence before your first word is cut automatically.
 6. **Upload** to YouTube.
 
 URL options: `?shot=N` (jump to a shot), `?notext=1` (hide captions), `?clean=1` (hide buttons), `?prompter=1` (recording mode).
+
+## On your Mac
+
+**One-time setup (about 10 minutes):**
+1. Open Terminal and run `git clone https://github.com/kunal-nandwana/mummas_mythology.git` (this makes a `mummas_mythology` folder in your home folder).
+2. In Finder, open that folder and double-click **`setup-mac.command`**. If macOS blocks it, right-click it → **Open** → **Open**. It installs Node.js, ffmpeg and the renderer.
+
+**For every video:** double-click **`make-video.command`**. It gets the latest videos from GitHub, asks which video, and makes the MP4 (about 3–6 minutes on an M1).
+
+Manual commands, if you prefer: `node tools/build.js <topic>` and `node tools/render.js <topic> [--voice file.m4a] [--offset 0.3]`.

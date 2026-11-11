@@ -95,3 +95,54 @@ function field(mode){ let s='';
   } return s; }
 function flyArrow(col,glow){ return A('slide:-560:60:1.1:0.2',`<g transform="translate(70 300) rotate(-6)"><line x1="-200" y1="0" x2="360" y2="0" stroke="${col}" stroke-width="16" opacity=".25" filter="url(#b10)"/><line x1="0" y1="0" x2="360" y2="0" stroke="${col}" stroke-width="4" stroke-linecap="round"/><polygon points="360,-11 390,0 360,11" fill="${col}"/><polygon points="0,0 -20,-11 -9,0 -20,11" fill="${col}"/><circle cx="380" cy="0" r="50" fill="url(#${glow})"/></g>`); }
 const big=(x,y,size,col,str,delay)=>A('pop:'+(delay||0.4),`<text x="${x}" y="${y}" text-anchor="middle" font-size="${size}" fill="${col}" style="filter:drop-shadow(0 0 12px ${col})">${str}</text>`);
+
+/* ---------- sky, moon & palace pieces (reusable) ---------- */
+let _pmN=0;
+// Moon with phases. mode: 'full' | 'wane' (full -> crescent over dur) | 'wax' (crescent -> full) | number = fixed shadow offset in radii
+function phaseMoon(x,y,r,mode,dur,delay){
+  const id='pm'+(_pmN++), D=dur||3, dl=delay===undefined?0.3:delay, sr=r1(r*1.06), dark='#0b1030';
+  let crater=''; [[-.3,-.25,.18],[.25,.1,.22],[-.05,.4,.12],[.42,-.38,.1]].forEach(([a,b,c])=>crater+=`<circle cx="${r1(x+a*r)}" cy="${r1(y+b*r)}" r="${r1(c*r)}" fill="#c9bfa0" opacity=".35"/>`);
+  let sh='';
+  if(mode==='wane') sh=A(`slide:${r1(r*1.75)}:0:${D}:${dl}`,`<circle cx="${r1(x+r*.45)}" cy="${y}" r="${sr}" fill="${dark}" opacity=".94"/>`);
+  else if(mode==='wax') sh=A(`slide:${r1(r*1.75)}:0:${D}:0`,`<circle cx="${r1(x-r*2.35)}" cy="${y}" r="${sr}" fill="${dark}" opacity=".94"/>`);
+  else if(typeof mode==='number') sh=`<circle cx="${r1(x+mode*r)}" cy="${y}" r="${sr}" fill="${dark}" opacity=".94"/>`;
+  const halo = mode==='wane' ? A(`fadeout:${dl}:${D*1.2}`,`<circle cx="${x}" cy="${y}" r="${r*3.4}" fill="url(#moonG)" opacity=".55"/>`)
+             : mode==='wax' ? A(`fadein:${D*0.5}:${D}`,`<circle cx="${x}" cy="${y}" r="${r*3.4}" fill="url(#moonG)" opacity=".55"/>`)
+             : `<circle cx="${x}" cy="${y}" r="${r*3.4}" fill="url(#moonG)" opacity=".5"/>`;
+  return `<circle cx="${x}" cy="${y}" r="${r*2}" fill="url(#moonG)" opacity=".3"/>${halo}<clipPath id="${id}"><circle cx="${x}" cy="${y}" r="${r}"/></clipPath>`+
+    `<g clip-path="url(#${id})"><circle cx="${x}" cy="${y}" r="${r}" fill="#f3ecd2"/>${crater}${sh}</g><circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="#f3ecd2" stroke-opacity=".25" stroke-width="1.5"/>`;
+}
+// 8 phases in a row: waning (कृष्ण पक्ष) on the left, waxing (शुक्ल पक्ष) on the right
+function moonRow(y,r){ const offs=['f',1.35,.85,.4,0,-.4,-.85,-1.35]; let s=''; const gap=540/8;
+  offs.forEach((o,i)=>{ const x=r1(gap/2+i*gap); s+=A(`pop:${(0.3+i*0.18).toFixed(2)}`, o==='f'?phaseMoon(x,y,r,'full'):phaseMoon(x,y,r,o)); }); return s; }
+// a sparkle star
+function sparkle(x,y,s,col){ col=col||'#fff3c4'; return `<g transform="translate(${r1(x)} ${r1(y)}) scale(${s})"><circle r="9" fill="${col}" opacity=".18"/><path d="M0 -9 L2 -2 L9 0 L2 2 L0 9 L-2 2 L-9 0 L-2 -2Z" fill="${col}"/></g>`; }
+// the 27 nakshatras on a ring (ellipse); stars twinkle and appear one by one when stagger>0
+function nakshatras(cx,cy,rx,ry,stagger,col){ let s=`<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none" stroke="#f0d79a" stroke-opacity=".22" stroke-width="1.5" stroke-dasharray="3 8"/>`;
+  for(let i=0;i<27;i++){ const a=-Math.PI/2+i*2*Math.PI/27, x=cx+rx*Math.cos(a), y=cy+ry*Math.sin(a);
+    const st=sparkle(x,y,0.8+(i%3)*0.2,col); s+= stagger ? A(`pop:${(0.2+i*stagger).toFixed(2)}`, A('flick:'+(2+rnd()*3).toFixed(2), st)) : A('flick:'+(2+rnd()*3).toFixed(2), st); }
+  return s; }
+// a small Earth
+function earth(x,y,r){ return `<circle cx="${x}" cy="${y}" r="${r*1.5}" fill="#4a8ad8" opacity=".15"/><circle cx="${x}" cy="${y}" r="${r}" fill="#2d6ab0"/>`+
+  `<path d="M${x-r*.6} ${y-r*.3} q${r*.3} ${-r*.4} ${r*.6} ${-r*.1} q${r*.1} ${r*.4} ${-r*.2} ${r*.6} q${-r*.4} ${r*.1} ${-r*.4} ${-r*.5}Z M${x+r*.2} ${y+r*.2} q${r*.4} ${-r*.1} ${r*.5} ${r*.3} q${-r*.2} ${r*.4} ${-r*.5} ${r*.2}Z" fill="#4e9a5a"/>`+
+  `<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="#bfe0ff" stroke-opacity=".5" stroke-width="2"/>`; }
+// moon going round a centre once every `period` seconds (radius r)
+function orbitMoon(cx,cy,r,period,mr){ return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#f3ecd2" stroke-opacity=".35" stroke-width="2"/>`+A(`spin:${period}:${cx}:${cy}`, phaseMoon(cx+r,cy,mr||16,'full')); }
+// royal palace interior (warm), pillars + arches + hanging lamps; floor at y
+function palace(y,tone){ const w=tone||'#3a1a2c', p='#58283e', g='url(#gold)'; let s=`<rect width="540" height="960" fill="${w}"/><circle cx="270" cy="${y-240}" r="360" fill="url(#saf)" opacity=".35"/>`;
+  for(let i=0;i<4;i++){ const x=-20+i*190; s+=`<path d="M${x+20} ${y-90} L${x+20} ${y-420} Q${x+95} ${y-560} ${x+170} ${y-420} L${x+170} ${y-90}Z" fill="#24101c" opacity=".75"/>`; }
+  for(let i=0;i<5;i++){ const x=-10+i*137; s+=`<rect x="${x-14}" y="${y-470}" width="28" height="${470}" fill="${p}"/><rect x="${x-20}" y="${y-480}" width="40" height="14" fill="${g}"/><rect x="${x-20}" y="${y-14}" width="40" height="14" fill="${g}"/><rect x="${x-14}" y="${y-470}" width="8" height="456" fill="#000" opacity=".18"/>`; }
+  s+=`<rect y="${y-500}" width="540" height="22" fill="${g}" opacity=".85"/>`;
+  [135,405].forEach(x=>{ s+=`<line x1="${x}" y1="${y-478}" x2="${x}" y2="${y-400}" stroke="#c99a3a" stroke-width="1.5"/>`+A('flick:'+(4+rnd()*3).toFixed(2),`<circle cx="${x}" cy="${y-392}" r="34" fill="url(#saf)"/>`)+`<path d="M${x-10} ${y-400} L${x+10} ${y-400} L${x} ${y-386}Z" fill="${g}"/>`; });
+  s+=`<path d="M0 ${y} L540 ${y} L540 960 L0 960Z" fill="#1e0c16"/>`;
+  for(let i=0;i<8;i++) s+=`<line x1="${270+(i-3.5)*40}" y1="${y}" x2="${270+(i-3.5)*160}" y2="960" stroke="#3a1a2a" stroke-width="2"/>`;
+  return s+`<rect y="${y}" width="540" height="6" fill="${g}" opacity=".6"/>`; }
+// palm-leaf manuscript (pothi), centred at x,y
+function pothi(x,y,s){ let l=''; for(let i=0;i<6;i++) l+=`<line x1="${-150}" y1="${-22+i*9}" x2="${150}" y2="${-22+i*9}" stroke="#7a5228" stroke-width="1.6" opacity=".55" stroke-dasharray="${8+i*3} 5"/>`;
+  return `<g transform="translate(${x} ${y}) scale(${s||1})"><rect x="-176" y="-44" width="352" height="88" rx="10" fill="#4a2c18"/><rect x="-168" y="-38" width="336" height="76" rx="8" fill="#e8cf96"/><rect x="-168" y="-38" width="336" height="76" rx="8" fill="url(#paper)" opacity=".2"/>${l}`+
+    `<circle cx="-110" cy="0" r="5" fill="#4a2c18"/><circle cx="110" cy="0" r="5" fill="#4a2c18"/><path d="M-110 0 C-140 60 -100 90 -60 70" stroke="#b8202a" stroke-width="2.5" fill="none"/></g>`; }
+// parchment panel for verses: returns svg; put text lines with verse()
+function parchment(x,y,w,h){ return A('rise:30:0.8:0.2',`<g><rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="14" fill="#ead6a4"/><rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="14" fill="none" stroke="#a8742c" stroke-width="3"/>`+
+  `<rect x="${x-w/2+10}" y="${y-h/2+10}" width="${w-20}" height="${h-20}" rx="10" fill="none" stroke="#a8742c" stroke-width="1.2" stroke-dasharray="2 5"/><rect x="${x-w/2-8}" y="${y-h/2-12}" width="${w+16}" height="20" rx="10" fill="#8a5a28"/><rect x="${x-w/2-8}" y="${y+h/2-8}" width="${w+16}" height="20" rx="10" fill="#8a5a28"/></g>`); }
+// verse lines (Tiro font), each line fades in after the previous
+function verse(x,y,lines,size,col,delay,gap){ return lines.map((t,i)=>A(`pop:${((delay||0.8)+i*(gap||1.4)).toFixed(2)}`,`<text x="${x}" y="${y+i*size*1.55}" text-anchor="middle" font-size="${size}" fill="${col||'#5a2a0a'}" style="font-family:'Tiro',serif;font-weight:400">${t}</text>`)).join(''); }

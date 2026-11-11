@@ -130,6 +130,7 @@ function makeRig(cast){
   if(c.mus) head+=`<path d="M12 -254 q8 -4 15 1" stroke="${dark}" stroke-width="3.2" fill="none" stroke-linecap="round"/>`;
   if(c.tilak) head+=`<path d="M20 -287 l1 7" stroke="#d63a2a" stroke-width="2.2"/>`;
   if(c.head==='turban') head+=`<path d="M-22 -270 C-24 -296 2 -306 24 -290 C30 -284 28 -276 22 -276 C10 -280 -4 -282 -18 -264Z" fill="${c.turban}"/><circle cx="-22" cy="-286" r="9" fill="${c.turban}"/>`;
+  if(c.crescent) head+=`<path d="M-17 -330 A19 19 0 0 0 21 -330 A16 12 0 0 1 -17 -330Z" fill="#f6f1dc" style="filter:drop-shadow(0 0 6px #fff6c8)"/>`;
   if(c.head==='crown'||c.head==='feather') head+=`<path d="M-16 -286 L-12 -318 L-4 -300 L2 -326 L8 -300 L16 -316 L18 -286Z" fill="url(#gold)"/><circle cx="2" cy="-296" r="3" fill="#d63a2a"/>`;
   if(c.head==='feather') head+=`<g transform="translate(0 -322) rotate(-14)"><path d="M0 0 Q-6 -24 0 -46" stroke="#3a7a4f" stroke-width="2.5" fill="none"/><ellipse cx="0" cy="-48" rx="9" ry="15" fill="#2e9a86"/><ellipse cx="0" cy="-48" rx="5.5" ry="9" fill="#1f5fb0"/><ellipse cx="0" cy="-48" rx="2.5" ry="4.5" fill="#e8c24a"/></g>`;
   if(c.head==='band') head+=`<path d="M-16 -282 Q2 -292 20 -284 L20 -277 Q2 -285 -16 -275Z" fill="url(#gold)"/><circle cx="4" cy="-286" r="2.6" fill="#d63a2a"/>`;

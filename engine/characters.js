@@ -23,5 +23,12 @@ const RISHI     = {skin:'#8a5a3c', top:'#d98a2a', bottom:'#d98a2a', head:'jata',
 const SOLDIER   = {skin:'#7a4e34', top:'#3a2a2a', bottom:'#5a3a2a', head:'band', jewel:false};
 const VILLAGER  = {skin:'#8a5a3c', top:'#c8641e', bottom:'#efe9da', head:'turban', turban:'#ff8a1a', jewel:false, trim:null};
 const DEVOTEE_F = {skin:'#8a5a3c', top:'#b8202a', bottom:'#b8202a', skirt:true, veil:'#e05a2a', jewel:false};
+const CHANDRA   = {skin:'#eadcd0', top:'#f4f1e6', bottom:'#b9c6e6', head:'crown', crescent:true, garland:'#fff6dc', sash:'#c9d4f0', aura:'gw', tilak:true};
+const DAKSHA    = {skin:'#9a6a4a', top:'#7a1a2a', bottom:'#e5b324', head:'big', beard:'white', mus:true, garland:'#ffd25e', sash:'#e5b324', tilak:true};
+const ROHINI    = {skin:'#c98a6a', top:'#d8487a', bottom:'#d8487a', skirt:true, veil:'#f28ab4', head:'crown', jewel:true};
+const NAKSHATRA = {skin:'#b67e5e', top:'#5a3a9a', bottom:'#5a3a9a', skirt:true, veil:'#8a6ad0', jewel:true};   // one of the 27 wives; recolour with:{top,bottom,veil}
+const INDRA     = {skin:'#c98a6a', top:'#2a5aa8', bottom:'#e5b324', head:'big', garland:'#ffd25e', mus:true, aura:'gw'};
+const DEVA      = {skin:'#c98a6a', top:'#e8e0cc', bottom:'#c8641e', head:'crown', garland:'#ffd25e'};
 
-const CHARACTER_LIST = {BARBARIK, KRISHNA, BRAHMIN, ARJUNA, BHIMA, YUDHISHTHIRA, NAKULA, SAHADEVA, GHATOTKACH, MOTHER, DEVI, SITA, RAMA, SHIVA, RISHI, SOLDIER, VILLAGER, DEVOTEE_F};
+const CHARACTER_LIST = {BARBARIK, KRISHNA, BRAHMIN, ARJUNA, BHIMA, YUDHISHTHIRA, NAKULA, SAHADEVA, GHATOTKACH, MOTHER, DEVI, SITA, RAMA, SHIVA, RISHI, SOLDIER, VILLAGER, DEVOTEE_F,
+  CHANDRA, DAKSHA, ROHINI, NAKSHATRA, INDRA, DEVA};
