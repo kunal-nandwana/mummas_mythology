@@ -71,4 +71,6 @@ URL options: `?shot=N` (jump to a shot), `?notext=1` (hide captions), `?clean=1`
 
 **Background music is added automatically.** It is original (made by `tools/make-music.js`, so no copyright problems): a tanpura drone, soft pad and flute. It fades in and out and gets quieter when you speak. The first time, the renderer makes the 3 tracks itself (about 30 seconds). Pick one per video with `music:'calm'` (default), `'dark'` (war, curse, sad) or `'bright'` (victory, blessing) in `story.js`. Change it from the command line with `--music dark`, `--nomusic`, or `--musicvol 0.3` (louder).
 
+**More polish, all automatic:** an opening montage (3 quick silent shots before the story), Sanskrit verses written in calligraphy (`calli:` in a shot), and original sound effects (whoosh, boom, bell, shimmer, riser) at transitions and the hook. Turn the effects off with `--nosfx`, or change their loudness with `--sfxvol 0.5`. To hear each effect: `node tools/sfx.js` (it makes `music/sfx-preview/`).
+
 Manual commands, if you prefer: `node tools/build.js <topic>` and `node tools/render.js <topic> [--voice file.m4a] [--offset 0.3]`.

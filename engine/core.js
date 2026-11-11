@@ -15,6 +15,12 @@
      shot.cam:{keys:[[t,x,y,zoom,'snap'?],...]}   keyframed camera (push-ins, tilts, whip to a face)
      shot.mood:'anger'|'sad'|'joy'|'hope'|'calm'|'shock'|'divine'   lighting + colour grade per emotion
      shot.tr:'fade'|'glow'|'whip'|'zoom'|'iris'|'wipe'|'flash'|'dip'|'cut'   cinematic transition INTO this shot
+   More (all optional):
+     cfg.opening:N                  first N shots = silent 0.8 s MONTAGE (give them art/cast/cam/tr, no line); voice starts at shot N+1
+     shot.calli:{lines,source,y,size,delay,gap,write,hold}   Sanskrit verse "written" in calligraphy (see calligraphy() in scenes.js)
+     Sound effects are added automatically (whoosh on whip/wipe, hit on flash, boom on dip + hook slam, shimmer on glow/iris,
+     riser on zoom, bell on a 'divine' shot, ticks + riser + boom on the montage). Extra ones: shot.sfx:[[secondsIntoShot,'gong',vol?],...]
+     names: whoosh boom hit gong bell shimmer tick riser.   cfg.sfx:false turns all SFX off.
    ===================================================================== */
 const LAYER_F={sky:.3,far:.6,mid:.85,art:1,near:1.4};
 function VIDEO(cfg){
@@ -53,9 +59,10 @@ function VIDEO(cfg){
   /* ---- build every shot once ---- */
   SH.forEach((sc,i)=>{
     const rigs=(sc.cast||[]).map(makeRig);
-    const title = sc.title ? big(W/2, sc.title.y||150, sc.title.size||60, sc.title.color||'#ffd25e', sc.title.text, sc.title.delay||0.5) : '';
+    const title = sc.title ? big(W/2, sc.title.y||150, (sc.title.size||50)*0.82, sc.title.color||'#ffd25e', sc.title.text, sc.title.delay||0.5) : '';
     const d=document.createElement('div'); d.className='scene';
-    const stage0=`${sc.art?sc.art():''}${rigs.map(r=>r.svg).join('')}${sc.front?sc.front():''}${title}`;
+    const calli = sc.calli ? calligraphy(sc.calli.lines, sc.calli) : '';
+    const stage0=`${sc.art?sc.art():''}${rigs.map(r=>r.svg).join('')}${sc.front?sc.front():''}${calli}${title}`;
     const layered=!!(sc.sky||sc.far||sc.mid||sc.near);
     d.innerHTML=`<svg viewBox="0 0 ${W} ${H}">`+(layered ?
       `<g class="L" data-f="${LAYER_F.sky}" data-dof="1.6">${sc.sky?sc.sky():''}</g><g class="L" data-f="${LAYER_F.far}" data-dof="1">${sc.far?sc.far():''}</g><g class="L" data-f="${LAYER_F.mid}" data-dof="0.5">${sc.mid?sc.mid():''}</g>`+
@@ -66,7 +73,7 @@ function VIDEO(cfg){
     sc.anims=[...d.querySelectorAll('[data-a]')].map(e=>{ const p=e.dataset.a.split(':'); return {e,type:p[0],a:p.slice(1).map(Number),ph:rnd()*6.28}; });
     if(NOTEXT) d.querySelectorAll('text').forEach(e=>e.style.display='none');
     // captions
-    sc.chunks= sc.nocap ? [] : captionChunks(sc.words, cfg.captionChars||24).map(ch=>{ const el=document.createElement('div'); el.className='chunk';
+    sc.chunks= sc.nocap ? [] : captionChunks(sc.words, cfg.captionChars||28).map(ch=>{ const el=document.createElement('div'); el.className='chunk';
       ch.forEach(w=>{ const s=document.createElement('span'); s.className='w'+(KEY.some(k=>tStrip(w.text).includes(k))?' hl':''); s.textContent=w.text; w.el=s; el.appendChild(s); el.appendChild(document.createTextNode(' ')); });
       cap.appendChild(el); return {el, words:ch, t:ch[0].t}; });
   });
@@ -86,6 +93,8 @@ function VIDEO(cfg){
         case 'rise': { const k=easeOut((lt-a[2])/a[1]); op=Math.min(1,k*1.4); tr=`translate(0 ${r1((1-k)*a[0])})`; break; }
         case 'slide':{ const k=easeOut((lt-a[3])/a[2]); tr=`translate(${r1((1-k)*a[0])} ${r1((1-k)*a[1])})`; op=lt<a[3]?0:1; break; }
         case 'walk': { const k=clamp01((lt-a[2])/a[1]), kk=1-Math.pow(1-k,1.6); tr=`translate(${r1((1-kk)*a[0])} ${k<1?r1(-Math.abs(Math.sin(lt*4.2))*4):0})`; break; }
+        case 'reveal':{ const k=easeIO(clamp01((lt-a[0])/a[1])); e.setAttribute('width',((a[3]-a[2])*k).toFixed(1)); break; }
+        case 'glint':{ const u=(lt-a[0])/a[1], k=easeIO(clamp01(u)); e.setAttribute('transform',`translate(${(a[2]+(a[3]-a[2])*k).toFixed(1)} 0)`); op=(u<0||u>=1)?0:Math.min(1,Math.min(u,1-u)*8); break; }
         case 'fadeout':{ op=1-clamp01((lt-a[0])/a[1]); break; }
         case 'fadein':{ op=clamp01((lt-a[0])/a[1]); break; }
         case 'orbit':{ const ang=(lt/a[4])*6.283, x=a[2]+a[0]*Math.cos(ang), y=a[3]+a[1]*Math.sin(ang), tang=Math.atan2(a[1]*Math.cos(ang),-a[0]*Math.sin(ang))*57.3; tr=`translate(${r1(x)} ${r1(y)}) rotate(${r1(tang)})`; op=Math.sin(ang)<-0.2?0.55:1; break; }
@@ -294,6 +303,7 @@ function VIDEO(cfg){
     if(active>=0) placeCap(SH[active].capTop||CAPTOP);
     SH.forEach((sc,i)=>{ let ag=-1; if(i===active) sc.chunks.forEach((c,ci)=>{ if(t>=c.t-0.05) ag=ci; });
       sc.chunks.forEach((c,ci)=>{ const on=ci===ag; c.el.style.display=on?'block':'none';
+        if(on){ const k=clamp01((t-c.t)/0.22), e=1-Math.pow(1-k,3); c.el.style.opacity=(0.2+0.8*e).toFixed(2); c.el.style.transform=`translateY(${((1-e)*16).toFixed(1)}px) scale(${(0.94+0.06*e).toFixed(3)})`; }
         if(on) c.words.forEach(w=>{ w.el.classList.toggle('on', t>=w.t && t<w.e); w.el.classList.toggle('said', t>=w.e); }); }); });
     updateHook(t); updateSting(t); updateCard(t);
     bar.style.width=(100*t/DURATION)+'%';
@@ -304,7 +314,7 @@ function VIDEO(cfg){
   const pm=$('prompter'), fmt=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
   function prompter(t, a){ if(a<0) return; const sc=SH[a], nx=SH[a+1];
     pm.querySelector('.meta').textContent=`शॉट ${a+1}/${SH.length}   •   ${fmt(t)} / ${fmt(DURATION)}`;
-    pm.querySelector('.now').textContent=sc.line; pm.querySelector('.next').textContent=nx?('अगला: '+nx.line):'— समाप्त —';
+    pm.querySelector('.now').textContent=sc.line||'… (शुरुआती झलक: बस चुप रहें)'; pm.querySelector('.next').textContent=nx?('अगला: '+nx.line):'— समाप्त —';
     pm.querySelector('.pbar i').style.width=(100*clamp01((t-sc.start)/sc.dur))+'%'; }
 
   /* ---- player ---- */
@@ -319,7 +329,20 @@ function VIDEO(cfg){
   $('toggle').onclick=e=>{ if(!paused){pausedAt=now();paused=true;e.target.textContent='Play';audio&&audio.pause();} else {t0=performance.now()-pausedAt*1000;paused=false;e.target.textContent='Pause';audio&&audio.play().catch(()=>{});} };
   pm.querySelector('.start button').onclick=()=>{ const st=pm.querySelector('.start'), ct=pm.querySelector('.count'); st.style.display='none'; let n=3; ct.textContent=n; ct.style.display='flex';
     const iv=setInterval(()=>{ n--; if(n>0) ct.textContent=n; else { clearInterval(iv); ct.style.display='none'; restart(); } },1000); };
-  window.__ENGINE={ music:cfg.music, duration:DURATION, intro:INTRO, narrEnd:NARR_END, W, H, shots:SH.map(s=>({start:s.start,end:s.end,line:s.line})), seek:t=>render(t), ready:document.fonts?document.fonts.ready:Promise.resolve() };
+  /* ---- sound-effect events (render.js turns these into audio with tools/sfx.js) ---- */
+  const OPEN=cfg.opening||0;
+  function sfxEvents(){ if(cfg.sfx===false) return []; const ev=[], add=(t,n,v)=>{ if(t>=0&&t<DURATION) ev.push({t:+t.toFixed(3),name:n,vol:v===undefined?1:v}); };
+    const TRSFX={whip:['whoosh',-1,1],wipe:['whoosh',-1,.8],flash:['hit',0,.9],dip:['boom',0,.55],glow:['shimmer',-.2,.8],iris:['shimmer',-.3,.9],zoom:['riser',-.9,.8]};
+    SH.forEach((sc,i)=>{ const tr=TRN[i];
+      if(i<OPEN){ add(sc.start,'tick',.9); if(i>0 && !tr && !sc.tr) add(sc.start-.12,'whoosh',.5); }
+      if(tr && TRSFX[tr.type] && i>0){ const m=TRSFX[tr.type]; add(sc.start+(m[1]===-1?-tr.d/2:m[1]===0?0:m[1]*tr.d),m[0],m[2]); }
+      if(sc.tr==='flash'||sc.tr==='dip'){ if(!tr) add(sc.start,sc.tr==='flash'?'hit':'boom',sc.tr==='flash'?.9:.55); }
+      if(sc.mood==='divine' && i>0 && SH[i-1].mood!=='divine') add(sc.start+.25,'bell',.8);
+      (sc.sfx||[]).forEach(e=>add(sc.start+e[0],e[1],e[2])); });
+    if(OPEN>0 && SH[OPEN]){ const vs=SH[OPEN].start; add(Math.max(0,vs-1.3),'riser',.8); add(vs,'boom',.8); }
+    if(HK) HK.words.forEach((w,k)=>add(hookImpact(w)-.02,k===0?'boom':'hit',k===0?1:.8));
+    return ev.sort((a,b)=>a.t-b.t); }
+  window.__ENGINE={ voiceAt:plan.voiceAt, sfx:sfxEvents(), music:cfg.music, duration:DURATION, intro:INTRO, narrEnd:NARR_END, W, H, shots:SH.map(s=>({start:s.start,end:s.end,line:s.line})), seek:t=>render(t), ready:document.fonts?document.fonts.ready:Promise.resolve() };
   window.__DUR=DURATION;
   if(!RENDER){ (function loop(){ const t=now(); if(!PROMPT && fixed===null && !paused && t>=DURATION-0.002){ t0=performance.now(); if(audio){audio.currentTime=0;audio.play().catch(()=>{});} }
       last=t; render(t); requestAnimationFrame(loop); })(); }

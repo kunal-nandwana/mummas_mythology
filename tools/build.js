@@ -28,8 +28,8 @@ let md=`# ${CFG.title||topic} — Recording script\n\n`+
   `How to record: open \`index.html?prompter=1\` in Chrome, start your recorder, press **Start**, and read each line as it appears. `+
   `Pause briefly at each "|". If a line feels rushed, tell Kiro the shot number and the extra seconds you need.\n\n`+
   `| # | Start | Length | Line (Hindi) |\n|---|---|---|---|\n`;
-plan.shots.forEach((s,i)=>{ md+=`| ${i+1} | ${fmt(s.start)} | ${s.dur.toFixed(1)}s | ${s.line.replace(/\|/g,'/')} |\n`; });
-md+=`\n## Full narration (one block)\n\n`+plan.shots.map(s=>s.line).join(' |\n')+'\n';
+plan.shots.forEach((s,i)=>{ md+=`| ${i+1} | ${fmt(s.start)} | ${s.dur.toFixed(1)}s | ${s.line?s.line.replace(/\|/g,'/'):'(opening montage: no narration)'} |\n`; });
+md+=`\n## Full narration (one block)\n\n`+plan.shots.map(s=>s.line).filter(Boolean).join(' |\n')+'\n';
 fs.writeFileSync(path.join(dir,'script.md'), md);
 
 /* 2) standalone index.html */

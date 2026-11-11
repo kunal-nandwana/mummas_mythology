@@ -29,12 +29,12 @@ canvas{position:absolute;inset:0;pointer-events:none;z-index:5}
   background:linear-gradient(transparent,rgba(5,3,12,.55) 35%,rgba(5,3,12,.55) 65%,transparent)}
 /* Captions sit in the upper-middle band: above character heads and clear of YouTube Shorts' bottom UI. */
 #cap{position:absolute;left:28px;right:28px;top:400px;z-index:8;text-align:center;min-height:100px;
-  font-family:'Mukta','Kohinoor Devanagari','Noto Sans Devanagari','Nirmala UI',sans-serif;font-weight:800;font-size:40px;line-height:1.28;color:#f6ecd2;
+  font-family:'Mukta','Kohinoor Devanagari','Noto Sans Devanagari','Nirmala UI',sans-serif;font-weight:800;font-size:31px;line-height:1.3;color:#f6ecd2;
   text-shadow:0 3px 0 #1a0d05,0 0 14px rgba(0,0,0,.9)}
 #cap .chunk{display:none}
-#cap .w{display:inline-block;opacity:.88;transition:color .08s,transform .08s}
-#cap .w.said{opacity:1}
-#cap .w.on{color:#ffd25e;opacity:1;transform:translateY(-2px) scale(1.07);text-shadow:0 3px 0 #3a1a05,0 0 18px rgba(255,180,60,.75)}
+#cap .w{display:inline-block;opacity:.55;transition:color .08s,transform .08s}
+#cap .w.said{opacity:.95}
+#cap .w.on{color:#ffd25e;opacity:1;transform:translateY(-2px) scale(1.1);text-shadow:0 3px 0 #3a1a05,0 0 18px rgba(255,180,60,.75)}
 #cap .w.hl{color:#ffb347}
 #cap .w.hl.on{color:#ff8a2a}
 svg text{font-family:'Mukta','Kohinoor Devanagari','Noto Sans Devanagari',sans-serif;font-weight:800}
@@ -71,6 +71,8 @@ body.prompt #ui{top:auto;bottom:10px}
    - cfg.target (seconds) rescales the flexible shots to hit the total.
    - shot.dur fixes one shot's length exactly.
    - cfg.minShot (default 2.4s) is the shortest any shot can be.
+   - cfg.opening:N makes the first N shots a silent MONTAGE (no narration): 0.8 s each unless shot.dur is set.
+     The voice starts at shot N+1 (see __ENGINE.voiceAt). The montage counts inside cfg.target.
    - cfg.intro (seconds) puts the channel sting BEFORE shot 1: every shot starts that much later.
    - cfg.outro (seconds) adds the end card AFTER the last shot. Neither counts towards cfg.target.
    ===================================================================== */
@@ -79,10 +81,11 @@ function tWords(line){ return (line||'').split(/\s+/).filter(w=>w && !/^[—\-�
 
 function planTiming(cfg){
   const minShot = cfg.minShot || 2.4, PACE = cfg.pace || 13;
-  const P = cfg.shots.map(s=>{
-    const w = tWords(s.line), wt = w.map(x=>tStrip(x).length+2);
+  const OPEN = cfg.opening||0;
+  const P = cfg.shots.map((s,si)=>{
+    const w = si<OPEN ? [] : tWords(s.line), wt = w.map(x=>tStrip(x).length+2);
     const raw = w.length ? wt.reduce((a,b)=>a+b,0)/PACE + 0.45 : 2.2;
-    return {w, wt, raw, fixed: s.dur||null};
+    return {w, wt, raw, fixed: s.dur || (si<OPEN?0.8:null)};
   });
   // Solve the scale so the total hits cfg.target, honouring minShot.
   let scale = 1;
@@ -104,7 +107,7 @@ function planTiming(cfg){
     const words = p.w.map((w,k)=>{ const o={text:w, t:start+lead+acc/total*speak, e:0}; acc+=p.wt[k]; o.e=start+lead+acc/total*speak; return o; });
     shots.push({i, start, end, dur, line: cfg.shots[i].line||'', words, speakEnd: start+lead+speak});
   });
-  return {shots, duration:T+outro, intro, outro, narrEnd:T};
+  return {shots, duration:T+outro, intro, outro, narrEnd:T, voiceAt: shots[Math.min(OPEN,shots.length-1)] ? shots[Math.min(OPEN,shots.length-1)].start : 0};
 }
 
 /* Split a line's words into caption chunks (<= maxChars letters each). */
@@ -129,7 +132,7 @@ if(typeof module!=='undefined') module.exports={planTiming, captionChunks, tWord
      flick:speed | pulse:speed | bob:amp:speed | spin:period:cx:cy
      rock:deg:speed:cx:cy | pop:delay | rise:dy:dur:delay
      slide:dx:dy:dur:delay | walk:dx:dur:delay | fadeout:at:dur
-     orbit:rx:ry:cx:cy:period
+     orbit:rx:ry:cx:cy:period | reveal/glint (used by calligraphy())
    ===================================================================== */
 const r1=n=>Math.round(n*10)/10;
 let seed=11; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
@@ -275,6 +278,23 @@ function parchment(x,y,w,h){ return A('rise:30:0.8:0.2',`<g><rect x="${x-w/2}" y
   `<rect x="${x-w/2+10}" y="${y-h/2+10}" width="${w-20}" height="${h-20}" rx="10" fill="none" stroke="#a8742c" stroke-width="1.2" stroke-dasharray="2 5"/><rect x="${x-w/2-8}" y="${y-h/2-12}" width="${w+16}" height="20" rx="10" fill="#8a5a28"/><rect x="${x-w/2-8}" y="${y+h/2-8}" width="${w+16}" height="20" rx="10" fill="#8a5a28"/></g>`); }
 // verse lines (Tiro font), each line fades in after the previous
 function verse(x,y,lines,size,col,delay,gap){ return lines.map((t,i)=>A(`pop:${((delay||0.8)+i*(gap||1.4)).toFixed(2)}`,`<text x="${x}" y="${y+i*size*1.55}" text-anchor="middle" font-size="${size}" fill="${col||'#5a2a0a'}" style="font-family:'Tiro',serif;font-weight:400">${t}</text>`)).join(''); }
+
+/* Calligraphy: verse lines that are "written" left to right with a glowing pen-edge, a gold underline and a source credit.
+   Use as shot field:  calli:{lines:['..','..'], source:'— महाभारत', y:300, size:34, delay:.6, gap:1.5, write:1.2, hold:0}
+   (hold>0 = fade the verse out that many seconds after the last line is written). Or call calligraphy(lines,opts) inside art/front. */
+let _cgN=0;
+function calligraphy(lines,o){ o=Object.assign({y:300,size:34,delay:0.6,gap:1.5,write:1.2,col:'#ffe7a8',source:'',hold:0,scrim:true,glow:true},o||{});
+  const n=_cgN++, S=o.size, lh=S*1.6; let out=`<defs><linearGradient id="cgS${n}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#05030c" stop-opacity="0"/><stop offset=".22" stop-color="#05030c" stop-opacity=".62"/><stop offset=".78" stop-color="#05030c" stop-opacity=".62"/><stop offset="1" stop-color="#05030c" stop-opacity="0"/></linearGradient></defs>`;
+  const H=lines.length*lh+(o.source?lh*1.3:lh*.6)+S, top=o.y-S*2;
+  if(o.scrim) out+=A(`fadein:${Math.max(0,o.delay-.3).toFixed(2)}:.6`,`<rect x="0" y="${r1(top)}" width="540" height="${r1(H)}" fill="url(#cgS${n})"/>`);
+  lines.forEach((ln,i)=>{ const t0=o.delay+i*o.gap, ly=o.y+i*lh, w=Math.min(500,Array.from(ln).length*S*0.52+36), x0=r1(270-w/2), x1=r1(270+w/2);
+    out+=`<clipPath id="cg${n}_${i}"><rect data-a="reveal:${t0.toFixed(2)}:${o.write}:${x0}:${x1}" x="${x0}" y="${r1(ly-S*1.25)}" width="0" height="${r1(S*1.9)}"/></clipPath>`+
+      `<g clip-path="url(#cg${n}_${i})"><text x="270" y="${r1(ly)}" text-anchor="middle" font-size="${S}" fill="${o.col}" style="font-family:'Tiro','Mukta',serif;font-weight:400;${o.glow?'filter:drop-shadow(0 0 8px rgba(255,190,90,.75)) drop-shadow(0 2px 0 #2a1204)':''}">${ln}</text></g>`+
+      `<rect data-a="glint:${t0.toFixed(2)}:${o.write}:${x0}:${x1}" x="-3" y="${r1(ly-S*1.1)}" width="6" height="${r1(S*1.45)}" rx="3" fill="#fff3c4" filter="url(#b4)" opacity="0"/>`; });
+  const tEnd=o.delay+lines.length*o.gap;
+  if(o.source) out+=A(`pop:${(tEnd-.2).toFixed(2)}`,`<path d="M170 ${r1(o.y+lines.length*lh-S*.6)} L370 ${r1(o.y+lines.length*lh-S*.6)}" stroke="#f1c04e" stroke-width="1.6" opacity=".8"/><path d="M264 ${r1(o.y+lines.length*lh-S*.6)} l6 -5 l6 5 l-6 5Z" fill="#f1c04e"/>`+
+    `<text x="270" y="${r1(o.y+lines.length*lh+S*.5)}" text-anchor="middle" font-size="${r1(S*.58)}" fill="#e6c98a" style="font-weight:700">${o.source}</text>`);
+  return o.hold>0 ? A(`fadeout:${(tEnd+o.hold).toFixed(2)}:.7`,out) : out; }
 
 /* ---- engine/rig.js ---- */
 /* =====================================================================
@@ -484,10 +504,12 @@ function bindRig(r, root){
   r.keys=(r.cast.acts||[[0,r.cast.pose||'stand']]).map(k=>({t:k[0], p:poseOf(k[1]), d:k[2]||0.55})).sort((a,b)=>a.t-b.t);
   if(r.keys[0].t>0) r.keys.unshift({t:0,p:poseOf(r.cast.pose||'stand'),d:0});
 }
+// poses settle with a tiny overshoot (a living spring) instead of a robotic ease
+const easeSpring=k=>{ k=clamp01(k); const c1=1.1, c3=c1+1; return 1+c3*Math.pow(k-1,3)+c1*Math.pow(k-1,2); };
 function poseAt(r, lt){
   const K=r.keys; let i=0; while(i+1<K.length && K[i+1].t<=lt) i++;
   const cur=K[i]; if(i===0 || lt-cur.t>=cur.d) return cur.p;
-  return blendPose(K[i-1].p, cur.p, easeIO((lt-cur.t)/cur.d));
+  return blendPose(K[i-1].p, cur.p, easeSpring((lt-cur.t)/cur.d));
 }
 const show=(e,on)=>{ if(e) e.style.display=on?'':'none'; };
 const setT=(e,tr)=>{ if(e) e.setAttribute('transform',tr); };
@@ -534,6 +556,8 @@ function updateRig(r, lt, t, talking){
   } else if(free>0.5){ P.a=[P.a[0]+1.5*Math.sin(t*1.3+sd), P.a[1]+2*Math.sin(t*1.1+sd)]; }
   if(ex==='angry' && TT){ nod+=0.7*Math.sin(t*47+sd); }          // trembling with rage
 
+  // anticipation: the body dips a touch as each new pose starts, then springs up
+  if(!cast.walk){ const K=r.keys; let ki=0; while(ki+1<K.length && K[ki+1].t<=lt) ki++; if(ki>0){ const u=(lt-K[ki].t)/0.32; if(u>=0&&u<1) bob+=Math.sin(Math.PI*u)*3.2; } }
   // breathing
   const br=Math.sin(t*2.1+sd)*1.1;
   setT(q.root, `translate(${r1(x)} ${r1(y)}) scale(${s*flip} ${s})`); q.root.setAttribute('opacity', op.toFixed(3));
@@ -659,6 +683,12 @@ const CHARACTER_LIST = {BARBARIK, KRISHNA, BRAHMIN, ARJUNA, BHIMA, YUDHISHTHIRA,
      shot.cam:{keys:[[t,x,y,zoom,'snap'?],...]}   keyframed camera (push-ins, tilts, whip to a face)
      shot.mood:'anger'|'sad'|'joy'|'hope'|'calm'|'shock'|'divine'   lighting + colour grade per emotion
      shot.tr:'fade'|'glow'|'whip'|'zoom'|'iris'|'wipe'|'flash'|'dip'|'cut'   cinematic transition INTO this shot
+   More (all optional):
+     cfg.opening:N                  first N shots = silent 0.8 s MONTAGE (give them art/cast/cam/tr, no line); voice starts at shot N+1
+     shot.calli:{lines,source,y,size,delay,gap,write,hold}   Sanskrit verse "written" in calligraphy (see calligraphy() in scenes.js)
+     Sound effects are added automatically (whoosh on whip/wipe, hit on flash, boom on dip + hook slam, shimmer on glow/iris,
+     riser on zoom, bell on a 'divine' shot, ticks + riser + boom on the montage). Extra ones: shot.sfx:[[secondsIntoShot,'gong',vol?],...]
+     names: whoosh boom hit gong bell shimmer tick riser.   cfg.sfx:false turns all SFX off.
    ===================================================================== */
 const LAYER_F={sky:.3,far:.6,mid:.85,art:1,near:1.4};
 function VIDEO(cfg){
@@ -697,9 +727,10 @@ function VIDEO(cfg){
   /* ---- build every shot once ---- */
   SH.forEach((sc,i)=>{
     const rigs=(sc.cast||[]).map(makeRig);
-    const title = sc.title ? big(W/2, sc.title.y||150, sc.title.size||60, sc.title.color||'#ffd25e', sc.title.text, sc.title.delay||0.5) : '';
+    const title = sc.title ? big(W/2, sc.title.y||150, (sc.title.size||50)*0.82, sc.title.color||'#ffd25e', sc.title.text, sc.title.delay||0.5) : '';
     const d=document.createElement('div'); d.className='scene';
-    const stage0=`${sc.art?sc.art():''}${rigs.map(r=>r.svg).join('')}${sc.front?sc.front():''}${title}`;
+    const calli = sc.calli ? calligraphy(sc.calli.lines, sc.calli) : '';
+    const stage0=`${sc.art?sc.art():''}${rigs.map(r=>r.svg).join('')}${sc.front?sc.front():''}${calli}${title}`;
     const layered=!!(sc.sky||sc.far||sc.mid||sc.near);
     d.innerHTML=`<svg viewBox="0 0 ${W} ${H}">`+(layered ?
       `<g class="L" data-f="${LAYER_F.sky}" data-dof="1.6">${sc.sky?sc.sky():''}</g><g class="L" data-f="${LAYER_F.far}" data-dof="1">${sc.far?sc.far():''}</g><g class="L" data-f="${LAYER_F.mid}" data-dof="0.5">${sc.mid?sc.mid():''}</g>`+
@@ -710,7 +741,7 @@ function VIDEO(cfg){
     sc.anims=[...d.querySelectorAll('[data-a]')].map(e=>{ const p=e.dataset.a.split(':'); return {e,type:p[0],a:p.slice(1).map(Number),ph:rnd()*6.28}; });
     if(NOTEXT) d.querySelectorAll('text').forEach(e=>e.style.display='none');
     // captions
-    sc.chunks= sc.nocap ? [] : captionChunks(sc.words, cfg.captionChars||24).map(ch=>{ const el=document.createElement('div'); el.className='chunk';
+    sc.chunks= sc.nocap ? [] : captionChunks(sc.words, cfg.captionChars||28).map(ch=>{ const el=document.createElement('div'); el.className='chunk';
       ch.forEach(w=>{ const s=document.createElement('span'); s.className='w'+(KEY.some(k=>tStrip(w.text).includes(k))?' hl':''); s.textContent=w.text; w.el=s; el.appendChild(s); el.appendChild(document.createTextNode(' ')); });
       cap.appendChild(el); return {el, words:ch, t:ch[0].t}; });
   });
@@ -730,6 +761,8 @@ function VIDEO(cfg){
         case 'rise': { const k=easeOut((lt-a[2])/a[1]); op=Math.min(1,k*1.4); tr=`translate(0 ${r1((1-k)*a[0])})`; break; }
         case 'slide':{ const k=easeOut((lt-a[3])/a[2]); tr=`translate(${r1((1-k)*a[0])} ${r1((1-k)*a[1])})`; op=lt<a[3]?0:1; break; }
         case 'walk': { const k=clamp01((lt-a[2])/a[1]), kk=1-Math.pow(1-k,1.6); tr=`translate(${r1((1-kk)*a[0])} ${k<1?r1(-Math.abs(Math.sin(lt*4.2))*4):0})`; break; }
+        case 'reveal':{ const k=easeIO(clamp01((lt-a[0])/a[1])); e.setAttribute('width',((a[3]-a[2])*k).toFixed(1)); break; }
+        case 'glint':{ const u=(lt-a[0])/a[1], k=easeIO(clamp01(u)); e.setAttribute('transform',`translate(${(a[2]+(a[3]-a[2])*k).toFixed(1)} 0)`); op=(u<0||u>=1)?0:Math.min(1,Math.min(u,1-u)*8); break; }
         case 'fadeout':{ op=1-clamp01((lt-a[0])/a[1]); break; }
         case 'fadein':{ op=clamp01((lt-a[0])/a[1]); break; }
         case 'orbit':{ const ang=(lt/a[4])*6.283, x=a[2]+a[0]*Math.cos(ang), y=a[3]+a[1]*Math.sin(ang), tang=Math.atan2(a[1]*Math.cos(ang),-a[0]*Math.sin(ang))*57.3; tr=`translate(${r1(x)} ${r1(y)}) rotate(${r1(tang)})`; op=Math.sin(ang)<-0.2?0.55:1; break; }
@@ -938,6 +971,7 @@ function VIDEO(cfg){
     if(active>=0) placeCap(SH[active].capTop||CAPTOP);
     SH.forEach((sc,i)=>{ let ag=-1; if(i===active) sc.chunks.forEach((c,ci)=>{ if(t>=c.t-0.05) ag=ci; });
       sc.chunks.forEach((c,ci)=>{ const on=ci===ag; c.el.style.display=on?'block':'none';
+        if(on){ const k=clamp01((t-c.t)/0.22), e=1-Math.pow(1-k,3); c.el.style.opacity=(0.2+0.8*e).toFixed(2); c.el.style.transform=`translateY(${((1-e)*16).toFixed(1)}px) scale(${(0.94+0.06*e).toFixed(3)})`; }
         if(on) c.words.forEach(w=>{ w.el.classList.toggle('on', t>=w.t && t<w.e); w.el.classList.toggle('said', t>=w.e); }); }); });
     updateHook(t); updateSting(t); updateCard(t);
     bar.style.width=(100*t/DURATION)+'%';
@@ -948,7 +982,7 @@ function VIDEO(cfg){
   const pm=$('prompter'), fmt=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
   function prompter(t, a){ if(a<0) return; const sc=SH[a], nx=SH[a+1];
     pm.querySelector('.meta').textContent=`शॉट ${a+1}/${SH.length}   •   ${fmt(t)} / ${fmt(DURATION)}`;
-    pm.querySelector('.now').textContent=sc.line; pm.querySelector('.next').textContent=nx?('अगला: '+nx.line):'— समाप्त —';
+    pm.querySelector('.now').textContent=sc.line||'… (शुरुआती झलक: बस चुप रहें)'; pm.querySelector('.next').textContent=nx?('अगला: '+nx.line):'— समाप्त —';
     pm.querySelector('.pbar i').style.width=(100*clamp01((t-sc.start)/sc.dur))+'%'; }
 
   /* ---- player ---- */
@@ -963,7 +997,20 @@ function VIDEO(cfg){
   $('toggle').onclick=e=>{ if(!paused){pausedAt=now();paused=true;e.target.textContent='Play';audio&&audio.pause();} else {t0=performance.now()-pausedAt*1000;paused=false;e.target.textContent='Pause';audio&&audio.play().catch(()=>{});} };
   pm.querySelector('.start button').onclick=()=>{ const st=pm.querySelector('.start'), ct=pm.querySelector('.count'); st.style.display='none'; let n=3; ct.textContent=n; ct.style.display='flex';
     const iv=setInterval(()=>{ n--; if(n>0) ct.textContent=n; else { clearInterval(iv); ct.style.display='none'; restart(); } },1000); };
-  window.__ENGINE={ music:cfg.music, duration:DURATION, intro:INTRO, narrEnd:NARR_END, W, H, shots:SH.map(s=>({start:s.start,end:s.end,line:s.line})), seek:t=>render(t), ready:document.fonts?document.fonts.ready:Promise.resolve() };
+  /* ---- sound-effect events (render.js turns these into audio with tools/sfx.js) ---- */
+  const OPEN=cfg.opening||0;
+  function sfxEvents(){ if(cfg.sfx===false) return []; const ev=[], add=(t,n,v)=>{ if(t>=0&&t<DURATION) ev.push({t:+t.toFixed(3),name:n,vol:v===undefined?1:v}); };
+    const TRSFX={whip:['whoosh',-1,1],wipe:['whoosh',-1,.8],flash:['hit',0,.9],dip:['boom',0,.55],glow:['shimmer',-.2,.8],iris:['shimmer',-.3,.9],zoom:['riser',-.9,.8]};
+    SH.forEach((sc,i)=>{ const tr=TRN[i];
+      if(i<OPEN){ add(sc.start,'tick',.9); if(i>0 && !tr && !sc.tr) add(sc.start-.12,'whoosh',.5); }
+      if(tr && TRSFX[tr.type] && i>0){ const m=TRSFX[tr.type]; add(sc.start+(m[1]===-1?-tr.d/2:m[1]===0?0:m[1]*tr.d),m[0],m[2]); }
+      if(sc.tr==='flash'||sc.tr==='dip'){ if(!tr) add(sc.start,sc.tr==='flash'?'hit':'boom',sc.tr==='flash'?.9:.55); }
+      if(sc.mood==='divine' && i>0 && SH[i-1].mood!=='divine') add(sc.start+.25,'bell',.8);
+      (sc.sfx||[]).forEach(e=>add(sc.start+e[0],e[1],e[2])); });
+    if(OPEN>0 && SH[OPEN]){ const vs=SH[OPEN].start; add(Math.max(0,vs-1.3),'riser',.8); add(vs,'boom',.8); }
+    if(HK) HK.words.forEach((w,k)=>add(hookImpact(w)-.02,k===0?'boom':'hit',k===0?1:.8));
+    return ev.sort((a,b)=>a.t-b.t); }
+  window.__ENGINE={ voiceAt:plan.voiceAt, sfx:sfxEvents(), music:cfg.music, duration:DURATION, intro:INTRO, narrEnd:NARR_END, W, H, shots:SH.map(s=>({start:s.start,end:s.end,line:s.line})), seek:t=>render(t), ready:document.fonts?document.fonts.ready:Promise.resolve() };
   window.__DUR=DURATION;
   if(!RENDER){ (function loop(){ const t=now(); if(!PROMPT && fixed===null && !paused && t>=DURATION-0.002){ t0=performance.now(); if(audio){audio.currentTime=0;audio.play().catch(()=>{});} }
       last=t; render(t); requestAnimationFrame(loop); })(); }
@@ -985,12 +1032,22 @@ const WIFE = (top,veil)=>({c:NAKSHATRA, with:{top, bottom:top, veil}});
 const W1=['#5a3a9a','#8a6ad0'], W2=['#2a7a6a','#5ac0a0'], W3=['#b8602a','#f0a050'], W4=['#2a4a9a','#6a8ae0'];
 
 VIDEO({
-  title:'चंद्रदेव की 27 पत्नियाँ', format:'short', target:72,
+  title:'चंद्रदेव की 27 पत्नियाँ', format:'short', target:74.4, opening:3,   // opening = 3 silent 0.8 s montage shots before the narration (2.4 s added to the target)
   handheld:0.6,   // no intro sting or end card (the owner does not want them)
   // big hook: "27" counts up and slams in, then "पत्नियाँ!" (words taken from the title)
   hook:{ at:0.2, hold:1.5, words:[ {text:'27', size:230, y:268, count:[1,27], delay:0}, {text:'पत्नियाँ!', size:104, y:376, delay:0.42} ] },
   keywords:['चंद्र','दक्ष','रोहिणी','27','नक्षत्र','शाप','महाभारत','क्षीण','कृष्ण पक्ष','शुक्ल पक्ष'],
   shots:[
+    /* M1-M3 — silent opening montage (0.8 s each): the moon, the king, the curse. Sound effects are added automatically. */
+    { line:'', cam:{from:[270,430,1.0],to:[270,400,1.45]}, fx:'stars', mood:'calm',
+      sky:()=> SKY(270,330,70,'full')+nakshatras(270,330,215,175,0), far:()=> FAR(800), art:()=> GND(800) },
+    { line:'', cam:{from:[270,500,1.5],to:[270,470,2.1]}, fx:'petals', tr:'whip', mood:'joy',
+      far:()=> palaceBack(810), mid:()=> palaceMid(810), art:()=> palaceFloor(810),
+      cast:[{c:CHANDRA, x:270, y:872, s:1.05, expr:'smile', acts:[[0,'bless']]}] },
+    { line:'', cam:{from:[270,470,1.6],to:[270,500,2.3]}, fx:'embers', tr:'flash', mood:'anger', shake:[0.05,0.5,6],
+      far:()=> palaceBack(810,'#4a0e16'), mid:()=> palaceMid(810), art:()=> palaceFloor(810),
+      cast:[{c:DAKSHA, x:270, y:875, s:1.0, expr:'angry', acts:[[0,'rage']]}] },
+
     /* 1 — hook */
     { line:'चंद्रमा की 27 पत्नियाँ हैं,', cam:{from:[270,520,1.0],to:[270,560,1.3]}, fx:'stars', mood:'calm', capTop:430,
       sky:()=> SKY()+nakshatras(270,330,215,175,0.05), far:()=> FAR(800), art:()=> GND(800),
@@ -1016,8 +1073,8 @@ VIDEO({
       sky:()=> `<rect width="540" height="960" fill="url(#skyDiv)"/><circle cx="270" cy="480" r="340" fill="url(#saf)" opacity=".4"/>`,
       mid:()=> fire(90,860,1)+fire(450,860,1),
       art:()=> parchment(270,490,490,330)+
-        A('pop:0.5',`<text x="270" y="380" text-anchor="middle" font-size="18" fill="#8a5a28" style="font-weight:700">— महाभारत, शल्य पर्व, अध्याय 35 —</text>`)+
-        verse(270,445,['दक्षस्य तनयास्तात','प्रादुरासन् विशाम्पते।','स सप्तविंशतिं कन्या','दक्षः सोमाय वै ददौ॥'],34,'#5a2a0a',0.8,1.3) },
+        A('pop:0.5',`<text x="270" y="380" text-anchor="middle" font-size="18" fill="#8a5a28" style="font-weight:700">— महाभारत, शल्य पर्व, अध्याय 35 —</text>`),
+      calli:{ lines:['दक्षस्य तनयास्तात','प्रादुरासन् विशाम्पते।','स सप्तविंशतिं कन्या','दक्षः सोमाय वै ददौ॥'], y:445, size:34, col:'#5a2a0a', glow:false, scrim:false, delay:0.8, gap:1.35, write:1.1 } },
 
     /* 5 — Daksha gives 27 daughters to Chandra */
     { line:'जिसका अर्थ है— दक्ष ने अपनी 27 पुत्रियों का विवाह चंद्रदेव के साथ किया,', cam:{from:[270,520,1.28],to:[270,500,1.0]}, fx:'petals', tr:'wipe', mood:'joy',
