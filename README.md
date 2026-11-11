@@ -20,3 +20,29 @@ style-test-long-form/        style test, 16:9
 
 - Open any `index.html` in Chrome. Add `?shot=N` to jump to one shot, `?notext=1` to hide captions, or `?clean=1` to hide the controls.
 - `.webm` files play in Chrome or VLC, not QuickTime.
+
+## The engine (how new videos are made)
+
+```
+engine/            shared code for every video
+  rig.js           jointed characters: poses, walking, blinking, talking mouth, props
+  characters.js    costumes: BARBARIK, KRISHNA, ARJUNA, BHIMA, DEVI, SHIVA, RAMA, SITA, ...
+  scenes.js        backgrounds: night sky, war field, hills, armies, divine light, ...
+  timing.js        splits the video into shots from the Hindi text length
+  core.js          player: camera moves, transitions, effects, word-by-word Hindi captions, prompter
+  fonts/           Mukta + Tiro Devanagari Hindi (SIL Open Font License)
+tools/build.js     turns <topic>/story.js into <topic>/index.html + <topic>/script.md
+```
+
+Each video is one short file, `<topic>-short-form/story.js`. It lists the shots: the Hindi line, the background, the characters and their poses, and the camera. See `engine-test-short-form/story.js` for an example.
+
+### Making one video, step by step
+
+1. **Story.** Start a new Kiro session. Say: "Make `<topic>-short-form`, about N seconds, story: ...". Kiro writes `story.js` with a Hindi line for every shot.
+2. **Build.** Run `node tools/build.js <topic>-short-form`. This writes `index.html` (the video) and `script.md` (your recording script).
+3. **Check.** Open `index.html` in Chrome. If something is wrong, send all the fixes in **one** message, using shot numbers (for example: "shot 4: Krishna should smile; shot 6 needs 1 more second").
+4. **Record your voice.** Open `index.html?prompter=1`. Start your phone or Mac recorder, press **Start**, and after the 3-2-1 count read each line as it appears. `script.md` has the same lines with their timings.
+5. **Render the MP4.** Run the render tool on your Mac (coming next). It produces a 1080×1920 MP4 with your voice.
+6. **Upload** to YouTube.
+
+URL options: `?shot=N` (jump to a shot), `?notext=1` (hide captions), `?clean=1` (hide buttons), `?prompter=1` (recording mode).
