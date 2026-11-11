@@ -5,8 +5,9 @@ Design space 540x960. Build: `node tools/build.js <topic>`. Style reference: `ch
 ## story.js
 ```js
 VIDEO({ title, format:'short', target:72 /*sec*/, keywords:['..'],   // keywords = highlighted caption words
-  intro:1.0, outro:3.6,            // brand sting before shot 1 / end card after last (not in target)
+  // intro / outro (brand sting + end card) exist but the owner does NOT want them: leave them out
   hook:{at:.6, hold:1.5, words:[{text,size,y,delay,count:[1,27],glow,rot,shake,ring}]},  // slam-in text, first 2s
+  music:'calm',                    // background music: 'calm' (default) | 'dark' (war, curse, sad) | 'bright' (victory, blessing) | false
   handheld:.6, captionTop:400, captionChars:24, minShot:2.4, pace:13, audio:'file',
   shots:[ SHOT, ... ] })
 ```
@@ -56,7 +57,7 @@ cut fade glow whip zoom iris (+`trAt`) wipe flash dip
 calm joy hope anger sad shock divine. Object form: `{base:'sad', vig:.3, ...}`
 
 ## Animation upgrades (new, all optional)
-parallax layers · keyframed camera/close-ups · head turns, gestures, secondary motion · `tears` · mood · cinematic `tr` · `hook` · `intro`/`outro` · handheld camera.
+parallax layers · keyframed camera/close-ups · head turns, gestures, secondary motion · `tears` · mood · cinematic `tr` · `hook` · handheld camera.
 
 ## URL options
 `?shot=N` `?t=12.5` `?notext=1` `?clean=1` `?prompter=1` `?render=1` (`__ENGINE.seek(t)`)
