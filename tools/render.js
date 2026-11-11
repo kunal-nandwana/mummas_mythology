@@ -11,6 +11,9 @@
    Voice clean-up: ON by default (made for a Boya BY-M1 lapel mic): rumble cut, hiss/noise reduction, mouth-click removal,
            warmth + presence EQ, de-esser, compressor, loudness -14 LUFS (YouTube), peak limiter.
            --raw = no clean-up.  --denoise 12 = noise reduction in dB (default 12; try 18 for a noisy room, 0 = off).
+   Music:  original background music from music/ (made automatically by tools/make-music.js). Choose per video with
+           music:'calm'|'dark'|'bright' (or false) in story.js, or --music dark / --nomusic / --musicvol 0.2.
+           It fades in and out and gets quieter whenever you speak.
    Output: <topic-folder>/<topic-folder>.mp4
    ===================================================================== */
 const fs=require('fs'), path=require('path'), {spawn, spawnSync}=require('child_process');
@@ -58,7 +61,7 @@ function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain()
   await page.goto('file://'+HTML+'?render=1'+(opt('notext')?'&notext=1':''));
   await page.waitForFunction(()=>window.__ENGINE); await page.evaluate(()=>window.__ENGINE.ready); await page.waitForTimeout(400);
   if(errs.length){ console.error('✗ Page error:', errs[0]); process.exit(1); }
-  const {duration, shots}=await page.evaluate(()=>({duration:window.__ENGINE.duration, shots:window.__ENGINE.shots}));
+  const {duration, shots, music}=await page.evaluate(()=>({duration:window.__ENGINE.duration, shots:window.__ENGINE.shots, music:window.__ENGINE.music}));
   const N=Math.ceil(duration*FPS), out=path.join(DIR,topic+'.mp4');
 
   let shift=0, audioArgs=[], vf=null;
@@ -71,11 +74,24 @@ function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain()
     audioArgs = shift>=0 ? ['-ss',shift.toFixed(3),'-i',voice] : ['-i',voice];
   } else console.log('♪ no voice file found: rendering a silent video (put voice.m4a in the topic folder to add it)');
 
+  // ---- background music (original, made by tools/make-music.js): looped, faded, and ducked under your voice ----
+  const wantMusic = opt('nomusic') ? false : (opt('music') && opt('music')!==true ? opt('music') : (music===undefined ? 'calm' : music));
+  let musicFile=null;
+  if(wantMusic){ musicFile=path.join(ROOT,'music',wantMusic+'.wav');
+    if(!fs.existsSync(musicFile)){ try{ require('./make-music').makeTrack(wantMusic); }catch(e){ console.log('♫ could not make music "'+wantMusic+'" (calm | dark | bright): rendering without it'); musicFile=null; } }
+    if(musicFile) console.log(`♫ background music: ${wantMusic}${voice&&audioArgs.length?' (ducks under your voice)':''}`); }
+  const hasVoice=audioArgs.length>0, mIn=hasVoice?2:1, vol=+(opt('musicvol')||0.2), D=duration.toFixed(2);
+  const musicArgs = musicFile ? ['-stream_loop','-1','-i',musicFile] : [];
+  const mChain = `[${mIn}:a]volume=${vol},afade=t=in:d=1.5,afade=t=out:st=${Math.max(0,duration-3).toFixed(2)}:d=3`;
+  const vChain = hasVoice ? [vf, shift<0?`adelay=${Math.round(-shift*1000)}:all=1`:null, 'apad'].filter(Boolean).join(',') : null;
+  let audioOut=[];
+  if(hasVoice && musicFile) audioOut=['-filter_complex', `[1:a]${vChain},asplit=2[v][vs];${mChain}[m];[m][vs]sidechaincompress=threshold=0.03:ratio=8:attack=20:release=500[md];[v][md]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.89[a]`,'-map','0:v','-map','[a]','-c:a','aac','-b:a','192k'];
+  else if(hasVoice) audioOut=['-af',vChain,'-map','0:v','-map','1:a','-c:a','aac','-b:a','192k'];
+  else if(musicFile) audioOut=['-filter_complex',`${mChain}[a]`,'-map','0:v','-map','[a]','-c:a','aac','-b:a','192k'];
+  else audioOut=['-map','0:v'];
   const ff=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error',
-    '-f','image2pipe','-framerate',String(FPS),'-c:v','mjpeg','-i','-', ...audioArgs,
-    ...(audioArgs.length? ['-af',[vf, shift<0?`adelay=${Math.round(-shift*1000)}:all=1`:null, 'apad'].filter(Boolean).join(',')] : []),
-    '-map','0:v', ...(audioArgs.length?['-map','1:a','-c:a','aac','-b:a','192k']:[]),
-    '-c:v','libx264','-preset','medium','-crf','18','-pix_fmt','yuv420p','-r',String(FPS),'-t',duration.toFixed(3),'-movflags','+faststart', out],{stdio:['pipe','inherit','inherit']});
+    '-f','image2pipe','-framerate',String(FPS),'-c:v','mjpeg','-i','-', ...audioArgs, ...musicArgs, ...audioOut,
+    '-c:v','libx264','-preset','medium','-crf','18','-pix_fmt','yuv420p','-r',String(FPS),'-t',D,'-movflags','+faststart', out],{stdio:['pipe','inherit','inherit']});
   const ffDone=new Promise(r=>ff.on('close',code=>r(code)));
   const t0=Date.now();
   for(let i=0;i<N;i++){

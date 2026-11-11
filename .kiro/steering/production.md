@@ -33,4 +33,4 @@ Targets: 30 Shorts + 4 long videos a month, with his own voice. **Credits matter
 Depth layers + parallax, keyframed camera / face close-ups, head turns + secondary motion + gestures, mood per emotion, cinematic transitions, hook text, intro sting (`intro`) and end card (`outro`). Use them in new stories (options are listed in `engine/API.md`). `chandra-27-wives-short-form/` is the reference.
 
 ## Planned next work
-- Voice clean-up is DONE in `render.js` (on by default; `--raw` skips it; `--denoise N`). User records with a Boya BY-M1. Still to do: sync shots to the real voice using pauses; background music from `music/` with ducking; automatic SFX; voice-driven mouth.
+- Voice clean-up is DONE in `render.js` (on by default; `--raw` skips it; `--denoise N`). User records with a Boya BY-M1. Background music is DONE too: `tools/make-music.js` makes original loops (`music/calm|dark|bright.wav`, git-ignored, made on demand); choose with `music:` in story.js; render.js loops, fades and ducks it. Still to do: sync shots to the real voice using pauses; background music from `music/` with ducking; automatic SFX; voice-driven mouth.

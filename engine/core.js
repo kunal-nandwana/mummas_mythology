@@ -319,7 +319,7 @@ function VIDEO(cfg){
   $('toggle').onclick=e=>{ if(!paused){pausedAt=now();paused=true;e.target.textContent='Play';audio&&audio.pause();} else {t0=performance.now()-pausedAt*1000;paused=false;e.target.textContent='Pause';audio&&audio.play().catch(()=>{});} };
   pm.querySelector('.start button').onclick=()=>{ const st=pm.querySelector('.start'), ct=pm.querySelector('.count'); st.style.display='none'; let n=3; ct.textContent=n; ct.style.display='flex';
     const iv=setInterval(()=>{ n--; if(n>0) ct.textContent=n; else { clearInterval(iv); ct.style.display='none'; restart(); } },1000); };
-  window.__ENGINE={ duration:DURATION, intro:INTRO, narrEnd:NARR_END, W, H, shots:SH.map(s=>({start:s.start,end:s.end,line:s.line})), seek:t=>render(t), ready:document.fonts?document.fonts.ready:Promise.resolve() };
+  window.__ENGINE={ music:cfg.music, duration:DURATION, intro:INTRO, narrEnd:NARR_END, W, H, shots:SH.map(s=>({start:s.start,end:s.end,line:s.line})), seek:t=>render(t), ready:document.fonts?document.fonts.ready:Promise.resolve() };
   window.__DUR=DURATION;
   if(!RENDER){ (function loop(){ const t=now(); if(!PROMPT && fixed===null && !paused && t>=DURATION-0.002){ t0=performance.now(); if(audio){audio.currentTime=0;audio.play().catch(()=>{});} }
       last=t; render(t); requestAnimationFrame(loop); })(); }
