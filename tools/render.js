@@ -8,6 +8,9 @@
    Sync:   the silence at the start of your recording (recorder start + 3-2-1 count) is detected
            and cut automatically, so your first word lands on shot 1. Use --offset to nudge
            (+0.3 = voice 0.3 s later, -0.3 = earlier).
+   Voice clean-up: ON by default (made for a Boya BY-M1 lapel mic): rumble cut, hiss/noise reduction, mouth-click removal,
+           warmth + presence EQ, de-esser, compressor, loudness -14 LUFS (YouTube), peak limiter.
+           --raw = no clean-up.  --denoise 12 = noise reduction in dB (default 12; try 18 for a noisy room, 0 = off).
    Output: <topic-folder>/<topic-folder>.mp4
    ===================================================================== */
 const fs=require('fs'), path=require('path'), {spawn, spawnSync}=require('child_process');
@@ -30,6 +33,24 @@ else if(!path.isAbsolute(voice)) voice=fs.existsSync(voice)?path.resolve(voice):
 function leadSilence(file){ const r=spawnSync('ffmpeg',['-hide_banner','-i',file,'-af','silencedetect=noise=-38dB:d=0.35','-f','null','-'],{encoding:'utf8'});
   const m=/silence_start: (-?[\d.]+)[\s\S]*?silence_end: ([\d.]+)/.exec(r.stderr||''); return (m && +m[1]<=0.05) ? +m[2] : 0; }
 
+// ---- voice clean-up chain (plain ffmpeg filters, nothing extra to install) ----
+function voiceChain(){ const dn=opt('denoise')===null?12:+opt('denoise');
+  return ['highpass=f=80',                                   // rumble, handling noise, AC hum
+    ...(dn>0?[`afftdn=nr=${dn}:nf=-35:tn=1`]:[]),             // steady hiss / room noise
+    'adeclick=w=55:o=75',                                    // mouth clicks
+    'equalizer=f=250:t=q:w=1:g=-2',                          // lapel mics sound boxy: cut mud
+    'equalizer=f=3500:t=q:w=1:g=3',                          // presence: clear words
+    'highshelf=f=9000:g=2',                                  // air
+    'deesser=i=0.4:m=0.5:f=0.5',                             // soften harsh "s" sounds
+    'acompressor=threshold=-20dB:ratio=3:attack=10:release=150:makeup=3'].join(','); }   // even volume
+function measureLoud(file,chain){ const r=spawnSync('ffmpeg',['-hide_banner','-i',file,'-af',chain+',loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json','-f','null','-'],{encoding:'utf8'});
+  const m=/\{[^{}]*"input_i"[^{}]*\}/.exec(r.stderr||''); try{ return m?JSON.parse(m[0]):null; }catch(e){ return null; } }
+function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain(), L=measureLoud(file,chain);
+  const ln = L ? `loudnorm=I=-14:TP=-1.5:LRA=11:measured_I=${L.input_i}:measured_TP=${L.input_tp}:measured_LRA=${L.input_lra}:measured_thresh=${L.input_thresh}:offset=${L.target_offset}:linear=true`
+               : 'loudnorm=I=-14:TP=-1.5:LRA=11';
+  console.log(L?`♪ voice clean-up on: loudness ${(+L.input_i).toFixed(1)} → -14 LUFS`:'♪ voice clean-up on (one-pass loudness)');
+  return chain+','+ln+',alimiter=limit=0.89,aresample=48000'; }
+
 (async()=>{
   const browser=await chromium.launch();
   const page=await browser.newPage({viewport:{width:540,height:960}, deviceScaleFactor:SCALE});
@@ -40,18 +61,19 @@ function leadSilence(file){ const r=spawnSync('ffmpeg',['-hide_banner','-i',file
   const {duration, shots}=await page.evaluate(()=>({duration:window.__ENGINE.duration, shots:window.__ENGINE.shots}));
   const N=Math.ceil(duration*FPS), out=path.join(DIR,topic+'.mp4');
 
-  let shift=0, audioArgs=[];
+  let shift=0, audioArgs=[], vf=null;
   if(voice && fs.existsSync(voice)){
     const lead=leadSilence(voice), off=+(opt('offset')||0);
     const first = shots.length ? shots[0].start : 0;   // intro sting length: the voice starts when shot 1 starts
     shift = lead - 0.15 - first - off;      // seconds to cut from the start of the recording (negative = add delay)
     console.log(`♪ voice: ${path.basename(voice)}  (speech starts at ${lead.toFixed(2)}s → aligned to shot 1${first?`, after the ${first.toFixed(1)}s intro`:''}${off?`, offset ${off}s`:''})`);
+    vf = voiceFilter(voice);
     audioArgs = shift>=0 ? ['-ss',shift.toFixed(3),'-i',voice] : ['-i',voice];
   } else console.log('♪ no voice file found: rendering a silent video (put voice.m4a in the topic folder to add it)');
 
   const ff=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error',
     '-f','image2pipe','-framerate',String(FPS),'-c:v','mjpeg','-i','-', ...audioArgs,
-    ...(audioArgs.length? (shift<0?['-af',`adelay=${Math.round(-shift*1000)}:all=1,apad`]:['-af','apad']) : []),
+    ...(audioArgs.length? ['-af',[vf, shift<0?`adelay=${Math.round(-shift*1000)}:all=1`:null, 'apad'].filter(Boolean).join(',')] : []),
     '-map','0:v', ...(audioArgs.length?['-map','1:a','-c:a','aac','-b:a','192k']:[]),
     '-c:v','libx264','-preset','medium','-crf','18','-pix_fmt','yuv420p','-r',String(FPS),'-t',duration.toFixed(3),'-movflags','+faststart', out],{stdio:['pipe','inherit','inherit']});
   const ffDone=new Promise(r=>ff.on('close',code=>r(code)));

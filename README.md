@@ -67,4 +67,6 @@ URL options: `?shot=N` (jump to a shot), `?notext=1` (hide captions), `?clean=1`
 
 **For every video:** double-click **`make-video.command`**. It gets the latest videos from GitHub, asks which video, and makes the MP4 (about 3–6 minutes on an M1).
 
+**Your voice is cleaned automatically** (made for the Boya M1): rumble and hiss removed, mouth clicks removed, warmer and clearer tone, harsh "s" softened, even volume, and loudness set to YouTube's level (-14 LUFS). To skip it add `--raw`; for a noisy room add `--denoise 18`.
+
 Manual commands, if you prefer: `node tools/build.js <topic>` and `node tools/render.js <topic> [--voice file.m4a] [--offset 0.3]`.
