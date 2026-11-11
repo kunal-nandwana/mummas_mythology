@@ -13,7 +13,17 @@ html,body{margin:0;height:100%;background:#000;overflow:hidden}
 .scene{position:absolute;inset:0;opacity:0;display:none;transform-origin:0 0;will-change:transform,opacity}
 .scene svg,#over{position:absolute;inset:0;width:540px;height:960px}
 canvas{position:absolute;inset:0;pointer-events:none;z-index:5}
+#scenes{position:absolute;inset:0;z-index:1}
 #over{z-index:6;pointer-events:none}
+/* mood: colour wash, coloured light and vignette per emotion (core.js applyMood) */
+#mood{position:absolute;inset:0;z-index:5;pointer-events:none}
+#mood i{position:absolute;inset:0;display:block}
+#mood i:nth-child(2){mix-blend-mode:screen}
+#trfx,#hook,#sting,#card{position:absolute;inset:0;width:540px;height:960px;pointer-events:none}
+#trfx{z-index:7}
+#card{z-index:9;display:none}
+#sting{z-index:10}
+#hook{z-index:11;display:none}
 #flash{position:absolute;inset:0;z-index:7;opacity:0;pointer-events:none}
 #shade{position:absolute;left:0;right:0;top:320px;height:270px;z-index:7;pointer-events:none;
   background:linear-gradient(transparent,rgba(5,3,12,.55) 35%,rgba(5,3,12,.55) 65%,transparent)}
@@ -28,7 +38,7 @@ canvas{position:absolute;inset:0;pointer-events:none;z-index:5}
 #cap .w.hl{color:#ffb347}
 #cap .w.hl.on{color:#ff8a2a}
 svg text{font-family:'Mukta','Kohinoor Devanagari','Noto Sans Devanagari',sans-serif;font-weight:800}
-#bar{position:absolute;left:0;bottom:0;height:4px;background:#e0453a;width:0;z-index:9}
+#bar{position:absolute;left:0;bottom:0;height:4px;background:#e0453a;width:0;z-index:12}
 #ui{position:fixed;top:10px;left:10px;z-index:20;display:flex;gap:8px}
 #ui button{background:#222c;color:#fff;border:1px solid #555;border-radius:6px;padding:6px 12px;cursor:pointer;font:14px sans-serif}
 body.clean #ui,body.clean #bar{display:none}
@@ -61,6 +71,8 @@ body.prompt #ui{top:auto;bottom:10px}
    - cfg.target (seconds) rescales the flexible shots to hit the total.
    - shot.dur fixes one shot's length exactly.
    - cfg.minShot (default 2.4s) is the shortest any shot can be.
+   - cfg.intro (seconds) puts the channel sting BEFORE shot 1: every shot starts that much later.
+   - cfg.outro (seconds) adds the end card AFTER the last shot. Neither counts towards cfg.target.
    ===================================================================== */
 function tStrip(s){ return s.replace(/[.,!?'"‘’“”—\-–…:;।()]/g,''); }
 function tWords(line){ return (line||'').split(/\s+/).filter(w=>w && !/^[—\-–…]+$/.test(w)); }
@@ -82,7 +94,8 @@ function planTiming(cfg){
       scale = Math.max(0.4, (cfg.target-fixed)/flex);
     }
   }
-  let T=0; const shots=[];
+  const intro = cfg.intro||0, outro = cfg.outro||0;
+  let T=intro; const shots=[];
   P.forEach((p,i)=>{
     const dur = p.fixed || Math.max(minShot, p.raw*scale);
     const start=T, end=T+dur; T=end;
@@ -91,7 +104,7 @@ function planTiming(cfg){
     const words = p.w.map((w,k)=>{ const o={text:w, t:start+lead+acc/total*speak, e:0}; acc+=p.wt[k]; o.e=start+lead+acc/total*speak; return o; });
     shots.push({i, start, end, dur, line: cfg.shots[i].line||'', words, speakEnd: start+lead+speak});
   });
-  return {shots, duration:T};
+  return {shots, duration:T+outro, intro, outro, narrEnd:T};
 }
 
 /* Split a line's words into caption chunks (<= maxChars letters each). */
@@ -239,15 +252,20 @@ function earth(x,y,r){ return `<circle cx="${x}" cy="${y}" r="${r*1.5}" fill="#4
   `<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="#bfe0ff" stroke-opacity=".5" stroke-width="2"/>`; }
 // moon going round a centre once every `period` seconds (radius r)
 function orbitMoon(cx,cy,r,period,mr){ return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#f3ecd2" stroke-opacity=".35" stroke-width="2"/>`+A(`spin:${period}:${cx}:${cy}`, phaseMoon(cx+r,cy,mr||16,'full')); }
-// royal palace interior (warm), pillars + arches + hanging lamps; floor at y
-function palace(y,tone){ const w=tone||'#3a1a2c', p='#58283e', g='url(#gold)'; let s=`<rect width="540" height="960" fill="${w}"/><circle cx="270" cy="${y-240}" r="360" fill="url(#saf)" opacity=".35"/>`;
-  for(let i=0;i<4;i++){ const x=-20+i*190; s+=`<path d="M${x+20} ${y-90} L${x+20} ${y-420} Q${x+95} ${y-560} ${x+170} ${y-420} L${x+170} ${y-90}Z" fill="#24101c" opacity=".75"/>`; }
-  for(let i=0;i<5;i++){ const x=-10+i*137; s+=`<rect x="${x-14}" y="${y-470}" width="28" height="${470}" fill="${p}"/><rect x="${x-20}" y="${y-480}" width="40" height="14" fill="${g}"/><rect x="${x-20}" y="${y-14}" width="40" height="14" fill="${g}"/><rect x="${x-14}" y="${y-470}" width="8" height="456" fill="#000" opacity=".18"/>`; }
-  s+=`<rect y="${y-500}" width="540" height="22" fill="${g}" opacity=".85"/>`;
+// royal palace interior (warm), pillars + arches + hanging lamps; floor at y.
+// For parallax the palace comes in three depth layers: palaceBack (wall, glow, arches), palaceMid (pillars, cornice, lamps), palaceFloor.
+function palaceBack(y,tone){ const w=tone||'#3a1a2c'; let s=`<rect x="-60" y="-60" width="660" height="1080" fill="${w}"/><circle cx="270" cy="${y-240}" r="360" fill="url(#saf)" opacity=".35"/>`;
+  for(let i=-1;i<5;i++){ const x=-20+i*190; s+=`<path d="M${x+20} ${y-90} L${x+20} ${y-420} Q${x+95} ${y-560} ${x+170} ${y-420} L${x+170} ${y-90}Z" fill="#24101c" opacity=".75"/>`; }
+  return s; }
+function palaceMid(y){ const p='#58283e', g='url(#gold)'; let s='';
+  for(let i=-1;i<6;i++){ const x=-10+i*137; s+=`<rect x="${x-14}" y="${y-470}" width="28" height="${470}" fill="${p}"/><rect x="${x-20}" y="${y-480}" width="40" height="14" fill="${g}"/><rect x="${x-20}" y="${y-14}" width="40" height="14" fill="${g}"/><rect x="${x-14}" y="${y-470}" width="8" height="456" fill="#000" opacity=".18"/>`; }
+  s+=`<rect x="-60" y="${y-500}" width="660" height="22" fill="${g}" opacity=".85"/>`;
   [135,405].forEach(x=>{ s+=`<line x1="${x}" y1="${y-478}" x2="${x}" y2="${y-400}" stroke="#c99a3a" stroke-width="1.5"/>`+A('flick:'+(4+rnd()*3).toFixed(2),`<circle cx="${x}" cy="${y-392}" r="34" fill="url(#saf)"/>`)+`<path d="M${x-10} ${y-400} L${x+10} ${y-400} L${x} ${y-386}Z" fill="${g}"/>`; });
-  s+=`<path d="M0 ${y} L540 ${y} L540 960 L0 960Z" fill="#1e0c16"/>`;
-  for(let i=0;i<8;i++) s+=`<line x1="${270+(i-3.5)*40}" y1="${y}" x2="${270+(i-3.5)*160}" y2="960" stroke="#3a1a2a" stroke-width="2"/>`;
-  return s+`<rect y="${y}" width="540" height="6" fill="${g}" opacity=".6"/>`; }
+  return s; }
+function palaceFloor(y){ const g='url(#gold)'; let s=`<path d="M-60 ${y} L600 ${y} L600 1020 L-60 1020Z" fill="#1e0c16"/>`;
+  for(let i=-2;i<10;i++) s+=`<line x1="${270+(i-3.5)*40}" y1="${y}" x2="${270+(i-3.5)*160}" y2="1020" stroke="#3a1a2a" stroke-width="2"/>`;
+  return s+`<rect x="-60" y="${y}" width="660" height="6" fill="${g}" opacity=".6"/>`; }
+function palace(y,tone){ return palaceBack(y,tone)+palaceMid(y)+palaceFloor(y); }
 // palm-leaf manuscript (pothi), centred at x,y
 function pothi(x,y,s){ let l=''; for(let i=0;i<6;i++) l+=`<line x1="${-150}" y1="${-22+i*9}" x2="${150}" y2="${-22+i*9}" stroke="#7a5228" stroke-width="1.6" opacity=".55" stroke-dasharray="${8+i*3} 5"/>`;
   return `<g transform="translate(${x} ${y}) scale(${s||1})"><rect x="-176" y="-44" width="352" height="88" rx="10" fill="#4a2c18"/><rect x="-168" y="-38" width="336" height="76" rx="8" fill="#e8cf96"/><rect x="-168" y="-38" width="336" height="76" rx="8" fill="url(#paper)" opacity=".2"/>${l}`+
@@ -271,8 +289,18 @@ function verse(x,y,lines,size,col,delay,gap){ return lines.map((t,i)=>A(`pop:${(
      f/k = front/back leg  [hip, knee]        (+hip = forward, +knee = bend back)
      head (+ = look up), lean (+ = bow forward), drop (body lowered, kneel = 72)
      draw (0..1 bowstring pull), kt (back-foot extra rotation)
+     turn (0..1 head turn: 0 = faces ahead, 1 = looks the other way over the shoulder)
+
+   Acting upgrades (animation pack):
+     - head turns (pose key `turn`, or the poses lookAway / lookBack)
+     - secondary motion: earrings, pendant, garland, veil, sash, skirt, hair and cape
+       swing with a short time-lag behind the body (stateless, so seek() works)
+     - talking characters nod and gesture with their hands
+     - expression adds a body attitude (sad slumps, angry leans in, ...)
+     - detailed face for close-ups: ear, iris + highlight, tears, furrowed brow,
+       clenched teeth, blush, rim light from the scene mood
    ===================================================================== */
-const POSE0 = {a:[6,10], b:[-6,8], f:[3,3], k:[-3,3], head:0, lean:0, drop:0, draw:0, kt:0, hand:'fist', handB:'fist'};
+const POSE0 = {a:[6,10], b:[-6,8], f:[3,3], k:[-3,3], head:0, lean:0, drop:0, draw:0, kt:0, turn:0, hand:'fist', handB:'fist'};
 const KNEEL = {f:[88,92], k:[2,92], drop:72, kt:160};
 const POSES = {
   stand:{}, relax:{a:[3,4], b:[-3,4]},
@@ -291,6 +319,16 @@ const POSES = {
   shoulder:{a:[24,128]},              // weapon resting on shoulder
   pranam:{lean:16, head:-12, a:[22,64], b:[18,68], hand:'namaste', handB:'namaste'},
   lookUp:{head:18}, lookDown:{head:-14},
+  // acting gestures (animation pack)
+  lookAway:{turn:1, head:-4}, lookBack:{turn:1, head:2, lean:-3},
+  explain:{a:[52,62], b:[-4,10], hand:'open', lean:3, head:3},
+  plead:{a:[60,34], b:[56,38], hand:'open', handB:'open', lean:10, head:8},
+  accuse:{a:[104,0], b:[-10,30], hand:'open', lean:8, head:5},
+  rage:{a:[70,100], b:[62,104], lean:10, head:8},
+  recoil:{a:[24,80], b:[34,90], hand:'open', handB:'open', lean:-14, head:10},
+  weep:{a:[44,150], b:[-4,10], lean:9, head:-20},
+  grief:{a:[34,120], b:[26,124], hand:'open', handB:'open', lean:12, head:-22},
+  hold:{a:[34,100], b:[28,104], hand:'open', handB:'open', lean:2, head:6},
   kneel:KNEEL,
   kneelPray:Object.assign({}, KNEEL, {a:[28,112], b:[22,118], hand:'namaste', handB:'namaste'}),
   kneelOffer:Object.assign({}, KNEEL, {a:[58,26], b:[52,30], hand:'open', handB:'open', lean:6}),
@@ -371,24 +409,36 @@ function makeRig(cast){
 
   /* ---- head ---- */
   let head='';
-  if(c.veil) head+=`<path d="M-18 -292 C-40 -270 -50 -220 -56 -150 L-30 -150 C-28 -210 -20 -250 -8 -276Z" fill="${c.veil}"/>`;
+  if(c.veil) head+=`<g ${J('veilB')}><path d="M-18 -292 C-40 -270 -50 -220 -56 -150 L-30 -150 C-28 -210 -20 -250 -8 -276Z" fill="${c.veil}"/><path d="M-30 -150 C-28 -210 -20 -250 -8 -276 L-14 -280 C-22 -246 -26 -206 -28 -150Z" fill="#000" opacity=".16"/></g>`;
   if(c.hair==='long' && !c.veil) head+=`<g ${J('hair')}><path d="M-12 -272 C-30 -262 -34 -230 -40 -196 L-22 -204 C-20 -226 -14 -244 -6 -256Z" fill="${dark}"/></g>`;
   if(c.hair==='bun') head+=`<circle cx="-16" cy="-280" r="11" fill="${dark}"/>`;
   if(c.head==='jata') head+=`<g ${J('hair')}><path d="M-16 -272 C-46 -262 -52 -220 -58 -170 L-40 -180 C-36 -220 -28 -246 -8 -258Z" fill="${dark}"/></g><path d="M-14 -284 C-18 -320 10 -330 18 -300 L16 -286Z" fill="${dark}"/><path d="M2 -318 a12 12 0 1 0 10 -10 a9 9 0 1 1 -10 10Z" fill="#f3ecd2"/>`;
   head+=`<rect x="-6" y="-254" width="14" height="20" fill="${skin}"/><path d="M-6 -254 L8 -254 L8 -234 L-6 -234Z" fill="#000" opacity=".15"/>`;
   head+=`<path d="M-14 -262 C-16 -286 0 -294 14 -288 C22 -284 24 -276 24 -270 L32 -260 L24 -258 C24 -252 22 -248 16 -246 L-6 -244Z" fill="${skin}"/>`;
+  // face detail (visible in close-ups): jaw shade, nose bridge light, cheek blush, ear
+  head+=`<path d="M-6 -246 C4 -244 14 -246 20 -250 L22 -248 C16 -243 4 -240 -6 -238Z" fill="#000" opacity=".12"/>`+
+        `<path d="M22 -268 L30 -261" stroke="#fff" stroke-opacity=".22" stroke-width="1.4" stroke-linecap="round" fill="none"/>`+
+        `<path d="M24 -258 q3 1.5 0 3" stroke="#000" stroke-opacity=".28" stroke-width="1.2" fill="none"/>`+
+        `<ellipse ${J('blush')} cx="12" cy="-259" rx="6" ry="3.6" fill="#e0556a" opacity="0"/>`+
+        `<path d="M-2 -273 q-6 4 -3 14 q3 5 7 2" fill="${shade(skin,-.08)}" stroke="${shade(skin,-.3)}" stroke-width="1.3"/><path d="M-2 -268 q-2 5 1 8" stroke="${shade(skin,-.35)}" stroke-width="1" fill="none"/>`;
   if(c.head!=='turban' && !c.veil && c.head!=='jata' && c.hair!=='none') head+=`<path d="M-16 -268 C-20 -292 0 -300 18 -290 L14 -280 C2 -284 -8 -282 -12 -262Z" fill="${dark}"/>`;
   if(c.beard) head+=`<path d="M6 -248 Q26 -246 22 -222 Q12 -210 2 -222 Q-4 -236 -2 -246Z" fill="${c.beard==='white'?'#e7e1d4':dark}"/>`;
   // eye (almond, kajal line) with blink
-  head+=`<g ${J('eye')}><path d="M9 -270.5 Q15 -275.5 21.5 -270 Q15 -267.4 9 -270.5Z" fill="#f3ead8"/><circle ${J('pupil')} cx="16.8" cy="-270.6" r="2" fill="#1a0f08"/><path d="M8.5 -271 Q15 -276.5 22 -270" stroke="#140a06" stroke-width="1.7" fill="none"/></g>`;
+  head+=`<g ${J('eye')}><path ${J('sclera')} d="M9 -270.5 Q15 -275.5 21.5 -270 Q15 -267.4 9 -270.5Z" fill="#f3ead8"/><circle ${J('pupil')} cx="16.8" cy="-270.6" r="2.1" fill="#3b2415"/><circle cx="16.9" cy="-270.6" r="1.1" fill="#0d0705"/><circle cx="17.7" cy="-271.4" r=".75" fill="#fff"/><path d="M8.5 -271 Q15 -276.5 22 -270" stroke="#140a06" stroke-width="1.7" fill="none"/>`+
+        (c.skirt?`<path d="M21.5 -270 l3.4 -2.6" stroke="#140a06" stroke-width="1.5" stroke-linecap="round"/>`:'')+`<path ${J('wet')} d="M10.5 -267.6 Q15 -266 20 -268" stroke="#fff" stroke-width="1" fill="none" opacity="0"/></g>`;
   head+=`<path ${J('lid')} d="M9 -270.5 q6.5 3 12.5 0" stroke="#140a06" stroke-width="2" fill="none" style="display:none"/>`;
   head+=`<path ${J('brow')} d="M8 -278 Q15 -281.5 22.5 -277.5" stroke="${c.beard==='white'?'#d9d2c4':dark}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
+  head+=`<g ${J('furrow')} style="display:none"><path d="M10 -283 q2 -2 1 -5" stroke="#000" stroke-opacity=".38" stroke-width="1.3" fill="none" stroke-linecap="round"/><path d="M14 -284 q2 -2 1.4 -5" stroke="#000" stroke-opacity=".32" stroke-width="1.1" fill="none" stroke-linecap="round"/></g>`;
   // mouth variants
   head+=`<path ${J('m_neutral')} d="M17 -251 q4 0 7 -1" stroke="#3a1a10" stroke-width="2" fill="none"/>`+
         `<path ${J('m_smile')} d="M16.5 -252.5 q4 3.5 8.5 -1" stroke="#3a1a10" stroke-width="2" fill="none" style="display:none"/>`+
         `<path ${J('m_sad')} d="M17 -250 q4 -2.5 7.5 0" stroke="#3a1a10" stroke-width="2" fill="none" style="display:none"/>`+
-        `<ellipse ${J('m_open')} cx="21" cy="-251" rx="3" ry="1.5" fill="#3a1010" style="display:none"/>`;
+        `<ellipse ${J('m_open')} cx="21" cy="-251" rx="3" ry="1.5" fill="#3a1010" style="display:none"/>`+
+        `<path ${J('m_teeth')} d="M18.4 -252.4 h5.4" stroke="#f6f0e0" stroke-width="1.5" stroke-linecap="round" style="display:none"/>`+
+        `<g ${J('tear')} style="display:none"><path d="M0 0 q-2.2 3.6 0 5.2 q2.2 -1.6 0 -5.2Z" fill="#cfe8ff" stroke="#fff" stroke-opacity=".6" stroke-width=".5"/></g>`+
+        `<g ${J('tear2')} style="display:none"><path d="M0 0 q-2 3.2 0 4.6 q2 -1.4 0 -4.6Z" fill="#cfe8ff" stroke="#fff" stroke-opacity=".6" stroke-width=".5"/></g>`;
   if(c.mus) head+=`<path d="M12 -254 q8 -4 15 1" stroke="${dark}" stroke-width="3.2" fill="none" stroke-linecap="round"/>`;
+  head+=`<path d="M18 -289 C22 -285 24 -278 24 -270 L32 -260 L24 -258 C24 -252 22 -248 16 -246" fill="none" style="stroke:var(--rimc,#fff);stroke-opacity:var(--rimo,0);stroke-width:1.6" stroke-linecap="round"/>`;
   if(c.tilak) head+=`<path d="M20 -287 l1 7" stroke="#d63a2a" stroke-width="2.2"/>`;
   if(c.head==='turban') head+=`<path d="M-22 -270 C-24 -296 2 -306 24 -290 C30 -284 28 -276 22 -276 C10 -280 -4 -282 -18 -264Z" fill="${c.turban}"/><circle cx="-22" cy="-286" r="9" fill="${c.turban}"/>`;
   if(c.crescent) head+=`<path d="M-17 -330 A19 19 0 0 0 21 -330 A16 12 0 0 1 -17 -330Z" fill="#f6f1dc" style="filter:drop-shadow(0 0 6px #fff6c8)"/>`;
@@ -397,15 +447,17 @@ function makeRig(cast){
   if(c.head==='band') head+=`<path d="M-16 -282 Q2 -292 20 -284 L20 -277 Q2 -285 -16 -275Z" fill="url(#gold)"/><circle cx="4" cy="-286" r="2.6" fill="#d63a2a"/>`;
   if(c.head==='big') head+=`<path d="M-18 -284 L-16 -326 L-6 -308 L2 -340 L10 -308 L20 -324 L20 -284Z" fill="url(#gold)"/><circle cx="2" cy="-300" r="4" fill="#d63a2a"/><circle cx="-8" cy="-292" r="2" fill="#2ec28a"/><circle cx="12" cy="-292" r="2" fill="#2ec28a"/>`;
   if(c.veil) head+=`<path d="M-20 -290 C0 -306 22 -300 24 -284 C14 -290 0 -290 -12 -278 C-16 -270 -18 -262 -16 -250 L-24 -250 C-26 -270 -26 -284 -20 -290Z" fill="${c.veil}"/><path d="M-20 -290 C0 -306 22 -300 24 -284" stroke="url(#gold)" stroke-width="2.4" fill="none"/>`;
-  if(c.earring && c.head!=='turban') head+=`<circle cx="-4" cy="-256" r="4" fill="none" stroke="#e8b83a" stroke-width="2"/>`;
+  if(c.earring && c.head!=='turban') head+=`<g ${J('ear')}><circle cx="-4" cy="-256" r="3" fill="none" stroke="#e8b83a" stroke-width="1.6"/>`+
+    (c.skirt||c.jewel ? `<line x1="-4" y1="-253" x2="-4" y2="-248" stroke="#e8b83a" stroke-width="1.2"/><path d="M-7.5 -248 Q-4 -241 -0.5 -248Z" fill="url(#gold)"/><circle cx="-4" cy="-241.6" r="1.4" fill="#d63a2a"/>` : '')+`</g>`;
 
   /* ---- torso ---- */
   let torso=`<g transform="scale(${wide} 1)"><path d="M-8 -238 C-28 -234 -34 -214 -34 -192 L-28 -148 L26 -148 L28 -194 C28 -222 18 -236 8 -238Z" fill="${c.top}"/>`;
   if(c.skirt) torso+=`<path d="M-30 -150 C-30 -170 -28 -190 -26 -200 L28 -160 L26 -150Z" fill="${c.bottom}"/>`;
   else if(c.trim) torso+=`<path d="M-30 -156 L28 -156 L28 -146 L-30 -146Z" fill="${c.trim}"/>`;
-  if(c.sash) torso+=`<path d="M-34 -220 C-10 -200 10 -170 26 -150 L10 -150 C-6 -176 -22 -196 -36 -206Z" fill="${c.sash}"/>`;
-  if(c.jewel && !c.skirt) torso+=`<path d="M-22 -230 Q2 -196 22 -228" stroke="url(#gold)" stroke-width="3" fill="none"/>`;
-  if(c.garland) torso+=`<path d="M-22 -234 Q2 -160 22 -230" stroke="${c.garland}" stroke-width="6" fill="none" stroke-dasharray="1 5" stroke-linecap="round"/>`;
+  if(c.sash) torso+=`<g ${J('sashT')}><path d="M-34 -220 C-10 -200 10 -170 26 -150 L10 -150 C-6 -176 -22 -196 -36 -206Z" fill="${c.sash}"/></g>`;
+  if(c.jewel) torso+=`<g ${J('pend')}><path d="M-22 -230 Q2 -196 22 -228" stroke="url(#gold)" stroke-width="3" fill="none"/><line x1="2" y1="-205" x2="2" y2="-196" stroke="#e8b83a" stroke-width="1.4"/><path d="M-3 -196 L2 -186 L7 -196Z" fill="url(#gold)"/><circle cx="2" cy="-195" r="2" fill="#d63a2a"/></g>`;
+  if(c.garland) torso+=`<g ${J('garl')}><path d="M-22 -234 Q2 -160 22 -230" stroke="${c.garland}" stroke-width="6" fill="none" stroke-dasharray="1 5" stroke-linecap="round"/></g>`;
+  torso+=`<path d="M28 -194 C28 -222 18 -236 8 -238" fill="none" style="stroke:var(--rimc,#fff);stroke-opacity:var(--rimo,0);stroke-width:1.8" stroke-linecap="round"/>`;
   torso+='</g>';
 
   let back='';
@@ -418,7 +470,7 @@ function makeRig(cast){
     `<g ${J('body')}>`+
       `<g ${J('upperB')}>${back}${arm('B',true)}</g>`+
       leg('K',true)+leg('F',false)+skirtFlare+
-      `<g ${J('upper')}>${torso}<g ${J('head')}>${head}</g>${arm('A',false)}</g>`+
+      `<g ${J('upper')}>${torso}<g ${J('head')}><g ${J('headT')}>${head}</g></g>${arm('A',false)}</g>`+
     `</g></g>`;
 
   return {id, c, cast, svg, props, UPRIGHT, seed:RIG_ID*1.37};
@@ -440,11 +492,17 @@ function poseAt(r, lt){
 const show=(e,on)=>{ if(e) e.style.display=on?'':'none'; };
 const setT=(e,tr)=>{ if(e) e.setAttribute('transform',tr); };
 
+/* Body attitude added on top of the pose by facial expression (small, keeps characters alive). */
+const ATTITUDE={ sad:{head:-9,lean:4}, angry:{head:3,lean:5}, surprise:{lean:-6,head:5}, smile:{head:2}, serene:{head:3,lean:-1} };
+const smooth01=k=>{ k=clamp01(k); return k*k*(3-2*k); };
+
 /* Called every frame. lt = time since shot start, t = global time, talking = 0..1 */
 function updateRig(r, lt, t, talking){
   const q=r.q, cast=r.cast; if(!q) return;
   let P=Object.assign({}, poseAt(r, lt));
+  const PL=poseAt(r, Math.max(0,lt-0.16));            // the pose a moment ago (for lag / swing)
   let x=cast.x||270, y=cast.y||840, s=cast.s||1, flip=cast.flip?-1:1, bob=0, op=1;
+  const ex=cast.expr||'calm', sd=r.seed, TT=cast.talk?1:0;
 
   // walk cycle
   if(cast.walk){ const w=cast.walk, k=clamp01((lt-(w.delay||0))/(w.dur||2)); const kk=1-Math.pow(1-k,1.7);
@@ -459,50 +517,92 @@ function updateRig(r, lt, t, talking){
   if(cast.enter){ const e=cast.enter; op=clamp01((lt-(e.delay||0))/(e.fade||0.8)); if(e.rise) y+= (1-easeIO(op))*e.rise; }
   if(cast.exit){ const e=cast.exit; op*=1-clamp01((lt-e.at)/(e.fade||0.8)); }
 
+  // attitude from expression (eases in over the first half second of the shot)
+  const at=ATTITUDE[ex], ak=smooth01(lt/0.6);
+  if(at){ P.head+=(at.head||0)*ak; P.lean+=(at.lean||0)*ak; }
+
+  // talking: gentle nods + hand gestures (arms that are "free" drift and open up)
+  const free = clamp01(1-(P.a[0]-10)/40);
+  let nod=0;
+  if(TT){
+    const env=0.5+0.5*Math.sin(t*1.9+sd);                       // slow emphasis envelope
+    nod = (0.9+0.9*talking)*Math.sin(t*6.3+sd);
+    if(cast.gesture!==false && free>0.05){
+      P.a=[P.a[0]+free*env*(14+8*Math.sin(t*3.1+sd)), P.a[1]+free*env*(34+16*Math.sin(t*4.3+sd))];
+      if(P.hand==='fist' && free>0.6 && env>0.3) P.hand='open';
+      P.b=[P.b[0]+free*(1-env)*7*Math.sin(t*2.7+sd), P.b[1]+free*(1-env)*10]; }
+  } else if(free>0.5){ P.a=[P.a[0]+1.5*Math.sin(t*1.3+sd), P.a[1]+2*Math.sin(t*1.1+sd)]; }
+  if(ex==='angry' && TT){ nod+=0.7*Math.sin(t*47+sd); }          // trembling with rage
+
   // breathing
-  const br=Math.sin(t*2.1+r.seed)*1.1;
+  const br=Math.sin(t*2.1+sd)*1.1;
   setT(q.root, `translate(${r1(x)} ${r1(y)}) scale(${s*flip} ${s})`); q.root.setAttribute('opacity', op.toFixed(3));
-  setT(q.body, `translate(0 ${r1(P.drop+bob)})`);
+  setT(q.body, `translate(0 ${r1(P.drop+bob+nod*0.25)})`);
   const up=`rotate(${r1(P.lean)} 0 -150) translate(0 ${r1(br*0.6)})`;
   setT(q.upper, up); setT(q.upperB, up);
-  setT(q.head, `rotate(${r1(-P.head + Math.sin(t*0.9+r.seed)*1.2)} 2 -246)`);
+  const headRot=(pp,tt,nd)=> -pp.head + Math.sin(tt*0.9+sd)*1.2 + nd;
+  setT(q.head, `rotate(${r1(headRot(P,t,nod))} 2 -246)`);
+  // head turn: a quick squash-and-flip pivoting on the neck (paper-puppet style)
+  const tn=smooth01(P.turn), sx=1-1.9*tn;
+  setT(q.headT, tn>0.001 ? `translate(4 0) scale(${sx.toFixed(3)} 1) translate(-4 0)` : '');
 
   // arms (shoulder, elbow) and prop counter-rotation
   const sw=r.c.big?4:0;
-  [['A',P.a,P.hand,4+sw,'front'],['B',P.b,P.handB,-4-sw,'back']].forEach(([n,ang,hnd,sx,side])=>{
-    setT(q[n], `translate(${sx} -224) rotate(${r1(-ang[0])})`);
+  [['A',P.a,P.hand,4+sw,'front'],['B',P.b,P.handB,-4-sw,'back']].forEach(([n,ang,hnd,sx0,side])=>{
+    setT(q[n], `translate(${sx0} -224) rotate(${r1(-ang[0])})`);
     setT(q[n+'E'], `translate(0 50) rotate(${r1(-ang[1])})`);
     setT(q[n+'H'], `translate(0 46)`);
     const pr=r.props[side]; setT(q[n+'P'], r.UPRIGHT[pr] ? `rotate(${r1(ang[0]+ang[1])})` : '');
     ['fist','open','namaste'].forEach(h=>show(q[n+'_'+h], h===hnd && !(pr&&h==='fist'&&!r.UPRIGHT[pr]&&false)));
   });
   // bowstring + nocked arrow
-  if(q.string){ const d=P.draw, sx=-6-92*d; q.string.setAttribute('points',`-6,-162 ${r1(sx)},-14 -6,128`);
-    show(q.arrow, d>0.25); setT(q.arrow, `translate(${r1(sx)} -14)`); }
+  if(q.string){ const d=P.draw, sx2=-6-92*d; q.string.setAttribute('points',`-6,-162 ${r1(sx2)},-14 -6,128`);
+    show(q.arrow, d>0.25); setT(q.arrow, `translate(${r1(sx2)} -14)`); }
   // legs: thigh, knee, flat foot
   [['F',P.f,0],['K',P.k,P.kt]].forEach(([n,ang,ft])=>{
     setT(q[n], `translate(${n==='F'?4:-4} -150) rotate(${r1(-ang[0])})`);
     setT(q[n+'K'], `translate(0 76) rotate(${r1(ang[1])})`);
     setT(q[n+'F'], `translate(0 74) rotate(${r1(ang[0]-ang[1]+ft)})`);
   });
-  if(q.skirt) q.skirt.setAttribute('opacity', (1-clamp01(P.drop/40)).toFixed(2));
-  if(q.cape) setT(q.cape, `rotate(${r1(Math.sin(t*1.3+r.seed)*2.2 - P.lean*0.85)} -16 -230) translate(-16 -230) scale(1 ${(1-clamp01(P.drop/72)*0.32).toFixed(3)}) translate(16 230)`);
-  if(q.hair) setT(q.hair, `rotate(${r1(Math.sin(t*1.1+r.seed)*2)} -8 -262)`);
+
+  /* ---- secondary motion: things that hang or flow swing a moment behind the body ---- */
+  const dHead = headRot(PL,t-0.16,0)-headRot(P,t,0), dLean = PL.lean-P.lean, dDrop=(PL.drop-P.drop);
+  const wind = Math.sin(t*1.3+sd), wind2=Math.sin(t*2.3+sd*1.7), talkShake=nod*1.3;
+  const gk=(a,m)=>Math.max(-m,Math.min(m,a));
+  setT(q.ear,  `rotate(${r1(gk(dHead*1.6 + dLean*0.8 + talkShake*2.2 + wind2*3.2, 38))} -4 -257)`);
+  setT(q.pend, `rotate(${r1(gk(-dLean*1.3 + wind2*2.4 + talkShake*0.8, 22))} 2 -226)`);
+  setT(q.garl, `rotate(${r1(gk(-dLean*0.9 + wind*1.6, 14))} 0 -232) translate(0 ${r1(dDrop*0.04)})`);
+  setT(q.sashT,`rotate(${r1(gk(-dLean*0.7 + wind*1.4 + wind2*0.8, 10))} -30 -214)`);
+  setT(q.veilB,`rotate(${r1(gk(dHead*0.9 + dLean*0.6 + wind*3.4 + wind2*1.2, 16))} -18 -292)`);
+  if(q.skirt){ q.skirt.setAttribute('opacity', (1-clamp01(P.drop/40)).toFixed(2));
+    setT(q.skirt, `translate(0 -150) skewX(${r1(gk(wind*1.4+wind2*0.9 + dLean*0.4, 6))}) translate(0 150)`); }
+  if(q.cape) setT(q.cape, `rotate(${r1(Math.sin(t*1.3+sd)*2.2 - P.lean*0.85 + gk(dLean*1.4,12))} -16 -230) translate(-16 -230) scale(1 ${(1-clamp01(P.drop/72)*0.32).toFixed(3)}) translate(16 230)`);
+  if(q.hair) setT(q.hair, `rotate(${r1(Math.sin(t*1.1+sd)*2 + gk(dHead*0.9 + dLean*0.5,14))} -8 -262)`);
   if(q.aura) q.aura.setAttribute('opacity', (0.75+0.25*Math.sin(t*1.6)).toFixed(3));
 
-  // face: expression, blink, talk
-  const ex=cast.expr||'calm';
-  const bt=(t+r.seed*2.3)%3.7; let lid = bt<0.16 ? Math.sin(Math.PI*bt/0.16) : 0;
-  if(cast.eyes==='closed') lid=1; else if(ex==='serene') lid=Math.max(lid,0.35);
-  const ey=1-lid; setT(q.eye, `translate(15 -270.5) scale(1 ${Math.max(0.05,ey).toFixed(3)}) translate(-15 270.5)`);
+  /* ---- face: expression, blink, talk, tears ---- */
+  const bt=(t+sd*2.3)%3.7; let lid = bt<0.16 ? Math.sin(Math.PI*bt/0.16) : 0;
+  if(cast.eyes==='closed') lid=1; else if(ex==='serene') lid=Math.max(lid,0.35); else if(ex==='sad') lid=Math.max(lid,0.22+0.08*Math.sin(t*1.7)); else if(ex==='angry') lid=Math.max(lid,0.16);
+  const widen = ex==='surprise' ? 1.22 : 1;
+  const ey=(1-lid)*widen; setT(q.eye, `translate(15 -270.5) scale(1 ${Math.max(0.05,ey).toFixed(3)}) translate(-15 270.5)`);
   show(q.eye, ey>0.2); show(q.lid, ey<=0.2);
   if(cast.look==='up' && q.pupil) q.pupil.setAttribute('cy','-271.6');
-  setT(q.brow, ex==='angry'?'rotate(12 15 -278)': ex==='sad'?'rotate(-10 15 -278)': ex==='surprise'?'translate(0 -3)':'');
+  if(q.sclera) q.sclera.setAttribute('fill', ex==='angry'?'#f0c8b8':'#f3ead8');
+  setT(q.brow, ex==='angry'?'rotate(14 15 -278) translate(0 2)': ex==='sad'?'rotate(-12 15 -278) translate(0 -1)': ex==='surprise'?'translate(0 -3.5)':'');
+  show(q.furrow, ex==='angry');
   const open = talking>0 ? (0.35+0.65*Math.abs(Math.sin(t*15.5+Math.sin(t*4))))*talking : (ex==='surprise'?0.8:0);
   show(q.m_open, open>0.15); if(open>0.15) q.m_open.setAttribute('ry', (0.8+open*2.4).toFixed(2));
+  show(q.m_teeth, open>0.15 && ex==='angry');
   show(q.m_smile, open<=0.15 && (ex==='smile'||ex==='serene'));
   show(q.m_sad,   open<=0.15 && (ex==='sad'||ex==='angry'));
   show(q.m_neutral, open<=0.15 && !['smile','serene','sad','angry'].includes(ex));
+  if(ex==='sad' && q.m_sad) setT(q.m_sad, `translate(0 ${r1(0.5*Math.sin(t*9+sd))})`);   // lip quiver
+  if(q.blush) q.blush.setAttribute('opacity', (ex==='smile'||ex==='serene'?0.28:ex==='angry'?0.2:0).toString());
+  // tears: two drops sliding down the cheek, a wet shine on the eye
+  const cry = !!cast.tears;
+  [['tear',0],['tear2',0.55]].forEach(([n,off])=>{ const e=q[n]; if(!e) return; show(e,cry);
+    if(cry){ const k=((t*0.7+off+sd*0.1)%1), fall=k*k; e.setAttribute('transform',`translate(${r1(15.5+k*1.5)} ${r1(-267+fall*21)})`); e.setAttribute('opacity',(k<0.12?k/0.12:k>0.85?(1-k)/0.15:1).toFixed(2)); } });
+  if(q.wet) q.wet.setAttribute('opacity', cry?0.9:0);
 }
 
 /* ---- engine/characters.js ---- */
@@ -549,7 +649,18 @@ const CHARACTER_LIST = {BARBARIK, KRISHNA, BRAHMIN, ARJUNA, BHIMA, YUDHISHTHIRA,
      ?notext=1  hide captions/titles     ?clean=1  hide buttons
      ?prompter=1  recording mode: shows current + next line, 3-2-1 start
      ?render=1  no playback loop; renderer calls __ENGINE.seek(t)
+
+   Animation pack (all optional, old stories keep working):
+     cfg.intro:1.0 / cfg.outro:3.6   "Mumma's Mythology" sting before shot 1 and end card after the last shot
+     cfg.hook:{at,hold,words:[{text,size,y,delay,count:[a,b]}]}   big slam-in hook text in the first 2 seconds
+     cfg.handheld:0.6                tiny camera breathing (0 = off)
+     shot.sky / far / mid / art / near   depth layers that move at different speeds when the camera moves
+                                     (parallax factors .3 / .6 / .85 / 1 / 1.4). Plain `art` alone = flat, as before.
+     shot.cam:{keys:[[t,x,y,zoom,'snap'?],...]}   keyframed camera (push-ins, tilts, whip to a face)
+     shot.mood:'anger'|'sad'|'joy'|'hope'|'calm'|'shock'|'divine'   lighting + colour grade per emotion
+     shot.tr:'fade'|'glow'|'whip'|'zoom'|'iris'|'wipe'|'flash'|'dip'|'cut'   cinematic transition INTO this shot
    ===================================================================== */
+const LAYER_F={sky:.3,far:.6,mid:.85,art:1,near:1.4};
 function VIDEO(cfg){
   const W=540, H=960;                       // design space (9:16). Long-form scenes come in a later step.
   const qs=new URLSearchParams(location.search);
@@ -560,8 +671,10 @@ function VIDEO(cfg){
   <div id="wrap"><div id="stage">
     <svg width="0" height="0" style="position:absolute" id="defs"></svg>
     <div id="scenes"></div><canvas id="fx" width="${W}" height="${H}"></canvas>
-    <svg id="over" viewBox="0 0 ${W} ${H}"></svg><div id="flash"></div>
-    <div id="shade"></div><div id="cap"></div><div id="bar"></div>
+    <div id="mood"><i></i><i></i><i></i></div>
+    <svg id="over" viewBox="0 0 ${W} ${H}"></svg><svg id="trfx" viewBox="0 0 ${W} ${H}"></svg><div id="flash"></div>
+    <div id="shade"></div><div id="cap"></div>
+    <svg id="card" viewBox="0 0 ${W} ${H}"></svg><svg id="sting" viewBox="0 0 ${W} ${H}"></svg><svg id="hook" viewBox="0 0 ${W} ${H}"></svg><div id="bar"></div>
   </div></div>
   <div id="prompter"><div class="meta"></div><div class="now"></div><div class="next"></div><div class="pbar"><i></i></div>
     <div class="start"><button>▶ Start recording run</button><small>Start your voice recorder first, then press the button. A 3-2-1 count follows.</small></div><div class="count"></div></div>`;
@@ -577,7 +690,7 @@ function VIDEO(cfg){
   const placeCap=y=>{ cap.style.top=y+'px'; shadeEl.style.top=(y-80)+'px'; };
   placeCap(CAPTOP);
 
-  const plan=planTiming(cfg), DURATION=plan.duration, FADE=0.45;
+  const plan=planTiming(cfg), DURATION=plan.duration, INTRO=plan.intro, NARR_END=plan.narrEnd, OUTRO=plan.outro;
   const KEY=(cfg.keywords||[]);
   const SH = cfg.shots.map((s,i)=>Object.assign({}, s, plan.shots[i]));
 
@@ -586,8 +699,13 @@ function VIDEO(cfg){
     const rigs=(sc.cast||[]).map(makeRig);
     const title = sc.title ? big(W/2, sc.title.y||150, sc.title.size||60, sc.title.color||'#ffd25e', sc.title.text, sc.title.delay||0.5) : '';
     const d=document.createElement('div'); d.className='scene';
-    d.innerHTML=`<svg viewBox="0 0 ${W} ${H}">${sc.art?sc.art():''}${rigs.map(r=>r.svg).join('')}${sc.front?sc.front():''}${title}</svg>`;
+    const stage0=`${sc.art?sc.art():''}${rigs.map(r=>r.svg).join('')}${sc.front?sc.front():''}${title}`;
+    const layered=!!(sc.sky||sc.far||sc.mid||sc.near);
+    d.innerHTML=`<svg viewBox="0 0 ${W} ${H}">`+(layered ?
+      `<g class="L" data-f="${LAYER_F.sky}" data-dof="1.6">${sc.sky?sc.sky():''}</g><g class="L" data-f="${LAYER_F.far}" data-dof="1">${sc.far?sc.far():''}</g><g class="L" data-f="${LAYER_F.mid}" data-dof="0.5">${sc.mid?sc.mid():''}</g>`+
+      `<g class="L" data-f="1">${stage0}</g><g class="L" data-f="${LAYER_F.near}" data-dof="-1.2">${sc.near?sc.near():''}</g>` : stage0)+`</svg>`;
     scenesEl.appendChild(d); sc.el=d;
+    sc.layers=[...d.querySelectorAll('g.L')].map(e=>({e,f:+e.dataset.f,dof:+(e.dataset.dof||0)}));
     rigs.forEach(r=>bindRig(r,d)); sc.rigs=rigs;
     sc.anims=[...d.querySelectorAll('[data-a]')].map(e=>{ const p=e.dataset.a.split(':'); return {e,type:p[0],a:p.slice(1).map(Number),ph:rnd()*6.28}; });
     if(NOTEXT) d.querySelectorAll('text').forEach(e=>e.style.display='none');
@@ -619,16 +737,159 @@ function VIDEO(cfg){
       if(tr) e.setAttribute('transform',tr); if(op!==null) e.setAttribute('opacity',op.toFixed(3)); });
   }
 
-  /* ---- camera: preset name or {from:[x,y,zoom], to:[x,y,zoom]} (x,y = point to centre on) ---- */
+  /* ---- camera: preset name, {from:[x,y,zoom], to:[x,y,zoom]} or {keys:[[t,x,y,zoom,'snap'?],...]} (x,y = point to centre on) ---- */
   const CAMS={ in:{from:[270,480,1],to:[270,480,1.08]}, out:{from:[270,480,1.1],to:[270,480,1]},
     panL:{from:[286,480,1.08],to:[254,480,1.08]}, panR:{from:[254,480,1.08],to:[286,480,1.08]},
     up:{from:[270,500,1.06],to:[270,470,1.06]}, down:{from:[270,460,1.06],to:[270,490,1.06]}, still:{from:[270,480,1.02],to:[270,480,1.02]} };
-  function camT(sc,lt){ const c=typeof sc.cam==='object'?sc.cam:(CAMS[sc.cam]||CAMS.in), k=easeIO(clamp01(lt/sc.dur));
-    let x=lerp(c.from[0],c.to[0],k), y=lerp(c.from[1],c.to[1],k), z=lerp(c.from[2],c.to[2],k);
+  const easeSnap=k=>{ k=clamp01(k); return k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2; };
+  const HAND = cfg.handheld===undefined ? 0.6 : cfg.handheld;
+  function camState(sc,lt,t){
+    const c=typeof sc.cam==='object'?sc.cam:(CAMS[sc.cam]||CAMS.in); let x,y,z;
+    if(c.keys){ const K=c.keys; let i=0; while(i+1<K.length && K[i+1][0]<=lt) i++;
+      if(i+1>=K.length||lt<=K[0][0]){ const k0=K[Math.min(i,K.length-1)]; [x,y,z]=[k0[1],k0[2],k0[3]]; }
+      else { const a=K[i], b=K[i+1], u=(lt-a[0])/(b[0]-a[0]), k=(b[4]==='snap'?easeSnap:easeIO)(u); x=lerp(a[1],b[1],k); y=lerp(a[2],b[2],k); z=lerp(a[3],b[3],k); } }
+    else { const k=easeIO(clamp01(lt/sc.dur)); x=lerp(c.from[0],c.to[0],k); y=lerp(c.from[1],c.to[1],k); z=lerp(c.from[2],c.to[2],k); }
     if(sc.shake){ const [st,du,amp]=sc.shake; const e=clamp01((lt-st)/du); if(e>0&&e<1){ const f=(1-e)*amp; x+=Math.sin(lt*70)*f; y+=Math.cos(lt*57)*f; } }
+    if(HAND){ x+=Math.sin(t*0.83)*HAND*1.4+Math.sin(t*2.1)*HAND*0.35; y+=Math.cos(t*0.67)*HAND*1.1+Math.sin(t*1.9)*HAND*0.3; }
+    const hs=hookShake(t); x+=hs[0]; y+=hs[1];
     // keep the frame covered: centre point can't drift past the edge allowed by the zoom
     const mx=W/2/z, my=H/2/z; x=Math.max(mx,Math.min(W-mx,x)); y=Math.max(my,Math.min(H-my,y));
-    return `translate(${r1(W/2)}px,${r1(H/2)}px) scale(${z.toFixed(4)}) translate(${r1(-x)}px,${r1(-y)}px)`; }
+    return {x,y,z}; }
+  const camCss=c=>`translate(${r1(W/2)}px,${r1(H/2)}px) scale(${c.z.toFixed(4)}) translate(${r1(-c.x)}px,${r1(-c.y)}px)`;
+  // parallax: a layer with factor f follows the camera f times as far (f<1 = distant, f>1 = in front of the actors)
+  function layerTf(f,c){ const zf=1+(c.z-1)*f, s=zf/c.z, tx=c.x-s*(W/2+(c.x-W/2)*f), ty=c.y-s*(H/2+(c.y-H/2)*f); return `translate(${tx.toFixed(2)} ${ty.toFixed(2)}) scale(${s.toFixed(4)})`; }
+
+  /* ---- mood: lighting + colour grade per emotion (cross-fades between shots) ---- */
+  const MOOD0={sat:1,bri:1,con:1,hue:0,tint:[0,0,0,0],vig:0,glow:[.5,.5,.8,255,255,255,0],rim:[255,255,255,0],pulse:0};
+  const MOODS={ neutral:{},
+    calm:  {sat:1.0,bri:1,con:1.03,tint:[120,150,255,.04],glow:[.5,.2,.7,205,222,255,.07],rim:[190,210,255,.55],vig:.12},
+    joy:   {sat:1.14,bri:1.05,con:1.05,hue:-3,tint:[255,190,110,.07],glow:[.55,.6,.7,255,205,120,.10],rim:[255,214,140,.8],vig:.1},
+    hope:  {sat:1.12,bri:1.05,con:1.06,hue:-4,tint:[255,170,90,.09],glow:[.78,.8,.75,255,190,110,.17],rim:[255,205,130,.9],vig:.1},
+    anger: {sat:1.28,bri:.9,con:1.2,hue:-9,tint:[255,28,10,.16],glow:[.5,.92,.8,255,50,15,.24],rim:[255,70,40,.95],vig:.55,pulse:1},
+    sad:   {sat:.62,bri:.88,con:1.06,hue:12,tint:[56,86,170,.18],glow:[.5,.1,.7,150,180,255,.09],rim:[130,170,255,.75],vig:.5},
+    shock: {sat:.65,bri:1.06,con:1.26,hue:6,tint:[220,235,255,.10],glow:[.5,.45,.6,255,255,255,.12],rim:[255,255,255,.9],vig:.32,pulse:.6},
+    divine:{sat:1.08,bri:1.02,con:1.05,hue:2,tint:[190,140,255,.06],glow:[.5,.42,.65,255,226,150,.14],rim:[255,226,160,.85],vig:.2} };
+  const moodOf=m=>{ if(!m) m='neutral'; if(typeof m==='string') m={base:m}; return Object.assign({},MOOD0,MOODS[m.base||'neutral'],m); };
+  const mixV=(a,b,k)=>Array.isArray(a)?a.map((v,i)=>lerp(v,b[i],k)):lerp(a,b,k);
+  const moodEl=document.querySelectorAll('#mood i'), scenesBox=$('scenes');
+  const smooth=k=>{ k=clamp01(k); return k*k*(3-2*k); };
+  function applyMood(t,idx){
+    const sc=SH[idx], pv=SH[Math.max(0,idx-1)], A0=moodOf(pv.mood), B0=moodOf(sc.mood), k=idx===0?1:smooth((t-(sc.start-0.2))/0.9), M={};
+    for(const key in MOOD0) M[key]=mixV(A0[key],B0[key],k);
+    if(t>=NARR_END) for(const key in MOOD0) M[key]=mixV(M[key],MOOD0[key],smooth((t-NARR_END)/0.5));
+    const beat=Math.pow(Math.max(0,Math.sin(t*6.2)),6)+0.6*Math.pow(Math.max(0,Math.sin(t*6.2-1.1)),6), pu=1+M.pulse*(0.35*beat-0.1);
+    const id=Math.abs(M.sat-1)+Math.abs(M.bri-1)+Math.abs(M.con-1)+Math.abs(M.hue)<0.01;
+    scenesBox.style.filter= id?'':`saturate(${M.sat.toFixed(3)}) brightness(${M.bri.toFixed(3)}) contrast(${M.con.toFixed(3)}) hue-rotate(${M.hue.toFixed(1)}deg)`;
+    const T=M.tint, G=M.glow, rgb=a=>a.map(Math.round).join(',');
+    moodEl[0].style.background = T[3]>0.003 ? `rgba(${rgb(T.slice(0,3))},${T[3].toFixed(3)})` : 'none';
+    moodEl[1].style.background = G[6]>0.003 ? `radial-gradient(circle at ${(G[0]*100).toFixed(1)}% ${(G[1]*100).toFixed(1)}%, rgba(${rgb(G.slice(3,6))},${(G[6]*pu).toFixed(3)}) 0%, rgba(${rgb(G.slice(3,6))},0) ${(G[2]*100).toFixed(0)}%)` : 'none';
+    moodEl[2].style.background = M.vig>0.003 ? `radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0) ${(46-18*M.vig).toFixed(0)}%, rgba(${(T[0]>200&&T[1]<80)?'30,0,0':'0,0,6'},${Math.min(.92,M.vig*pu).toFixed(3)}) 100%)` : 'none';
+    scenesBox.style.setProperty('--rimc',`rgb(${rgb(M.rim.slice(0,3))})`); scenesBox.style.setProperty('--rimo',M.rim[3].toFixed(2)); }
+
+  /* ---- cinematic transitions INTO a shot (shot.tr). Overlap types play across the cut: half before, half after ---- */
+  const TRDUR={fade:.5,glow:.7,whip:.42,zoom:.5,iris:.75,wipe:.55};
+  const TRN=SH.map((sc,i)=> i>0 && TRDUR[sc.tr] ? {type:sc.tr, d:TRDUR[sc.tr]} : null);
+  const trfx=$('trfx');
+  trfx.innerHTML=`<defs><linearGradient id="wipeG" x1="0" x2="1"><stop offset="0" stop-color="#ffe7a8" stop-opacity="0"/><stop offset=".7" stop-color="#ffe7a8" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="1"/></linearGradient></defs>`+
+    `<circle id="irisRing" r="0" fill="none" stroke="#ffe7a8" stroke-width="7" opacity="0" filter="url(#b4)"/><circle id="irisRing2" r="0" fill="none" stroke="#fff6dc" stroke-width="2.5" opacity="0"/><path id="wipeBand" fill="url(#wipeG)" opacity="0"/><g id="whipLines" opacity="0"></g>`;
+  const irisRing=$('irisRing'), irisRing2=$('irisRing2'), wipeBand=$('wipeBand'), whipLines=$('whipLines');
+  whipLines.innerHTML=[150,260,420,540,700,810].map((y,i)=>`<rect x="-40" y="${y}" width="620" height="${i%2?8:14}" rx="6" fill="#fff" opacity=".22" filter="url(#b4)"/>`).join('');
+  const easeBack=k=>{ k=clamp01(k); const c1=1.70158,c3=c1+1; return 1+c3*Math.pow(k-1,3)+c1*Math.pow(k-1,2); };
+  // returns {op, tf (screen-space, before camera), blur, clip, bright}
+  function trStyle(type,role,p,sc){ const e=easeIO(p), o={op:1,tf:'',blur:0,clip:'',bright:1}, cxy=[W/2,H/2];
+    const scaleAbout=(s,x,y)=>`translate(${x}px,${y}px) scale(${s.toFixed(4)}) translate(${-x}px,${-y}px)`;
+    switch(type){
+      case 'fade': if(role==='in') o.op=e; break;
+      case 'glow': { const g=Math.sin(Math.PI*p); if(role==='in') o.op=e; o.bright=1+0.45*g; o.blur=g*2; break; }
+      case 'whip': { const w=easeSnap(p); o.blur=Math.sin(Math.PI*w)*11; o.tf = role==='in' ? `translate(${r1((1-w)*W)}px,0)` : `translate(${r1(-w*W)}px,0)`; break; }
+      case 'zoom': if(role==='out'){ o.tf=scaleAbout(1+e*1.1,cxy[0],cxy[1]); o.op=1-smooth((e-.25)/.75); o.blur=e*7; } else { o.tf=scaleAbout(1.45-0.45*e,cxy[0],cxy[1]); o.op=smooth(e*1.5); o.blur=(1-e)*6; } break;
+      case 'iris': if(role==='in'){ const c=sc.trAt||[W/2,H*0.44], r=easeIO(p)*Math.hypot(W,H); o.clip=`circle(${r.toFixed(1)}px at ${c[0]}px ${c[1]}px)`; } break;
+      case 'wipe': if(role==='in'){ const S=300, xt=e*(W+S); o.clip=`polygon(0 0, ${xt.toFixed(1)}px 0, ${(xt-S).toFixed(1)}px ${H}px, 0 ${H}px)`; } break;
+    } return o; }
+  function trOverlay(type,p,sc){ irisRing.setAttribute('opacity',0); irisRing2.setAttribute('opacity',0); wipeBand.setAttribute('opacity',0); whipLines.setAttribute('opacity',0);
+    if(!type) return; const e=easeIO(p);
+    if(type==='iris'){ const c=sc.trAt||[W/2,H*0.44], r=e*Math.hypot(W,H); [irisRing,irisRing2].forEach(el=>{ el.setAttribute('cx',c[0]); el.setAttribute('cy',c[1]); el.setAttribute('r',r.toFixed(1)); el.setAttribute('opacity',(1-p*p).toFixed(2)); }); }
+    else if(type==='wipe'){ const S=300, xt=e*(W+S); wipeBand.setAttribute('d',`M${(xt-60).toFixed(1)} 0 L${(xt+14).toFixed(1)} 0 L${(xt-S+14).toFixed(1)} ${H} L${(xt-S-60).toFixed(1)} ${H}Z`); wipeBand.setAttribute('opacity',Math.sin(Math.PI*p).toFixed(2)); }
+    else if(type==='whip'){ whipLines.setAttribute('opacity',(Math.sin(Math.PI*p)).toFixed(2)); whipLines.setAttribute('transform',`translate(${r1((0.5-p)*160)} 0)`); } }
+
+  /* ---- hook: big kinetic text that slams in during the first 2 seconds ---- */
+  const HK=cfg.hook||null, hookEl=$('hook');
+  const HKAT=HK?(HK.at!==undefined?HK.at:Math.max(0.2,INTRO*0.7)):0, HKHOLD=HK?(HK.hold||1.7):0;
+  if(HK){
+    hookEl.innerHTML=`<defs><linearGradient id="hookG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3b0"/><stop offset=".5" stop-color="#ffc83c"/><stop offset="1" stop-color="#ff8a1c"/></linearGradient>
+      <radialGradient id="hookR"><stop offset="0" stop-color="#ffd25e" stop-opacity=".55"/><stop offset="1" stop-color="#ffd25e" stop-opacity="0"/></radialGradient></defs>`+
+      `<g id="hkRays">${Array.from({length:16},(_,i)=>`<path d="M0 0 L${i%2?34:22} -520 L-${i%2?34:22} -520Z" transform="rotate(${i*22.5})" fill="url(#hookR)"/>`).join('')}</g>`+
+      `<circle id="hkRing" r="0" fill="none" stroke="#fff3b0" stroke-width="6" opacity="0"/>`+
+      HK.words.map((w,i)=>`<g class="hw" id="hw${i}"><text text-anchor="middle" font-size="${w.size}" fill="${w.glow||'#ff8a1c'}" filter="url(#b10)" opacity=".85" style="font-weight:800">${w.text}</text>`+
+        `<text text-anchor="middle" font-size="${w.size}" fill="url(#hookG)" stroke="#3a1204" stroke-width="${Math.max(6,w.size*.075)}" stroke-linejoin="round" paint-order="stroke" style="font-weight:800">${w.text}</text></g>`).join('');
+    HK.words.forEach((w,i)=>{ w.g=hookEl.querySelector('#hw'+i); w.txt=[...w.g.querySelectorAll('text')]; if(NOTEXT) w.g.style.display='none'; });
+    hookEl.style.display='none';
+  }
+  const hookImpact=w=>HKAT+(w.delay||0)+0.3;
+  function hookShake(t){ if(!HK||NOTEXT) return [0,0]; let ax=0, ay=0; HK.words.forEach(w=>{ const k=(t-hookImpact(w))/0.35; if(k>0&&k<1){ const a=(w.shake===undefined?9:w.shake)*(1-k); ax+=Math.sin(k*70)*a; ay+=Math.cos(k*55)*a; } }); return [ax,ay]; }
+  function updateHook(t){ if(!HK) return; const end=HKAT+HKHOLD+0.35, on=t>=HKAT && t<end && !NOTEXT; hookEl.style.display=on?'block':'none'; if(!on) return;
+    const ex=clamp01((t-(HKAT+HKHOLD))/0.35), cx0=270, cy0=HK.words[0].y-HK.words[0].size*0.35;
+    const rays=$('hkRays'); rays.setAttribute('transform',`translate(${cx0} ${cy0}) rotate(${r1(t*14)}) scale(1.4)`); rays.setAttribute('opacity',(smooth((t-HKAT)/0.3)*(1-ex)*0.42).toFixed(2));
+    let ring=0, rr=0; HK.words.forEach(w=>{ const kr=(t-hookImpact(w))/0.5; if(kr>0&&kr<1&&w.ring!==false){ ring=1-kr; rr=40+kr*300; } });
+    const hr=$('hkRing'); hr.setAttribute('cx',cx0); hr.setAttribute('cy',cy0); hr.setAttribute('r',rr.toFixed(1)); hr.setAttribute('opacity',(ring*.8).toFixed(2));
+    HK.words.forEach(w=>{ const k=(t-HKAT-(w.delay||0))/0.34; if(k<0){ w.g.setAttribute('opacity',0); return; }
+      const eb=easeBack(k), sc=lerp(3.6,1,eb)*(1+0.018*Math.sin(t*5)) *(1+ex*0.55), rot=(1-eb)*(w.rot===undefined?-9:w.rot), dy=-ex*34+(1-clamp01(k))*-40;
+      w.g.setAttribute('opacity',(clamp01(k*5)*(1-ex)).toFixed(3));
+      w.g.setAttribute('transform',`translate(270 ${r1(w.y+dy)}) rotate(${r1(rot)}) scale(${sc.toFixed(3)})`);
+      if(w.count){ const n=Math.round(lerp(w.count[0],w.count[1],1-Math.pow(1-clamp01((t-HKAT-(w.delay||0))/0.55),3))); w.txt.forEach(e=>e.textContent=n); } }); }
+
+  /* ---- channel brand: crescent + "Mumma's Mythology" (used by the intro sting and the end card) ---- */
+  let _bn=0;
+  function brandMark(){ const n=_bn++;
+    return `<defs><mask id="bm${n}"><rect x="-90" y="-90" width="180" height="180" fill="#fff"/><circle cx="26" cy="-16" r="52" fill="#000"/></mask>
+      <linearGradient id="bg${n}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0b8"/><stop offset=".55" stop-color="#f1c04e"/><stop offset="1" stop-color="#b98428"/></linearGradient>
+      <clipPath id="bt${n}"><text x="0" y="60" text-anchor="middle" font-size="80" style="font-family:'Tiro','Mukta',serif;font-weight:400">Mumma’s</text><text x="0" y="112" text-anchor="middle" font-size="35" letter-spacing="13" style="font-family:'Mukta',sans-serif;font-weight:800">MYTHOLOGY</text></clipPath></defs>
+      <g class="bm-moon"><circle r="120" fill="url(#moonG)" opacity=".5"/><circle r="60" fill="#f3ecd2" mask="url(#bm${n})"/><path transform="translate(58 -52) scale(1.4)" d="M0 -9 L2 -2 L9 0 L2 2 L0 9 L-2 2 L-9 0 L-2 -2Z" fill="#fff3c4"/></g>
+      <g class="bm-text"><text x="0" y="60" text-anchor="middle" font-size="80" fill="url(#bg${n})" style="font-family:'Tiro','Mukta',serif;font-weight:400">Mumma’s</text>
+        <text x="0" y="112" text-anchor="middle" font-size="35" letter-spacing="13" fill="url(#bg${n})" style="font-family:'Mukta',sans-serif;font-weight:800">MYTHOLOGY</text>
+        <g clip-path="url(#bt${n})"><rect class="bm-shine" x="-400" y="-20" width="46" height="170" fill="#fff" opacity=".85" transform="skewX(-18)"/></g></g>
+      <path class="bm-line" d="M-120 134 L120 134" stroke="#f1c04e" stroke-width="2" opacity=".7"/><path d="M-6 134 L0 128 L6 134 L0 140Z" fill="#f1c04e"/>`; }
+  function brandUpdate(root,u){ // u: seconds since the lockup began
+    const moon=root.querySelector('.bm-moon'), tx=root.querySelector('.bm-text'), ln=root.querySelector('.bm-line'), sh=root.querySelector('.bm-shine');
+    const mk=easeBack(clamp01(u/0.5)), tk=smooth((u-0.18)/0.4);
+    moon.setAttribute('transform',`translate(0 ${r1(-86+(1-mk)*26)}) scale(${(0.5+0.5*mk).toFixed(3)})`); moon.setAttribute('opacity',clamp01(u/0.25).toFixed(2));
+    tx.setAttribute('opacity',tk.toFixed(2)); tx.setAttribute('transform',`translate(0 ${r1((1-tk)*22)})`);
+    ln.setAttribute('opacity',(0.7*smooth((u-0.35)/0.3)).toFixed(2));
+    sh.setAttribute('x',r1(-420+Math.max(0,(u-0.32))*1000)); }
+
+  /* ---- intro sting (before shot 1) ---- */
+  const stingEl=$('sting');
+  if(INTRO>0){ stingEl.innerHTML=`<defs><mask id="stM"><rect width="${W}" height="${H}" fill="#fff"/><circle id="stHole" cx="${W/2}" cy="${H*0.44}" r="0" fill="#000"/></mask>
+      <radialGradient id="stG"><stop offset="0" stop-color="#2a2a6a"/><stop offset="1" stop-color="#05060f"/></radialGradient></defs>
+      <rect width="${W}" height="${H}" fill="url(#stG)" mask="url(#stM)"/><circle id="stRing" cx="${W/2}" cy="${H*0.44}" r="0" fill="none" stroke="#ffe7a8" stroke-width="5" opacity="0"/>
+      <g id="stStars">${Array.from({length:40},(_,i)=>{ const a=i*2.399, rr=40+(i*47)%330; return `<circle cx="${r1(W/2+Math.cos(a)*rr)}" cy="${r1(H*0.44+Math.sin(a)*rr*1.3)}" r="${i%5?1:1.8}" fill="#fff" opacity=".7"/>`; }).join('')}</g>
+      <g id="stLogo" transform="translate(${W/2} ${H*0.44})">${brandMark()}</g>`; }
+  function updateSting(t){ if(INTRO<=0) return; const on=t<INTRO+0.02; stingEl.style.display=on?'block':'none'; if(!on) return;
+    const holdEnd=INTRO*0.5, iris=smooth((t-holdEnd)/(INTRO-holdEnd)), R=iris*Math.hypot(W,H)*0.6;
+    $('stHole').setAttribute('r',R.toFixed(1)); const ring=$('stRing'); ring.setAttribute('r',R.toFixed(1)); ring.setAttribute('opacity',(iris>0&&iris<1?(1-iris)*.9:0).toFixed(2));
+    const logo=$('stLogo'); brandUpdate(logo,t); const fade=1-smooth((t-INTRO*0.55)/(INTRO*0.3)), sc=1+0.12*smooth(t/INTRO);
+    logo.setAttribute('transform',`translate(${W/2} ${H*0.44}) scale(${(0.9*sc).toFixed(3)})`); logo.setAttribute('opacity',fade.toFixed(2));
+    $('stStars').setAttribute('opacity',(fade*smooth(t/0.3)).toFixed(2)); }
+
+  /* ---- end card (after the last shot) ---- */
+  const cardEl=$('card'), CD_CY=372;
+  if(OUTRO>0){ cardEl.innerHTML=`<defs><linearGradient id="cdBg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#050716"/><stop offset=".6" stop-color="#1a1f4a"/><stop offset="1" stop-color="#3a2a52"/></linearGradient></defs>
+      <rect width="${W}" height="${H}" fill="url(#cdBg)"/>
+      <g id="cdStars">${Array.from({length:70},(_,i)=>`<circle cx="${r1(((i*97)%540))}" cy="${r1(((i*211)%940))}" r="${i%7?.9:1.7}" fill="#fff" data-p="${(i*0.77).toFixed(2)}"/>`).join('')}</g>
+      <g id="cdRing" transform="translate(${W/2} ${CD_CY})">${Array.from({length:27},(_,i)=>{ const a=-Math.PI/2+i*2*Math.PI/27; return `<g class="rs" transform="translate(${r1(Math.cos(a)*205)} ${r1(Math.sin(a)*205)}) scale(.9)"><path d="M0 -9 L2 -2 L9 0 L2 2 L0 9 L-2 2 L-9 0 L-2 -2Z" fill="#f0d79a"/></g>`; }).join('')}</g>
+      <g id="cdLogo" transform="translate(${W/2} ${CD_CY+30})">${brandMark()}</g>
+      <g id="cdCta" transform="translate(${W/2} 690)"><rect x="-150" y="-36" width="300" height="72" rx="36" fill="#d8302a"/><rect x="-150" y="-36" width="300" height="72" rx="36" fill="none" stroke="#ffd25e" stroke-width="3"/>
+        <g id="cdBell" transform="translate(-100 0)"><path d="M-12 8 Q-12 -4 -10 -9 Q-8 -17 0 -18 Q8 -17 10 -9 Q12 -4 12 8 L16 12 L-16 12Z" fill="#fff3c4"/><circle cx="0" cy="17" r="4" fill="#fff3c4"/></g>
+        <text x="14" y="13" text-anchor="middle" font-size="36" fill="#fff" style="font-weight:800">सब्सक्राइब करें</text></g>`; }
+  function updateCard(t){ if(OUTRO<=0) return; const u=t-NARR_END, on=u>-0.001; cardEl.style.display=on?'block':'none'; if(!on) return;
+    cardEl.style.opacity=smooth(u/0.55).toFixed(3);
+    cardEl.querySelectorAll('#cdStars circle').forEach(c=>c.setAttribute('opacity',(0.25+0.65*(0.5+0.5*Math.sin(t*2+ +c.dataset.p*5))).toFixed(2)));
+    const ring=$('cdRing'); ring.setAttribute('transform',`translate(${W/2} ${CD_CY}) rotate(${r1(t*6)})`);
+    ring.querySelectorAll('.rs').forEach((g,i)=>{ g.setAttribute('opacity',smooth((u-0.35-i*0.035)/0.3).toFixed(2)); });
+    const logo=$('cdLogo'); brandUpdate(logo,u-0.25); logo.setAttribute('transform',`translate(${W/2} ${CD_CY+30}) scale(${(1.0+0.025*Math.min(u,3)).toFixed(3)})`);
+    const cta=$('cdCta'), ck=easeBack((u-1.5)/0.45); cta.setAttribute('opacity',clamp01((u-1.5)/0.2).toFixed(2));
+    cta.setAttribute('transform',`translate(${W/2} 690) scale(${(lerp(0.4,1,ck)*(1+0.03*Math.sin(Math.max(0,u-2)*5))).toFixed(3)})`);
+    const decay=Math.exp(-Math.max(0,u-2.0)*1.2); $('cdBell').setAttribute('transform',`translate(-100 0) rotate(${r1(u>2?22*decay*Math.sin(u*28):0)} 0 -18)`); }
 
   /* ---- particles ---- */
   const cv=$('fx'), cx=cv.getContext('2d');
@@ -646,23 +907,39 @@ function VIDEO(cfg){
   /* ---- one frame ---- */
   const flash=$('flash'), bar=$('bar');
   function render(t){
-    cx.clearRect(0,0,W,H); let active=-1, fl=0;
+    cx.clearRect(0,0,W,H); let active=-1, fl=0, trOv=null, cur=0;
+    SH.forEach((sc,i)=>{ if(t>=sc.start) cur=i; });
     SH.forEach((sc,i)=>{
-      let o=0; if(t>=sc.start-FADE && t<sc.end) o=Math.min(1,(t-(sc.start-FADE))/FADE); if(i===0&&t<sc.end) o=1;
-      if(sc.tr==='cut' && t<sc.start) o=0;
-      const on=o>0; sc.el.style.display=on?'block':'none'; if(!on) return;
+      const tr=TRN[i], nx=TRN[i+1], pre=tr?tr.d/2:0, post=nx?nx.d/2:0;
+      const on = i===0 ? t<sc.end+post : (t>=sc.start-pre && t<sc.end+post);
+      sc.el.style.display=on?'block':'none'; if(!on) return;
       const isA=t>=sc.start&&t<sc.end; if(isA) active=i;
-      sc.el.style.opacity=o.toFixed(3); sc.el.style.zIndex=isA?2:1;
-      const lt=Math.max(0,t-sc.start);
-      sc.el.style.transform=camT(sc,lt); animate(sc,lt,t); drawFx(sc.fx,t,o);
+      let inP=null, outP=null;
+      if(tr && t>=sc.start-pre && t<sc.start+pre) inP=(t-(sc.start-pre))/tr.d;
+      if(nx && t>=sc.end-post && t<sc.end+post) outP=(t-(sc.end-post))/nx.d;
+      let o={op:1,tf:'',blur:0,clip:'',bright:1}, z=isA?2:1;
+      if(inP!==null){ o=trStyle(tr.type,'in',inP,sc); trOv={type:tr.type,p:inP,sc}; z=tr.type==='zoom'?1:3; }
+      else if(outP!==null){ o=trStyle(nx.type,'out',outP,SH[i+1]); trOv={type:nx.type,p:outP,sc:SH[i+1]}; z=nx.type==='zoom'?3:1; }
+      const lt=Math.max(0,t-sc.start), cs=camState(sc,lt,t);
+      const st=sc.el.style; st.zIndex=z; st.opacity=o.op.toFixed(3); st.transform=(o.tf?o.tf+' ':'')+camCss(cs);
+      st.clipPath=o.clip||'none';
+      st.filter=(o.blur>0.2?`blur(${o.blur.toFixed(1)}px) `:'')+(o.bright>1.01?`brightness(${o.bright.toFixed(2)})`:'')||'none';
+      // parallax layers + depth of field in close-ups
+      sc.layers.forEach(L=>{ if(L.f!==1) L.e.setAttribute('transform',layerTf(L.f,cs));
+        if(L.dof){ const bl=Math.max(0,cs.z-1.5)*(L.dof>0?1.7:2.6)*Math.abs(L.dof); L.e.style.filter=bl>0.3?`blur(${bl.toFixed(1)}px)`:''; } });
+      animate(sc,lt,t); drawFx(sc.fx,t,o.op);
       sc.rigs.forEach(r=>{ let talk=0; if(r.cast.talk && isA){ const w=sc.words.find(w=>t>=w.t&&t<w.e); if(w) talk=(t-w.t)<(w.e-w.t)-0.06?1:0; } updateRig(r,lt,t,talk); });
       if(isA && (sc.tr==='flash'||sc.tr==='dip')){ const k=lt/0.5; if(k<1) fl=Math.max(fl,1-k); flash.style.background=sc.tr==='flash'?'#fff4d6':'#000'; }
     });
+    if(trOv && trOv.type==='glow'){ fl=Math.max(fl,0.28*Math.sin(Math.PI*trOv.p)); flash.style.background='radial-gradient(circle at 50% 45%,#fff0c0,#ffb45a)'; }
+    trOverlay(trOv?trOv.type:null, trOv?trOv.p:0, trOv?trOv.sc:null);
     flash.style.opacity=fl.toFixed(3);
+    applyMood(t,cur);
     if(active>=0) placeCap(SH[active].capTop||CAPTOP);
     SH.forEach((sc,i)=>{ let ag=-1; if(i===active) sc.chunks.forEach((c,ci)=>{ if(t>=c.t-0.05) ag=ci; });
       sc.chunks.forEach((c,ci)=>{ const on=ci===ag; c.el.style.display=on?'block':'none';
         if(on) c.words.forEach(w=>{ w.el.classList.toggle('on', t>=w.t && t<w.e); w.el.classList.toggle('said', t>=w.e); }); }); });
+    updateHook(t); updateSting(t); updateCard(t);
     bar.style.width=(100*t/DURATION)+'%';
     if(PROMPT) prompter(t, active);
   }
@@ -686,7 +963,7 @@ function VIDEO(cfg){
   $('toggle').onclick=e=>{ if(!paused){pausedAt=now();paused=true;e.target.textContent='Play';audio&&audio.pause();} else {t0=performance.now()-pausedAt*1000;paused=false;e.target.textContent='Pause';audio&&audio.play().catch(()=>{});} };
   pm.querySelector('.start button').onclick=()=>{ const st=pm.querySelector('.start'), ct=pm.querySelector('.count'); st.style.display='none'; let n=3; ct.textContent=n; ct.style.display='flex';
     const iv=setInterval(()=>{ n--; if(n>0) ct.textContent=n; else { clearInterval(iv); ct.style.display='none'; restart(); } },1000); };
-  window.__ENGINE={ duration:DURATION, W, H, shots:SH.map(s=>({start:s.start,end:s.end,line:s.line})), seek:t=>render(t), ready:document.fonts?document.fonts.ready:Promise.resolve() };
+  window.__ENGINE={ duration:DURATION, intro:INTRO, narrEnd:NARR_END, W, H, shots:SH.map(s=>({start:s.start,end:s.end,line:s.line})), seek:t=>render(t), ready:document.fonts?document.fonts.ready:Promise.resolve() };
   window.__DUR=DURATION;
   if(!RENDER){ (function loop(){ const t=now(); if(!PROMPT && fixed===null && !paused && t>=DURATION-0.002){ t0=performance.now(); if(audio){audio.currentTime=0;audio.play().catch(()=>{});} }
       last=t; render(t); requestAnimationFrame(loop); })(); }
@@ -695,44 +972,56 @@ function VIDEO(cfg){
 
 /* ---- chandra-27-wives-short-form/story.js ---- */
 /* Chandra's 27 wives — Short. Words come exactly from my-script.md (long lines split over 2 shots).
-   Build: node tools/build.js chandra-27-wives-short-form */
+   Build: node tools/build.js chandra-27-wives-short-form
+
+   Animation-pack version: depth layers (sky/far/mid/art/near) for parallax, face close-ups on the curse (shot 11) and the
+   sad Chandra (shot 12), richer acting, a mood (lighting + colour) per emotion, cinematic transitions, a big hook in the
+   first 2 seconds, the "Mumma's Mythology" sting before shot 1 and an end card after the last shot.
+   The earlier flat version is saved in old-version/. */
 const SKY = (moonX,moonY,moonR,mode,dur,delay)=> `<rect width="540" height="960" fill="url(#skyN)"/>`+stars(90,620)+(moonR?phaseMoon(moonX,moonY,moonR,mode||'full',dur,delay):'');
-const LAND = (y)=> hills(y-90,36,'#1d1d40',140)+`<rect y="${y-120}" width="540" height="70" fill="url(#fog)"/>`+ground(y)+tufts(y-10,'#3a3a4a',50)+flowers(y,20);
+const FAR = (y)=> hills(y-90,36,'#1d1d40',140)+`<rect y="${y-120}" width="540" height="70" fill="url(#fog)"/>`;      // distant hills (parallax layer 'far')
+const GND = (y)=> ground(y)+tufts(y-10,'#3a3a4a',50)+flowers(y,20);                                                   // the ground the actors stand on
 const WIFE = (top,veil)=>({c:NAKSHATRA, with:{top, bottom:top, veil}});
 const W1=['#5a3a9a','#8a6ad0'], W2=['#2a7a6a','#5ac0a0'], W3=['#b8602a','#f0a050'], W4=['#2a4a9a','#6a8ae0'];
 
 VIDEO({
   title:'चंद्रदेव की 27 पत्नियाँ', format:'short', target:72,
+  intro:1.0, outro:3.6, handheld:0.6,
+  // big hook: "27" counts up and slams in, then "पत्नियाँ!" (words taken from the title)
+  hook:{ at:0.6, hold:1.5, words:[ {text:'27', size:230, y:268, count:[1,27], delay:0}, {text:'पत्नियाँ!', size:104, y:376, delay:0.42} ] },
   keywords:['चंद्र','दक्ष','रोहिणी','27','नक्षत्र','शाप','महाभारत','क्षीण','कृष्ण पक्ष','शुक्ल पक्ष'],
   shots:[
     /* 1 — hook */
-    { line:'चंद्रमा की 27 पत्नियाँ हैं,', cam:'in', fx:'stars',
-      art:()=> SKY()+nakshatras(270,330,215,175,0.05)+LAND(800),
-      cast:[{c:CHANDRA, x:270, y:870, s:1.05, expr:'serene', acts:[[0,'stand'],[0.6,'bless',0.8]]}],
-      title:{text:'चंद्रदेव की 27 पत्नियाँ', y:120, size:44, delay:0.3} },
+    { line:'चंद्रमा की 27 पत्नियाँ हैं,', cam:{from:[270,520,1.0],to:[270,560,1.3]}, fx:'stars', mood:'calm', capTop:430,
+      sky:()=> SKY()+nakshatras(270,330,215,175,0.05), far:()=> FAR(800), art:()=> GND(800),
+      cast:[{c:CHANDRA, x:270, y:870, s:1.05, expr:'serene', acts:[[0,'stand'],[1.4,'bless',0.9],[3.2,'lookUp',0.8]]}],
+      title:{text:'चंद्रदेव की 27 पत्नियाँ', y:120, size:44, delay:1.9} },
 
     /* 2 — a different wife each night */
-    { line:'और वह हर रात एक अलग पत्नी के साथ समय बिताते हैं।', cam:'panR', fx:'flies',
-      art:()=> SKY(430,150,34)+sparkle(380,250,1.4)+sparkle(120,210,1)+sparkle(250,120,1.1)+LAND(800),
+    { line:'और वह हर रात एक अलग पत्नी के साथ समय बिताते हैं।', cam:{from:[215,520,1.22],to:[335,520,1.22]}, fx:'flies', tr:'glow', mood:'joy',
+      sky:()=> SKY(430,150,34)+sparkle(380,250,1.4)+sparkle(120,210,1)+sparkle(250,120,1.1), far:()=> FAR(800), art:()=> GND(800), near:()=>fg(),
       cast:[{c:CHANDRA, x:190, y:860, s:.95, expr:'smile', walk:{from:-220, dur:2.2}, acts:[[0,'stand'],[2.3,'offer',0.7]]},
-            {...WIFE(...W1), x:390, y:855, s:.9, flip:true, expr:'smile', acts:[[0,'stand'],[1.6,'namaste',0.7]]}],
-      front:()=>fg() },
+            {...WIFE(...W1), x:390, y:855, s:.9, flip:true, expr:'smile', acts:[[0,'stand+lookAway'],[1.5,'stand',0.4],[2.0,'namaste',0.7]]}] },
 
     /* 3 — the source */
-    { line:'और इसका उल्लेख वास्तव में महाभारत के शल्य पर्व, अध्याय 35 में मिलता है:', cam:'in', fx:'embers',
-      art:()=> `<rect width="540" height="960" fill="url(#skyDiv)"/><circle cx="270" cy="700" r="320" fill="url(#saf)" opacity=".45"/>`+A('rise:40:1:0.3',pothi(270,720,1.25))+fire(110,800,1.1)+fire(430,800,1.1),
+    { line:'और इसका उल्लेख वास्तव में महाभारत के शल्य पर्व, अध्याय 35 में मिलता है:', cam:{from:[270,500,1.0],to:[270,470,1.2]}, fx:'embers', tr:'iris', trAt:[270,720], mood:'divine',
+      sky:()=> `<rect width="540" height="960" fill="url(#skyDiv)"/><circle cx="270" cy="700" r="320" fill="url(#saf)" opacity=".45"/>`,
+      mid:()=> fire(110,800,1.1)+fire(430,800,1.1),
+      art:()=> A('rise:40:1:0.3',pothi(270,720,1.25)),
       title:{text:'महाभारत', y:170, size:70, delay:0.3},
       front:()=> big(270,250,34,'#f6ecd2','शल्य पर्व · अध्याय 35',1.4) },
 
     /* 4 — the shloka (captions off: the verse is on the parchment) */
-    { line:'दक्षस्य तनयास्तात प्रादुरासन् विशाम्पते। स सप्तविंशतिं कन्या दक्षः सोमाय वै ददौ॥', nocap:true, cam:'still', fx:'embers',
-      art:()=> `<rect width="540" height="960" fill="url(#skyDiv)"/><circle cx="270" cy="480" r="340" fill="url(#saf)" opacity=".4"/>`+parchment(270,490,490,330)+
+    { line:'दक्षस्य तनयास्तात प्रादुरासन् विशाम्पते। स सप्तविंशतिं कन्या दक्षः सोमाय वै ददौ॥', nocap:true, cam:{from:[270,480,1.0],to:[270,470,1.12]}, fx:'embers', tr:'zoom', mood:'divine',
+      sky:()=> `<rect width="540" height="960" fill="url(#skyDiv)"/><circle cx="270" cy="480" r="340" fill="url(#saf)" opacity=".4"/>`,
+      mid:()=> fire(90,860,1)+fire(450,860,1),
+      art:()=> parchment(270,490,490,330)+
         A('pop:0.5',`<text x="270" y="380" text-anchor="middle" font-size="18" fill="#8a5a28" style="font-weight:700">— महाभारत, शल्य पर्व, अध्याय 35 —</text>`)+
-        verse(270,445,['दक्षस्य तनयास्तात','प्रादुरासन् विशाम्पते।','स सप्तविंशतिं कन्या','दक्षः सोमाय वै ददौ॥'],34,'#5a2a0a',0.8,1.3)+fire(90,860,1)+fire(450,860,1) },
+        verse(270,445,['दक्षस्य तनयास्तात','प्रादुरासन् विशाम्पते।','स सप्तविंशतिं कन्या','दक्षः सोमाय वै ददौ॥'],34,'#5a2a0a',0.8,1.3) },
 
     /* 5 — Daksha gives 27 daughters to Chandra */
-    { line:'जिसका अर्थ है— दक्ष ने अपनी 27 पुत्रियों का विवाह चंद्रदेव के साथ किया,', cam:'out', fx:'petals',
-      art:()=> palace(810),
+    { line:'जिसका अर्थ है— दक्ष ने अपनी 27 पुत्रियों का विवाह चंद्रदेव के साथ किया,', cam:{from:[270,520,1.28],to:[270,500,1.0]}, fx:'petals', tr:'wipe', mood:'joy',
+      far:()=> palaceBack(810), mid:()=> palaceMid(810), art:()=> palaceFloor(810),
       cast:[{...WIFE(...W2), x:225, y:812, s:.7, expr:'smile', acts:[[0,'namaste']]},
             {...WIFE(...W3), x:290, y:812, s:.7, expr:'smile', acts:[[0,'namaste']]},
             {...WIFE(...W4), x:355, y:812, s:.7, expr:'smile', acts:[[0,'namaste']]},
@@ -740,65 +1029,67 @@ VIDEO({
             {c:CHANDRA, x:445, y:870, s:.95, flip:true, expr:'smile', acts:[[0,'stand'],[1.4,'namaste',0.7]]}] },
 
     /* 6 — they are the 27 nakshatras */
-    { line:'जो आकाश में 27 नक्षत्रों का प्रतिनिधित्व करती हैं।', cam:'in', fx:'stars', capTop:640,
-      art:()=> SKY(270,330,44)+nakshatras(270,330,215,215,0.07)+LAND(860) },
+    { line:'जो आकाश में 27 नक्षत्रों का प्रतिनिधित्व करती हैं।', cam:{from:[270,470,1.0],to:[270,420,1.22]}, fx:'stars', capTop:640, tr:'glow', mood:'calm',
+      sky:()=> SKY(270,330,44)+nakshatras(270,330,215,215,0.07), far:()=> FAR(860), art:()=> GND(860) },
 
     /* 7 — 27.3 days */
-    { line:'और आज भी चंद्रमा को सभी 27 नक्षत्रों की परिक्रमा करने में लगभग 27.3 दिन का समय लगता है।', cam:'still', fx:'stars', capTop:650,
-      art:()=> SKY()+nakshatras(270,380,200,200,0)+earth(270,380,30)+orbitMoon(270,380,120,5,15)+LAND(880),
+    { line:'और आज भी चंद्रमा को सभी 27 नक्षत्रों की परिक्रमा करने में लगभग 27.3 दिन का समय लगता है।', cam:{from:[270,400,1.0],to:[270,380,1.16]}, fx:'stars', capTop:650, tr:'whip', mood:'calm',
+      sky:()=> SKY()+nakshatras(270,380,200,200,0)+earth(270,380,30)+orbitMoon(270,380,120,5,15), far:()=> FAR(880), art:()=> GND(880),
       title:{text:'≈ 27.3 दिन', y:130, size:60, delay:1.2} },
 
     /* 8 — the twist */
-    { line:'लेकिन यहीं पर गड़बड़ हो गई!', cam:'in', fx:'sparks', tr:'dip', shake:[0.4,0.5,5],
-      art:()=> SKY(420,150,30)+clouds()+LAND(800),
-      cast:[{c:CHANDRA, x:270, y:880, s:1.1, expr:'surprise', acts:[[0,'stand'],[0.3,'shock',0.4]]}] },
+    { line:'लेकिन यहीं पर गड़बड़ हो गई!', cam:{from:[270,540,1.0],to:[270,600,1.3]}, fx:'sparks', tr:'dip', shake:[0.4,0.5,5], mood:'shock',
+      sky:()=> SKY(420,150,30)+clouds(), far:()=> FAR(800), art:()=> GND(800),
+      cast:[{c:CHANDRA, x:270, y:880, s:1.1, expr:'surprise', acts:[[0,'stand'],[0.3,'recoil',0.35],[1.7,'hold',0.8]]}] },
 
     /* 9 — only Rohini */
-    { line:'चंद्रदेव केवल अपनी एक पत्नी, रोहिणी, से प्रेम करते थे।', cam:'panL', fx:'petals',
-      art:()=> SKY(440,150,32)+sparkle(330,260,1.6,'#ffc0d8')+LAND(800),
-      cast:[{...WIFE(...W2), x:55, y:800, s:.62, expr:'sad', acts:[[0,'lookDown']]},
-            {...WIFE(...W3), x:105, y:804, s:.62, expr:'sad', acts:[[0,'lookDown']]},
+    { line:'चंद्रदेव केवल अपनी एक पत्नी, रोहिणी, से प्रेम करते थे।', cam:{from:[330,520,1.2],to:[180,520,1.2]}, fx:'petals', tr:'fade', mood:'joy',
+      sky:()=> SKY(440,150,32)+sparkle(330,260,1.6,'#ffc0d8'), far:()=> FAR(800), art:()=> GND(800), near:()=>fg(),
+      cast:[{...WIFE(...W2), x:55, y:800, s:.62, expr:'sad', acts:[[0,'lookDown+lookAway']]},
+            {...WIFE(...W3), x:105, y:804, s:.62, expr:'sad', acts:[[0,'lookDown'],[1.2,'lookAway',0.4]]},
             {c:CHANDRA, x:235, y:865, s:.95, expr:'smile', acts:[[0,'stand'],[0.7,'give',0.7]]},
-            {c:ROHINI, x:390, y:860, s:.92, flip:true, expr:'smile', acts:[[0,'stand'],[1.0,'namaste',0.7]]}],
-      front:()=>fg() },
+            {c:ROHINI, x:390, y:860, s:.92, flip:true, expr:'smile', acts:[[0,'stand'],[1.0,'namaste',0.7]]}] },
 
     /* 10 — the wives complain to Daksha */
-    { line:'जब उनकी बाकी पत्नियों ने दक्ष से शिकायत की,', cam:'panR', fx:'dust',
-      art:()=> palace(810),
-      cast:[{...WIFE(...W1), x:95, y:860, s:.8, expr:'sad', acts:[[0,'stand'],[0.6,'offer']]},
-            {...WIFE(...W4), x:175, y:858, s:.8, expr:'sad', acts:[[0,'lookDown']]},
-            {...WIFE(...W2), x:250, y:862, s:.8, expr:'sad', talk:true, acts:[[0,'stand'],[0.4,'point']]},
+    { line:'जब उनकी बाकी पत्नियों ने दक्ष से शिकायत की,', cam:{from:[200,520,1.2],to:[330,520,1.2]}, fx:'dust', tr:'whip', mood:'sad',
+      far:()=> palaceBack(810), mid:()=> palaceMid(810), art:()=> palaceFloor(810),
+      cast:[{...WIFE(...W1), x:95, y:860, s:.8, expr:'sad', tears:true, acts:[[0,'stand'],[0.6,'plead']]},
+            {...WIFE(...W4), x:175, y:858, s:.8, expr:'sad', acts:[[0,'lookDown'],[1.4,'grief',0.8]]},
+            {...WIFE(...W2), x:250, y:862, s:.8, expr:'sad', talk:true, acts:[[0,'stand'],[0.4,'accuse']]},
             {c:DAKSHA, x:430, y:870, s:.98, flip:true, expr:'calm', acts:[[0,'stand'],[1.0,'think']]}] },
 
-    /* 11 — the curse */
-    { line:'तो वह अत्यंत क्रोधित हो गए और उन्होंने चंद्रदेव को क्षीण (नष्ट) होने का शाप दे दिया।', cam:'in', fx:'embers', tr:'flash', shake:[1.4,0.7,7],
-      art:()=> palace(810,'#4a0e16')+`<rect width="540" height="960" fill="#ff2a10" opacity=".08"/>`,
-      cast:[{c:DAKSHA, x:150, y:875, s:1.0, talk:true, expr:'angry', acts:[[0,'fist'],[1.3,'point',0.3]]},
-            {c:CHANDRA, x:420, y:870, s:.95, flip:true, expr:'surprise', acts:[[0,'stand'],[1.5,'shock',0.3]]}] },
+    /* 11 — the curse (face close-ups: Daksha's fury, then Chandra's shock) */
+    { line:'तो वह अत्यंत क्रोधित हो गए और उन्होंने चंद्रदेव को क्षीण (नष्ट) होने का शाप दे दिया।', fx:'embers', tr:'flash', shake:[1.4,0.7,7], mood:'anger', capTop:130,
+      cam:{keys:[[0,285,560,1.0],[1.0,285,560,1.18],[1.5,190,590,3.1,'snap'],[3.6,196,588,3.5],[4.0,425,612,3.0,'snap']]},
+      far:()=> palaceBack(810,'#4a0e16')+`<rect width="540" height="960" fill="#ff2a10" opacity=".08"/>`, mid:()=> palaceMid(810), art:()=> palaceFloor(810),
+      cast:[{c:DAKSHA, x:150, y:875, s:1.0, talk:true, expr:'angry', acts:[[0,'fist'],[1.2,'rage',0.4],[2.6,'accuse',0.3]]},
+            {c:CHANDRA, x:420, y:870, s:.95, flip:true, expr:'surprise', acts:[[0,'stand'],[3.9,'recoil',0.35]]}] },
 
-    /* 12 — the moon fades */
-    { line:'जल्द ही, चंद्रमा का प्रकाश कम होने लगा।', cam:'down', fx:'stars',
-      art:()=> SKY(270,220,80,'wane',3.2,0.3)+LAND(820),
-      cast:[{c:CHANDRA, with:{aura:null}, x:270, y:885, s:.92, expr:'sad', acts:[[0,'stand'],[0.8,'lookDown',1]]}] },
+    /* 12 — the moon fades (tilt down from the dimming moon to Chandra's tearful face) */
+    { line:'जल्द ही, चंद्रमा का प्रकाश कम होने लगा।', dur:4.4, fx:'stars', tr:'fade', mood:'sad', capTop:150,
+      cam:{keys:[[0,270,330,1.08],[1.2,270,350,1.2],[3.4,282,628,3.1]]},
+      sky:()=> SKY(270,220,80,'wane',3.2,0.3), far:()=> FAR(820), art:()=> GND(820),
+      cast:[{c:CHANDRA, with:{aura:null}, x:270, y:885, s:.92, expr:'sad', tears:true, acts:[[0,'stand'],[0.9,'lookDown',1.0],[2.4,{head:-3,lean:3,a:[34,120],b:[26,124],hand:'open',handB:'open'},1.0]]}] },
 
     /* 13 — the gods pray */
-    { line:'देवताओं ने दक्ष से शाप वापस लेने की प्रार्थना की,', cam:'out', fx:'sparks',
-      art:()=> palace(810,'#2e1a34'),
+    { line:'देवताओं ने दक्ष से शाप वापस लेने की प्रार्थना की,', cam:{from:[270,520,1.25],to:[270,500,1.0]}, fx:'sparks', tr:'whip', mood:'divine',
+      far:()=> palaceBack(810,'#2e1a34'), mid:()=> palaceMid(810), art:()=> palaceFloor(810),
       cast:[{c:INDRA, x:105, y:868, s:.92, expr:'calm', acts:[[0,'stand'],[0.4,'namaste',0.7]]},
             {c:DEVA, x:215, y:862, s:.85, expr:'calm', acts:[[0,'stand'],[0.7,'namaste',0.7]]},
-            {c:DAKSHA, x:435, y:872, s:.98, flip:true, expr:'calm', acts:[[0,'think'],[2.2,'stand']]}] },
+            {c:DAKSHA, x:435, y:872, s:.98, flip:true, expr:'calm', acts:[[0,'think'],[0.9,'think+lookAway',0.3],[2.6,'stand',0.5]]}] },
 
     /* 14 — light returns slowly */
-    { line:'तब उन्होंने चंद्रदेव को अपनी चमक को क्रमिक रूप से (धीरे-धीरे) पुनः प्राप्त करने की अनुमति दी।', cam:'up', fx:'stars',
-      art:()=> SKY(400,200,62,'wax',5)+LAND(810),
+    { line:'तब उन्होंने चंद्रदेव को अपनी चमक को क्रमिक रूप से (धीरे-धीरे) पुनः प्राप्त करने की अनुमति दी।', cam:{from:[270,540,1.0],to:[300,470,1.2]}, fx:'stars', tr:'glow', mood:'hope',
+      sky:()=> SKY(400,200,62,'wax',5), far:()=> FAR(810), art:()=> GND(810),
       cast:[{c:DAKSHA, x:130, y:870, s:.95, talk:true, expr:'calm', acts:[[0,'stand'],[0.5,'bless',0.7]]},
             {c:CHANDRA, x:400, y:868, s:.95, flip:true, expr:'serene', acts:[[0,'kneelPray'],[3.0,'stand',1.0]]}] },
 
     /* 15 — waning & waxing */
-    { line:'और इसी प्रकार महाभारत में चंद्रमा के घटने और बढ़ने (कृष्ण पक्ष और शुक्ल पक्ष) की व्याख्या की गई है!', cam:'still', fx:'stars', tr:'dip', dur:7.4,
-      art:()=> SKY()+moonRow(200,24)+
+    { line:'और इसी प्रकार महाभारत में चंद्रमा के घटने और बढ़ने (कृष्ण पक्ष और शुक्ल पक्ष) की व्याख्या की गई है!', cam:{from:[270,470,1.0],to:[270,520,1.18]}, fx:'stars', tr:'iris', trAt:[270,200], dur:7.4, mood:'divine',
+      sky:()=> SKY()+moonRow(200,24)+
         A('pop:1.8',`<text x="135" y="268" text-anchor="middle" font-size="26" fill="#c9c4e8">कृष्ण पक्ष</text><path d="M60 284 L210 284" stroke="#c9c4e8" stroke-width="2"/><path d="M60 284 l10 -6 v12Z" fill="#c9c4e8"/>`)+
-        A('pop:2.6',`<text x="405" y="268" text-anchor="middle" font-size="26" fill="#ffe7a8">शुक्ल पक्ष</text><path d="M330 284 L480 284" stroke="#ffe7a8" stroke-width="2"/><path d="M480 284 l-10 -6 v12Z" fill="#ffe7a8"/>`)+LAND(810),
+        A('pop:2.6',`<text x="405" y="268" text-anchor="middle" font-size="26" fill="#ffe7a8">शुक्ल पक्ष</text><path d="M330 284 L480 284" stroke="#ffe7a8" stroke-width="2"/><path d="M480 284 l-10 -6 v12Z" fill="#ffe7a8"/>`),
+      far:()=> FAR(810), art:()=> GND(810),
       cast:[{c:CHANDRA, x:270, y:880, s:1.05, expr:'serene', acts:[[0,'stand'],[0.6,'bless',0.8]]}] }
   ]
 });

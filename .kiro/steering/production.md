@@ -28,6 +28,8 @@ Targets: 30 Shorts + 4 long videos a month, with his own voice. **Credits matter
 3. Fix only real problems, rebuild, commit, push, open the PR, and send a short summary.
 4. When editing an existing video, change only the shots the user names, and don't recapture shots that didn't change.
 
+## Animation pack (done, see README "Animation pack")
+Depth layers + parallax, keyframed camera / face close-ups, head turns + secondary motion + gestures, mood per emotion, cinematic transitions, hook text, intro sting (`intro`) and end card (`outro`). Use them in new stories. `chandra-27-wives-short-form/` is the reference.
+
 ## Planned next work
-- Audio pipeline in `render.js`: denoise, EQ, de-ess, compression, loudness normalized to -14 LUFS; sync shots to the real voice using pauses; background music from `music/` with ducking; automatic SFX.
-- Animation upgrade pack: parallax depth layers, close-up face shots, richer acting (head turns, jewellery and cloth motion, voice-driven mouth), lighting and colour mood, cinematic transitions, kinetic hook text, channel intro sting and end card.
+- Audio pipeline in `render.js`: denoise, EQ, de-ess, compression, loudness normalized to -14 LUFS; sync shots to the real voice using pauses; background music from `music/` with ducking; automatic SFX; voice-driven mouth.

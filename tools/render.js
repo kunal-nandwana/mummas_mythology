@@ -43,8 +43,9 @@ function leadSilence(file){ const r=spawnSync('ffmpeg',['-hide_banner','-i',file
   let shift=0, audioArgs=[];
   if(voice && fs.existsSync(voice)){
     const lead=leadSilence(voice), off=+(opt('offset')||0);
-    shift = lead - 0.15 - off;              // seconds to cut from the start of the recording (negative = add delay)
-    console.log(`♪ voice: ${path.basename(voice)}  (speech starts at ${lead.toFixed(2)}s → aligned to shot 1${off?`, offset ${off}s`:''})`);
+    const first = shots.length ? shots[0].start : 0;   // intro sting length: the voice starts when shot 1 starts
+    shift = lead - 0.15 - first - off;      // seconds to cut from the start of the recording (negative = add delay)
+    console.log(`♪ voice: ${path.basename(voice)}  (speech starts at ${lead.toFixed(2)}s → aligned to shot 1${first?`, after the ${first.toFixed(1)}s intro`:''}${off?`, offset ${off}s`:''})`);
     audioArgs = shift>=0 ? ['-ss',shift.toFixed(3),'-i',voice] : ['-i',voice];
   } else console.log('♪ no voice file found: rendering a silent video (put voice.m4a in the topic folder to add it)');
 

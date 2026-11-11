@@ -45,6 +45,18 @@ Each video is one short file, `<topic>-short-form/story.js`. It lists the shots:
 5. **Render the MP4.** Save your recording as `voice.m4a` in the topic folder, then double-click `make-video.command`. It produces a 1080×1920 MP4 with your voice, and the silence before your first word is cut automatically.
 6. **Upload** to YouTube.
 
+### Animation pack (optional story.js features)
+
+Old stories keep working. New options, shown in `chandra-27-wives-short-form/story.js`:
+
+- **Depth layers:** give a shot `sky`, `far`, `mid`, `art`, `near` instead of one `art`. They move at different speeds when the camera moves (parallax), and soften when the camera zooms in close.
+- **Camera keys and face close-ups:** `cam:{keys:[[t,x,y,zoom],[t,x,y,zoom,'snap']]}`. The head is at about `(x, y-268*s)` for a character at `x,y` with scale `s`. Use `capTop` to move captions clear of the face.
+- **Acting:** poses `lookAway`, `lookBack` (head turns), `explain`, `plead`, `accuse`, `rage`, `recoil`, `weep`, `grief`, `hold`; `tears:true`. Earrings, pendants, garlands, veils, sashes, skirts, hair and capes swing by themselves, and talking characters nod and gesture.
+- **Mood:** `mood:'calm'|'joy'|'hope'|'anger'|'sad'|'shock'|'divine'` sets the lighting, colour and rim light. Moods cross-fade between shots.
+- **Transitions into a shot:** `tr:'fade'|'glow'|'whip'|'zoom'|'iris'|'wipe'|'flash'|'dip'|'cut'` (`trAt:[x,y]` sets the iris centre).
+- **Hook text:** `hook:{at,hold,words:[{text,size,y,delay,count:[from,to]}]}` slams in during the first 2 seconds.
+- **Channel sting and end card:** `intro:1.0` and `outro:3.6`. The intro makes every shot start 1 s later; the renderer lines your voice up for you.
+
 URL options: `?shot=N` (jump to a shot), `?notext=1` (hide captions), `?clean=1` (hide buttons), `?prompter=1` (recording mode).
 
 ## On your Mac

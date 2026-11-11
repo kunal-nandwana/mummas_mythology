@@ -128,15 +128,20 @@ function earth(x,y,r){ return `<circle cx="${x}" cy="${y}" r="${r*1.5}" fill="#4
   `<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="#bfe0ff" stroke-opacity=".5" stroke-width="2"/>`; }
 // moon going round a centre once every `period` seconds (radius r)
 function orbitMoon(cx,cy,r,period,mr){ return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#f3ecd2" stroke-opacity=".35" stroke-width="2"/>`+A(`spin:${period}:${cx}:${cy}`, phaseMoon(cx+r,cy,mr||16,'full')); }
-// royal palace interior (warm), pillars + arches + hanging lamps; floor at y
-function palace(y,tone){ const w=tone||'#3a1a2c', p='#58283e', g='url(#gold)'; let s=`<rect width="540" height="960" fill="${w}"/><circle cx="270" cy="${y-240}" r="360" fill="url(#saf)" opacity=".35"/>`;
-  for(let i=0;i<4;i++){ const x=-20+i*190; s+=`<path d="M${x+20} ${y-90} L${x+20} ${y-420} Q${x+95} ${y-560} ${x+170} ${y-420} L${x+170} ${y-90}Z" fill="#24101c" opacity=".75"/>`; }
-  for(let i=0;i<5;i++){ const x=-10+i*137; s+=`<rect x="${x-14}" y="${y-470}" width="28" height="${470}" fill="${p}"/><rect x="${x-20}" y="${y-480}" width="40" height="14" fill="${g}"/><rect x="${x-20}" y="${y-14}" width="40" height="14" fill="${g}"/><rect x="${x-14}" y="${y-470}" width="8" height="456" fill="#000" opacity=".18"/>`; }
-  s+=`<rect y="${y-500}" width="540" height="22" fill="${g}" opacity=".85"/>`;
+// royal palace interior (warm), pillars + arches + hanging lamps; floor at y.
+// For parallax the palace comes in three depth layers: palaceBack (wall, glow, arches), palaceMid (pillars, cornice, lamps), palaceFloor.
+function palaceBack(y,tone){ const w=tone||'#3a1a2c'; let s=`<rect x="-60" y="-60" width="660" height="1080" fill="${w}"/><circle cx="270" cy="${y-240}" r="360" fill="url(#saf)" opacity=".35"/>`;
+  for(let i=-1;i<5;i++){ const x=-20+i*190; s+=`<path d="M${x+20} ${y-90} L${x+20} ${y-420} Q${x+95} ${y-560} ${x+170} ${y-420} L${x+170} ${y-90}Z" fill="#24101c" opacity=".75"/>`; }
+  return s; }
+function palaceMid(y){ const p='#58283e', g='url(#gold)'; let s='';
+  for(let i=-1;i<6;i++){ const x=-10+i*137; s+=`<rect x="${x-14}" y="${y-470}" width="28" height="${470}" fill="${p}"/><rect x="${x-20}" y="${y-480}" width="40" height="14" fill="${g}"/><rect x="${x-20}" y="${y-14}" width="40" height="14" fill="${g}"/><rect x="${x-14}" y="${y-470}" width="8" height="456" fill="#000" opacity=".18"/>`; }
+  s+=`<rect x="-60" y="${y-500}" width="660" height="22" fill="${g}" opacity=".85"/>`;
   [135,405].forEach(x=>{ s+=`<line x1="${x}" y1="${y-478}" x2="${x}" y2="${y-400}" stroke="#c99a3a" stroke-width="1.5"/>`+A('flick:'+(4+rnd()*3).toFixed(2),`<circle cx="${x}" cy="${y-392}" r="34" fill="url(#saf)"/>`)+`<path d="M${x-10} ${y-400} L${x+10} ${y-400} L${x} ${y-386}Z" fill="${g}"/>`; });
-  s+=`<path d="M0 ${y} L540 ${y} L540 960 L0 960Z" fill="#1e0c16"/>`;
-  for(let i=0;i<8;i++) s+=`<line x1="${270+(i-3.5)*40}" y1="${y}" x2="${270+(i-3.5)*160}" y2="960" stroke="#3a1a2a" stroke-width="2"/>`;
-  return s+`<rect y="${y}" width="540" height="6" fill="${g}" opacity=".6"/>`; }
+  return s; }
+function palaceFloor(y){ const g='url(#gold)'; let s=`<path d="M-60 ${y} L600 ${y} L600 1020 L-60 1020Z" fill="#1e0c16"/>`;
+  for(let i=-2;i<10;i++) s+=`<line x1="${270+(i-3.5)*40}" y1="${y}" x2="${270+(i-3.5)*160}" y2="1020" stroke="#3a1a2a" stroke-width="2"/>`;
+  return s+`<rect x="-60" y="${y}" width="660" height="6" fill="${g}" opacity=".6"/>`; }
+function palace(y,tone){ return palaceBack(y,tone)+palaceMid(y)+palaceFloor(y); }
 // palm-leaf manuscript (pothi), centred at x,y
 function pothi(x,y,s){ let l=''; for(let i=0;i<6;i++) l+=`<line x1="${-150}" y1="${-22+i*9}" x2="${150}" y2="${-22+i*9}" stroke="#7a5228" stroke-width="1.6" opacity=".55" stroke-dasharray="${8+i*3} 5"/>`;
   return `<g transform="translate(${x} ${y}) scale(${s||1})"><rect x="-176" y="-44" width="352" height="88" rx="10" fill="#4a2c18"/><rect x="-168" y="-38" width="336" height="76" rx="8" fill="#e8cf96"/><rect x="-168" y="-38" width="336" height="76" rx="8" fill="url(#paper)" opacity=".2"/>${l}`+
