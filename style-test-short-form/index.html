@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Style test - Miniature night scene</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@600;800&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  #stage{position:relative;overflow:hidden;transform-origin:center;background:#0a0b1e}
+  #stage svg{position:absolute;inset:0}
+  canvas{position:absolute;inset:0;pointer-events:none}
+  #cap{position:absolute;left:0;right:0;text-align:center;padding:0 24px;box-sizing:border-box;
+       font-family:'Tiro Devanagari Hindi','Mukta','Noto Sans Devanagari','Nirmala UI','Kohinoor Devanagari',serif;
+       color:#efe2c2;text-shadow:0 2px 3px #000,0 0 14px rgba(0,0,0,.9)}
+  #cap .w{display:inline-block;margin:0 .18em;opacity:.78;transition:color .12s,transform .12s}
+  #cap .w.on{opacity:1;color:#ffcf6b;transform:translateY(-1px);text-shadow:0 0 16px rgba(255,180,70,.75),0 2px 3px #000}
+  #ui{position:fixed;top:10px;left:10px;z-index:9;display:flex;gap:8px}
+  #ui a,#ui button{background:#222c;color:#fff;border:1px solid #555;border-radius:6px;padding:6px 12px;font:14px sans-serif;text-decoration:none;cursor:pointer}
+  body.clean #ui{display:none}
+</style>
+</head>
+<body>
+<div id="ui">
+  <a href="?f=long">16:9 Long</a><a href="?f=short">9:16 Short</a><button id="restart">Restart</button>
+</div>
+<div id="wrap"><div id="stage">
+  <svg id="svg"></svg>
+  <canvas id="fx"></canvas>
+  <div id="cap"></div>
+</div></div>
+
+<script>
+(function(){
+/* ======================= SETTINGS ======================= */
+const qs = new URLSearchParams(location.search);
+const FMT = qs.get('f')==='long' ? 'long' : 'short';
+const DUR = 12;                       // seconds (loops)
+const LINE = "युद्ध से पहले ब्राह्मण के वेश में कृष्ण उसके पास आए...";
+const BARB_PNG = "barbarik.png";      // put your PNG next to this file
+const BRAH_PNG = "brahmin.png";       // optional
+const FLIP_BARB = qs.has('flipb');    // add ?flipb=1 if your PNG faces the wrong way
+
+const W = FMT==='long' ? 960 : 540, H = FMT==='long' ? 540 : 960;
+const WORLD = FMT==='long' ? 1500 : 540;
+const L = FMT==='long' ? {
+  moon:[540,125,30], cloudY:0, farY:318, fort:[330,322,.95], campY:372, camp:[40,1050],
+  groundY:432, tree:[1210,470,.92], barb:[1135,492,.62], brah:[600,985,494,.6], capY:448, capSize:30
+} : {
+  moon:[410,180,40], cloudY:0, farY:575, fort:[110,580,.75], campY:628, camp:[0,540],
+  groundY:705, tree:[425,790,1.05], barb:[400,830,.86], brah:[-90,190,836,.84], capY:850, capSize:34
+};
+
+/* ======================= DRAWING HELPERS ======================= */
+const r2=n=>Math.round(n*10)/10;
+let seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+const FLICK=[];   // [id, speed, phase, min, max]
+let fid=0; const flick=(sp,lo,hi)=>{ const id='fk'+(fid++); FLICK.push([id,sp,rnd()*6.28,lo,hi]); return id; };
+
+const DEFS = `<defs>
+ <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+   <stop offset="0" stop-color="#070a22"/><stop offset=".55" stop-color="#16204a"/><stop offset=".85" stop-color="#3a2a4e"/><stop offset="1" stop-color="#5a3440"/></linearGradient>
+ <radialGradient id="saf"><stop offset="0" stop-color="#ffc56a" stop-opacity=".95"/><stop offset=".4" stop-color="#ff9a3c" stop-opacity=".35"/><stop offset="1" stop-color="#ff8a2a" stop-opacity="0"/></radialGradient>
+ <radialGradient id="moonG"><stop offset="0" stop-color="#fff6dc" stop-opacity=".9"/><stop offset="1" stop-color="#bcc8ff" stop-opacity="0"/></radialGradient>
+ <radialGradient id="aura"><stop offset="0" stop-color="#8fb4ff" stop-opacity=".55"/><stop offset="1" stop-color="#5f7cff" stop-opacity="0"/></radialGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d77a"/><stop offset="1" stop-color="#b98428"/></linearGradient>
+ <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2236"/><stop offset="1" stop-color="#120f1a"/></linearGradient>
+ <linearGradient id="fogG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a90c0" stop-opacity="0"/><stop offset=".5" stop-color="#8a90c0" stop-opacity=".22"/><stop offset="1" stop-color="#8a90c0" stop-opacity="0"/></linearGradient>
+ <filter id="b3"><feGaussianBlur stdDeviation="3"/></filter>
+ <filter id="b8"><feGaussianBlur stdDeviation="8"/></filter>
+ <filter id="b20"><feGaussianBlur stdDeviation="20"/></filter>
+ <filter id="paper" x="0" y="0" width="100%" height="100%">
+   <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" seed="4" result="n"/>
+   <feColorMatrix in="n" type="matrix" values="0 0 0 0 .62  0 0 0 0 .52  0 0 0 0 .38  0 0 0 .55 -.12"/></filter>
+ <filter id="blotch" x="0" y="0" width="100%" height="100%">
+   <feTurbulence type="fractalNoise" baseFrequency=".004 .009" numOctaves="2" seed="9"/>
+   <feColorMatrix type="matrix" values="0 0 0 0 .1  0 0 0 0 .08  0 0 0 0 .14  0 0 0 .9 -.35"/></filter>
+</defs>`;
+
+function stars(n,w,h){ let s=''; for(let i=0;i<n;i++){ const x=rnd()*w, y=rnd()*h, r=rnd()<.15?1.6:.9; s+=`<circle id="${flick(1+rnd()*2,.25,1)}" cx="${r2(x)}" cy="${r2(y)}" r="${r}" fill="#f4ecd4"/>`; } return s; }
+function cloudBand(y,w,r,col,op,off){ let s=`<g opacity="${op}" fill="${col}">`; for(let x=-r+(off||0);x<w+r;x+=r*1.25){ s+=`<circle cx="${r2(x)}" cy="${r2(y+ (Math.sin(x*.05)*r*.25))}" r="${r}"/>`; } s+=`<rect x="0" y="0" width="${w}" height="${y}"/></g>`; return s; }
+function cloudOutline(y,w,r){ let s=''; for(let x=-r;x<w+r;x+=r*1.25){ s+=`<path d="M${r2(x-r*.8)} ${r2(y+Math.sin(x*.05)*r*.25+r*.35)} A${r} ${r} 0 0 1 ${r2(x+r*.8)} ${r2(y+Math.sin(x*.05)*r*.25+r*.35)}" fill="none" stroke="#3b4278" stroke-width="1.4" opacity=".7"/>`; } return s; }
+function hills(y,w,amp,col,step){ let d=`M0 ${y}`; for(let x=0;x<=w+step;x+=step){ d+=` Q${r2(x+step/2)} ${r2(y-amp*(0.4+rnd()*0.8))} ${r2(x+step)} ${y}`; } return `<path d="${d} L${w+step} 2000 L0 2000Z" fill="${col}"/>`; }
+function chhatri(x,y,s,col){ return `<g transform="translate(${x} ${y}) scale(${s})" fill="${col}"><rect x="-14" y="-30" width="28" height="30"/><path d="M-18 -30 Q0 -58 18 -30Z"/><rect x="-1.5" y="-66" width="3" height="10"/><circle cx="0" cy="-56" r="3"/></g>`; }
+function fort(x,y,s){
+  const c='#272a52', c2='#1d1f40'; let win='';
+  for(let i=0;i<7;i++){ win+=`<rect id="${flick(2+rnd()*2,.35,1)}" x="${-150+i*48}" y="-38" width="5" height="8" fill="#ffb85c" opacity=".8"/>`; }
+  let cren=''; for(let i=-180;i<180;i+=14) cren+=`<rect x="${i}" y="-62" width="8" height="8"/>`;
+  return `<g transform="translate(${x} ${y}) scale(${s})" fill="${c}">
+    <rect x="-180" y="-56" width="360" height="56"/>${cren}
+    <rect x="-200" y="-96" width="40" height="96" fill="${c2}"/><path d="M-206 -96 Q-180 -140 -154 -96Z" fill="${c2}"/>
+    <rect x="160" y="-96" width="40" height="96" fill="${c2}"/><path d="M154 -96 Q180 -140 206 -96Z" fill="${c2}"/>
+    <rect x="-40" y="-110" width="80" height="54"/><path d="M-52 -110 Q0 -176 52 -110Z"/><rect x="-2" y="-196" width="4" height="26"/><path d="M2 -196 L22 -190 L2 -184Z" fill="#a8432a"/>
+    ${chhatri(-80,-56,1,c)}${chhatri(80,-56,1,c)}
+    <path d="M-18 0 L-18 -26 Q0 -46 18 -26 L18 0Z" fill="#0f1030"/>${win}</g>`;
+}
+function tent(x,y,s,col){ return `<g transform="translate(${r2(x)} ${r2(y)}) scale(${r2(s)})"><path d="M-22 0 L0 -28 L22 0Z" fill="${col}"/><path d="M0 -28 L4 0 L-4 0Z" fill="#0b0a18" opacity=".6"/><line x1="0" y1="-28" x2="0" y2="-40" stroke="${col}" stroke-width="1.5"/><path d="M0 -40 L9 -37 L0 -34Z" fill="#a8432a"/></g>`; }
+function fire(x,y,s){ const a=flick(5+rnd()*4,.55,1), b=flick(7+rnd()*4,.6,1);
+  return `<g transform="translate(${r2(x)} ${r2(y)}) scale(${r2(s)})"><circle id="${a}" r="34" fill="url(#saf)" opacity=".8"/><path id="${b}" d="M0 2 Q-6 -6 0 -16 Q6 -6 0 2Z" fill="#ffd27a"/></g>`; }
+function camps(x0,x1,y,sc){ let s=''; for(let x=x0;x<x1;x+=38+rnd()*30){ const yy=y+rnd()*18, k=sc*(0.7+rnd()*.5); s+=tent(x,yy,k, rnd()<.5?'#2c2848':'#352a44'); if(rnd()<.45) s+=fire(x+18*k,yy-2,k*.8); } return s; }
+function leaf(x,y,rot,sc,col){ return `<path transform="translate(${r2(x)} ${r2(y)}) rotate(${rot|0}) scale(${sc})" d="M0 -12 Q11 -3 0 14 Q-11 -3 0 -12Z" fill="${col}"/>`; }
+function peepal(x,y,s){
+  let lv=''; const cols=['#14261c','#1a3224','#203c2b','#172b20'];
+  for(let i=0;i<320;i++){ const a=i*2.399, r=Math.sqrt(i)*11.5; const lx=Math.cos(a)*r*1.25, ly=-330+Math.sin(a)*r*.75; lv+=leaf(lx,ly,(i*53)%360,.75, cols[i%4]); }
+  let rim=''; for(let i=0;i<46;i++){ const a=-Math.PI*.12 - i*0.065, r=196+rnd()*14; rim+=leaf(Math.cos(a)*r*1.05+30, -330+Math.sin(a)*r*.72, rnd()*360, .7, '#3e6650'); }
+  return `<g transform="translate(${x} ${y}) scale(${s})">
+    <path d="M-26 0 C-20 -60 -34 -120 -60 -170 L-40 -176 C-18 -140 -6 -110 -2 -90 C4 -120 20 -150 52 -186 L66 -176 C34 -140 22 -80 24 0Z" fill="#1a1222"/>
+    <path d="M-2 -90 C-6 -150 -10 -220 -6 -290" stroke="#1a1222" stroke-width="16" fill="none"/>
+    <path d="M-40 -176 C-80 -220 -120 -250 -150 -260 M52 -186 C90 -230 130 -250 170 -262" stroke="#1a1222" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <ellipse cx="0" cy="-330" rx="235" ry="150" fill="#0e1d15"/>${lv}<g opacity=".5">${rim}</g></g>`;
+}
+function tufts(x0,x1,y,col,n){ let s=''; for(let i=0;i<n;i++){ const x=x0+rnd()*(x1-x0), yy=y+rnd()*40, h=6+rnd()*10; s+=`<path d="M${r2(x)} ${r2(yy)} l-3 -${r2(h)} M${r2(x)} ${r2(yy)} l0 -${r2(h*1.2)} M${r2(x)} ${r2(yy)} l3 -${r2(h)}" stroke="${col}" stroke-width="1.4" fill="none"/>`; } return s; }
+function flowers(x0,x1,y,n){ let s=''; for(let i=0;i<n;i++){ const x=x0+rnd()*(x1-x0), yy=y+rnd()*40; s+=`<g transform="translate(${r2(x)} ${r2(yy)})"><path d="M0 0 L0 -10" stroke="#2d3a2a" stroke-width="1.2"/><circle cx="0" cy="-11" r="2.2" fill="${rnd()<.5?'#c96b4a':'#d8c27a'}" opacity=".7"/></g>`; } return s; }
+
+/* ---------- side-profile figures (face right), base at y=0, ~300 units tall ---------- */
+function brahmin(){
+  return `<g id="brahPH">
+   <ellipse cx="0" cy="0" rx="46" ry="8" fill="#000" opacity=".35"/>
+   <path d="M-30 -150 C-34 -100 -40 -50 -44 -4 L-8 -4 L0 -92 L8 -4 L40 -4 C36 -50 30 -100 26 -150Z" fill="#d9d1bf"/>
+   <path d="M0 -92 L8 -4 L18 -4 Z" fill="#b9b19f"/>
+   <path d="M-40 -4 l-6 5 h22 l0 -5Z M14 -4 l0 5 h26 l-4 -5Z" fill="#7a4e34"/>
+   <path d="M-8 -236 C-28 -232 -36 -214 -36 -192 L-30 -150 L26 -150 L28 -194 C28 -220 18 -234 8 -236Z" fill="#cdbf9e"/>
+   <path d="M-34 -220 C-10 -200 10 -170 26 -150 L10 -150 C-6 -176 -22 -196 -36 -206Z" fill="#c98a2e"/>
+   <rect x="-6" y="-250" width="14" height="18" fill="#7a4e34"/>
+   <path d="M-14 -262 C-16 -284 0 -292 14 -286 C22 -282 24 -274 24 -268 L32 -258 L24 -256 C24 -250 22 -246 16 -244 L-6 -242Z" fill="#8a5a3c"/>
+   <path d="M6 -248 Q26 -246 22 -222 Q12 -210 2 -222 Q-4 -236 -2 -246Z" fill="#e7e1d4"/>
+   <path d="M-22 -270 C-24 -296 2 -306 24 -290 C30 -284 28 -276 22 -276 C10 -280 -4 -282 -18 -264Z" fill="#ece5d4"/>
+   <circle cx="-22" cy="-286" r="9" fill="#ece5d4"/>
+   <circle cx="14" cy="-268" r="2" fill="#1a0f08"/><path d="M10 -273 l8 -1" stroke="#e7e1d4" stroke-width="2"/>
+   <path d="M16 -214 C30 -200 40 -180 46 -160" stroke="#8a5a3c" stroke-width="11" fill="none" stroke-linecap="round"/>
+   <g transform="translate(50 -150)"><line x1="0" y1="-10" x2="0" y2="4" stroke="#6a4a22" stroke-width="2"/>
+     <circle id="lanG" r="90" fill="url(#saf)" opacity=".9"/>
+     <path d="M-8 4 h16 l-2 20 h-12Z" fill="#7a5420"/><rect x="-5" y="7" width="10" height="13" fill="#ffd27a"/><path d="M-9 4 L0 -4 L9 4Z" fill="#5a3a14"/></g>
+   <path d="M-10 -214 C-24 -190 -28 -160 -20 -138" stroke="#8a5a3c" stroke-width="10" fill="none" stroke-linecap="round"/>
+   <line x1="-20" y1="-300" x2="-26" y2="-2" stroke="#5a3c1c" stroke-width="5" stroke-linecap="round"/>
+  </g>`;
+}
+function barbarik(){
+  return `<g id="barbPH">
+   <ellipse cx="0" cy="0" rx="54" ry="9" fill="#000" opacity=".35"/>
+   <path d="M-20 -232 C-56 -200 -78 -110 -96 -6 L-30 -6 C-36 -80 -30 -160 -10 -226Z" fill="#7a1820"/>
+   <path d="M-20 -232 C-56 -200 -78 -110 -96 -6 L-80 -6 C-62 -100 -44 -180 -16 -228Z" fill="#5a1016"/>
+   <g transform="rotate(-18 -18 -200)"><rect x="-34" y="-260" width="18" height="110" rx="5" fill="#4a2c18" stroke="#c99a3a" stroke-width="2"/>
+     <path d="M-31 -260 l3 -18 l3 18Z" fill="#ff4a3c"/><path d="M-26 -260 l3 -24 l3 24Z" fill="#4ee08a"/><path d="M-21 -260 l3 -18 l3 18Z" fill="#ffd25e"/>
+     <circle id="arrG" cx="-25" cy="-270" r="22" fill="url(#saf)" opacity=".9"/></g>
+   <path d="M-28 -148 C-30 -100 -36 -50 -40 -4 L-6 -4 L2 -90 L10 -4 L40 -4 C36 -50 30 -100 26 -148Z" fill="#8e1d24"/>
+   <path d="M2 -90 L10 -4 L20 -4Z" fill="#6a141a"/>
+   <path d="M-36 -4 l-6 5 h22 l0 -5Z M14 -4 l0 5 h28 l-4 -5Z" fill="#6a4630"/>
+   <path d="M-8 -238 C-28 -234 -34 -214 -34 -192 L-28 -148 L26 -148 L28 -194 C28 -222 18 -236 8 -238Z" fill="#1f2640"/>
+   <path d="M-30 -156 L28 -156 L28 -146 L-30 -146Z" fill="url(#gold)"/>
+   <path d="M-24 -228 Q0 -196 24 -226" stroke="url(#gold)" stroke-width="3" fill="none"/>
+   <ellipse cx="-2" cy="-226" rx="22" ry="14" fill="#1f2640" stroke="#c99a3a" stroke-width="2"/>
+   <rect x="-6" y="-252" width="14" height="18" fill="#7a5038"/>
+   <path d="M-12 -244 C-26 -250 -30 -230 -36 -200 L-20 -206 C-18 -226 -14 -238 -8 -242Z" fill="#0d0a10"/>
+   <path d="M-14 -262 C-16 -286 0 -294 14 -288 C22 -284 24 -276 24 -270 L32 -260 L24 -258 C24 -252 22 -248 16 -246 L-6 -244Z" fill="#8c6248"/>
+   <path d="M-16 -268 C-20 -292 0 -300 18 -290 L14 -280 C2 -284 -8 -282 -12 -262Z" fill="#0d0a10"/>
+   <path d="M-16 -286 L-12 -318 L-4 -300 L2 -326 L8 -300 L16 -316 L18 -286Z" fill="url(#gold)"/><circle cx="2" cy="-296" r="3" fill="#d63a2a"/>
+   <circle cx="14" cy="-270" r="2.2" fill="#1a0f08"/><path d="M9 -276 l10 -2" stroke="#0d0a10" stroke-width="2.4"/>
+   <path d="M12 -252 q8 0 12 -2" stroke="#0d0a10" stroke-width="2.4" fill="none"/>
+   <circle cx="-4" cy="-256" r="4" fill="none" stroke="#e8b83a" stroke-width="2"/>
+   <path d="M16 -220 C34 -200 44 -180 50 -168" stroke="#8c6248" stroke-width="12" fill="none" stroke-linecap="round"/>
+   <path d="M44 -330 Q96 -200 44 -40" stroke="#6a4218" stroke-width="7" fill="none" stroke-linecap="round"/>
+   <path d="M44 -330 Q96 -200 44 -40" stroke="#d9a73a" stroke-width="2" fill="none"/>
+   <line x1="44" y1="-330" x2="44" y2="-40" stroke="#e9e1c8" stroke-width="1.2"/>
+  </g>`;
+}
+
+/* ======================= BUILD SCENE ======================= */
+const svg=document.getElementById('svg'), stage=document.getElementById('stage');
+stage.style.width=W+'px'; stage.style.height=H+'px';
+svg.setAttribute('width',W); svg.setAttribute('height',H); svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+
+const sky = `<rect width="${W}" height="${H}" fill="url(#sky)"/>`;
+const skyFar = stars(FMT==='long'?110:90, WORLD, L.farY*0.8) +
+  `<circle cx="${L.moon[0]}" cy="${L.moon[1]}" r="${L.moon[2]*4}" fill="url(#moonG)" opacity=".5"/>`+
+  `<circle cx="${L.moon[0]}" cy="${L.moon[1]}" r="${L.moon[2]}" fill="#f3ecd2"/><circle cx="${L.moon[0]+L.moon[2]*.42}" cy="${L.moon[1]-L.moon[2]*.18}" r="${L.moon[2]*.92}" fill="#121a40"/>`+
+  cloudBand(36, WORLD, 30, '#1b2150', 1, 0) + cloudOutline(36, WORLD, 30) +
+  cloudBand(14, WORLD, 22, '#151a42', 1, 14) + cloudOutline(14, WORLD, 22);
+const far = hills(L.farY, WORLD, 40, '#1d1d40', 140) + fort(L.fort[0], L.fort[1], L.fort[2]) +
+  `<rect x="0" y="${L.farY-30}" width="${WORLD}" height="70" fill="url(#fogG)"/>`;
+const mid = hills(L.campY-18, WORLD, 16, '#231f3c', 90) + camps(L.camp[0], L.camp[1], L.campY, FMT==='long'?.9:1.1) +
+  `<rect x="0" y="${L.campY-10}" width="${WORLD}" height="60" fill="url(#fogG)" opacity=".8"/>`;
+const near = `<path d="M0 ${L.groundY} Q${WORLD*.5} ${L.groundY-34} ${WORLD} ${L.groundY-8} L${WORLD} ${H+200} L0 ${H+200}Z" fill="url(#ground)"/>`+
+  `<path d="M0 ${L.groundY} Q${WORLD*.5} ${L.groundY-34} ${WORLD} ${L.groundY-8}" stroke="#4a3e5a" stroke-width="2" fill="none" opacity=".7"/>`+
+  tufts(0, WORLD, L.groundY-10, '#3a3a4a', FMT==='long'?120:70) + flowers(0, WORLD, L.groundY, FMT==='long'?40:26) +
+  peepal(L.tree[0], L.tree[1], L.tree[2]);
+const FGW = WORLD + (WORLD-W)*0.35 + 120;   // foreground moves faster (parallax), so it must be wider
+const fg = `<path d="M-50 ${H+10} Q${FGW*.3} ${H-50} ${FGW*.6} ${H-20} T${FGW} ${H-40} L${FGW} ${H+40} L-50 ${H+40}Z" fill="#07060c"/>`+
+  tufts(0, FGW, H-46, '#121018', 70);
+
+const barbS = L.barb[3]||L.barb[2];
+svg.innerHTML = DEFS + sky +
+  `<g id="Lsky">${skyFar}</g><g id="Lfar">${far}</g><g id="Lmid">${mid}</g>`+
+  `<g id="Lnear">${near}
+     <g id="barbG" transform="translate(${L.barb[0]} ${L.barb[1]}) scale(${-L.barb[2]} ${L.barb[2]})">${barbarik()}<image id="barbIMG" style="display:none" preserveAspectRatio="xMidYMax meet"/></g>
+     <g id="brahG"><circle id="auraC" cx="0" cy="-160" r="170" fill="url(#aura)" opacity=".35"/><ellipse cx="40" cy="0" rx="150" ry="22" fill="url(#saf)" opacity=".5"/>${brahmin()}<image id="brahIMG" style="display:none" preserveAspectRatio="xMidYMax meet"/></g>
+   </g>`+
+  `<g id="Lfg">${fg}</g>`+
+  `<rect width="${W}" height="${H}" filter="url(#blotch)" style="mix-blend-mode:multiply"/>`+
+  `<rect width="${W}" height="${H}" filter="url(#paper)" style="mix-blend-mode:overlay" opacity=".55"/>`+
+  `<rect width="${W}" height="${H}" fill="none" stroke="#000" stroke-opacity=".0"/>`+
+  `<radialGradient id="vg" cx="50%" cy="45%" r="75%"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".6"/></radialGradient><rect width="${W}" height="${H}" fill="url(#vg)"/>`;
+
+/* user PNG characters (optional) */
+function useImg(imgId, phId, src, mirrorFix){
+  const im=new Image();
+  im.onload=()=>{ const el=document.getElementById(imgId), h=320, w=h*im.naturalWidth/im.naturalHeight;
+    el.setAttribute('href',src); el.setAttribute('width',w); el.setAttribute('height',h); el.setAttribute('x',-w/2); el.setAttribute('y',-h);
+    if(mirrorFix) el.setAttribute('transform','scale(-1 1)');
+    el.style.display=''; document.getElementById(phId).style.display='none'; };
+  im.src=src;
+}
+useImg('barbIMG','barbPH',BARB_PNG,FLIP_BARB);
+useImg('brahIMG','brahPH',BRAH_PNG,false);
+
+/* caption */
+const cap=document.getElementById('cap');
+cap.style.top=L.capY+'px'; cap.style.fontSize=L.capSize+'px';
+const words=LINE.split(/\s+/); const spans=words.map(w=>{ const s=document.createElement('span'); s.className='w'; s.textContent=w; cap.appendChild(s); return s; });
+const CAP0=2.0, CAP1=9.0;
+if(qs.has('notext')) cap.style.display='none';
+
+/* particles: embers from camps + fireflies near tree */
+const cv=document.getElementById('fx'); cv.width=W; cv.height=H; const cx=cv.getContext('2d');
+const EM=Array.from({length:FMT==='long'?60:50},()=>({x:rnd()*WORLD,y:L.campY+rnd()*20,s:8+rnd()*14,ph:rnd()*6,life:3+rnd()*4,off:rnd()*7}));
+const FF=Array.from({length:22},()=>({x:L.tree[0]+(rnd()-.5)*360*L.tree[2],y:L.tree[1]-40-rnd()*260*L.tree[2],ph:rnd()*6}));
+
+/* ======================= TIMELINE ======================= */
+const $=id=>document.getElementById(id);
+const ease=k=>k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+function render(t){
+  const k=Math.min(1,t/DUR);
+  let camX=0, camY=0, zoom=1;
+  if(FMT==='long'){ camX = -(WORLD-W)*ease(Math.min(1,t/9.5)); }
+  else { zoom = 1+0.07*ease(k); camY = -14*ease(k); }
+  const par=(id,f,fy)=>$(id).setAttribute('transform',`translate(${r2(camX*f)} ${r2(camY*(fy||f))})`);
+  par('Lsky',.12,.2); par('Lfar',.38,.4); par('Lmid',.62,.6); par('Lnear',1,1); par('Lfg',1.3,1.2);
+  if(FMT==='short'){ svg.style.transformOrigin='60% 75%'; svg.style.transform=`scale(${zoom.toFixed(4)})`; }
+
+  // brahmin walk
+  const wk=Math.min(1,Math.max(0,(t-0.6)/7.5)), bx=L.brah[0]+(L.brah[1]-L.brah[0])*(1-Math.pow(1-wk,1.6));
+  const bob = wk<1 ? -Math.abs(Math.sin(t*4.2))*4 : 0;
+  $('brahG').setAttribute('transform',`translate(${r2(bx)} ${r2(L.brah[2]+bob)}) scale(${L.brah[3]})`);
+  $('auraC').setAttribute('opacity',(0.25+0.15*Math.sin(t*2)).toFixed(3));
+  const lg=$('lanG'); if(lg) lg.setAttribute('opacity',(0.75+0.2*Math.sin(t*9)+0.05*Math.sin(t*23)).toFixed(3));
+  const ag=$('arrG'); if(ag) ag.setAttribute('opacity',(0.55+0.4*Math.sin(t*2.4)).toFixed(3));
+  // barbarik subtle breathing
+  const br=1+0.006*Math.sin(t*1.6);
+  $('barbG').setAttribute('transform',`translate(${L.barb[0]} ${L.barb[1]}) scale(${r2(-L.barb[2]*1000)/1000} ${(L.barb[2]*br).toFixed(4)})`);
+
+  FLICK.forEach(f=>{ const e=$(f[0]); if(e) e.setAttribute('opacity',(f[3]+(f[4]-f[3])*(0.5+0.5*Math.sin(t*f[1]+f[2]))).toFixed(3)); });
+
+  // particles
+  cx.clearRect(0,0,W,H);
+  EM.forEach(p=>{ const lt=((t+p.off)%p.life)/p.life; const x=p.x+camX*.62+Math.sin(t+p.ph)*6, y=p.y+camY*.6-lt*p.s*p.life*3;
+    cx.globalAlpha=(1-lt)*.8; cx.fillStyle='#ffb45a'; cx.beginPath(); cx.arc(x,y,1.3,0,6.283); cx.fill(); });
+  FF.forEach(p=>{ const x=p.x+camX+Math.sin(t*.7+p.ph)*16, y=p.y+camY+Math.cos(t*.9+p.ph)*10;
+    const a=Math.max(0,Math.sin(t*1.8+p.ph)); cx.globalAlpha=a*.9; cx.fillStyle='#e8ff9a';
+    cx.shadowColor='#d8ff7a'; cx.shadowBlur=8; cx.beginPath(); cx.arc(x,y,1.8,0,6.283); cx.fill(); cx.shadowBlur=0; });
+  cx.globalAlpha=1;
+
+  // caption
+  const ck=(t-CAP0)/(CAP1-CAP0); cap.style.opacity = t<CAP0-0.4?0:1;
+  spans.forEach((s,i)=>s.classList.toggle('on', ck>=i/words.length));
+}
+
+function fit(){ stage.style.transform=`scale(${Math.min(innerWidth/W, innerHeight/H)})`; }
+addEventListener('resize',fit); fit();
+if(qs.has('clean')) document.body.classList.add('clean');
+const fixed = qs.has('t') ? parseFloat(qs.get('t')) : null;
+let t0=performance.now();
+$('restart').onclick=()=>{ t0=performance.now(); };
+(function loop(){ const t = fixed!==null ? fixed : ((performance.now()-t0)/1000)%DUR; render(t); requestAnimationFrame(loop); })();
+})();
+</script>
+</body>
+</html>
