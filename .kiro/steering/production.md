@@ -13,6 +13,7 @@ Targets: 30 Shorts + 4 long videos a month, with his own voice. **Credits matter
 - Work on a branch, open a PR to `main` with `gh api` (no `gh pr create`), and give the user the link.
 
 ## Where things are
+- **For normal video sessions read `engine/API.md` (one-page cheat sheet of every character, pose, scene, prop, camera/fx/transition/mood option and story.js field). Do NOT open the engine source files (`rig.js`, `scenes.js`, `core.js`, `characters.js`, `timing.js`) unless you are changing the engine itself or API.md is missing something. If you add or change an engine feature, update `engine/API.md` in the same PR.**
 - `engine/`: `rig.js` (jointed characters, poses, props), `characters.js` (costume presets), `scenes.js` (backgrounds and pieces), `timing.js`, `core.js` (player, captions, prompter, `seek()`), `engine.css`, `fonts/`.
 - `tools/build.js <topic>` makes `<topic>/index.html` and `<topic>/script.md` from `<topic>/story.js`.
 - `tools/render.js <topic>` runs **on the user's Mac only** (this sandbox has no ffmpeg). It makes a 1080x1920 MP4 and adds `voice.m4a` from the topic folder. The user double-clicks `make-video.command`.
@@ -29,7 +30,7 @@ Targets: 30 Shorts + 4 long videos a month, with his own voice. **Credits matter
 4. When editing an existing video, change only the shots the user names, and don't recapture shots that didn't change.
 
 ## Animation pack (done, see README "Animation pack")
-Depth layers + parallax, keyframed camera / face close-ups, head turns + secondary motion + gestures, mood per emotion, cinematic transitions, hook text, intro sting (`intro`) and end card (`outro`). Use them in new stories. `chandra-27-wives-short-form/` is the reference.
+Depth layers + parallax, keyframed camera / face close-ups, head turns + secondary motion + gestures, mood per emotion, cinematic transitions, hook text, intro sting (`intro`) and end card (`outro`). Use them in new stories (options are listed in `engine/API.md`). `chandra-27-wives-short-form/` is the reference.
 
 ## Planned next work
 - Audio pipeline in `render.js`: denoise, EQ, de-ess, compression, loudness normalized to -14 LUFS; sync shots to the real voice using pauses; background music from `music/` with ducking; automatic SFX; voice-driven mouth.
