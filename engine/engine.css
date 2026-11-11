@@ -1,0 +1,39 @@
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{position:relative;width:540px;height:960px;overflow:hidden;transform-origin:center;background:#07081a;flex:none}
+.scene{position:absolute;inset:0;opacity:0;display:none;transform-origin:0 0;will-change:transform,opacity}
+.scene svg,#over{position:absolute;inset:0;width:540px;height:960px}
+canvas{position:absolute;inset:0;pointer-events:none;z-index:5}
+#over{z-index:6;pointer-events:none}
+#flash{position:absolute;inset:0;z-index:7;opacity:0;pointer-events:none}
+#shade{position:absolute;left:0;right:0;top:320px;height:270px;z-index:7;pointer-events:none;
+  background:linear-gradient(transparent,rgba(5,3,12,.55) 35%,rgba(5,3,12,.55) 65%,transparent)}
+/* Captions sit in the upper-middle band: above character heads and clear of YouTube Shorts' bottom UI. */
+#cap{position:absolute;left:28px;right:28px;top:400px;z-index:8;text-align:center;min-height:100px;
+  font-family:'Mukta','Kohinoor Devanagari','Noto Sans Devanagari','Nirmala UI',sans-serif;font-weight:800;font-size:40px;line-height:1.28;color:#f6ecd2;
+  text-shadow:0 3px 0 #1a0d05,0 0 14px rgba(0,0,0,.9)}
+#cap .chunk{display:none}
+#cap .w{display:inline-block;opacity:.88;transition:color .08s,transform .08s}
+#cap .w.said{opacity:1}
+#cap .w.on{color:#ffd25e;opacity:1;transform:translateY(-2px) scale(1.07);text-shadow:0 3px 0 #3a1a05,0 0 18px rgba(255,180,60,.75)}
+#cap .w.hl{color:#ffb347}
+#cap .w.hl.on{color:#ff8a2a}
+svg text{font-family:'Mukta','Kohinoor Devanagari','Noto Sans Devanagari',sans-serif;font-weight:800}
+#bar{position:absolute;left:0;bottom:0;height:4px;background:#e0453a;width:0;z-index:9}
+#ui{position:fixed;top:10px;left:10px;z-index:20;display:flex;gap:8px}
+#ui button{background:#222c;color:#fff;border:1px solid #555;border-radius:6px;padding:6px 12px;cursor:pointer;font:14px sans-serif}
+body.clean #ui,body.clean #bar{display:none}
+/* ---- prompter ---- */
+#prompter{display:none}
+body.prompt #prompter{display:block;position:fixed;left:0;right:0;top:0;z-index:30;background:rgba(8,6,16,.92);color:#fff;padding:14px 24px 16px;
+  font-family:'Tiro','Mukta','Kohinoor Devanagari','Noto Sans Devanagari',sans-serif;border-bottom:2px solid #e0453a}
+body.prompt #ui{top:auto;bottom:10px}
+#prompter .meta{font:600 15px 'Mukta',sans-serif;color:#ffb347;letter-spacing:.5px}
+#prompter .now{font-size:34px;line-height:1.35;margin:6px 0 4px;min-height:46px}
+#prompter .next{font-size:20px;color:#9a94b0;min-height:28px}
+#prompter .pbar{height:5px;background:#333;margin-top:10px;border-radius:3px;overflow:hidden}
+#prompter .pbar i{display:block;height:100%;width:0;background:#ffd25e}
+#prompter .start{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.75);gap:12px}
+#prompter .start button{font:700 22px 'Mukta',sans-serif;padding:14px 28px;border-radius:10px;border:0;background:#e0453a;color:#fff;cursor:pointer}
+#prompter .start small{font:14px sans-serif;color:#ccc}
+#prompter .count{position:fixed;inset:0;display:none;align-items:center;justify-content:center;font:800 160px 'Mukta',sans-serif;color:#ffd25e;background:rgba(0,0,0,.6)}
