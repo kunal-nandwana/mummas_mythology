@@ -46,3 +46,13 @@ Each video is one short file, `<topic>-short-form/story.js`. It lists the shots:
 6. **Upload** to YouTube.
 
 URL options: `?shot=N` (jump to a shot), `?notext=1` (hide captions), `?clean=1` (hide buttons), `?prompter=1` (recording mode).
+
+## On your Mac
+
+**One-time setup (about 10 minutes):**
+1. Open Terminal and run `git clone https://github.com/kunal-nandwana/mummas_mythology.git` (this makes a `mummas_mythology` folder in your home folder).
+2. In Finder, open that folder and double-click **`setup-mac.command`**. If macOS blocks it, right-click it → **Open** → **Open**. It installs Node.js, ffmpeg and the renderer.
+
+**For every video:** double-click **`make-video.command`**. It gets the latest videos from GitHub, asks which video, and makes the MP4 (about 3–6 minutes on an M1).
+
+Manual commands, if you prefer: `node tools/build.js <topic>` and `node tools/render.js <topic> [--voice file.m4a] [--offset 0.3]`.

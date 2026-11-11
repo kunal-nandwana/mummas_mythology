@@ -1,0 +1,12 @@
+{
+  "name": "mummas-mythology",
+  "private": true,
+  "description": "Animated Hindi mythology videos drawn in code",
+  "scripts": {
+    "build": "node tools/build.js",
+    "render": "node tools/render.js"
+  },
+  "dependencies": {
+    "playwright": "^1.48.0"
+  }
+}

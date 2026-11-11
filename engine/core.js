@@ -48,7 +48,7 @@ function VIDEO(cfg){
     sc.anims=[...d.querySelectorAll('[data-a]')].map(e=>{ const p=e.dataset.a.split(':'); return {e,type:p[0],a:p.slice(1).map(Number),ph:rnd()*6.28}; });
     if(NOTEXT) d.querySelectorAll('text').forEach(e=>e.style.display='none');
     // captions
-    sc.chunks=captionChunks(sc.words, cfg.captionChars||24).map(ch=>{ const el=document.createElement('div'); el.className='chunk';
+    sc.chunks= sc.nocap ? [] : captionChunks(sc.words, cfg.captionChars||24).map(ch=>{ const el=document.createElement('div'); el.className='chunk';
       ch.forEach(w=>{ const s=document.createElement('span'); s.className='w'+(KEY.some(k=>tStrip(w.text).includes(k))?' hl':''); s.textContent=w.text; w.el=s; el.appendChild(s); el.appendChild(document.createTextNode(' ')); });
       cap.appendChild(el); return {el, words:ch, t:ch[0].t}; });
   });
