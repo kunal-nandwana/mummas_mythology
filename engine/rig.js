@@ -205,10 +205,12 @@ function bindRig(r, root){
   r.keys=(r.cast.acts||[[0,r.cast.pose||'stand']]).map(k=>({t:k[0], p:poseOf(k[1]), d:k[2]||0.55})).sort((a,b)=>a.t-b.t);
   if(r.keys[0].t>0) r.keys.unshift({t:0,p:poseOf(r.cast.pose||'stand'),d:0});
 }
+// poses settle with a tiny overshoot (a living spring) instead of a robotic ease
+const easeSpring=k=>{ k=clamp01(k); const c1=1.1, c3=c1+1; return 1+c3*Math.pow(k-1,3)+c1*Math.pow(k-1,2); };
 function poseAt(r, lt){
   const K=r.keys; let i=0; while(i+1<K.length && K[i+1].t<=lt) i++;
   const cur=K[i]; if(i===0 || lt-cur.t>=cur.d) return cur.p;
-  return blendPose(K[i-1].p, cur.p, easeIO((lt-cur.t)/cur.d));
+  return blendPose(K[i-1].p, cur.p, easeSpring((lt-cur.t)/cur.d));
 }
 const show=(e,on)=>{ if(e) e.style.display=on?'':'none'; };
 const setT=(e,tr)=>{ if(e) e.setAttribute('transform',tr); };
@@ -255,6 +257,8 @@ function updateRig(r, lt, t, talking){
   } else if(free>0.5){ P.a=[P.a[0]+1.5*Math.sin(t*1.3+sd), P.a[1]+2*Math.sin(t*1.1+sd)]; }
   if(ex==='angry' && TT){ nod+=0.7*Math.sin(t*47+sd); }          // trembling with rage
 
+  // anticipation: the body dips a touch as each new pose starts, then springs up
+  if(!cast.walk){ const K=r.keys; let ki=0; while(ki+1<K.length && K[ki+1].t<=lt) ki++; if(ki>0){ const u=(lt-K[ki].t)/0.32; if(u>=0&&u<1) bob+=Math.sin(Math.PI*u)*3.2; } }
   // breathing
   const br=Math.sin(t*2.1+sd)*1.1;
   setT(q.root, `translate(${r1(x)} ${r1(y)}) scale(${s*flip} ${s})`); q.root.setAttribute('opacity', op.toFixed(3));

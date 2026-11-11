@@ -53,7 +53,7 @@ function VIDEO(cfg){
   /* ---- build every shot once ---- */
   SH.forEach((sc,i)=>{
     const rigs=(sc.cast||[]).map(makeRig);
-    const title = sc.title ? big(W/2, sc.title.y||150, sc.title.size||60, sc.title.color||'#ffd25e', sc.title.text, sc.title.delay||0.5) : '';
+    const title = sc.title ? big(W/2, sc.title.y||150, (sc.title.size||50)*0.82, sc.title.color||'#ffd25e', sc.title.text, sc.title.delay||0.5) : '';
     const d=document.createElement('div'); d.className='scene';
     const stage0=`${sc.art?sc.art():''}${rigs.map(r=>r.svg).join('')}${sc.front?sc.front():''}${title}`;
     const layered=!!(sc.sky||sc.far||sc.mid||sc.near);
@@ -66,7 +66,7 @@ function VIDEO(cfg){
     sc.anims=[...d.querySelectorAll('[data-a]')].map(e=>{ const p=e.dataset.a.split(':'); return {e,type:p[0],a:p.slice(1).map(Number),ph:rnd()*6.28}; });
     if(NOTEXT) d.querySelectorAll('text').forEach(e=>e.style.display='none');
     // captions
-    sc.chunks= sc.nocap ? [] : captionChunks(sc.words, cfg.captionChars||24).map(ch=>{ const el=document.createElement('div'); el.className='chunk';
+    sc.chunks= sc.nocap ? [] : captionChunks(sc.words, cfg.captionChars||28).map(ch=>{ const el=document.createElement('div'); el.className='chunk';
       ch.forEach(w=>{ const s=document.createElement('span'); s.className='w'+(KEY.some(k=>tStrip(w.text).includes(k))?' hl':''); s.textContent=w.text; w.el=s; el.appendChild(s); el.appendChild(document.createTextNode(' ')); });
       cap.appendChild(el); return {el, words:ch, t:ch[0].t}; });
   });
@@ -294,6 +294,7 @@ function VIDEO(cfg){
     if(active>=0) placeCap(SH[active].capTop||CAPTOP);
     SH.forEach((sc,i)=>{ let ag=-1; if(i===active) sc.chunks.forEach((c,ci)=>{ if(t>=c.t-0.05) ag=ci; });
       sc.chunks.forEach((c,ci)=>{ const on=ci===ag; c.el.style.display=on?'block':'none';
+        if(on){ const k=clamp01((t-c.t)/0.22), e=1-Math.pow(1-k,3); c.el.style.opacity=(0.2+0.8*e).toFixed(2); c.el.style.transform=`translateY(${((1-e)*16).toFixed(1)}px) scale(${(0.94+0.06*e).toFixed(3)})`; }
         if(on) c.words.forEach(w=>{ w.el.classList.toggle('on', t>=w.t && t<w.e); w.el.classList.toggle('said', t>=w.e); }); }); });
     updateHook(t); updateSting(t); updateCard(t);
     bar.style.width=(100*t/DURATION)+'%';

@@ -29,12 +29,12 @@ canvas{position:absolute;inset:0;pointer-events:none;z-index:5}
   background:linear-gradient(transparent,rgba(5,3,12,.55) 35%,rgba(5,3,12,.55) 65%,transparent)}
 /* Captions sit in the upper-middle band: above character heads and clear of YouTube Shorts' bottom UI. */
 #cap{position:absolute;left:28px;right:28px;top:400px;z-index:8;text-align:center;min-height:100px;
-  font-family:'Mukta','Kohinoor Devanagari','Noto Sans Devanagari','Nirmala UI',sans-serif;font-weight:800;font-size:40px;line-height:1.28;color:#f6ecd2;
+  font-family:'Mukta','Kohinoor Devanagari','Noto Sans Devanagari','Nirmala UI',sans-serif;font-weight:800;font-size:31px;line-height:1.3;color:#f6ecd2;
   text-shadow:0 3px 0 #1a0d05,0 0 14px rgba(0,0,0,.9)}
 #cap .chunk{display:none}
-#cap .w{display:inline-block;opacity:.88;transition:color .08s,transform .08s}
-#cap .w.said{opacity:1}
-#cap .w.on{color:#ffd25e;opacity:1;transform:translateY(-2px) scale(1.07);text-shadow:0 3px 0 #3a1a05,0 0 18px rgba(255,180,60,.75)}
+#cap .w{display:inline-block;opacity:.55;transition:color .08s,transform .08s}
+#cap .w.said{opacity:.95}
+#cap .w.on{color:#ffd25e;opacity:1;transform:translateY(-2px) scale(1.1);text-shadow:0 3px 0 #3a1a05,0 0 18px rgba(255,180,60,.75)}
 #cap .w.hl{color:#ffb347}
 #cap .w.hl.on{color:#ff8a2a}
 svg text{font-family:'Mukta','Kohinoor Devanagari','Noto Sans Devanagari',sans-serif;font-weight:800}
@@ -484,10 +484,12 @@ function bindRig(r, root){
   r.keys=(r.cast.acts||[[0,r.cast.pose||'stand']]).map(k=>({t:k[0], p:poseOf(k[1]), d:k[2]||0.55})).sort((a,b)=>a.t-b.t);
   if(r.keys[0].t>0) r.keys.unshift({t:0,p:poseOf(r.cast.pose||'stand'),d:0});
 }
+// poses settle with a tiny overshoot (a living spring) instead of a robotic ease
+const easeSpring=k=>{ k=clamp01(k); const c1=1.1, c3=c1+1; return 1+c3*Math.pow(k-1,3)+c1*Math.pow(k-1,2); };
 function poseAt(r, lt){
   const K=r.keys; let i=0; while(i+1<K.length && K[i+1].t<=lt) i++;
   const cur=K[i]; if(i===0 || lt-cur.t>=cur.d) return cur.p;
-  return blendPose(K[i-1].p, cur.p, easeIO((lt-cur.t)/cur.d));
+  return blendPose(K[i-1].p, cur.p, easeSpring((lt-cur.t)/cur.d));
 }
 const show=(e,on)=>{ if(e) e.style.display=on?'':'none'; };
 const setT=(e,tr)=>{ if(e) e.setAttribute('transform',tr); };
@@ -534,6 +536,8 @@ function updateRig(r, lt, t, talking){
   } else if(free>0.5){ P.a=[P.a[0]+1.5*Math.sin(t*1.3+sd), P.a[1]+2*Math.sin(t*1.1+sd)]; }
   if(ex==='angry' && TT){ nod+=0.7*Math.sin(t*47+sd); }          // trembling with rage
 
+  // anticipation: the body dips a touch as each new pose starts, then springs up
+  if(!cast.walk){ const K=r.keys; let ki=0; while(ki+1<K.length && K[ki+1].t<=lt) ki++; if(ki>0){ const u=(lt-K[ki].t)/0.32; if(u>=0&&u<1) bob+=Math.sin(Math.PI*u)*3.2; } }
   // breathing
   const br=Math.sin(t*2.1+sd)*1.1;
   setT(q.root, `translate(${r1(x)} ${r1(y)}) scale(${s*flip} ${s})`); q.root.setAttribute('opacity', op.toFixed(3));
@@ -697,7 +701,7 @@ function VIDEO(cfg){
   /* ---- build every shot once ---- */
   SH.forEach((sc,i)=>{
     const rigs=(sc.cast||[]).map(makeRig);
-    const title = sc.title ? big(W/2, sc.title.y||150, sc.title.size||60, sc.title.color||'#ffd25e', sc.title.text, sc.title.delay||0.5) : '';
+    const title = sc.title ? big(W/2, sc.title.y||150, (sc.title.size||50)*0.82, sc.title.color||'#ffd25e', sc.title.text, sc.title.delay||0.5) : '';
     const d=document.createElement('div'); d.className='scene';
     const stage0=`${sc.art?sc.art():''}${rigs.map(r=>r.svg).join('')}${sc.front?sc.front():''}${title}`;
     const layered=!!(sc.sky||sc.far||sc.mid||sc.near);
@@ -710,7 +714,7 @@ function VIDEO(cfg){
     sc.anims=[...d.querySelectorAll('[data-a]')].map(e=>{ const p=e.dataset.a.split(':'); return {e,type:p[0],a:p.slice(1).map(Number),ph:rnd()*6.28}; });
     if(NOTEXT) d.querySelectorAll('text').forEach(e=>e.style.display='none');
     // captions
-    sc.chunks= sc.nocap ? [] : captionChunks(sc.words, cfg.captionChars||24).map(ch=>{ const el=document.createElement('div'); el.className='chunk';
+    sc.chunks= sc.nocap ? [] : captionChunks(sc.words, cfg.captionChars||28).map(ch=>{ const el=document.createElement('div'); el.className='chunk';
       ch.forEach(w=>{ const s=document.createElement('span'); s.className='w'+(KEY.some(k=>tStrip(w.text).includes(k))?' hl':''); s.textContent=w.text; w.el=s; el.appendChild(s); el.appendChild(document.createTextNode(' ')); });
       cap.appendChild(el); return {el, words:ch, t:ch[0].t}; });
   });
@@ -938,6 +942,7 @@ function VIDEO(cfg){
     if(active>=0) placeCap(SH[active].capTop||CAPTOP);
     SH.forEach((sc,i)=>{ let ag=-1; if(i===active) sc.chunks.forEach((c,ci)=>{ if(t>=c.t-0.05) ag=ci; });
       sc.chunks.forEach((c,ci)=>{ const on=ci===ag; c.el.style.display=on?'block':'none';
+        if(on){ const k=clamp01((t-c.t)/0.22), e=1-Math.pow(1-k,3); c.el.style.opacity=(0.2+0.8*e).toFixed(2); c.el.style.transform=`translateY(${((1-e)*16).toFixed(1)}px) scale(${(0.94+0.06*e).toFixed(3)})`; }
         if(on) c.words.forEach(w=>{ w.el.classList.toggle('on', t>=w.t && t<w.e); w.el.classList.toggle('said', t>=w.e); }); }); });
     updateHook(t); updateSting(t); updateCard(t);
     bar.style.width=(100*t/DURATION)+'%';
