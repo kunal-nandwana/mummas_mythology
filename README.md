@@ -55,7 +55,7 @@ Old stories keep working. New options, shown in `chandra-27-wives-short-form/sto
 - **Mood:** `mood:'calm'|'joy'|'hope'|'anger'|'sad'|'shock'|'divine'` sets the lighting, colour and rim light. Moods cross-fade between shots.
 - **Transitions into a shot:** `tr:'fade'|'glow'|'whip'|'zoom'|'iris'|'wipe'|'flash'|'dip'|'cut'` (`trAt:[x,y]` sets the iris centre).
 - **Hook text:** `hook:{at,hold,words:[{text,size,y,delay,count:[from,to]}]}` slams in during the first 2 seconds.
-- **Channel sting and end card:** `intro:1.0` and `outro:3.6`. The intro makes every shot start 1 s later; the renderer lines your voice up for you.
+- **Channel sting and end card:** switched off on purpose (no "Mumma's Mythology" intro or end card). Videos start straight with the story.
 
 URL options: `?shot=N` (jump to a shot), `?notext=1` (hide captions), `?clean=1` (hide buttons), `?prompter=1` (recording mode).
 
