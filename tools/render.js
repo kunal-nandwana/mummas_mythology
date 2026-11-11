@@ -14,6 +14,8 @@
    Music:  original background music from music/ (made automatically by tools/make-music.js). Choose per video with
            music:'calm'|'dark'|'bright' (or false) in story.js, or --music dark / --nomusic / --musicvol 0.2.
            It fades in and out and gets quieter whenever you speak.
+   SFX:    whoosh / boom / bell sounds are added at transitions and the hook (original, made by tools/sfx.js).
+           --nosfx turns them off, --sfxvol 0.8 sets the loudness.
    Output: <topic-folder>/<topic-folder>.mp4
    ===================================================================== */
 const fs=require('fs'), path=require('path'), {spawn, spawnSync}=require('child_process');
@@ -61,15 +63,15 @@ function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain()
   await page.goto('file://'+HTML+'?render=1'+(opt('notext')?'&notext=1':''));
   await page.waitForFunction(()=>window.__ENGINE); await page.evaluate(()=>window.__ENGINE.ready); await page.waitForTimeout(400);
   if(errs.length){ console.error('✗ Page error:', errs[0]); process.exit(1); }
-  const {duration, shots, music}=await page.evaluate(()=>({duration:window.__ENGINE.duration, shots:window.__ENGINE.shots, music:window.__ENGINE.music}));
+  const {duration, shots, music, voiceAt, sfx}=await page.evaluate(()=>({duration:window.__ENGINE.duration, shots:window.__ENGINE.shots, music:window.__ENGINE.music, voiceAt:window.__ENGINE.voiceAt, sfx:window.__ENGINE.sfx}));
   const N=Math.ceil(duration*FPS), out=path.join(DIR,topic+'.mp4');
 
   let shift=0, audioArgs=[], vf=null;
   if(voice && fs.existsSync(voice)){
     const lead=leadSilence(voice), off=+(opt('offset')||0);
-    const first = shots.length ? shots[0].start : 0;   // intro sting length: the voice starts when shot 1 starts
+    const first = voiceAt || 0;   // the voice starts when the narration starts (after any opening montage)
     shift = lead - 0.15 - first - off;      // seconds to cut from the start of the recording (negative = add delay)
-    console.log(`♪ voice: ${path.basename(voice)}  (speech starts at ${lead.toFixed(2)}s → aligned to shot 1${first?`, after the ${first.toFixed(1)}s intro`:''}${off?`, offset ${off}s`:''})`);
+    console.log(`♪ voice: ${path.basename(voice)}  (speech starts at ${lead.toFixed(2)}s → aligned to shot 1${first?`, after the ${first.toFixed(1)}s opening`:''}${off?`, offset ${off}s`:''})`);
     vf = voiceFilter(voice);
     audioArgs = shift>=0 ? ['-ss',shift.toFixed(3),'-i',voice] : ['-i',voice];
   } else console.log('♪ no voice file found: rendering a silent video (put voice.m4a in the topic folder to add it)');
@@ -80,17 +82,27 @@ function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain()
   if(wantMusic){ musicFile=path.join(ROOT,'music',wantMusic+'.wav');
     if(!fs.existsSync(musicFile)){ try{ require('./make-music').makeTrack(wantMusic); }catch(e){ console.log('♫ could not make music "'+wantMusic+'" (calm | dark | bright): rendering without it'); musicFile=null; } }
     if(musicFile) console.log(`♫ background music: ${wantMusic}${voice&&audioArgs.length?' (ducks under your voice)':''}`); }
-  const hasVoice=audioArgs.length>0, mIn=hasVoice?2:1, vol=+(opt('musicvol')||0.2), D=duration.toFixed(2);
-  const musicArgs = musicFile ? ['-stream_loop','-1','-i',musicFile] : [];
-  const mChain = `[${mIn}:a]volume=${vol},afade=t=in:d=1.5,afade=t=out:st=${Math.max(0,duration-3).toFixed(2)}:d=3`;
+  // ---- sound effects (whoosh, boom, gong...): made from the story's transitions/hook by tools/sfx.js ----
+  let sfxFile=null;
+  if(!opt('nosfx') && sfx && sfx.length){ const S=require('./sfx'); sfxFile=path.join(DIR,'.sfx-temp.wav'); S.writeWav(sfxFile,S.renderSfx(sfx,duration+0.5)); console.log(`♫ sound effects: ${sfx.length} (whoosh / boom / bell ...)`); }
+  const hasVoice=audioArgs.length>0, vol=+(opt('musicvol')||0.2), sfxVol=+(opt('sfxvol')||0.8), D=duration.toFixed(2);
+  let nIn=hasVoice?2:1; const mIn=musicFile?nIn++:-1, sIn=sfxFile?nIn++:-1;
+  const musicArgs = musicFile ? ['-stream_loop','-1','-i',musicFile] : [], sfxArgs = sfxFile ? ['-i',sfxFile] : [];
   const vChain = hasVoice ? [vf, shift<0?`adelay=${Math.round(-shift*1000)}:all=1`:null, 'apad'].filter(Boolean).join(',') : null;
-  let audioOut=[];
-  if(hasVoice && musicFile) audioOut=['-filter_complex', `[1:a]${vChain},asplit=2[v][vs];${mChain}[m];[m][vs]sidechaincompress=threshold=0.03:ratio=8:attack=20:release=500[md];[v][md]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.89[a]`,'-map','0:v','-map','[a]','-c:a','aac','-b:a','192k'];
-  else if(hasVoice) audioOut=['-af',vChain,'-map','0:v','-map','1:a','-c:a','aac','-b:a','192k'];
-  else if(musicFile) audioOut=['-filter_complex',`${mChain}[a]`,'-map','0:v','-map','[a]','-c:a','aac','-b:a','192k'];
-  else audioOut=['-map','0:v'];
+  const fc=[], bed=[];
+  if(hasVoice){ fc.push(musicFile?`[1:a]${vChain},asplit=2[v][vs]`:`[1:a]${vChain}[v]`); bed.push('v'); }
+  if(musicFile){ fc.push(`[${mIn}:a]volume=${vol},afade=t=in:d=1.5,afade=t=out:st=${Math.max(0,duration-3).toFixed(2)}:d=3[m]`);
+    if(hasVoice){ fc.push('[m][vs]sidechaincompress=threshold=0.03:ratio=8:attack=20:release=500[md]'); bed.push('md'); } else bed.push('m'); }
+  let bedL=null;
+  if(bed.length===2){ fc.push(`[${bed[0]}][${bed[1]}]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[bed]`); bedL='bed'; } else if(bed.length===1) bedL=bed[0];
+  if(sfxFile) fc.push(`[${sIn}:a]aresample=48000,volume=${sfxVol}[s]`);
+  let audioOut=['-map','0:v'];
+  if(bedL && sfxFile){ fc.push(`[${bedL}][s]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.89[a]`); }
+  else if(bedL){ fc.push(`[${bedL}]alimiter=limit=0.89[a]`); }
+  else if(sfxFile){ fc.push('[s]anull[a]'); }
+  if(bedL||sfxFile) audioOut=['-filter_complex',fc.join(';'),'-map','0:v','-map','[a]','-c:a','aac','-b:a','192k'];
   const ff=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error',
-    '-f','image2pipe','-framerate',String(FPS),'-c:v','mjpeg','-i','-', ...audioArgs, ...musicArgs, ...audioOut,
+    '-f','image2pipe','-framerate',String(FPS),'-c:v','mjpeg','-i','-', ...audioArgs, ...musicArgs, ...sfxArgs, ...audioOut,
     '-c:v','libx264','-preset','medium','-crf','18','-pix_fmt','yuv420p','-r',String(FPS),'-t',D,'-movflags','+faststart', out],{stdio:['pipe','inherit','inherit']});
   const ffDone=new Promise(r=>ff.on('close',code=>r(code)));
   const t0=Date.now();
@@ -101,7 +113,7 @@ function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain()
     if(i%FPS===0||i===N-1){ const p=(i+1)/N, el=(Date.now()-t0)/1000; process.stdout.write(`\r▶ frame ${i+1}/${N}  ${(p*100).toFixed(0)}%  ~${Math.max(0,el/p-el).toFixed(0)}s left   `); }
   }
   ff.stdin.end(); await browser.close();
-  const code=await ffDone;
+  const code=await ffDone; if(sfxFile) try{ fs.unlinkSync(sfxFile); }catch(e){}
   if(code){ console.error(`\n✗ ffmpeg failed (code ${code}). Check that the voice file plays, or try again without it.`); process.exit(1); }
   console.log(`\n✓ ${path.relative(ROOT,out)}  (${(duration).toFixed(1)}s, ${shots.length} shots, ${540*SCALE}x${960*SCALE})`);
 })().catch(e=>{ console.error('✗',e.message); process.exit(1); });

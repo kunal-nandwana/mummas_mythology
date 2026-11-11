@@ -8,6 +8,8 @@
    - cfg.target (seconds) rescales the flexible shots to hit the total.
    - shot.dur fixes one shot's length exactly.
    - cfg.minShot (default 2.4s) is the shortest any shot can be.
+   - cfg.opening:N makes the first N shots a silent MONTAGE (no narration): 0.8 s each unless shot.dur is set.
+     The voice starts at shot N+1 (see __ENGINE.voiceAt). The montage counts inside cfg.target.
    - cfg.intro (seconds) puts the channel sting BEFORE shot 1: every shot starts that much later.
    - cfg.outro (seconds) adds the end card AFTER the last shot. Neither counts towards cfg.target.
    ===================================================================== */
@@ -16,10 +18,11 @@ function tWords(line){ return (line||'').split(/\s+/).filter(w=>w && !/^[â€”\-â€
 
 function planTiming(cfg){
   const minShot = cfg.minShot || 2.4, PACE = cfg.pace || 13;
-  const P = cfg.shots.map(s=>{
-    const w = tWords(s.line), wt = w.map(x=>tStrip(x).length+2);
+  const OPEN = cfg.opening||0;
+  const P = cfg.shots.map((s,si)=>{
+    const w = si<OPEN ? [] : tWords(s.line), wt = w.map(x=>tStrip(x).length+2);
     const raw = w.length ? wt.reduce((a,b)=>a+b,0)/PACE + 0.45 : 2.2;
-    return {w, wt, raw, fixed: s.dur||null};
+    return {w, wt, raw, fixed: s.dur || (si<OPEN?0.8:null)};
   });
   // Solve the scale so the total hits cfg.target, honouring minShot.
   let scale = 1;
@@ -41,7 +44,7 @@ function planTiming(cfg){
     const words = p.w.map((w,k)=>{ const o={text:w, t:start+lead+acc/total*speak, e:0}; acc+=p.wt[k]; o.e=start+lead+acc/total*speak; return o; });
     shots.push({i, start, end, dur, line: cfg.shots[i].line||'', words, speakEnd: start+lead+speak});
   });
-  return {shots, duration:T+outro, intro, outro, narrEnd:T};
+  return {shots, duration:T+outro, intro, outro, narrEnd:T, voiceAt: shots[Math.min(OPEN,shots.length-1)] ? shots[Math.min(OPEN,shots.length-1)].start : 0};
 }
 
 /* Split a line's words into caption chunks (<= maxChars letters each). */
