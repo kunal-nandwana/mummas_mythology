@@ -8,6 +8,8 @@
    - cfg.target (seconds) rescales the flexible shots to hit the total.
    - shot.dur fixes one shot's length exactly.
    - cfg.minShot (default 2.4s) is the shortest any shot can be.
+   - cfg.intro (seconds) puts the channel sting BEFORE shot 1: every shot starts that much later.
+   - cfg.outro (seconds) adds the end card AFTER the last shot. Neither counts towards cfg.target.
    ===================================================================== */
 function tStrip(s){ return s.replace(/[.,!?'"‘’“”—\-–…:;।()]/g,''); }
 function tWords(line){ return (line||'').split(/\s+/).filter(w=>w && !/^[—\-–…]+$/.test(w)); }
@@ -29,7 +31,8 @@ function planTiming(cfg){
       scale = Math.max(0.4, (cfg.target-fixed)/flex);
     }
   }
-  let T=0; const shots=[];
+  const intro = cfg.intro||0, outro = cfg.outro||0;
+  let T=intro; const shots=[];
   P.forEach((p,i)=>{
     const dur = p.fixed || Math.max(minShot, p.raw*scale);
     const start=T, end=T+dur; T=end;
@@ -38,7 +41,7 @@ function planTiming(cfg){
     const words = p.w.map((w,k)=>{ const o={text:w, t:start+lead+acc/total*speak, e:0}; acc+=p.wt[k]; o.e=start+lead+acc/total*speak; return o; });
     shots.push({i, start, end, dur, line: cfg.shots[i].line||'', words, speakEnd: start+lead+speak});
   });
-  return {shots, duration:T};
+  return {shots, duration:T+outro, intro, outro, narrEnd:T};
 }
 
 /* Split a line's words into caption chunks (<= maxChars letters each). */

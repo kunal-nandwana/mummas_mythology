@@ -4,7 +4,17 @@ html,body{margin:0;height:100%;background:#000;overflow:hidden}
 .scene{position:absolute;inset:0;opacity:0;display:none;transform-origin:0 0;will-change:transform,opacity}
 .scene svg,#over{position:absolute;inset:0;width:540px;height:960px}
 canvas{position:absolute;inset:0;pointer-events:none;z-index:5}
+#scenes{position:absolute;inset:0;z-index:1}
 #over{z-index:6;pointer-events:none}
+/* mood: colour wash, coloured light and vignette per emotion (core.js applyMood) */
+#mood{position:absolute;inset:0;z-index:5;pointer-events:none}
+#mood i{position:absolute;inset:0;display:block}
+#mood i:nth-child(2){mix-blend-mode:screen}
+#trfx,#hook,#sting,#card{position:absolute;inset:0;width:540px;height:960px;pointer-events:none}
+#trfx{z-index:7}
+#card{z-index:9;display:none}
+#sting{z-index:10}
+#hook{z-index:11;display:none}
 #flash{position:absolute;inset:0;z-index:7;opacity:0;pointer-events:none}
 #shade{position:absolute;left:0;right:0;top:320px;height:270px;z-index:7;pointer-events:none;
   background:linear-gradient(transparent,rgba(5,3,12,.55) 35%,rgba(5,3,12,.55) 65%,transparent)}
@@ -19,7 +29,7 @@ canvas{position:absolute;inset:0;pointer-events:none;z-index:5}
 #cap .w.hl{color:#ffb347}
 #cap .w.hl.on{color:#ff8a2a}
 svg text{font-family:'Mukta','Kohinoor Devanagari','Noto Sans Devanagari',sans-serif;font-weight:800}
-#bar{position:absolute;left:0;bottom:0;height:4px;background:#e0453a;width:0;z-index:9}
+#bar{position:absolute;left:0;bottom:0;height:4px;background:#e0453a;width:0;z-index:12}
 #ui{position:fixed;top:10px;left:10px;z-index:20;display:flex;gap:8px}
 #ui button{background:#222c;color:#fff;border:1px solid #555;border-radius:6px;padding:6px 12px;cursor:pointer;font:14px sans-serif}
 body.clean #ui,body.clean #bar{display:none}
