@@ -13,9 +13,9 @@ const W1=['#5a3a9a','#8a6ad0'], W2=['#2a7a6a','#5ac0a0'], W3=['#b8602a','#f0a050
 
 VIDEO({
   title:'चंद्रदेव की 27 पत्नियाँ', format:'short', target:72,
-  intro:1.0, outro:3.6, handheld:0.6,
+  handheld:0.6,   // no intro sting or end card (the owner does not want them)
   // big hook: "27" counts up and slams in, then "पत्नियाँ!" (words taken from the title)
-  hook:{ at:0.6, hold:1.5, words:[ {text:'27', size:230, y:268, count:[1,27], delay:0}, {text:'पत्नियाँ!', size:104, y:376, delay:0.42} ] },
+  hook:{ at:0.2, hold:1.5, words:[ {text:'27', size:230, y:268, count:[1,27], delay:0}, {text:'पत्नियाँ!', size:104, y:376, delay:0.42} ] },
   keywords:['चंद्र','दक्ष','रोहिणी','27','नक्षत्र','शाप','महाभारत','क्षीण','कृष्ण पक्ष','शुक्ल पक्ष'],
   shots:[
     /* 1 — hook */

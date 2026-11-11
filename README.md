@@ -55,7 +55,7 @@ Old stories keep working. New options, shown in `chandra-27-wives-short-form/sto
 - **Mood:** `mood:'calm'|'joy'|'hope'|'anger'|'sad'|'shock'|'divine'` sets the lighting, colour and rim light. Moods cross-fade between shots.
 - **Transitions into a shot:** `tr:'fade'|'glow'|'whip'|'zoom'|'iris'|'wipe'|'flash'|'dip'|'cut'` (`trAt:[x,y]` sets the iris centre).
 - **Hook text:** `hook:{at,hold,words:[{text,size,y,delay,count:[from,to]}]}` slams in during the first 2 seconds.
-- **Channel sting and end card:** `intro:1.0` and `outro:3.6`. The intro makes every shot start 1 s later; the renderer lines your voice up for you.
+- **Channel sting and end card:** switched off on purpose (no "Mumma's Mythology" intro or end card). Videos start straight with the story.
 
 URL options: `?shot=N` (jump to a shot), `?notext=1` (hide captions), `?clean=1` (hide buttons), `?prompter=1` (recording mode).
 
@@ -66,5 +66,9 @@ URL options: `?shot=N` (jump to a shot), `?notext=1` (hide captions), `?clean=1`
 2. In Finder, open that folder and double-click **`setup-mac.command`**. If macOS blocks it, right-click it → **Open** → **Open**. It installs Node.js, ffmpeg and the renderer.
 
 **For every video:** double-click **`make-video.command`**. It gets the latest videos from GitHub, asks which video, and makes the MP4 (about 3–6 minutes on an M1).
+
+**Your voice is cleaned automatically** (made for the Boya M1): rumble and hiss removed, mouth clicks removed, warmer and clearer tone, harsh "s" softened, even volume, and loudness set to YouTube's level (-14 LUFS). To skip it add `--raw`; for a noisy room add `--denoise 18`.
+
+**Background music is added automatically.** It is original (made by `tools/make-music.js`, so no copyright problems): a tanpura drone, soft pad and flute. It fades in and out and gets quieter when you speak. The first time, the renderer makes the 3 tracks itself (about 30 seconds). Pick one per video with `music:'calm'` (default), `'dark'` (war, curse, sad) or `'bright'` (victory, blessing) in `story.js`. Change it from the command line with `--music dark`, `--nomusic`, or `--musicvol 0.3` (louder).
 
 Manual commands, if you prefer: `node tools/build.js <topic>` and `node tools/render.js <topic> [--voice file.m4a] [--offset 0.3]`.
