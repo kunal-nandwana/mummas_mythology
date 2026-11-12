@@ -25,6 +25,27 @@ const defs = (w, h) => `
 </defs>`;
 
 // crescent centred at (cx,cy), outer radius r, opens to upper right like the video logo
+// Sudarshan Chakra: spiked golden disc with rings and spokes. R = outer radius of the blades.
+const chakra = (cx, cy, R) => {
+  const N = 24, pts = [];
+  for (let k = 0; k < N * 2; k++) {
+    const a = (k * Math.PI) / N - Math.PI / 2, r = k % 2 ? R * 0.84 : R;
+    pts.push((cx + Math.cos(a) * r).toFixed(1) + ',' + (cy + Math.sin(a) * r).toFixed(1));
+  }
+  let spokes = '';
+  for (let k = 0; k < 12; k++) {
+    const a = (k * Math.PI) / 6;
+    spokes += `M${(cx + Math.cos(a) * R * 0.2).toFixed(1)} ${(cy + Math.sin(a) * R * 0.2).toFixed(1)}L${(cx + Math.cos(a) * R * 0.56).toFixed(1)} ${(cy + Math.sin(a) * R * 0.56).toFixed(1)}`;
+  }
+  return `<circle cx="${cx}" cy="${cy}" r="${R * 1.35}" fill="url(#glow)"/>
+<polygon points="${pts.join(' ')}" fill="url(#gold)" opacity=".92"/>
+<circle cx="${cx}" cy="${cy}" r="${R * 0.78}" fill="#1a1740"/>
+<circle cx="${cx}" cy="${cy}" r="${R * 0.78}" fill="none" stroke="#ffd98a" stroke-width="${R * 0.025}"/>
+<circle cx="${cx}" cy="${cy}" r="${R * 0.58}" fill="none" stroke="#f0b84e" stroke-width="${R * 0.02}"/>
+<path d="${spokes}" stroke="#f0b84e" stroke-width="${R * 0.02}" stroke-linecap="round"/>
+<circle cx="${cx}" cy="${cy}" r="${R * 0.17}" fill="url(#gold)"/><circle cx="${cx}" cy="${cy}" r="${R * 0.07}" fill="#1a1740"/>`;
+};
+
 // Krishna's bansuri (bamboo flute) with a peacock feather and a red tassel. s=1 is profile size.
 const bansuri = (cx, cy, s) => `
 <circle cx="${cx}" cy="${cy}" r="${230 * s}" fill="url(#glow)"/>
@@ -75,8 +96,9 @@ const scatter = (w, h, n, avoid) => {
 out('profile.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">${defs()}
 <rect width="800" height="800" fill="url(#bg)"/><rect width="800" height="800" fill="url(#haze)"/>
 ${scatter(800, 800, 70, (x, y) => Math.hypot(x - 400, y - 400) > 395 || (y > 425 && y < 690 && x > 60 && x < 740))}
-${ring(400, 290, 215, 28, 11)}
-${bansuri(400, 300, 0.95)}
+${ring(400, 262, 222, 28, 11)}
+${chakra(400, 262, 172)}
+${bansuri(400, 272, 0.9)}
 <text x="400" y="545" text-anchor="middle" font-family="Tiro,serif" font-size="136" fill="url(#gold)" stroke="#3a1a05" stroke-width="1.5" paint-order="stroke">Mumma’s</text>
 <text x="400" y="617" text-anchor="middle" font-family="Mukta,sans-serif" font-weight="800" font-size="40" letter-spacing="15" fill="#f0b84e">MYTHOLOGY</text>
 <g stroke="#f0b84e" stroke-width="2" opacity=".75"><path d="M285 662H375M425 662H515"/></g>
@@ -95,7 +117,8 @@ ${scatter(W, H, 260, (x, y) => x > 460 && x < 2100 && y > 470 && y < 960)}
 ${hills}
 ${diya(230, 1262)}${diya(330, 1290)}${diya(2230, 1262)}${diya(2330, 1290)}
 <!-- safe-area content: moon left of the name -->
-${bansuri(690, 735, 1.05)}
+${chakra(655, 725, 190)}
+${bansuri(655, 730, 0.98)}
 <text x="1365" y="775" text-anchor="middle" font-family="Tiro,serif" font-size="215" fill="url(#gold)" stroke="#3a1a05" stroke-width="2" paint-order="stroke">Mumma’s</text>
 <text x="1365" y="858" text-anchor="middle" font-family="Mukta,sans-serif" font-weight="800" font-size="60" letter-spacing="26" fill="#f0b84e">MYTHOLOGY</text>
 <g stroke="#f0b84e" stroke-width="3" opacity=".75"><path d="M1045 905H1295M1435 905H1685"/></g><circle cx="1365" cy="905" r="8" fill="#f0b84e"/>
