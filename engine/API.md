@@ -10,7 +10,8 @@ VIDEO({ title, format:'short', target:72 /*sec*/, keywords:['..'],   // keywords
   // hook:{at:.6, hold:1.5, words:[{text,size,y,delay,count:[1,27],glow,rot,shake,ring}]},  // slam-in text, first 2s
   // opening:N (silent montage) exists but the owner does NOT want an intro before the story: do not use it
   sfx:true,                        // sound effects are automatic; false = none
-  music:'calm',                    // background music: 'calm' (default) | 'dark' (war, curse, sad) | 'bright' (victory, blessing) | false
+  music:'flute',                   // background music = owner's track in music/ (default: first file; 'flute' = any file whose name has 'flute'); false = none
+  ending:3.2,                      // natural finish (default): last scene holds + slow push-in, music fades, fade to black; 0 = stop at once
   handheld:.6, captionTop:400, captionChars:24, minShot:2.4, pace:13, audio:'file',
   shots:[ SHOT, ... ] })
 ```

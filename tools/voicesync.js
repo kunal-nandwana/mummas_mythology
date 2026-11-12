@@ -54,35 +54,48 @@ function probe(file,nShots){
 
 /* nar = planned lengths (s) of the narration shots. Returns null if the recording has no clear speech.
    -> {durs[], speech[][] (speech parts inside each shot, relative to the shot start), cuts[], start, end, snapped, report[]} */
-function planSync({silences,total,nar,forced}){   // forced[i] = time (s) in the recording where narration shot i must start
+function planSync({silences,total,nar,forced,weights}){   // weights[i] = how much text shot i has (seconds at the plan pace); default = nar   // forced[i] = time (s) in the recording where narration shot i must start
   const n=nar.length; if(!n) return null;
   const first=silences[0], last=silences[silences.length-1];
   const start = first && first.s<=0.08 ? first.e : 0;
   const end = Math.min(total, last && last.e>=total-0.08 ? last.s : total);
   const L=end-start; if(L<=1) return null;
   const P=silences.filter(p=>p.s>start+0.05 && p.e<end-0.05).map(p=>({s:p.s,e:p.e,len:p.e-p.s,mid:(p.s+p.e)/2}));
-  const m=P.length, cuts=[], how=[];
+  const cuts=[], how=[]; let steadiness=null;
   // speech time between two moments (pauses not counted): a shot's spoken length should match how much text it has
   const pre=[0]; P.forEach((p,i)=>pre.push(pre[i]+p.len));
   const quietBefore=x=>{ let q=0; for(const p of P){ if(p.e<=x) q+=p.len; else if(p.s<x) q+=x-p.s; else break; } return q; };
   const SPT=x=>(x-start)-quietBefore(x);
-  const textW=nar.map(d=>Math.max(0.5,d-0.45)), sumW=textW.reduce((a,b)=>a+b,0), kS=SPT(end)/sumW;
-  if(m>=n-1 && n>1){
-    // best-fit search: cut i sits on pause j; cost = how far each shot's spoken length is from its text, minus a reward for longer pauses
-    const seg=(i,a,b)=>{ const r=(SPT(b)-SPT(a))/(textW[i]*kS); if(r<=0.05) return 1e6; const l=Math.log(r)/0.55; return l*l; };
-    const bonus=j=>3*Math.min(P[j].len,1.0);
-    // pinned shots (shot.rec in story.js): that cut must sit on a pause within 1 s of the given time
-    const pin=(i,j)=>{ const f=forced&&forced[i+1]; if(f===undefined||f===null) return 0; const d=Math.abs(P[j].mid-f); return d<=1.0 ? d*4 : 1e7; };
-    const INF=1e18, dp=[], bk=[];
-    for(let i=0;i<n-1;i++){ dp.push(new Float64Array(m).fill(INF)); bk.push(new Int32Array(m).fill(-1));
-      for(let j=i;j<m-(n-2-i);j++){
-        if(i===0){ dp[0][j]=seg(0,start,P[j].mid)-bonus(j)+pin(0,j); continue; }
-        for(let q=i-1;q<j;q++){ if(dp[i-1][q]>=INF) continue; const v=dp[i-1][q]+seg(i,P[q].mid,P[j].mid)-bonus(j)+pin(i,j); if(v<dp[i][j]){ dp[i][j]=v; bk[i][j]=q; } } } }
-    let j=-1, bestV=INF; for(let q=n-2;q<m;q++){ if(dp[n-2][q]>=INF) continue; const v=dp[n-2][q]+seg(n-1,P[q].mid,end); if(v<bestV){ bestV=v; j=q; } }
-    for(let i=n-2;i>=0;i--){ cuts[i]=Math.max(P[j].s+P[j].len*0.5, P[j].e-0.25); how[i]='at your pause'; j=bk[i][j]; }
+  const textW=(weights||nar.map(d=>d-0.45)).map(d=>Math.max(0.5,d)), sumW=textW.reduce((a,b)=>a+b,0), kS=SPT(end)/sumW;
+  if(n>1){
+    // candidates: your real pauses + "no pause" points every 0.25 s (used when you read two lines without stopping)
+    const C=P.map(p=>({mid:p.mid, cut:Math.max(p.s+p.len*0.5, p.e-0.25), len:p.len, real:true}));
+    for(let x=start+0.6; x<end-0.6; x+=0.25){ if(!P.some(p=>x>p.s-0.15 && x<p.e+0.15)) C.push({mid:x, cut:x, len:0, real:false}); }
+    C.sort((a,b)=>a.mid-b.mid); const m=C.length;
+    // best-fit search: cut i sits on candidate j; cost = how far each shot's spoken length is from its text,
+    // minus a reward for a real pause (longer = more likely a line end), plus a fee for cutting where you did not pause
+    const NOPAUSE=2.2;
+    const bonus=j=>C[j].real ? 3*Math.min(C[j].len,1.0) : -NOPAUSE;
+    // pinned shots (shot.rec in story.js): that cut must sit within 1 s of the given time
+    const pin=(i,j)=>{ const f=forced&&forced[i+1]; if(f===undefined||f===null) return 0; const d=Math.abs(C[j].mid-f); return d<=1.0 ? d*4 : 1e7; };
+    const fit=sig=>{ const seg=(i,a,b)=>{ const r=(SPT(b)-SPT(a))/(textW[i]*kS); if(r<=0.05) return 1e6; const l=Math.log(r)/sig; return l*l; };
+      const INF=1e18, dp=[], bk=[];
+      for(let i=0;i<n-1;i++){ dp.push(new Float64Array(m).fill(INF)); bk.push(new Int32Array(m).fill(-1));
+        for(let j=i;j<m-(n-2-i);j++){
+          if(i===0){ dp[0][j]=seg(0,start,C[j].mid)-bonus(j)+pin(0,j); continue; }
+          for(let q=i-1;q<j;q++){ if(dp[i-1][q]>=INF || C[j].mid-C[q].mid<0.8) continue; const v=dp[i-1][q]+seg(i,C[q].mid,C[j].mid)-bonus(j)+pin(i,j); if(v<dp[i][j]){ dp[i][j]=v; bk[i][j]=q; } } } }
+      let j=-1, bestV=INF; for(let q=n-2;q<m;q++){ if(dp[n-2][q]>=INF) continue; const v=dp[n-2][q]+seg(n-1,C[q].mid,end); if(v<bestV){ bestV=v; j=q; } }
+      const pick=[]; for(let i=n-2;i>=0;i--){ pick[i]=j; j=bk[i][j]; } return pick; };
+    // pass 1 with a loose tolerance, then learn how steady YOUR pace is and fit again with that tolerance
+    let pick=fit(0.55);
+    const ends=[start,...pick.map(j=>C[j].mid),end], lr=nar.map((_,i)=>Math.log((SPT(ends[i+1])-SPT(ends[i]))/(textW[i]*kS))).sort((a,b)=>a-b);
+    const med=lr[lr.length>>1], mad=lr.map(x=>Math.abs(x-med)).sort((a,b)=>a-b)[lr.length>>1];
+    const sig=Math.max(0.2,Math.min(0.55,1.4826*mad*1.6));
+    if(sig<0.54) pick=fit(sig);
+    pick.forEach((j,i)=>{ cuts[i]=C[j].cut; how[i]=C[j].real?'at your pause':'no pause (by pace)'; });
+    steadiness=sig;
     for(let i=0;i<n-1;i++){ const f=forced&&forced[i+1]; if(f!==undefined&&f!==null){ if(Math.abs(cuts[i]-f)>1.0) cuts[i]=f; how[i]='pinned (rec)'; } }
-  } else if(n>1){
-    // not enough pauses: place cuts by spoken-time proportion
+  } else if(false){
     let c=0; for(let i=0;i<n-1;i++){ c+=textW[i]; const want=c*kS; let lo=start, hi=end; for(let it=0;it<40;it++){ const md=(lo+hi)/2; if(SPT(md)<want) lo=md; else hi=md; } cuts.push(lo); how.push('by pace'); } }
   const B=[start-0.15, ...cuts, end+0.55];
   const durs=[], speech=[], report=[]; let snapped=0;
@@ -93,7 +106,7 @@ function planSync({silences,total,nar,forced}){   // forced[i] = time (s) in the
     segs=segs.filter(([x,y])=>y-x>0.12).map(([x,y])=>[+(x-a).toFixed(3),+(y-a).toFixed(3)]);
     speech.push(segs.length?segs:[[0.18,Math.max(0.6,b-a-0.3)]]);
     if(i>0){ if(how[i-1]==='at your pause') snapped++; report.push({shot:i+1, at:B[i], how:how[i-1]}); } }
-  return {durs, speech, cuts:B, start, end, snapped, pauses:P, report}; }
+  return {durs, speech, cuts:B, start, end, snapped, pauses:P, report, steadiness}; }
 
 module.exports={AUDIO_EXT, parseSilences, probe, planSync};
 

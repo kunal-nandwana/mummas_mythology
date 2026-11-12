@@ -4,3 +4,5 @@ out/
 *.mp4
 *.m4a
 *.wav
+music/*
+!music/README.md

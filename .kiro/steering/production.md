@@ -23,6 +23,17 @@ Targets: 30 Shorts + 4 long videos a month, with his own voice. **Credits matter
 `VIDEO({title, format:'short', target:<sec>, keywords:[...], shots:[{line, art:()=>svg, cast:[{c:CHAR, x, y, s, flip, expr, talk, acts:[[t,'pose',dur]], props, walk, with:{}}], front, title:{text,y,size}, cam, fx, tr, shake, dur, capTop, nocap}]})`.
 - Design space is 540x960. Captions default to top 400 px (above heads); use `capTop:640` when there are no characters.
 
+## Owner's standing rules
+- When the owner confirms a change works ("good", "ok", "approved"), make it the **engine default** (engine/ + tools/ + `engine/API.md`), not a one-video tweak, so every future video gets it.
+- No intro, hook text or end card. Every video ends with the natural `ending` (default on).
+- Music = the owner's own track in `music/` (never generate new music unless he asks). SFX stay soft and quiet.
+- Voice sync issue? Ask for `<topic>/voice-report.md`, then add `rec:'m:ss.s'` to the wrong shot. Don't re-render or screenshot to debug sync.
+
+## Credit saving (important)
+- One new chat session per video. Long sessions resend all history and cost much more.
+- Rendering, preview and voice report all run free on the Mac (`make-video.command`, `preview.command`). Never ask for screenshots the owner can see himself in `preview.command`.
+- Read `engine/API.md` + the topic's `story.js` only. Don't open engine source unless changing the engine.
+
 ## Cheap workflow (follow it)
 1. For a new script, store it verbatim, then build `story.js`, then `node tools/build.js <topic>`.
 2. Check frames once: use a Playwright `browser_run_code_unsafe` script that loads `index.html` via `setContent`, sets `?render=1`, calls `__ENGINE.seek(t)`, takes screenshots, and puts them on ONE contact sheet. Read only the contact sheet, not every frame. Scripts must live in `.kiro/artifacts/screenshots/`. Never print huge tool output.

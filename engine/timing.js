@@ -13,6 +13,8 @@
      The voice starts at shot N+1 (see __ENGINE.voiceAt). The montage counts inside cfg.target.
    - cfg.intro (seconds) puts the channel sting BEFORE shot 1: every shot starts that much later.
    - cfg.outro (seconds) adds the end card AFTER the last shot. Neither counts towards cfg.target.
+   - cfg.ending (seconds, default 3.2) = natural finish: the last scene holds and drifts after the last word,
+     the music fades out and the picture fades to black. 0 = stop at once. Not counted in cfg.target.
    ===================================================================== */
 function tStrip(s){ return s.replace(/[.,!?'"‘’“”—\-–…:;।()]/g,''); }
 function tWords(line){ return (line||'').split(/\s+/).filter(w=>w && !/^[—\-–…]+$/.test(w)); }
@@ -51,7 +53,8 @@ function planTiming(cfg){
     const words = p.w.map((w,k)=>{ const o={text:w, t:at(acc/total), e:0}; acc+=p.wt[k]; o.e=at(acc/total); return o; });
     shots.push({i, start, end, dur, line: cfg.shots[i].line||'', words, speakEnd: start+lead+speak});
   });
-  return {shots, duration:T+outro, intro, outro, narrEnd:T, voiceAt: shots[Math.min(OPEN,shots.length-1)] ? shots[Math.min(OPEN,shots.length-1)].start : 0};
+  const ending = outro>0 ? 0 : (cfg.ending===undefined ? 3.2 : cfg.ending);
+  return {shots, duration:T+outro+ending, ending, intro, outro, narrEnd:T, voiceAt: shots[Math.min(OPEN,shots.length-1)] ? shots[Math.min(OPEN,shots.length-1)].start : 0};
 }
 
 /* Split a line's words into caption chunks (<= maxChars letters each). */

@@ -65,11 +65,15 @@ URL options: `?shot=N` (jump to a shot), `?notext=1` (hide captions), `?clean=1`
 1. Open Terminal and run `git clone https://github.com/kunal-nandwana/mummas_mythology.git` (this makes a `mummas_mythology` folder in your home folder).
 2. In Finder, open that folder and double-click **`setup-mac.command`**. If macOS blocks it, right-click it → **Open** → **Open**. It installs Node.js, ffmpeg and the renderer.
 
+**To watch a video instantly** (no rendering): double-click **`preview.command`**. It can also open the recording prompter.
+
+**Background music:** put a calm track from YouTube Studio's Audio library in the `music/` folder (see `music/README.md`). It is used for every video.
+
 **For every video:** double-click **`make-video.command`**. It gets the latest videos from GitHub, asks which video, and makes the MP4 (about 3–6 minutes on an M1).
 
 **Your voice is cleaned automatically** (made for the Boya M1): rumble and hiss removed, mouth clicks removed, warmer and clearer tone, harsh "s" softened, even volume, and loudness set to YouTube's level (-14 LUFS). To skip it add `--raw`; for a noisy room add `--denoise 18`.
 
-**Background music is added automatically.** It is original (made by `tools/make-music.js`, so no copyright problems): a tanpura drone, soft pad and flute. It fades in and out and gets quieter when you speak. The first time, the renderer makes the 3 tracks itself (about 30 seconds). Pick one per video with `music:'calm'` (default), `'dark'` (war, curse, sad) or `'bright'` (victory, blessing) in `story.js`. Change it from the command line with `--music dark`, `--nomusic`, or `--musicvol 0.3` (louder).
+**Background music:** your own track from the `music/` folder (see `music/README.md`). It fades in, dips gently while you speak, swells a little with each scene's mood and fades out at the end. Change it with `--music <part of file name>`, `--nomusic`, or `--musicvol 0.8` (louder) / `0.3` (softer). Generated tracks (`music:'calm'`, `'dark'`, `'bright'`) still exist but are not the default.
 
 **Your pace, your pauses:** the renderer measures your recording, finds your pauses, and puts every picture change on the pause that fits the script best; the caption words follow your speech and wait while you pause (`--nosync` to turn off). After each video it writes **`<video>/voice-report.md`** (it opens by itself) showing where each shot starts in your recording; paste it into the Kiro chat if something is off. You can also make it alone: `node tools/voice-report.js <video>`. Tip: leave a short pause (about half a second) at the end of every line. Any recording works: m4a, mp3, wav, and Voice Memos `.qta`; `make-video.command` even finds a recent recording in Downloads/Desktop/Voice Memos for you. The music gets louder or softer with each scene's mood (`--flatmusic` = constant). Music is now gentle (v2: pentatonic bansuri + tanpura, no scary tones) and clearly audible under your voice (`--musicvol 0.5` default; 0.8 = louder, 0.3 = softer). Sound effects are quiet and soft (`--sfxvol 0.35`).
 

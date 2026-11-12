@@ -11,8 +11,8 @@
    Voice clean-up: ON by default (made for a Boya BY-M1 lapel mic): rumble cut, hiss/noise reduction, mouth-click removal,
            warmth + presence EQ, de-esser, compressor, loudness -14 LUFS (YouTube), peak limiter.
            --raw = no clean-up.  --denoise 12 = noise reduction in dB (default 12; try 18 for a noisy room, 0 = off).
-   Music:  original background music from music/ (made automatically by tools/make-music.js). Choose per video with
-           music:'calm'|'dark'|'bright' (or false) in story.js, or --music dark / --nomusic / --musicvol 0.5 (default; 0.8 = louder, 0.3 = softer).
+   Music:  YOUR track from the music/ folder (first file, or story.js music:'part-of-file-name'). music:false = none.
+           'calm'|'dark'|'bright' = generated tracks. --music name / --nomusic / --musicvol 0.5 (default; 0.8 = louder, 0.3 = softer).
            It fades in and out and gets quieter whenever you speak.
    SFX:    whoosh / boom / bell sounds are added at transitions and the hook (original, made by tools/sfx.js).
            --nosfx turns them off, --sfxvol 0.35 sets the loudness.
@@ -89,11 +89,19 @@ function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain()
   } else console.log('♪ no voice file found: rendering a silent video (put voice.m4a in the topic folder to add it)');
 
   // ---- background music (original, made by tools/make-music.js): looped, faded, and ducked under your voice ----
-  const wantMusic = opt('nomusic') ? false : (opt('music') && opt('music')!==true ? opt('music') : (music===undefined ? 'calm' : music));
-  let musicFile=null;
-  if(wantMusic){ musicFile=require('./make-music').fileOf(wantMusic);
-    if(!fs.existsSync(musicFile)){ try{ require('./make-music').makeTrack(wantMusic); }catch(e){ console.log('♫ could not make music "'+wantMusic+'" (calm | dark | bright): rendering without it'); musicFile=null; } }
-    if(musicFile) console.log(`♫ background music: ${wantMusic}${voice&&audioArgs.length?' (ducks under your voice)':''}`); }
+  // Music: YOUR track from the music/ folder (e.g. from YouTube Audio Library). story.js music:'name' picks a file whose
+  // name contains it; music:false = none; 'calm'|'dark'|'bright' = the generated tracks (tools/make-music.js).
+  const MDIR=path.join(ROOT,'music'), GEN={calm:1,dark:1,bright:1};
+  const userTracks=fs.existsSync(MDIR)?fs.readdirSync(MDIR).filter(n=>VS.AUDIO_EXT.test(n) && !/-v\d+\.wav$/.test(n) && !/^\./.test(n)).sort():[];
+  const want = opt('nomusic') ? false : (opt('music') && opt('music')!==true ? opt('music') : (music===undefined ? null : music));
+  let musicFile=null, musicName='';
+  if(want===false){}
+  else if(want && GEN[want]){ musicFile=require('./make-music').fileOf(want); musicName=want+' (generated)';
+    if(!fs.existsSync(musicFile)){ try{ require('./make-music').makeTrack(want); }catch(e){ musicFile=null; } } }
+  else { const pick = want ? userTracks.find(n=>n.toLowerCase().includes(String(want).toLowerCase())) : userTracks[0];
+    if(pick){ musicFile=path.join(MDIR,pick); musicName=pick; }
+    else console.log(want ? `♫ no file in music/ matches "${want}": rendering without music` : '♫ no music yet: put a calm track (mp3 / m4a) in the music/ folder. See music/README.md'); }
+  if(musicFile) console.log(`♫ background music: ${musicName}${audioArgs.length?' (dips gently while you speak)':''}`);
   // ---- sound effects (whoosh, boom, gong...): made from the story's transitions/hook by tools/sfx.js ----
   let sfxFile=null;
   if(!opt('nosfx') && sfx && sfx.length){ const S=require('./sfx'); sfxFile=path.join(DIR,'.sfx-temp.wav'); S.writeWav(sfxFile,S.renderSfx(sfx,duration+0.5)); console.log(`♫ sound effects: ${sfx.length} (whoosh / boom / bell ...)`); }
@@ -107,7 +115,7 @@ function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain()
   if(musicFile && levels && levels.length && !opt('flatmusic')){ const g0=levels[0].g; const terms=[];
     for(let k=1;k<levels.length;k++){ const dg=levels[k].g-levels[k-1].g; if(Math.abs(dg)<0.005) continue; const b=levels[k].start; terms.push(`${dg.toFixed(3)}*min(1,max(0,(t-${(b-0.6).toFixed(2)})/1.2))`); }
     envExpr=`${g0.toFixed(3)}${terms.length?'+'+terms.join('+'):''}`; }
-  if(musicFile){ fc.push(`[${mIn}:a]volume='${vol}*(${envExpr})':eval=frame,afade=t=in:d=1.5,afade=t=out:st=${Math.max(0,duration-3).toFixed(2)}:d=3[m]`);
+  if(musicFile){ fc.push(`[${mIn}:a]volume='${vol}*(${envExpr})':eval=frame,afade=t=in:d=1.5,afade=t=out:st=${Math.max(0,duration-3.4).toFixed(2)}:d=3.4[m]`);
     if(hasVoice){ fc.push('[m][vs]sidechaincompress=threshold=0.1:ratio=2.5:attack=40:release=900[md]'); bed.push('md'); } else bed.push('m'); }
   let bedL=null;
   if(bed.length===2){ fc.push(`[${bed[0]}][${bed[1]}]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[bed]`); bedL='bed'; } else if(bed.length===1) bedL=bed[0];
@@ -131,6 +139,6 @@ function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain()
   ff.stdin.end(); await browser.close();
   const code=await ffDone; if(sfxFile) try{ fs.unlinkSync(sfxFile); }catch(e){}
   if(code){ console.error(`\n✗ ffmpeg failed (code ${code}). Check that the voice file plays, or try again without it.`); process.exit(1); }
-  if(A && A.ok){ const f=VR.writeReport(topic,A,`| Music | ${music===false||opt('nomusic')?'off':(opt('music')&&opt('music')!==true?opt('music'):(music||'calm'))}, volume ${vol} (dips gently while you speak) |\n`); console.log(`\n✓ voice report: ${path.relative(ROOT,f)}`); }
+  if(A && A.ok){ const f=VR.writeReport(topic,A,`| Music | ${musicFile?musicName+', volume '+vol+' (dips gently while you speak)':'none (put a track in music/)'} |\n`); console.log(`\n✓ voice report: ${path.relative(ROOT,f)}`); }
   console.log(`\n✓ ${path.relative(ROOT,out)}  (${(duration).toFixed(1)}s, ${shots.length} shots, ${540*SCALE}x${960*SCALE})`);
 })().catch(e=>{ console.error('✗',e.message); process.exit(1); });
