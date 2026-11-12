@@ -12,7 +12,7 @@
            warmth + presence EQ, de-esser, compressor, loudness -14 LUFS (YouTube), peak limiter.
            --raw = no clean-up.  --denoise 12 = noise reduction in dB (default 12; try 18 for a noisy room, 0 = off).
    Music:  YOUR track from the music/ folder (first file, or story.js music:'part-of-file-name'). music:false = none.
-           'calm'|'dark'|'bright' = generated tracks. --music name / --nomusic / --musicvol 0.5 (default; 0.8 = louder, 0.3 = softer).
+           'score' = music composed scene by scene (changes with each mood, own volume per scene); 'calm'|'dark'|'bright' = generated loops. --music name / --nomusic / --musicvol 0.5 (default; 0.8 = louder, 0.3 = softer).
            It fades in and out and gets quieter whenever you speak.
    SFX:    whoosh / boom / bell sounds are added at transitions and the hook (original, made by tools/sfx.js).
            --nosfx turns them off, --sfxvol 0.35 sets the loudness.
@@ -94,8 +94,12 @@ function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain()
   const MDIR=path.join(ROOT,'music'), GEN={calm:1,dark:1,bright:1};
   const userTracks=fs.existsSync(MDIR)?fs.readdirSync(MDIR).filter(n=>VS.AUDIO_EXT.test(n) && !/-v\d+\.wav$/.test(n) && !/^\./.test(n)).sort():[];
   const want = opt('nomusic') ? false : (opt('music') && opt('music')!==true ? opt('music') : (music===undefined ? null : music));
-  let musicFile=null, musicName='';
+  let musicFile=null, musicName='', scoreMade=false;
   if(want===false){}
+  else if(want==='score'){ // a score composed scene by scene from the story's moods (tools/make-score.js)
+    musicFile=path.join(DIR,'.score-temp.wav'); musicName='scene score (changes with every scene)'; scoreMade=true;
+    const plan=require('./make-score').makeScore(levels,duration,musicFile);
+    plan.forEach((p,i)=>console.log(`   ♫ scene ${String(i+1).padStart(2)}  ${p.start.toFixed(1).padStart(5)}s  ${p.mood.padEnd(7)} volume ${p.g0.toFixed(2)} → ${p.g1.toFixed(2)}`)); }
   else if(want && GEN[want]){ musicFile=require('./make-music').fileOf(want); musicName=want+' (generated)';
     if(!fs.existsSync(musicFile)){ try{ require('./make-music').makeTrack(want); }catch(e){ musicFile=null; } } }
   else { const pick = want ? userTracks.find(n=>n.toLowerCase().includes(String(want).toLowerCase())) : userTracks[0];
@@ -107,12 +111,12 @@ function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain()
   if(!opt('nosfx') && sfx && sfx.length){ const S=require('./sfx'); sfxFile=path.join(DIR,'.sfx-temp.wav'); S.writeWav(sfxFile,S.renderSfx(sfx,duration+0.5)); console.log(`♫ sound effects: ${sfx.length} (whoosh / boom / bell ...)`); }
   const hasVoice=audioArgs.length>0, vol=+(opt('musicvol')||0.5), sfxVol=+(opt('sfxvol')||0.35), D=duration.toFixed(2);
   let nIn=hasVoice?2:1; const mIn=musicFile?nIn++:-1, sIn=sfxFile?nIn++:-1;
-  const musicArgs = musicFile ? ['-stream_loop','-1','-i',musicFile] : [], sfxArgs = sfxFile ? ['-i',sfxFile] : [];
+  const musicArgs = musicFile ? (scoreMade ? ['-i',musicFile] : ['-stream_loop','-1','-i',musicFile]) : [], sfxArgs = sfxFile ? ['-i',sfxFile] : [];
   const vChain = hasVoice ? [vf, shift<0?`adelay=${Math.round(-shift*1000)}:all=1`:null, 'apad'].filter(Boolean).join(',') : null;
   const fc=[], bed=[];
   if(hasVoice){ fc.push(musicFile?`[1:a]${vChain},asplit=2[v][vs]`:`[1:a]${vChain}[v]`); bed.push('v'); }
   let envExpr='1';
-  if(musicFile && levels && levels.length && !opt('flatmusic')){ const g0=levels[0].g; const terms=[];
+  if(musicFile && !scoreMade && levels && levels.length && !opt('flatmusic')){ const g0=levels[0].g; const terms=[];
     for(let k=1;k<levels.length;k++){ const dg=levels[k].g-levels[k-1].g; if(Math.abs(dg)<0.005) continue; const b=levels[k].start; terms.push(`${dg.toFixed(3)}*min(1,max(0,(t-${(b-0.6).toFixed(2)})/1.2))`); }
     envExpr=`${g0.toFixed(3)}${terms.length?'+'+terms.join('+'):''}`; }
   if(musicFile){ fc.push(`[${mIn}:a]volume='${vol}*(${envExpr})':eval=frame,afade=t=in:d=1.5,afade=t=out:st=${Math.max(0,duration-3.4).toFixed(2)}:d=3.4[m]`);
@@ -138,6 +142,7 @@ function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain()
   }
   ff.stdin.end(); await browser.close();
   const code=await ffDone; if(sfxFile) try{ fs.unlinkSync(sfxFile); }catch(e){}
+  if(scoreMade) try{ fs.unlinkSync(musicFile); }catch(e){}
   if(code){ console.error(`\n✗ ffmpeg failed (code ${code}). Check that the voice file plays, or try again without it.`); process.exit(1); }
   if(A && A.ok){ const f=VR.writeReport(topic,A,`| Music | ${musicFile?musicName+', volume '+vol+' (dips gently while you speak)':'none (put a track in music/)'} |\n`); console.log(`\n✓ voice report: ${path.relative(ROOT,f)}`); }
   console.log(`\n✓ ${path.relative(ROOT,out)}  (${(duration).toFixed(1)}s, ${shots.length} shots, ${540*SCALE}x${960*SCALE})`);

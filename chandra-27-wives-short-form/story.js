@@ -13,6 +13,7 @@ const W1=['#5a3a9a','#8a6ad0'], W2=['#2a7a6a','#5ac0a0'], W3=['#b8602a','#f0a050
 
 VIDEO({
   title:'चंद्रदेव की 27 पत्नियाँ', format:'short', target:72,
+  music:'score',  // background music composed scene by scene (changes + louder/softer with each mood)
   handheld:0.6,   // no intro sting or end card (the owner does not want them)
   keywords:['चंद्र','दक्ष','रोहिणी','27','नक्षत्र','शाप','महाभारत','क्षीण','कृष्ण पक्ष','शुक्ल पक्ष'],
   shots:[
