@@ -10,7 +10,8 @@ VIDEO({ title, format:'short', target:72 /*sec*/, keywords:['..'],   // keywords
   // hook:{at:.6, hold:1.5, words:[{text,size,y,delay,count:[1,27],glow,rot,shake,ring}]},  // slam-in text, first 2s
   // opening:N (silent montage) exists but the owner does NOT want an intro before the story: do not use it
   sfx:true,                        // sound effects are automatic; false = none
-  music:'flute',                   // background music = owner's track in music/ (default: first file; 'flute' = any file whose name has 'flute'); false = none
+  music:'flute',                   // background music = owner's track in music/ (default: first file; 'flute' = any file whose name has 'flute'); false = none;
+                  // 'score' = music composed scene by scene from each shot's mood (own tune + own volume per scene, tools/make-score.js)
   ending:3.2,                      // natural finish (default): last scene holds + slow push-in, music fades, fade to black; 0 = stop at once
   handheld:.6, captionTop:400, captionChars:24, minShot:2.4, pace:13, audio:'file',
   shots:[ SHOT, ... ] })
@@ -58,7 +59,7 @@ dust embers sparks stars flies petals
 cut fade glow whip zoom iris (+`trAt`) wipe flash dip
 
 ## mood (new; lighting + colour grade, cross-fades)
-calm joy hope anger sad shock divine. The background music also follows the mood (a little louder for hope/anger, a little quieter for sad); override with `music:0.6` on a shot. Object form: `{base:'sad', vig:.3, ...}`
+calm joy hope anger sad shock divine. The background music also follows the mood (a little louder for hope/anger, a little quieter for sad); override with `music:0.6` on a shot. With `music:'score'` each mood also gets its OWN music (calm flute, joy plucks, hope harp, divine bells, sad bowed strings, shock drum+hush, anger drums) and volume (sad softest, anger loudest). Object form: `{base:'sad', vig:.3, ...}`
 
 ## Sound effects (automatic, original)
 Kept soft and quiet: whoosh (whip/wipe), shimmer (glow/iris), bell (entering a `divine` shot), one low thump on the hook. Extra: `sfx:[[1.2,'gong']]` on a shot. Names: whoosh boom hit gong bell shimmer tick riser. Preview: `node tools/sfx.js`.

@@ -80,3 +80,5 @@ URL options: `?shot=N` (jump to a shot), `?notext=1` (hide captions), `?clean=1`
 **More polish, all automatic:** Sanskrit verses written in calligraphy (`calli:` in a shot), and original sound effects (whoosh, boom, bell, shimmer, riser) at transitions and the hook. Turn the effects off with `--nosfx`, or change their loudness with `--sfxvol 0.5`. To hear each effect: `node tools/sfx.js` (it makes `music/sfx-preview/`).
 
 Manual commands, if you prefer: `node tools/build.js <topic>` and `node tools/render.js <topic> [--voice file.m4a] [--offset 0.3]`.
+
+**Scene-by-scene music (`music:'score'`):** instead of one looping track, `tools/make-score.js` composes original music that changes with every scene's mood (calm flute, joyful plucks, hopeful harp, divine bells, sad strings, a soft drum hit for shock, driving drums for anger), cross-fades between scenes and sets a different volume per scene. Add `music:'score'` to `story.js` (Chandra uses it). Per-scene volume override: `music:0.6` on a shot. Overall level: `--musicvol`.
