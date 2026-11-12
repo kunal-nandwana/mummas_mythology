@@ -9,6 +9,7 @@
    Animation pack (all optional, old stories keep working):
      cfg.intro:1.0 / cfg.outro:3.6   "Mumma's Mythology" sting before shot 1 and end card after the last shot
      cfg.hook:{at,hold,words:[{text,size,y,delay,count:[a,b]}]}   big slam-in hook text in the first 2 seconds
+     cfg.ending:3.2                  natural finish after the last word: scene holds + slow push-in, music fades, fade to black (0 = off)
      cfg.handheld:0.6                tiny camera breathing (0 = off)
      shot.sky / far / mid / art / near   depth layers that move at different speeds when the camera moves
                                      (parallax factors .3 / .6 / .85 / 1 / 1.4). Plain `art` alone = flat, as before.
@@ -57,7 +58,7 @@ function VIDEO(cfg){
   const SY = window.__SYNC || (qs.has('durs') ? {durs:qs.get('durs').split(',').map(Number)} : null);
   if(SY && SY.durs){ const o=cfg.opening||0;
     cfg.shots=cfg.shots.map((s,i)=> i>=o && SY.durs[i-o]>0 ? Object.assign({},s,{dur:SY.durs[i-o], speech:SY.speech?SY.speech[i-o]:undefined}) : s); }
-  const plan=planTiming(cfg), DURATION=plan.duration, INTRO=plan.intro, NARR_END=plan.narrEnd, OUTRO=plan.outro;
+  const plan=planTiming(cfg), ENDING=plan.ending||0, DURATION=plan.duration, INTRO=plan.intro, NARR_END=plan.narrEnd, OUTRO=plan.outro;
   const KEY=(cfg.keywords||[]);
   const SH = cfg.shots.map((s,i)=>Object.assign({}, s, plan.shots[i]));
 
@@ -123,6 +124,7 @@ function VIDEO(cfg){
     if(HAND){ x+=Math.sin(t*0.83)*HAND*1.4+Math.sin(t*2.1)*HAND*0.35; y+=Math.cos(t*0.67)*HAND*1.1+Math.sin(t*1.9)*HAND*0.3; }
     const hs=hookShake(t); x+=hs[0]; y+=hs[1];
     // keep the frame covered: centre point can't drift past the edge allowed by the zoom
+    if(ENDING>0 && sc===SH[SH.length-1] && lt>sc.dur){ const u=lt-sc.dur; z*=1+0.035*u/ENDING; y-=6*u/ENDING; }   // ending: slow, calm push-in
     const mx=W/2/z, my=H/2/z; x=Math.max(mx,Math.min(W-mx,x)); y=Math.max(my,Math.min(H-my,y));
     return {x,y,z}; }
   const camCss=c=>`translate(${r1(W/2)}px,${r1(H/2)}px) scale(${c.z.toFixed(4)}) translate(${r1(-c.x)}px,${r1(-c.y)}px)`;
@@ -146,7 +148,7 @@ function VIDEO(cfg){
   function applyMood(t,idx){
     const sc=SH[idx], pv=SH[Math.max(0,idx-1)], A0=moodOf(pv.mood), B0=moodOf(sc.mood), k=idx===0?1:smooth((t-(sc.start-0.2))/0.9), M={};
     for(const key in MOOD0) M[key]=mixV(A0[key],B0[key],k);
-    if(t>=NARR_END) for(const key in MOOD0) M[key]=mixV(M[key],MOOD0[key],smooth((t-NARR_END)/0.5));
+    if(t>=NARR_END && OUTRO>0) for(const key in MOOD0) M[key]=mixV(M[key],MOOD0[key],smooth((t-NARR_END)/0.5));
     const beat=Math.pow(Math.max(0,Math.sin(t*6.2)),6)+0.6*Math.pow(Math.max(0,Math.sin(t*6.2-1.1)),6), pu=1+M.pulse*(0.35*beat-0.1);
     const id=Math.abs(M.sat-1)+Math.abs(M.bri-1)+Math.abs(M.con-1)+Math.abs(M.hue)<0.01;
     scenesBox.style.filter= id?'':`saturate(${M.sat.toFixed(3)}) brightness(${M.bri.toFixed(3)}) contrast(${M.con.toFixed(3)}) hue-rotate(${M.hue.toFixed(1)}deg)`;
@@ -281,7 +283,8 @@ function VIDEO(cfg){
     SH.forEach((sc,i)=>{ if(t>=sc.start) cur=i; });
     SH.forEach((sc,i)=>{
       const tr=TRN[i], nx=TRN[i+1], pre=tr?tr.d/2:0, post=nx?nx.d/2:0;
-      const on = i===0 ? t<sc.end+post : (t>=sc.start-pre && t<sc.end+post);
+      const last=i===SH.length-1, endT=last&&ENDING>0 ? DURATION+1 : sc.end+post;
+      const on = i===0 ? t<endT : (t>=sc.start-pre && t<endT);
       sc.el.style.display=on?'block':'none'; if(!on) return;
       const isA=t>=sc.start&&t<sc.end; if(isA) active=i;
       let inP=null, outP=null;
@@ -303,6 +306,7 @@ function VIDEO(cfg){
     });
     if(trOv && trOv.type==='glow'){ fl=Math.max(fl,0.28*Math.sin(Math.PI*trOv.p)); flash.style.background='radial-gradient(circle at 50% 45%,#fff0c0,#ffb45a)'; }
     trOverlay(trOv?trOv.type:null, trOv?trOv.p:0, trOv?trOv.sc:null);
+    if(ENDING>0){ const fb=smooth((t-(DURATION-1.5))/1.4); if(fb>fl){ fl=fb; flash.style.background='#000'; } }   // ending: gentle fade to black
     flash.style.opacity=fl.toFixed(3);
     applyMood(t,cur);
     if(active>=0) placeCap(SH[active].capTop||CAPTOP);

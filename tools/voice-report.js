@@ -33,7 +33,8 @@ function analyse(topic,voice){
   // shot.rec:'0:31.8' in story.js pins that shot to a time in the recording (fix for a shot the automatic fit got wrong)
   const toSec=v=>{ if(v===undefined||v===null) return null; if(typeof v==='number') return v; const p=String(v).split(':').map(Number); return p.length===2?p[0]*60+p[1]:p[0]; };
   const forced=nar.map(s=>toSec(cfg.shots[s.i].rec));
-  const sync=VS.planSync({silences:info.silences,total:info.total,nar:nar.map(s=>s.dur),forced});
+  const strip=w=>w.replace(/[.,!?'"‘’“”—\-–…:;।()]/g,''), weights=nar.map(s=>s.words.reduce((a,w)=>a+strip(w.text).length+2,0)/(cfg.pace||13));
+  const sync=VS.planSync({silences:info.silences,total:info.total,nar:nar.map(s=>s.dur),forced,weights});
   return {ok:true, cfg, plan, nar, info, sync, voice}; }
 
 const mmss=s=>{ s=Math.round(Math.max(0,s)*10)/10; return Math.floor(s/60)+':'+(s%60).toFixed(1).padStart(4,'0'); };

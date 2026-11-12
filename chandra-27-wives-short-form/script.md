@@ -1,6 +1,6 @@
 # चंद्रदेव की 27 पत्नियाँ — Recording script
 
-Total length: **1:12.0** · 15 shots · format: short
+Total length: **1:15.2** · 15 shots · format: short
 
 How to record: open `index.html?prompter=1` in Chrome, start your recorder, press **Start**, and read each line as it appears. Pause briefly at each "|". If a line feels rushed, tell Kiro the shot number and the extra seconds you need.
 
