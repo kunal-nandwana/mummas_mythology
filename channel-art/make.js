@@ -125,8 +125,15 @@ ${bansuri(655, 730, 0.98)}
 <text x="1365" y="560" text-anchor="middle" font-family="Mukta,sans-serif" font-weight="700" font-size="46" letter-spacing="4" fill="#f6ecd2" opacity=".9">हिंदी में पौराणिक कथाएँ</text>
 </svg>`);
 console.log('wrote profile.svg, banner.svg');
+// ---------- watermark 150x150, transparent (YouTube video watermark): chakra + bansuri, no text ----------
+const noGlow = (t) => t.replace(/<circle[^>]*url\(#glow\)"\/>/g, '');
+out('watermark.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" width="150" height="150">${defs()}
+${noGlow(chakra(75, 75, 70))}
+${noGlow(bansuri(75, 78, 0.34))}
+</svg>`);
+
 // HTML wrappers (inline SVG) so fonts load reliably when rendering to PNG
-for (const n of ['profile', 'banner']) {
+for (const n of ['profile', 'banner', 'watermark']) {
   const svg = fs.readFileSync(path.join(__dirname, n + '.svg'), 'utf8');
-  out(n + '.html', `<!doctype html><meta charset=utf-8><style>html,body{margin:0;background:#000}svg{display:block}</style>${svg}`);
+  out(n + '.html', `<!doctype html><meta charset=utf-8><style>html,body{margin:0;background:transparent}svg{display:block}</style>${svg}`);
 }
