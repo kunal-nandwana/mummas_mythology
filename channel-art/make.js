@@ -19,22 +19,58 @@ const defs = (w, h) => `
 <radialGradient id="haze" cx="50%" cy="100%" r="80%"><stop offset="0" stop-color="#7a3a6a" stop-opacity=".55"/><stop offset="1" stop-color="#7a3a6a" stop-opacity="0"/></radialGradient>
 <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffd98a" stop-opacity=".55"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient>
 <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe3a0"/><stop offset=".55" stop-color="#f0b84e"/><stop offset="1" stop-color="#c9822c"/></linearGradient>
+<linearGradient id="bamboo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f8dc8e"/><stop offset=".5" stop-color="#e0a53c"/><stop offset="1" stop-color="#a8671f"/></linearGradient>
+<linearGradient id="feather" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#0f5a4a"/><stop offset=".6" stop-color="#1f9a72"/><stop offset="1" stop-color="#58c58a"/></linearGradient>
 <linearGradient id="moon" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6dc"/><stop offset="1" stop-color="#f1d79a"/></linearGradient>
 </defs>`;
 
 // crescent centred at (cx,cy), outer radius r, opens to upper right like the video logo
-const crescent = (id, cx, cy, r) => {
-  // outer circle (cx,cy,r) minus inner circle (ix,iy,ri); inner is shifted to the upper right
-  const ri = r * 0.82, ix = cx + r * 0.36, iy = cy - r * 0.22, dx = ix - cx, dy = iy - cy, d = Math.hypot(dx, dy);
-  const a = (r * r - ri * ri + d * d) / (2 * d), h = Math.sqrt(r * r - a * a);
-  const mx = cx + (a * dx) / d, my = cy + (a * dy) / d;
-  const A = [mx + (h * dy) / d, my - (h * dx) / d], B = [mx - (h * dy) / d, my + (h * dx) / d];
-  const f = (p) => p.map((v) => v.toFixed(1)).join(' ');
-  // A is the upper tip, B the lower tip: long way round the outer circle, back along the inner one
-  return `<circle cx="${cx}" cy="${cy}" r="${r * 2.1}" fill="url(#glow)"/>
-<path d="M${f(A)}A${r} ${r} 0 1 0 ${f(B)}A${ri.toFixed(1)} ${ri.toFixed(1)} 0 0 1 ${f(A)}Z" fill="url(#moon)"/>
-${star4(cx + r * 0.9, cy - r * 0.75, r * 0.17, 1)}`;
+// Sudarshan Chakra: spiked golden disc with rings and spokes. R = outer radius of the blades.
+const chakra = (cx, cy, R) => {
+  const N = 24, pts = [];
+  for (let k = 0; k < N * 2; k++) {
+    const a = (k * Math.PI) / N - Math.PI / 2, r = k % 2 ? R * 0.84 : R;
+    pts.push((cx + Math.cos(a) * r).toFixed(1) + ',' + (cy + Math.sin(a) * r).toFixed(1));
+  }
+  let spokes = '';
+  for (let k = 0; k < 12; k++) {
+    const a = (k * Math.PI) / 6;
+    spokes += `M${(cx + Math.cos(a) * R * 0.2).toFixed(1)} ${(cy + Math.sin(a) * R * 0.2).toFixed(1)}L${(cx + Math.cos(a) * R * 0.56).toFixed(1)} ${(cy + Math.sin(a) * R * 0.56).toFixed(1)}`;
+  }
+  return `<circle cx="${cx}" cy="${cy}" r="${R * 1.35}" fill="url(#glow)"/>
+<polygon points="${pts.join(' ')}" fill="url(#gold)" opacity=".92"/>
+<circle cx="${cx}" cy="${cy}" r="${R * 0.78}" fill="#1a1740"/>
+<circle cx="${cx}" cy="${cy}" r="${R * 0.78}" fill="none" stroke="#ffd98a" stroke-width="${R * 0.025}"/>
+<circle cx="${cx}" cy="${cy}" r="${R * 0.58}" fill="none" stroke="#f0b84e" stroke-width="${R * 0.02}"/>
+<path d="${spokes}" stroke="#f0b84e" stroke-width="${R * 0.02}" stroke-linecap="round"/>
+<circle cx="${cx}" cy="${cy}" r="${R * 0.17}" fill="url(#gold)"/><circle cx="${cx}" cy="${cy}" r="${R * 0.07}" fill="#1a1740"/>`;
 };
+
+// Krishna's bansuri (bamboo flute) with a peacock feather and a red tassel. s=1 is profile size.
+const bansuri = (cx, cy, s) => `
+<circle cx="${cx}" cy="${cy}" r="${230 * s}" fill="url(#glow)"/>
+<g transform="translate(${cx} ${cy}) scale(${s})">
+ <g transform="translate(-5 18) rotate(-20)">
+  <path d="M0 0Q10 -85 0 -178" fill="none" stroke="#d9b46a" stroke-width="4" stroke-linecap="round"/>
+  <path d="M0 -70C-52 -115 -48 -190 0 -232C48 -190 52 -115 0 -70Z" fill="url(#feather)"/>
+  <path d="M0 -70C-30 -105 -30 -160 0 -200" fill="none" stroke="#9fe0b8" stroke-width="2" opacity=".5"/>
+  <ellipse cx="0" cy="-172" rx="30" ry="40" fill="#e8b84a"/>
+  <ellipse cx="0" cy="-172" rx="22" ry="31" fill="#1b4fa0"/>
+  <ellipse cx="0" cy="-172" rx="12" ry="18" fill="#12a58a"/>
+  <ellipse cx="0" cy="-174" rx="5" ry="8" fill="#0b2a55"/>
+ </g>
+ <g transform="rotate(-35)">
+  <rect x="-172" y="-15" width="344" height="30" rx="15" fill="url(#bamboo)"/>
+  <rect x="-172" y="-15" width="344" height="9" rx="5" fill="#fff6dc" opacity=".35"/>
+  <g fill="#8a4d14"><rect x="-166" y="-15" width="10" height="30" rx="3"/><rect x="-96" y="-15" width="7" height="30"/><rect x="148" y="-15" width="10" height="30" rx="3"/><rect x="-6" y="-15" width="6" height="30"/></g>
+  <ellipse cx="-130" cy="0" rx="9" ry="6" fill="#4a2208"/>
+  <g fill="#4a2208"><circle cx="-40" cy="0" r="6"/><circle cx="-8" cy="0" r="0"/><circle cx="24" cy="0" r="6"/><circle cx="54" cy="0" r="6"/><circle cx="84" cy="0" r="6"/><circle cx="114" cy="0" r="6"/><circle cx="-62" cy="0" r="6"/></g>
+  <path d="M168 4Q196 30 190 66" fill="none" stroke="#e0453a" stroke-width="4" stroke-linecap="round"/>
+  <path d="M162 6Q184 38 176 74" fill="none" stroke="#f0b84e" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="190" cy="72" r="9" fill="#e0453a"/><circle cx="176" cy="80" r="8" fill="#f0b84e"/>
+ </g>
+</g>
+${star4(cx + 150 * s, cy - 120 * s, 20 * s, 1)}`;
 
 const ring = (cx, cy, R, n, size) => {
   let s = '';
@@ -60,8 +96,9 @@ const scatter = (w, h, n, avoid) => {
 out('profile.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">${defs()}
 <rect width="800" height="800" fill="url(#bg)"/><rect width="800" height="800" fill="url(#haze)"/>
 ${scatter(800, 800, 70, (x, y) => Math.hypot(x - 400, y - 400) > 395 || (y > 425 && y < 690 && x > 60 && x < 740))}
-${ring(400, 290, 205, 28, 11)}
-${crescent('cm', 400, 290, 112)}
+${ring(400, 262, 222, 28, 11)}
+${chakra(400, 262, 172)}
+${bansuri(400, 272, 0.9)}
 <text x="400" y="545" text-anchor="middle" font-family="Tiro,serif" font-size="136" fill="url(#gold)" stroke="#3a1a05" stroke-width="1.5" paint-order="stroke">Mumma’s</text>
 <text x="400" y="617" text-anchor="middle" font-family="Mukta,sans-serif" font-weight="800" font-size="40" letter-spacing="15" fill="#f0b84e">MYTHOLOGY</text>
 <g stroke="#f0b84e" stroke-width="2" opacity=".75"><path d="M285 662H375M425 662H515"/></g>
@@ -80,11 +117,12 @@ ${scatter(W, H, 260, (x, y) => x > 460 && x < 2100 && y > 470 && y < 960)}
 ${hills}
 ${diya(230, 1262)}${diya(330, 1290)}${diya(2230, 1262)}${diya(2330, 1290)}
 <!-- safe-area content: moon left of the name -->
-${crescent('cm', 720, 715, 120)}
-<text x="1330" y="775" text-anchor="middle" font-family="Tiro,serif" font-size="215" fill="url(#gold)" stroke="#3a1a05" stroke-width="2" paint-order="stroke">Mumma’s</text>
-<text x="1330" y="858" text-anchor="middle" font-family="Mukta,sans-serif" font-weight="800" font-size="60" letter-spacing="26" fill="#f0b84e">MYTHOLOGY</text>
-<g stroke="#f0b84e" stroke-width="3" opacity=".75"><path d="M1010 905H1260M1400 905H1650"/></g><circle cx="1330" cy="905" r="8" fill="#f0b84e"/>
-<text x="1330" y="560" text-anchor="middle" font-family="Mukta,sans-serif" font-weight="700" font-size="46" letter-spacing="4" fill="#f6ecd2" opacity=".9">हिंदी में पौराणिक कथाएँ</text>
+${chakra(655, 725, 190)}
+${bansuri(655, 730, 0.98)}
+<text x="1365" y="775" text-anchor="middle" font-family="Tiro,serif" font-size="215" fill="url(#gold)" stroke="#3a1a05" stroke-width="2" paint-order="stroke">Mumma’s</text>
+<text x="1365" y="858" text-anchor="middle" font-family="Mukta,sans-serif" font-weight="800" font-size="60" letter-spacing="26" fill="#f0b84e">MYTHOLOGY</text>
+<g stroke="#f0b84e" stroke-width="3" opacity=".75"><path d="M1045 905H1295M1435 905H1685"/></g><circle cx="1365" cy="905" r="8" fill="#f0b84e"/>
+<text x="1365" y="560" text-anchor="middle" font-family="Mukta,sans-serif" font-weight="700" font-size="46" letter-spacing="4" fill="#f6ecd2" opacity=".9">हिंदी में पौराणिक कथाएँ</text>
 </svg>`);
 console.log('wrote profile.svg, banner.svg');
 // HTML wrappers (inline SVG) so fonts load reliably when rendering to PNG
