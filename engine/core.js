@@ -52,9 +52,11 @@ function VIDEO(cfg){
   const placeCap=y=>{ cap.style.top=y+'px'; shadeEl.style.top=(y-80)+'px'; };
   placeCap(CAPTOP);
 
-  // ?durs=a,b,c : shot lengths measured from the owner's real voice (made by tools/render.js / voicesync.js). Applies to the narration shots.
-  if(qs.has('durs')){ const d=qs.get('durs').split(',').map(Number), o=cfg.opening||0;
-    cfg.shots=cfg.shots.map((s,i)=> i>=o && d[i-o]>0 ? Object.assign({},s,{dur:d[i-o]}) : s); }
+  // Timing measured from the owner's real voice (set by tools/render.js before the page loads): window.__SYNC = {durs:[..], speech:[[[s,e],..],..]}
+  // for the narration shots. ?durs=a,b,c works too (lengths only).
+  const SY = window.__SYNC || (qs.has('durs') ? {durs:qs.get('durs').split(',').map(Number)} : null);
+  if(SY && SY.durs){ const o=cfg.opening||0;
+    cfg.shots=cfg.shots.map((s,i)=> i>=o && SY.durs[i-o]>0 ? Object.assign({},s,{dur:SY.durs[i-o], speech:SY.speech?SY.speech[i-o]:undefined}) : s); }
   const plan=planTiming(cfg), DURATION=plan.duration, INTRO=plan.intro, NARR_END=plan.narrEnd, OUTRO=plan.outro;
   const KEY=(cfg.keywords||[]);
   const SH = cfg.shots.map((s,i)=>Object.assign({}, s, plan.shots[i]));
@@ -344,9 +346,9 @@ function VIDEO(cfg){
     if(HK) HK.words.forEach((w,k)=>{ if(k===0) add(hookImpact(w)-.02,'boom',.7); });
     return ev.sort((a,b)=>a.t-b.t); }
   /* background-music level per shot (the music swells and dips with the scene). shot.music = number overrides (1 = normal). */
-  const MUSIC_G={calm:.85,joy:1.0,hope:1.15,anger:1.1,sad:.55,shock:.7,divine:1.0,neutral:.85};
+  const MUSIC_G={calm:.9,joy:1.0,hope:1.15,anger:1.1,sad:.75,shock:.8,divine:1.0,neutral:.9};
   const musicLevels=SH.map(s=>({start:s.start, end:s.end, g: typeof s.music==='number' ? s.music : (MUSIC_G[typeof s.mood==='string'?s.mood:(s.mood&&s.mood.base)||'neutral']||.85)}));
-  window.__ENGINE={ musicLevels, voiceAt:plan.voiceAt, sfx:sfxEvents(), music:cfg.music, duration:DURATION, intro:INTRO, narrEnd:NARR_END, W, H, shots:SH.map(s=>({start:s.start,end:s.end,line:s.line})), seek:t=>render(t), ready:document.fonts?document.fonts.ready:Promise.resolve() };
+  window.__ENGINE={ words:SH.map(s=>s.words.map(w=>({text:w.text,t:+w.t.toFixed(2)}))), musicLevels, voiceAt:plan.voiceAt, sfx:sfxEvents(), music:cfg.music, duration:DURATION, intro:INTRO, narrEnd:NARR_END, W, H, shots:SH.map(s=>({start:s.start,end:s.end,line:s.line})), seek:t=>render(t), ready:document.fonts?document.fonts.ready:Promise.resolve() };
   window.__DUR=DURATION;
   if(!RENDER){ (function loop(){ const t=now(); if(!PROMPT && fixed===null && !paused && t>=DURATION-0.002){ t0=performance.now(); if(audio){audio.currentTime=0;audio.play().catch(()=>{});} }
       last=t; render(t); requestAnimationFrame(loop); })(); }
