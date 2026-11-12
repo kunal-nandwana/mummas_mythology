@@ -6,21 +6,24 @@
 
    Usage:  node tools/make-music.js            (makes any missing track in music/)
            node tools/make-music.js calm 7     (re-make one track; the number = a different tune)
-   Tracks: calm    peaceful, devotional (most stories)
-           dark    low, tense, with a slow heartbeat (war, curse, sad moments)
-           bright  warm, hopeful, a little faster (victory, blessing, happy ending)
-   ===================================================================== */
+   Tracks: calm    peaceful, devotional, warm (most stories)
+           dark    gentle and sad: slower, softer, minor-pentatonic. NOT scary: no heartbeat, no harsh notes (war, curse, grief)
+           bright  light, hopeful, a little faster (victory, blessing, happy ending)
+   v2: rebuilt to be soothing: only consonant notes (pentatonic), no beating/detuned pads, soft flute, little reverb.
+      ===================================================================== */
 const fs=require('fs'), path=require('path');
 const SR=44100, SECS=120, N=SR*SECS, TAU=Math.PI*2;
 const OUT=path.join(__dirname,'..','music');
 
 const hz=(root,semi)=>root*Math.pow(2,semi/12);
+const VERSION='v2';
 const TRACKS={
-  // root = Sa in Hz, scale = semitones above Sa, chords = [semitones...] cycled, tempo = melody speed
-  calm:  {root:146.83, scale:[0,2,4,7,9,12,14,16,19], chords:[[0,7,12,16],[-5,2,7,11],[-3,4,9,12],[0,7,12,14]], pad:.50, melody:.34, beat:0, pluckGap:1.15, rest:.45, oct:1, vib:5.2, seed:1},
-  dark:  {root:130.81, scale:[0,1,3,5,7,8,12,13,15],  chords:[[0,7,12,15],[-4,3,8,12],[-2,5,10,13],[0,7,12,13]], pad:.55, melody:.20, beat:1, pluckGap:1.5,  rest:.65, oct:.5, vib:4.4, seed:2},
-  bright:{root:164.81, scale:[0,2,4,7,9,12,14,16,19], chords:[[0,7,12,16],[-3,4,9,12],[-8,-1,4,8],[-5,2,7,11]], pad:.45, melody:.40, beat:0, pluckGap:.95, rest:.30, oct:1, vib:5.6, seed:3},
+  // root = Sa in Hz, scale = semitones above Sa (pentatonic = always consonant), chords = held drone notes
+  calm:  {root:146.83, scale:[0,2,4,7,9,12,14,16], chords:[[0,7,12],[0,7,12,16],[-5,2,7,12],[0,7,12]],  pad:.55, melody:.30, pluckGap:1.25, rest:.7, oct:1, vib:5.0, seed:1},
+  dark:  {root:130.81, scale:[0,3,5,7,10,12,15,17], chords:[[0,7,12],[0,7,12,15],[-5,2,7,12],[0,7,12]], pad:.50, melody:.20, pluckGap:1.5,  rest:1.0, oct:.5, vib:4.6, seed:2},
+  bright:{root:164.81, scale:[0,2,4,7,9,12,14,16], chords:[[0,7,12,16],[0,7,12],[-5,2,7,14],[0,7,12,16]], pad:.50, melody:.36, pluckGap:1.0, rest:.5, oct:1, vib:5.4, seed:3},
 };
+const fileOf=name=>path.join(OUT,name+'-'+VERSION+'.wav');
 
 function rng(seed){ let s=(seed*2654435761)>>>0||1; return ()=>{ s^=s<<13; s>>>=0; s^=s>>>17; s^=s<<5; s>>>=0; return s/4294967296; }; }
 
@@ -32,7 +35,7 @@ function tanpura(root,gap,R){ // 4 strings: Pa(low) Sa Sa Sa(low), plucked in tu
   const cyc=gap*4.4; let t=0, k=0;
   while(t<SECS){ const f=str[k%4], pan=[.4,.6,.5,.45][k%4], start=Math.floor(t*SR), len=Math.floor(SR*6.5), amp=.5;
     for(let h=1;h<=14;h++){ // jivari buzz: upper harmonics get a lift and ring a bit longer
-      const ha=amp*(1/h)*(h>=4&&h<=9?1.9:1), dec=2.2+h*0.18, fh=f*h; if(fh>9000) break;
+      const ha=amp*(1/h)*(h>=4&&h<=8?1.25:1), dec=2.6+h*0.15, fh=f*h; if(fh>4200) break;
       for(let i=0;i<len;i+=1){ const e=Math.exp(-i/(SR*dec/ (h>5?1.3:1)))*Math.min(1,i/(SR*0.012)); if(e<.002) break;
         const v=ha*e*Math.sin(TAU*fh*i/SR+h*.7); wrapAdd(L,start+i,v*(1-pan)*2); wrapAdd(Rr,start+i,v*pan*2); } }
     t+= (k%4===3)? cyc-gap*3.3 : gap*1.1; k++; }
@@ -43,24 +46,24 @@ function pad(T,R){ // slow chord pad: a few detuned soft saws, chord changes eve
   const order=[]; for(let i=0;i<T.chords.length*2;i++) order.push(T.chords[i%T.chords.length]);
   order.forEach((ch,ci)=>{ const s0=ci*segN;
     ch.forEach((semi,vi)=>{ const f0=hz(T.root,semi)*(semi<0?1:1), pan=.25+((vi*.37)%.5);
-      for(let d=-1;d<=1;d++){ const f=f0*(1+d*0.0035), ph=R()*TAU;
+      for(let d=0;d<=0;d++){ const f=f0, ph=R()*TAU;
         for(let i=-segN*0.45;i<segN*1.45;i++){ const u=(i+segN*0.45)/(segN*1.9), env=Math.sin(Math.PI*u); if(env<=0) continue; const e=env*env;
-          const x=f*i/SR+ph/TAU, saw=(x%1)*2-1, soft=Math.sin(TAU*x)*.6+saw*.12+Math.sin(TAU*2*x)*.12, v=soft*e*.05*T.pad;
+          const x=f*i/SR+ph/TAU, soft=Math.sin(TAU*x)*.7+Math.sin(TAU*2*x)*.12, v=soft*e*.07*T.pad;
           wrapAdd(L,s0+Math.floor(i),v*(1-pan)*1.6); wrapAdd(Rr,s0+Math.floor(i),v*pan*1.6); } } }); });
   return [L,Rr]; }
 
-function flute(T,R){ // sparse, breathy melody that wanders around the scale and often rests
-  const L=new Float32Array(N), Rr=new Float32Array(N), sc=T.scale; let idx=3, t=3+R()*2;
-  while(t<SECS-5){ const phrase=3+Math.floor(R()*4);
-    for(let p=0;p<phrase && t<SECS-4;p++){
-      idx=Math.max(0,Math.min(sc.length-1, idx+Math.round((R()-.5)*3.2)));
-      const dur=(1.1+R()*1.7)/ (T.melody>.3?1.1:.9), f=hz(T.root*2*T.oct,sc[idx]), start=Math.floor(t*SR), len=Math.floor(dur*SR*1.5), ph=R()*TAU;
-      for(let i=0;i<len;i++){ const u=i/(dur*SR), a=Math.min(1,i/(SR*.09)), r=u<1?1:Math.exp(-(u-1)*5), e=a*r; if(e<.003) continue;
-        const vib=1+Math.sin(TAU*T.vib*i/SR)*.004*Math.min(1,i/(SR*.4)), x=f*vib*i/SR;
-        const breath=(R()-.5)*.05*e, v=(Math.sin(TAU*x+ph)+.28*Math.sin(TAU*2*x)+.1*Math.sin(TAU*3*x)+breath*4)*e*.07*T.melody*2.2;
-        wrapAdd(L,start+i,v*.7); wrapAdd(Rr,start+i,v*.5); }
-      t+=dur*(1.0+R()*.25); }
-    t+= (2+R()*5)*T.rest*2.2; }
+function flute(T,R){ // sparse, soft bansuri-style melody: moves by steps, rests often, each phrase comes home to Sa
+  const L=new Float32Array(N), Rr=new Float32Array(N), sc=T.scale; let idx=2, t=4+R()*2;
+  while(t<SECS-6){ const phrase=3+Math.floor(R()*3);
+    for(let p=0;p<phrase && t<SECS-5;p++){
+      const last=p===phrase-1; const step=Math.round((R()-.5)*2.4); idx=last?(R()<.5?0:3):Math.max(0,Math.min(sc.length-1, idx+(step||1)));
+      const dur=(1.6+R()*1.6)*(last?1.5:1), f=hz(T.root*2*T.oct,sc[idx]), start=Math.floor(t*SR), len=Math.floor(dur*SR*1.6), ph=R()*TAU;
+      for(let i=0;i<len;i++){ const u=i/(dur*SR), a=Math.min(1,Math.pow(i/(SR*.22),1.5)), r=u<1?1:Math.exp(-(u-1)*4), e=a*r; if(e<.003) continue;
+        const vib=1+Math.sin(TAU*T.vib*i/SR)*.0035*Math.min(1,i/(SR*.6)), x=f*vib*i/SR;
+        const v=(Math.sin(TAU*x+ph)+.16*Math.sin(TAU*2*x)+.04*Math.sin(TAU*3*x))*e*.06*T.melody*2.2;
+        wrapAdd(L,start+i,v*.7); wrapAdd(Rr,start+i,v*.55); }
+      t+=dur*(1.05+R()*.2); }
+    t+= (3+R()*5)*T.rest*2; }
   return [L,Rr]; }
 
 function heartbeat(T){ // dark track only: a very soft low pulse every 2.4 s
@@ -92,17 +95,18 @@ function writeWav(file,L,Rr){ // 16-bit stereo, normalised to about -3 dBFS peak
 function makeTrack(name,seedShift){
   const T=TRACKS[name], R=rng(T.seed*100+(+seedShift||0)+7);
   const parts=[tanpura(T.root,T.pluckGap,R), pad(T,R), flute(T,R), heartbeat(T)], mix=[new Float32Array(N), new Float32Array(N)];
-  const gains=[.5,1,1,1];
+  const gains=[.55,1,1,0];
   parts.forEach((p,k)=>{ for(let i=0;i<N;i++){ mix[0][i]+=p[0][i]*gains[k]; mix[1][i]+=p[1][i]*gains[k]; } });
-  const [L,Rr]=reverb(mix[0],mix[1],.18);
-  fs.mkdirSync(OUT,{recursive:true}); const file=path.join(OUT,name+'.wav'); writeWav(file,L,Rr);
+  [mix[0],mix[1]].forEach(ch=>{ let y=0; const k=1-Math.exp(-TAU*4500/SR); for(let i=0;i<N;i++){ y+=k*(ch[i]-y); ch[i]=y; } });   // soften anything shrill
+  const [L,Rr]=reverb(mix[0],mix[1],.10);
+  fs.mkdirSync(OUT,{recursive:true}); const file=fileOf(name); writeWav(file,L,Rr);
   return file; }
 
 if(require.main===module){
   const [name,seed]=process.argv.slice(2);
-  const names=name?[name]:Object.keys(TRACKS).filter(n=>!fs.existsSync(path.join(OUT,n+'.wav')));
+  const names=name?[name]:Object.keys(TRACKS).filter(n=>!fs.existsSync(fileOf(n)));
   names.forEach(n=>{ if(!TRACKS[n]){ console.error('✗ unknown track',n,'(calm | dark | bright)'); process.exit(1); }
     process.stdout.write(`♫ making ${n}... `); const t0=Date.now(); const f=makeTrack(n,seed); console.log(`done (${((Date.now()-t0)/1000).toFixed(0)}s) → ${path.relative(path.join(__dirname,'..'),f)}`); });
-  if(!names.length) console.log('♫ all music already made (music/calm.wav, dark.wav, bright.wav)');
+  if(!names.length) console.log('♫ all music already made (music/*-v2.wav)');
 }
-module.exports={makeTrack, TRACKS, OUT};
+module.exports={makeTrack, TRACKS, OUT, fileOf};

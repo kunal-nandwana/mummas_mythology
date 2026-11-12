@@ -12,22 +12,12 @@ const WIFE = (top,veil)=>({c:NAKSHATRA, with:{top, bottom:top, veil}});
 const W1=['#5a3a9a','#8a6ad0'], W2=['#2a7a6a','#5ac0a0'], W3=['#b8602a','#f0a050'], W4=['#2a4a9a','#6a8ae0'];
 
 VIDEO({
-  title:'चंद्रदेव की 27 पत्नियाँ', format:'short', target:74.4, opening:3,   // opening = 3 silent 0.8 s montage shots before the narration (2.4 s added to the target)
+  title:'चंद्रदेव की 27 पत्नियाँ', format:'short', target:72,
   handheld:0.6,   // no intro sting or end card (the owner does not want them)
   // big hook: "27" counts up and slams in, then "पत्नियाँ!" (words taken from the title)
   hook:{ at:0.2, hold:1.5, words:[ {text:'27', size:230, y:268, count:[1,27], delay:0}, {text:'पत्नियाँ!', size:104, y:376, delay:0.42} ] },
   keywords:['चंद्र','दक्ष','रोहिणी','27','नक्षत्र','शाप','महाभारत','क्षीण','कृष्ण पक्ष','शुक्ल पक्ष'],
   shots:[
-    /* M1-M3 — silent opening montage (0.8 s each): the moon, the king, the curse. Sound effects are added automatically. */
-    { line:'', cam:{from:[270,430,1.0],to:[270,400,1.45]}, fx:'stars', mood:'calm',
-      sky:()=> SKY(270,330,70,'full')+nakshatras(270,330,215,175,0), far:()=> FAR(800), art:()=> GND(800) },
-    { line:'', cam:{from:[270,500,1.5],to:[270,470,2.1]}, fx:'petals', tr:'whip', mood:'joy',
-      far:()=> palaceBack(810), mid:()=> palaceMid(810), art:()=> palaceFloor(810),
-      cast:[{c:CHANDRA, x:270, y:872, s:1.05, expr:'smile', acts:[[0,'bless']]}] },
-    { line:'', cam:{from:[270,470,1.6],to:[270,500,2.3]}, fx:'embers', tr:'flash', mood:'anger', shake:[0.05,0.5,6],
-      far:()=> palaceBack(810,'#4a0e16'), mid:()=> palaceMid(810), art:()=> palaceFloor(810),
-      cast:[{c:DAKSHA, x:270, y:875, s:1.0, expr:'angry', acts:[[0,'rage']]}] },
-
     /* 1 — hook */
     { line:'चंद्रमा की 27 पत्नियाँ हैं,', cam:{from:[270,520,1.0],to:[270,560,1.3]}, fx:'stars', mood:'calm', capTop:430,
       sky:()=> SKY()+nakshatras(270,330,215,175,0.05), far:()=> FAR(800), art:()=> GND(800),

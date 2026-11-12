@@ -7,7 +7,7 @@ Design space 540x960. Build: `node tools/build.js <topic>`. Style reference: `ch
 VIDEO({ title, format:'short', target:72 /*sec*/, keywords:['..'],   // keywords = highlighted caption words
   // intro / outro (brand sting + end card) exist but the owner does NOT want them: leave them out
   hook:{at:.6, hold:1.5, words:[{text,size,y,delay,count:[1,27],glow,rot,shake,ring}]},  // slam-in text, first 2s
-  opening:3,                       // first 3 shots = silent 0.8s MONTAGE teaser (no `line`); voice starts at shot 4
+  // opening:N (silent montage) exists but the owner does NOT want an intro before the story: do not use it
   sfx:true,                        // sound effects are automatic; false = none
   music:'calm',                    // background music: 'calm' (default) | 'dark' (war, curse, sad) | 'bright' (victory, blessing) | false
   handheld:.6, captionTop:400, captionChars:24, minShot:2.4, pace:13, audio:'file',
@@ -56,13 +56,13 @@ dust embers sparks stars flies petals
 cut fade glow whip zoom iris (+`trAt`) wipe flash dip
 
 ## mood (new; lighting + colour grade, cross-fades)
-calm joy hope anger sad shock divine. Object form: `{base:'sad', vig:.3, ...}`
+calm joy hope anger sad shock divine. The background music also follows the mood (louder for hope/anger, quieter for sad); override with `music:0.6` on a shot. Object form: `{base:'sad', vig:.3, ...}`
 
 ## Sound effects (automatic, original)
-whoosh (whip/wipe), hit (flash), boom (dip, hook slam), shimmer (glow/iris), riser (zoom), bell (entering a `divine` shot), tick (montage cuts). Extra: `sfx:[[1.2,'gong']]` on a shot. Names: whoosh boom hit gong bell shimmer tick riser. Preview: `node tools/sfx.js`.
+Kept soft and quiet: whoosh (whip/wipe), shimmer (glow/iris), bell (entering a `divine` shot), one low thump on the hook. Extra: `sfx:[[1.2,'gong']]` on a shot. Names: whoosh boom hit gong bell shimmer tick riser. Preview: `node tools/sfx.js`.
 
 ## Opening montage
-`opening:N` + N shots with `art/cast/cam/tr` and NO `line` (0.8s each, or `dur`). Counts inside `target`. Plays with the hook, a riser, then a boom when narration starts. See `chandra-27-wives-short-form/story.js`.
+(Owner dislikes it: not used.) `opening:N` + N shots with `art/cast/cam/tr` and NO `line` (0.8s each, or `dur`). Counts inside `target`. Plays with the hook, a riser, then a boom when narration starts. See `chandra-27-wives-short-form/story.js`.
 
 ## Animation upgrades (new, all optional)
 parallax layers · keyframed camera/close-ups · head turns, gestures, secondary motion · `tears` · mood · cinematic `tr` · `hook` · handheld camera.
