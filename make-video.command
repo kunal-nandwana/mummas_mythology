@@ -32,4 +32,8 @@ fi
 node tools/build.js "$t" && node tools/render.js "$t"
 echo ""
 open "$t"
+if [ -f "$t/voice-report.md" ]; then
+  echo "Voice report: $t/voice-report.md  (it opens now; copy-paste it into the Kiro chat if the voice and pictures don't line up)"
+  open -e "$t/voice-report.md"
+fi
 read -n 1 -s -r -p "Done. The MP4 is in the folder that just opened. Press any key to close."

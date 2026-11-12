@@ -16,7 +16,7 @@ VIDEO({ title, format:'short', target:72 /*sec*/, keywords:['..'],   // keywords
 ```
 **SHOT**: `line` (exact user words), `dur` (fix length), `nocap`, `capTop` (use 640 if no characters), `cast:[CAST]`,
 `art` (flat scene) **or** layers `sky`/`far`/`mid`/`art`/`near` (parallax .3/.6/.85/1/1.4), `front` (drawn over actors),
-`title:{text,y,size,color,delay}`, `calli:{lines:[..],source,y,size,col,delay,gap,write,hold,glow,scrim}` (verse written in calligraphy), `sfx:[[secsIntoShot,'gong',vol]]` (extra sound effect), `cam`, `fx`, `tr`, `trAt:[x,y]` (iris centre), `mood`, `shake:[start,dur,amp]`.
+`title:{text,y,size,color,delay}`, `calli:{lines:[..],source,y,size,col,delay,gap,write,hold,glow,scrim}` (verse written in calligraphy), `sfx:[[secsIntoShot,'gong',vol]]` (extra sound effect), `rec:'0:31.8'` (pin this shot's start to that time in the owner's recording; use when voice-report.md shows a wrong start), `cam`, `fx`, `tr`, `trAt:[x,y]` (iris centre), `mood`, `shake:[start,dur,amp]`.
 All scene fields are functions: `art:()=>svg`.
 
 **CAST**: `{c:CHAR, x, y, s, flip, expr, talk:true, acts:[[t,'pose',dur?]...], props:{front,back}, walk:{from,dur,delay}, enter:{fade,delay,rise}, exit:{at,fade}, eyes:'closed', look:'up', tears:true, aura, gesture:false, with:{costume overrides}}`
@@ -57,7 +57,7 @@ dust embers sparks stars flies petals
 cut fade glow whip zoom iris (+`trAt`) wipe flash dip
 
 ## mood (new; lighting + colour grade, cross-fades)
-calm joy hope anger sad shock divine. The background music also follows the mood (louder for hope/anger, quieter for sad); override with `music:0.6` on a shot. Object form: `{base:'sad', vig:.3, ...}`
+calm joy hope anger sad shock divine. The background music also follows the mood (a little louder for hope/anger, a little quieter for sad); override with `music:0.6` on a shot. Object form: `{base:'sad', vig:.3, ...}`
 
 ## Sound effects (automatic, original)
 Kept soft and quiet: whoosh (whip/wipe), shimmer (glow/iris), bell (entering a `divine` shot), one low thump on the hook. Extra: `sfx:[[1.2,'gong']]` on a shot. Names: whoosh boom hit gong bell shimmer tick riser. Preview: `node tools/sfx.js`.
@@ -70,3 +70,6 @@ parallax layers · keyframed camera/close-ups · head turns, gestures, secondary
 
 ## URL options
 `?shot=N` `?t=12.5` `?notext=1` `?clean=1` `?prompter=1` `?render=1` (`__ENGINE.seek(t)`)
+
+## Voice sync (render.js, automatic)
+Pauses are found at the level that fits the room; each shot change goes on the pause that best fits how much text each shot has; caption words follow the real speech and wait in pauses. `node tools/voice-report.js <topic>` writes `<topic>/voice-report.md` (also written on every render). When the owner says a shot is off, read the report he pastes and add `rec:'m:ss.s'` to that shot.
