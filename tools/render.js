@@ -15,7 +15,10 @@
            music:'calm'|'dark'|'bright' (or false) in story.js, or --music dark / --nomusic / --musicvol 0.2.
            It fades in and out and gets quieter whenever you speak.
    SFX:    whoosh / boom / bell sounds are added at transitions and the hook (original, made by tools/sfx.js).
-           --nosfx turns them off, --sfxvol 0.8 sets the loudness.
+           --nosfx turns them off, --sfxvol 0.35 sets the loudness.
+   Pace:   the shots follow YOUR speaking pace: pauses in the recording are found and every picture change is moved to
+           the nearest pause (--nosync = use the planned pace instead). Music rises and falls with each scene's mood
+           (--flatmusic = constant volume).
    Output: <topic-folder>/<topic-folder>.mp4
    ===================================================================== */
 const fs=require('fs'), path=require('path'), {spawn, spawnSync}=require('child_process');
@@ -29,11 +32,18 @@ if(spawnSync('ffmpeg',['-version']).status!==0){ console.error('✗ ffmpeg is no
 let chromium; try{ ({chromium}=require('playwright')); }catch(e){ console.error('✗ Playwright missing. Run: npm install && npx playwright install chromium'); process.exit(1); }
 
 const FPS=+opt('fps')||30, SCALE=2;
+let voiceInfo=null;
 // ---- find the voice file ----
+const VS=require('./voicesync');
 let voice=opt('voice'); if(voice===true) voice=null;
-if(!voice){ const f=fs.readdirSync(DIR).filter(n=>/\.(m4a|mp3|wav|aac|ogg|webm)$/i.test(n) && !/\.mp4$/i.test(n)).sort((a,b)=>(/^voice/i.test(b)?1:0)-(/^voice/i.test(a)?1:0)); if(f.length) voice=path.join(DIR,f[0]); }
-else if(!path.isAbsolute(voice)) voice=fs.existsSync(voice)?path.resolve(voice):path.join(DIR,voice);
-
+if(!voice){
+  const look=[DIR, ROOT];
+  let found=null;
+  for(const d of look){ const f=fs.readdirSync(d).filter(n=>VS.AUDIO_EXT.test(n) && n!==topic+'.mp4' && !/^\./.test(n) && !/-v\d+\.wav$/.test(n))
+      .sort((a,b)=>(/^voice/i.test(b)?1:0)-(/^voice/i.test(a)?1:0)); if(f.length){ found=path.join(d,f[0]); break; } }
+  voice=found;
+} else if(!path.isAbsolute(voice)) voice=fs.existsSync(voice)?path.resolve(voice):path.join(DIR,voice);
+if(voice && fs.existsSync(voice)){ const pr=VS.probe(voice); if(!pr.ok){ console.error(`✗ ffmpeg cannot read your voice file: ${path.basename(voice)}\n  (${pr.error})\n  Tip: in Voice Memos / your recorder, share or export it as .m4a or .wav, put it in the ${topic}/ folder as voice.m4a, and try again.`); process.exit(1); } voiceInfo=pr; }
 // ---- where does speech start? (skip recorder start + countdown) ----
 function leadSilence(file){ const r=spawnSync('ffmpeg',['-hide_banner','-i',file,'-af','silencedetect=noise=-38dB:d=0.35','-f','null','-'],{encoding:'utf8'});
   const m=/silence_start: (-?[\d.]+)[\s\S]*?silence_end: ([\d.]+)/.exec(r.stderr||''); return (m && +m[1]<=0.05) ? +m[2] : 0; }
@@ -60,15 +70,25 @@ function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain()
   const browser=await chromium.launch();
   const page=await browser.newPage({viewport:{width:540,height:960}, deviceScaleFactor:SCALE});
   const errs=[]; page.on('pageerror',e=>errs.push(e.message));
-  await page.goto('file://'+HTML+'?render=1'+(opt('notext')?'&notext=1':''));
-  await page.waitForFunction(()=>window.__ENGINE); await page.evaluate(()=>window.__ENGINE.ready); await page.waitForTimeout(400);
-  if(errs.length){ console.error('✗ Page error:', errs[0]); process.exit(1); }
-  const {duration, shots, music, voiceAt, sfx}=await page.evaluate(()=>({duration:window.__ENGINE.duration, shots:window.__ENGINE.shots, music:window.__ENGINE.music, voiceAt:window.__ENGINE.voiceAt, sfx:window.__ENGINE.sfx}));
+  const load=async(extra)=>{ await page.goto('file://'+HTML+'?render=1'+(opt('notext')?'&notext=1':'')+(extra||''));
+    await page.waitForFunction(()=>window.__ENGINE); await page.evaluate(()=>window.__ENGINE.ready); await page.waitForTimeout(400);
+    if(errs.length){ console.error('✗ Page error:', errs[0]); process.exit(1); }
+    return page.evaluate(()=>({duration:window.__ENGINE.duration, shots:window.__ENGINE.shots, music:window.__ENGINE.music, voiceAt:window.__ENGINE.voiceAt, sfx:window.__ENGINE.sfx, levels:window.__ENGINE.musicLevels, opening:window.__ENGINE.opening})); };
+  let R0=await load(), syncStart=null;
+  // ---- follow the speaker's real pace: move shot changes to the pauses in the recording ----
+  if(voiceInfo && !opt('nosync')){
+    const open=Math.max(0,R0.shots.findIndex(s=>s.line)), nar=R0.shots.slice(open);
+    const sy=VS.planSync({silences:voiceInfo.silences,total:voiceInfo.total,nar:nar.map(s=>s.end-s.start)});
+    if(sy){ syncStart=sy.start; const total=nar.reduce((a,s)=>a+(s.end-s.start),0);
+      console.log(`♪ follows your pace: you speak for ${(sy.end-sy.start).toFixed(1)}s (plan was ${total.toFixed(1)}s); ${sy.snapped} of ${nar.length-1} shot changes moved to your pauses`);
+      R0=await load('&durs='+sy.durs.map(d=>d.toFixed(3)).join(',')); }
+    else console.log('♪ could not find clear speech in the recording: using the planned pace'); }
+  const {duration, shots, music, voiceAt, sfx, levels}=R0;
   const N=Math.ceil(duration*FPS), out=path.join(DIR,topic+'.mp4');
 
   let shift=0, audioArgs=[], vf=null;
   if(voice && fs.existsSync(voice)){
-    const lead=leadSilence(voice), off=+(opt('offset')||0);
+    const lead=syncStart!==null?syncStart:leadSilence(voice), off=+(opt('offset')||0);
     const first = voiceAt || 0;   // the voice starts when the narration starts (after any opening montage)
     shift = lead - 0.15 - first - off;      // seconds to cut from the start of the recording (negative = add delay)
     console.log(`♪ voice: ${path.basename(voice)}  (speech starts at ${lead.toFixed(2)}s → aligned to shot 1${first?`, after the ${first.toFixed(1)}s opening`:''}${off?`, offset ${off}s`:''})`);
@@ -79,23 +99,27 @@ function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain()
   // ---- background music (original, made by tools/make-music.js): looped, faded, and ducked under your voice ----
   const wantMusic = opt('nomusic') ? false : (opt('music') && opt('music')!==true ? opt('music') : (music===undefined ? 'calm' : music));
   let musicFile=null;
-  if(wantMusic){ musicFile=path.join(ROOT,'music',wantMusic+'.wav');
+  if(wantMusic){ musicFile=require('./make-music').fileOf(wantMusic);
     if(!fs.existsSync(musicFile)){ try{ require('./make-music').makeTrack(wantMusic); }catch(e){ console.log('♫ could not make music "'+wantMusic+'" (calm | dark | bright): rendering without it'); musicFile=null; } }
     if(musicFile) console.log(`♫ background music: ${wantMusic}${voice&&audioArgs.length?' (ducks under your voice)':''}`); }
   // ---- sound effects (whoosh, boom, gong...): made from the story's transitions/hook by tools/sfx.js ----
   let sfxFile=null;
   if(!opt('nosfx') && sfx && sfx.length){ const S=require('./sfx'); sfxFile=path.join(DIR,'.sfx-temp.wav'); S.writeWav(sfxFile,S.renderSfx(sfx,duration+0.5)); console.log(`♫ sound effects: ${sfx.length} (whoosh / boom / bell ...)`); }
-  const hasVoice=audioArgs.length>0, vol=+(opt('musicvol')||0.2), sfxVol=+(opt('sfxvol')||0.8), D=duration.toFixed(2);
+  const hasVoice=audioArgs.length>0, vol=+(opt('musicvol')||0.2), sfxVol=+(opt('sfxvol')||0.35), D=duration.toFixed(2);
   let nIn=hasVoice?2:1; const mIn=musicFile?nIn++:-1, sIn=sfxFile?nIn++:-1;
   const musicArgs = musicFile ? ['-stream_loop','-1','-i',musicFile] : [], sfxArgs = sfxFile ? ['-i',sfxFile] : [];
   const vChain = hasVoice ? [vf, shift<0?`adelay=${Math.round(-shift*1000)}:all=1`:null, 'apad'].filter(Boolean).join(',') : null;
   const fc=[], bed=[];
   if(hasVoice){ fc.push(musicFile?`[1:a]${vChain},asplit=2[v][vs]`:`[1:a]${vChain}[v]`); bed.push('v'); }
-  if(musicFile){ fc.push(`[${mIn}:a]volume=${vol},afade=t=in:d=1.5,afade=t=out:st=${Math.max(0,duration-3).toFixed(2)}:d=3[m]`);
+  let envExpr='1';
+  if(musicFile && levels && levels.length && !opt('flatmusic')){ const g0=levels[0].g; const terms=[];
+    for(let k=1;k<levels.length;k++){ const dg=levels[k].g-levels[k-1].g; if(Math.abs(dg)<0.005) continue; const b=levels[k].start; terms.push(`${dg.toFixed(3)}*min(1,max(0,(t-${(b-0.6).toFixed(2)})/1.2))`); }
+    envExpr=`${g0.toFixed(3)}${terms.length?'+'+terms.join('+'):''}`; }
+  if(musicFile){ fc.push(`[${mIn}:a]volume='${vol}*(${envExpr})':eval=frame,afade=t=in:d=1.5,afade=t=out:st=${Math.max(0,duration-3).toFixed(2)}:d=3[m]`);
     if(hasVoice){ fc.push('[m][vs]sidechaincompress=threshold=0.03:ratio=8:attack=20:release=500[md]'); bed.push('md'); } else bed.push('m'); }
   let bedL=null;
   if(bed.length===2){ fc.push(`[${bed[0]}][${bed[1]}]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[bed]`); bedL='bed'; } else if(bed.length===1) bedL=bed[0];
-  if(sfxFile) fc.push(`[${sIn}:a]aresample=48000,volume=${sfxVol}[s]`);
+  if(sfxFile) fc.push(`[${sIn}:a]aresample=48000,lowpass=f=6000,volume=${sfxVol}[s]`);
   let audioOut=['-map','0:v'];
   if(bedL && sfxFile){ fc.push(`[${bedL}][s]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.89[a]`); }
   else if(bedL){ fc.push(`[${bedL}]alimiter=limit=0.89[a]`); }
