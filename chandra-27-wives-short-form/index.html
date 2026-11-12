@@ -1026,8 +1026,8 @@ function VIDEO(cfg){
    Build: node tools/build.js chandra-27-wives-short-form
 
    Animation-pack version: depth layers (sky/far/mid/art/near) for parallax, face close-ups on the curse (shot 11) and the
-   sad Chandra (shot 12), richer acting, a mood (lighting + colour) per emotion, cinematic transitions, a big hook in the
-   first 2 seconds, the "Mumma's Mythology" sting before shot 1 and an end card after the last shot.
+   sad Chandra (shot 12), richer acting, a mood (lighting + colour) per emotion and cinematic transitions.
+   No intro, no big hook text and no end card: the story starts at once (owner's choice).
    The earlier flat version is saved in old-version/. */
 const SKY = (moonX,moonY,moonR,mode,dur,delay)=> `<rect width="540" height="960" fill="url(#skyN)"/>`+stars(90,620)+(moonR?phaseMoon(moonX,moonY,moonR,mode||'full',dur,delay):'');
 const FAR = (y)=> hills(y-90,36,'#1d1d40',140)+`<rect y="${y-120}" width="540" height="70" fill="url(#fog)"/>`;      // distant hills (parallax layer 'far')
@@ -1038,8 +1038,6 @@ const W1=['#5a3a9a','#8a6ad0'], W2=['#2a7a6a','#5ac0a0'], W3=['#b8602a','#f0a050
 VIDEO({
   title:'चंद्रदेव की 27 पत्नियाँ', format:'short', target:72,
   handheld:0.6,   // no intro sting or end card (the owner does not want them)
-  // big hook: "27" counts up and slams in, then "पत्नियाँ!" (words taken from the title)
-  hook:{ at:0.2, hold:1.5, words:[ {text:'27', size:230, y:268, count:[1,27], delay:0}, {text:'पत्नियाँ!', size:104, y:376, delay:0.42} ] },
   keywords:['चंद्र','दक्ष','रोहिणी','27','नक्षत्र','शाप','महाभारत','क्षीण','कृष्ण पक्ष','शुक्ल पक्ष'],
   shots:[
     /* 1 — hook */
