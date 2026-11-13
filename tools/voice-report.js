@@ -26,6 +26,18 @@ function findVoice(topic,given){
       .sort((a,b)=>(/^voice/i.test(b)?1:0)-(/^voice/i.test(a)?1:0)); if(f.length) return path.join(d,f[0]); }
   return null; }
 
+/* how long each narration shot should take in the voice, in seconds at the plan pace (the sync fit shares the real recording out by these).
+   Normal lines: by the number of letters. Chanted verses (shot.calli, or a line containing ॥) are spoken much slower than
+   narration, so they count CHANT times more, and never less than a fixed `dur:` given in story.js. Without this the verse shot was
+   given too little time and the next scene came in while the owner was still chanting. Per shot override: `chant:2` (or chant:1 = normal). */
+const CHANT=1.7;
+function textWeights(cfg,nar){
+  const strip=w=>w.replace(/[.,!?'"‘’“”—\-–…:;।॥()]/g,'');
+  return nar.map(s=>{ const sh=cfg.shots[s.i]||{}, w=s.words.reduce((a,x)=>a+strip(x.text).length+2,0)/(cfg.pace||13);
+    const verse=!!sh.calli || /॥/.test(sh.line||'');
+    const k=sh.chant!==undefined ? sh.chant : (verse ? (cfg.chant||CHANT) : 1);
+    return k===1 ? w : Math.max(w*k, sh.dur||0); }); }
+
 /* probe + sync plan for a topic and a voice file */
 function analyse(topic,voice){
   const {cfg,plan}=loadPlan(topic), open=cfg.opening||0, nar=plan.shots.slice(open);
@@ -33,7 +45,7 @@ function analyse(topic,voice){
   // shot.rec:'0:31.8' in story.js pins that shot to a time in the recording (fix for a shot the automatic fit got wrong)
   const toSec=v=>{ if(v===undefined||v===null) return null; if(typeof v==='number') return v; const p=String(v).split(':').map(Number); return p.length===2?p[0]*60+p[1]:p[0]; };
   const forced=nar.map(s=>toSec(cfg.shots[s.i].rec));
-  const strip=w=>w.replace(/[.,!?'"‘’“”—\-–…:;।()]/g,''), weights=nar.map(s=>s.words.reduce((a,w)=>a+strip(w.text).length+2,0)/(cfg.pace||13));
+  const weights=textWeights(cfg,nar);
   const sync=VS.planSync({silences:info.silences,total:info.total,nar:nar.map(s=>s.dur),forced,weights});
   return {ok:true, cfg, plan, nar, info, sync, voice}; }
 
@@ -62,7 +74,7 @@ function writeReport(topic,A,extra){
     md+=`\nIf one shot starts at the wrong moment, tell Kiro e.g. "shot 7 should start at 0:31.8" (Kiro adds \`rec:'0:31.8'\` to that shot).\n\n## Your pauses\n\n${sync.pauses.slice(0,120).map(p=>`${mmss(p.s)} (${p.len.toFixed(2)} s)`).join(' · ')||'none'}\n`; }
   fs.writeFileSync(out,md); return out; }
 
-module.exports={loadPlan, findVoice, analyse, writeReport};
+module.exports={loadPlan, findVoice, analyse, writeReport, textWeights};
 
 if(require.main===module){
   const args=process.argv.slice(2), topic=(args.find(a=>!a.startsWith('--'))||'').replace(/\/$/,'');

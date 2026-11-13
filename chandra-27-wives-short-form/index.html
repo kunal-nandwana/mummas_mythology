@@ -697,9 +697,11 @@ const CHARACTER_LIST = {BARBARIK, KRISHNA, BRAHMIN, ARJUNA, BHIMA, YUDHISHTHIRA,
    More (all optional):
      cfg.opening:N                  first N shots = silent 0.8 s MONTAGE (give them art/cast/cam/tr, no line); voice starts at shot N+1
      shot.calli:{lines,source,y,size,delay,gap,write,hold}   Sanskrit verse "written" in calligraphy (see calligraphy() in scenes.js)
-     Sound effects are added automatically (quiet whoosh on whip/wipe,
-     soft shimmer on glow/iris, bell entering a 'divine' shot, one soft thump on the hook). Extra ones: shot.sfx:[[secondsIntoShot,'gong',vol?],...]
-     names: whoosh boom hit gong bell shimmer tick riser.   cfg.sfx:false turns all SFX off.
+     Sound effects are added automatically: a soft BEEP at every scene change (rising two notes into bright scenes, falling into dark ones; no whoosh),
+     one soft thump on the hook. Extra ones: shot.sfx:[[secondsIntoShot,'gong',vol?],...]
+     names: whoosh boom hit gong bell shimmer tick riser beep beepUp beepDown.   cfg.sfx:false turns all SFX off; cfg.transitionSound:'none' = no beeps.
+     Scene music: cfg.music:'scenes' + shot.scene:'name' (sound recipe from music/scene-library/library.json, created automatically if new).
+     shot.focus:{at,sound,dur,duck}  = DOMINANT sound at the key moment (slay emerge arrive noose revive kaal ...); the music dips to duck (0.3) for dur s.
    ===================================================================== */
 const LAYER_F={sky:.3,far:.6,mid:.85,art:1,near:1.4};
 function VIDEO(cfg){
@@ -740,12 +742,26 @@ function VIDEO(cfg){
   const KEY=(cfg.keywords||[]);
   const SH = cfg.shots.map((s,i)=>Object.assign({}, s, plan.shots[i]));
 
+  /* Calligraphy follows the shot's REAL length: with the owner's voice, the lines are written across the time he actually chants
+     (first to last speech part), so line 1 appears as he starts and the last line is done as he finishes. Either way the last line
+     is always fully written at least 0.7 s before the cut, so the next scene never arrives with the verse half-written.
+     calli.fit:false keeps the fixed delay/gap/write from story.js. */
+  function fitCalli(sc){
+    const o=Object.assign({delay:0.6,gap:1.5,write:1.2}, sc.calli), n=(o.lines||[]).length, D=sc.dur;
+    if(o.fit===false || !n || !(D>0)) return o;
+    const SP=sc.speech;
+    if(SP && SP.length){ const s0=Math.max(0.15,SP[0][0]), e1=Math.min(D-0.7, SP[SP.length-1][1]), slot=Math.max(0.5,(e1-s0)/n);
+      o.delay=s0; o.gap=slot; o.write=Math.min(o.write, slot*0.85); }
+    const done=o.delay+(n-1)*o.gap+o.write, room=D-0.7;
+    if(done>room){ const k=Math.max(0.25,room/done); o.delay*=k; o.gap*=k; o.write*=k; }
+    return o; }
+
   /* ---- build every shot once ---- */
   SH.forEach((sc,i)=>{
     const rigs=(sc.cast||[]).map(makeRig);
     const title = sc.title ? big(W/2, sc.title.y||150, (sc.title.size||50)*0.82, sc.title.color||'#ffd25e', sc.title.text, sc.title.delay||0.5) : '';
     const d=document.createElement('div'); d.className='scene';
-    const calli = sc.calli ? calligraphy(sc.calli.lines, sc.calli) : '';
+    const calli = sc.calli ? calligraphy(sc.calli.lines, fitCalli(sc)) : '';
     const stage0=`${sc.art?sc.art():''}${rigs.map(r=>r.svg).join('')}${sc.front?sc.front():''}${calli}${title}`;
     const layered=!!(sc.sky||sc.far||sc.mid||sc.near);
     d.innerHTML=`<svg viewBox="0 0 ${W} ${H}">`+(layered ?
@@ -1018,18 +1034,22 @@ function VIDEO(cfg){
     const iv=setInterval(()=>{ n--; if(n>0) ct.textContent=n; else { clearInterval(iv); ct.style.display='none'; restart(); } },1000); };
   /* ---- sound-effect events (render.js turns these into audio with tools/sfx.js) ---- */
   const OPEN=cfg.opening||0;
-  function sfxEvents(){ if(cfg.sfx===false) return []; const ev=[], add=(t,n,v)=>{ if(t>=0&&t<DURATION) ev.push({t:+t.toFixed(3),name:n,vol:v===undefined?1:v}); };
-    const TRSFX={whip:['whoosh',-1,.8],wipe:['whoosh',-1,.7],glow:['shimmer',-.2,.7],iris:['shimmer',-.3,.7]};   // soft sounds only
+  const moodOfShot=sc=>typeof sc.mood==='string'?sc.mood:(sc.mood&&sc.mood.base)||'neutral';
+  function sfxEvents(){ if(cfg.sfx===false) return []; const ev=[], add=(t,n,v,dom)=>{ if(t>=0&&t<DURATION) ev.push({t:+t.toFixed(3),name:n,vol:v===undefined?1:v,dom:dom?1:0}); };
+    /* scene change = a simple soft beep (no whoosh): a rising two-note tune into bright scenes, falling into dark ones, one note otherwise.
+       cfg.transitionSound:'none' = silent transitions. */
+    const UP={joy:1,hope:1,divine:1,calm:1}, DOWN={sad:1,anger:1,shock:1};
     SH.forEach((sc,i)=>{ const tr=TRN[i];
       if(i<OPEN){ add(sc.start,'tick',.7); }
-      if(tr && TRSFX[tr.type] && i>0){ const m=TRSFX[tr.type]; add(sc.start+(m[1]===-1?-tr.d/2:m[1]===0?0:m[1]*tr.d),m[0],m[2]); }
-      if(sc.mood==='divine' && i>0 && SH[i-1].mood!=='divine') add(sc.start+.25,'bell',.7);
-      (sc.sfx||[]).forEach(e=>add(sc.start+e[0],e[1],e[2])); });
+      else if(i>0 && cfg.transitionSound!=='none'){ const m=moodOfShot(sc); add(sc.start-(tr?tr.d*.25:0), UP[m]?'beepUp':DOWN[m]?'beepDown':'beep', sc.tr==='cut'?.6:.85); }
+      (sc.sfx||[]).forEach(e=>add(sc.start+e[0],e[1],e[2]));
+      /* focus = a dominant sound for the key moment of a shot; the music steps back while it plays (render.js + tools/scene-audio.js) */
+      (sc.focus?[].concat(sc.focus):[]).forEach(f=>add(sc.start+(f.at||0),f.sound||'slay',f.vol,true)); });
     if(HK) HK.words.forEach((w,k)=>{ if(k===0) add(hookImpact(w)-.02,'boom',.7); });
     return ev.sort((a,b)=>a.t-b.t); }
   /* background-music level per shot (the music swells and dips with the scene). shot.music = number overrides (1 = normal). */
   const MUSIC_G={calm:.9,joy:1.0,hope:1.15,anger:1.1,sad:.75,shock:.8,divine:1.0,neutral:.9};
-  const musicLevels=SH.map(s=>({start:s.start, end:s.end, mood:(typeof s.mood==='string'?s.mood:(s.mood&&s.mood.base)||'neutral'), m:(typeof s.music==='number'?s.music:null), g: typeof s.music==='number' ? s.music : (MUSIC_G[typeof s.mood==='string'?s.mood:(s.mood&&s.mood.base)||'neutral']||.85)}));
+  const musicLevels=SH.map(s=>({start:s.start, end:s.end, mood:(typeof s.mood==='string'?s.mood:(s.mood&&s.mood.base)||'neutral'), m:(typeof s.music==='number'?s.music:null), scene:s.scene||null, focus:(s.focus?[].concat(s.focus):[]).map(f=>({t:+(s.start+(f.at||0)).toFixed(3),sound:f.sound||'slay',dur:f.dur||2.2,duck:f.duck===undefined?.3:f.duck})), g: typeof s.music==='number' ? s.music : (MUSIC_G[typeof s.mood==='string'?s.mood:(s.mood&&s.mood.base)||'neutral']||.85)}));
   window.__ENGINE={ words:SH.map(s=>s.words.map(w=>({text:w.text,t:+w.t.toFixed(2)}))), musicLevels, voiceAt:plan.voiceAt, sfx:sfxEvents(), music:cfg.music, duration:DURATION, intro:INTRO, narrEnd:NARR_END, W, H, shots:SH.map(s=>({start:s.start,end:s.end,line:s.line})), seek:t=>render(t), ready:document.fonts?document.fonts.ready:Promise.resolve() };
   window.__DUR=DURATION;
   if(!RENDER){ (function loop(){ const t=now(); if(!PROMPT && fixed===null && !paused && t>=DURATION-0.002){ t0=performance.now(); if(audio){audio.currentTime=0;audio.play().catch(()=>{});} }

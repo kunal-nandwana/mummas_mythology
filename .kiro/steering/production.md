@@ -27,6 +27,7 @@ Targets: 30 Shorts + 4 long videos a month, with his own voice. **Credits matter
 - When the owner confirms a change works ("good", "ok", "approved"), make it the **engine default** (engine/ + tools/ + `engine/API.md`), not a one-video tweak, so every future video gets it.
 - No intro, hook text or end card. Every video ends with the natural `ending` (default on).
 - Music = the owner's own track in `music/` by default. Exceptions he asked for: `music:'score'` (Chandra) and **`music:'scenes'` = scene sound library** (`music/scene-library/library.json`, `tools/scene-audio.js`): tag every shot `scene:'name'` (new names are auto-created + saved by build.js; reuse existing names for the same kind of scene), and use `focus:{at,sound,dur,duck}` on the 1-3 key moments so a dominant sound plays and the music steps back. Scene changes get a soft beep/tune, NEVER whoosh/whoop. Voice stays on top. SFX stay soft except `focus` sounds.
+- Shlokas/verses: always put them in their own shot with `calli` (that makes the voice sync treat them as slow chanting and makes the calligraphy follow the chanting). If a verse is still cut short, add `chant:2` to that shot. When the report shows "no pause (by pace)" cuts, simulate the fit offline from the report's pauses (tools/voicesync.js planSync) instead of guessing `rec:` times.
 - Voice sync issue? Ask for `<topic>/voice-report.md`, then add `rec:'m:ss.s'` to the wrong shot. Don't re-render or screenshot to debug sync.
 
 ## Credit saving (important)
