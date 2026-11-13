@@ -46,7 +46,8 @@ function analyse(topic,voice){
   const toSec=v=>{ if(v===undefined||v===null) return null; if(typeof v==='number') return v; const p=String(v).split(':').map(Number); return p.length===2?p[0]*60+p[1]:p[0]; };
   const forced=nar.map(s=>toSec(cfg.shots[s.i].rec));
   const weights=textWeights(cfg,nar);
-  const sync=VS.planSync({silences:info.silences,total:info.total,nar:nar.map(s=>s.dur),forced,weights});
+  const words=nar.map(s=>s.words.map(w=>w.text));
+  const sync=VS.planSync({silences:info.silences,total:info.total,nar:nar.map(s=>s.dur),forced,weights,words});
   return {ok:true, cfg, plan, nar, info, sync, voice}; }
 
 const mmss=s=>{ s=Math.round(Math.max(0,s)*10)/10; return Math.floor(s/60)+':'+(s%60).toFixed(1).padStart(4,'0'); };
@@ -66,10 +67,12 @@ function writeReport(topic,A,extra){
   if(isFinite(info.peak) && info.peak>-0.5) warn.push('The recording touches 0 dB (clipping). Keep the phone a little further away or lower the input level.');
   if(isFinite(info.mean) && info.mean<-38) warn.push('The recording is very quiet. Clip the Boya M1 about 15-20 cm below your mouth.');
   if(!sync) warn.push('No clear speech was found, so the planned pace was used.');
+  else if(sync.mode==='sentences'){
+    if(sync.steadiness>0.35) warn.push(`Your pace changes a lot in places (up to ${Math.round((Math.exp(sync.steadiness)-1)*100)}% from your average), so a few "by sentence pace" cuts may be up to a second off. Watch those shots; if one is wrong, say e.g. "shot 7 should start at 0:31.8".`); }
   else if(sync.snapped < (nar.length-1)*0.6) warn.push('Only a few shot changes landed on a real pause. Leave a short pause (about half a second) at the end of every line.');
   if(warn.length) md+='## Things to check\n\n'+warn.map(w=>'- '+w).join('\n')+'\n\n';
   if(sync){
-    md+=`## Shots against your voice\n\n"Starts at" is the time in YOUR recording. "How" says whether the picture change sits on one of your pauses.\n\n| Shot | Starts at | Your length | Plan | How | Line begins |\n|---|---|---|---|---|---|\n`;
+    md+=`## Shots against your voice\n\n"Starts at" is the time in YOUR recording. "How": *at your pause* = the cut sits on your pause after that line; *by sentence pace* = no pause there, so the cut is placed from your steady pace between the nearest pauses that match sentence ends in the script (breaths inside a sentence are ignored).${sync.mode==='sentences'?` Pace steadiness: ${sync.steadiness<=0.2?'very steady':sync.steadiness<=0.35?'steady':'uneven'} (largest change ${Math.round((Math.exp(sync.steadiness)-1)*100)}%).`:''}\n\n| Shot | Starts at | Your length | Plan | How | Line begins |\n|---|---|---|---|---|---|\n`;
     nar.forEach((s,i)=>{ const st=i===0?sync.start:sync.cuts[i]; md+=`| ${i+1+(cfg.opening||0)} | ${mmss(st)} | ${sync.durs[i].toFixed(1)} s | ${s.dur.toFixed(1)} s | ${i===0?'speech start':sync.report[i-1].how} | ${s.line.split(/\s+/).slice(0,5).join(' ')}… |\n`; });
     md+=`\nIf one shot starts at the wrong moment, tell Kiro e.g. "shot 7 should start at 0:31.8" (Kiro adds \`rec:'0:31.8'\` to that shot).\n\n## Your pauses\n\n${sync.pauses.slice(0,120).map(p=>`${mmss(p.s)} (${p.len.toFixed(2)} s)`).join(' · ')||'none'}\n`; }
   fs.writeFileSync(out,md); return out; }
