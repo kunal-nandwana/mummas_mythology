@@ -200,7 +200,7 @@ VIDEO({
      ]},
     /* 10a: the source: Brahma Purana manuscript */
     {line:'ब्रह्म पुराण के अध्याय 35, श्लोक 11 में महादेव की इसी रूप में स्तुति की गई है:',
-     rec:'1:12.6', scene:'shloka-intro', mood:'divine', tr:'fade', capTop:660, fx:'petals', cam:{keys:[[0,270,560,1.0],[4,270,520,1.18]]},
+     scene:'shloka-intro', mood:'divine', tr:'fade', capTop:660, fx:'petals', cam:{keys:[[0,270,560,1.0],[4,270,520,1.18]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyDiv)"/>`+stars(80,500)+divine(270,470,'#ffd27a',1),
      far:()=>kailash(800,'#2c2656','#fff2d0')+mist(780,.1),
      mid:()=>ground(850,'url(#gnd)','#9a8aba')+flameDiya(120,900)+flameDiya(420,900),
@@ -209,7 +209,7 @@ VIDEO({
         [[90,420],[450,440],[110,610],[440,600]].map(([x,y],k)=>A('flick:'+(2+k*.5),sparkle(x,y,1.3))).join('')},
     /* 10b: the shloka itself, written line by line inside a golden frame */
     {line:'"नमः कालान्तकायाथ नमो मन्दरवासिने। हिरण्यकवचायैव नमः केयूरधारिणे॥"',
-     rec:'1:19.0', scene:'shloka-chant', mood:'divine', tr:'glow', nocap:true, fx:'petals', dur:9, cam:{keys:[[0,270,470,1.0],[8,270,500,1.1]]},
+     scene:'shloka-chant', mood:'divine', tr:'glow', nocap:true, fx:'petals', dur:9, cam:{keys:[[0,270,470,1.0],[8,270,500,1.1]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyDiv)"/>`+stars(80,500)+divine(270,330,'#ffd27a',1),
      far:()=>kailash(820,'#2c2656','#fff2d0')+mist(790,.1),
      mid:()=>ground(850,'url(#gnd)','#9a8aba')+flameDiya(70,905)+flameDiya(470,905)+godRays(120),

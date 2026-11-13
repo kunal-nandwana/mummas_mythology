@@ -81,3 +81,4 @@ parallax layers · keyframed camera/close-ups · head turns, gestures, secondary
 
 ## Voice sync (render.js, automatic)
 Pauses are found at the level that fits the room; each shot change goes on the pause that best fits how much text each shot has; caption words follow the real speech and wait in pauses. `node tools/voice-report.js <topic>` writes `<topic>/voice-report.md` (also written on every render). When the owner says a shot is off, read the report he pastes and add `rec:'m:ss.s'` to that shot.
+Verses: shots with `calli` (or a `॥` line) count as chanted, 1.7x slower than narration (and never shorter than their `dur:`), so the next scene does not cut in mid-shloka. Per shot `chant:2` = slower still, `chant:1` = normal. The calligraphy lines are spread over the real chanting and always finish 0.7 s before the cut (`calli.fit:false` = fixed timings).

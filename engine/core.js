@@ -64,12 +64,26 @@ function VIDEO(cfg){
   const KEY=(cfg.keywords||[]);
   const SH = cfg.shots.map((s,i)=>Object.assign({}, s, plan.shots[i]));
 
+  /* Calligraphy follows the shot's REAL length: with the owner's voice, the lines are written across the time he actually chants
+     (first to last speech part), so line 1 appears as he starts and the last line is done as he finishes. Either way the last line
+     is always fully written at least 0.7 s before the cut, so the next scene never arrives with the verse half-written.
+     calli.fit:false keeps the fixed delay/gap/write from story.js. */
+  function fitCalli(sc){
+    const o=Object.assign({delay:0.6,gap:1.5,write:1.2}, sc.calli), n=(o.lines||[]).length, D=sc.dur;
+    if(o.fit===false || !n || !(D>0)) return o;
+    const SP=sc.speech;
+    if(SP && SP.length){ const s0=Math.max(0.15,SP[0][0]), e1=Math.min(D-0.7, SP[SP.length-1][1]), slot=Math.max(0.5,(e1-s0)/n);
+      o.delay=s0; o.gap=slot; o.write=Math.min(o.write, slot*0.85); }
+    const done=o.delay+(n-1)*o.gap+o.write, room=D-0.7;
+    if(done>room){ const k=Math.max(0.25,room/done); o.delay*=k; o.gap*=k; o.write*=k; }
+    return o; }
+
   /* ---- build every shot once ---- */
   SH.forEach((sc,i)=>{
     const rigs=(sc.cast||[]).map(makeRig);
     const title = sc.title ? big(W/2, sc.title.y||150, (sc.title.size||50)*0.82, sc.title.color||'#ffd25e', sc.title.text, sc.title.delay||0.5) : '';
     const d=document.createElement('div'); d.className='scene';
-    const calli = sc.calli ? calligraphy(sc.calli.lines, sc.calli) : '';
+    const calli = sc.calli ? calligraphy(sc.calli.lines, fitCalli(sc)) : '';
     const stage0=`${sc.art?sc.art():''}${rigs.map(r=>r.svg).join('')}${sc.front?sc.front():''}${calli}${title}`;
     const layered=!!(sc.sky||sc.far||sc.mid||sc.near);
     d.innerHTML=`<svg viewBox="0 0 ${W} ${H}">`+(layered ?
