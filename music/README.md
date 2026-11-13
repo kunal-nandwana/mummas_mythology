@@ -10,6 +10,11 @@ Files in this folder stay on your Mac only; they are not uploaded to GitHub.
 3. Pick tracks with **"No attribution required"** (otherwise copy the credit line into your video description).
 4. Download, and drop the file in this `music/` folder.
 
+## Scene music (no download needed)
+
+Set `music:'scenes'` in a story and every scene gets its own generated music from `scene-library/library.json` (this one file is saved in GitHub; the `.wav` listening copies are not).
+Hear all of them: `node tools/scene-audio.js preview` → files appear in `music/scene-library/`.
+
 ## Several tracks
 
 - The **first** file (alphabetical order) is the default for every video.

@@ -159,7 +159,9 @@ function writeWav(file,{L,R,SR:sr}){ const n=L.length, buf=Buffer.alloc(44+n*4);
 /* levels from the engine: [{start,end,mood,m}] -> writes a wav, returns the plan */
 function makeScore(levels,duration,file){ const sc=composeScore(levels,duration); writeWav(file,sc); return sc.plan; }
 
-module.exports={makeScore, composeScore, writeWav, MOOD_GAIN};
+module.exports={makeScore, composeScore, writeWav, MOOD_GAIN,
+  // building blocks, reused by tools/scene-audio.js (the scene sound library)
+  SR, TAU, hz, rng, T, P, MAJ, MIN, CH_MAJ, CH_MIN, padChords, melody, arp, tanpura, reverb};
 
 if(require.main===module){
   const out=process.argv[2]||path.join(__dirname,'..','music','score-sample.wav');

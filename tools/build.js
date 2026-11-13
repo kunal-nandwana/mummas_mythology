@@ -22,6 +22,8 @@ let CFG=null; ctx.VIDEO=c=>{ CFG=c; };
 vm.runInContext(story, ctx);
 if(!CFG){ console.error('story.js must call VIDEO({...})'); process.exit(1); }
 const plan=ctx.planTiming(CFG);
+/* scene sound library: any new scene: name gets its sound recipe created and saved (music/scene-library/library.json) */
+if(CFG.music==='scenes'){ const made=require('./scene-audio').ensureForStory(CFG); made.forEach(m=>console.log(`✚ new scene sound saved to the library: ${m.name} (${m.mood})`)); }
 const fmt=s=>Math.floor(s/60)+':'+(s%60).toFixed(1).padStart(4,'0');
 let md=`# ${CFG.title||topic} — Recording script\n\n`+
   `Total length: **${fmt(plan.duration)}** · ${plan.shots.length} shots · format: ${CFG.format||'short'}\n\n`+

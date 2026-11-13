@@ -14,7 +14,11 @@
    Music:  YOUR track from the music/ folder (first file, or story.js music:'part-of-file-name'). music:false = none.
            'score' = music composed scene by scene (changes with each mood, own volume per scene); 'calm'|'dark'|'bright' = generated loops. --music name / --nomusic / --musicvol 0.5 (default; 0.8 = louder, 0.3 = softer).
            It fades in and out and gets quieter whenever you speak.
-   SFX:    whoosh / boom / bell sounds are added at transitions and the hook (original, made by tools/sfx.js).
+           'scenes' = music from the SCENE SOUND LIBRARY (music/scene-library/library.json): each shot's scene:'name' has its own saved
+           sound, cross-faded smoothly; new scene names get a sound created and saved. Key moments (shot focus:{..}) get a dominant
+           sound while the music steps back. Level is balanced for you: music sits about 10-12 dB under your voice and is
+           tucked a little further whenever you speak (--musicvol 1.3 = louder, 0.7 = softer).
+   SFX:    a soft beep / two-note tune at every scene change (no whoosh) plus dominant key-moment sounds (original, made by tools/sfx.js).
            --nosfx turns them off, --sfxvol 0.35 sets the loudness.
    Pace:   the shots follow YOUR speaking pace: pauses in the recording are found and every picture change is moved to
            the nearest pause (--nosync = use the planned pace instead). Music rises and falls with each scene's mood
@@ -94,8 +98,14 @@ function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain()
   const MDIR=path.join(ROOT,'music'), GEN={calm:1,dark:1,bright:1};
   const userTracks=fs.existsSync(MDIR)?fs.readdirSync(MDIR).filter(n=>VS.AUDIO_EXT.test(n) && !/-v\d+\.wav$/.test(n) && !/^\./.test(n)).sort():[];
   const want = opt('nomusic') ? false : (opt('music') && opt('music')!==true ? opt('music') : (music===undefined ? null : music));
-  let musicFile=null, musicName='', scoreMade=false;
+  let musicFile=null, musicName='', scoreMade=false, scenesMode=false;
   if(want===false){}
+  else if(want==='scenes'){ // scene sound library: each shot's scene has its own saved sound (tools/scene-audio.js)
+    musicFile=path.join(DIR,'.score-temp.wav'); musicName='scene sound library (changes with every scene)'; scoreMade=true; scenesMode=true;
+    const SA=require('./scene-audio'); SA.ensure(levels.map(l=>({scene:l.scene,mood:l.mood}))).forEach(m=>console.log(`   ✚ new scene sound saved to the library: ${m.name} (${m.mood})`));
+    const sc=SA.makeSceneMusic(levels,duration,musicFile);
+    sc.plan.forEach((p,i)=>console.log(`   ♫ scene ${String(i+1).padStart(2)}  ${p.start.toFixed(1).padStart(5)}s  ${p.scene.padEnd(20)} ${p.mood.padEnd(7)} volume ${p.g0.toFixed(2)} → ${p.g1.toFixed(2)}${p.auto?'  (auto-made)':''}`));
+    levels.forEach(l=>(l.focus||[]).forEach(f=>console.log(`   ★ ${f.t.toFixed(1).padStart(5)}s  dominant "${f.sound}": music steps back to ${Math.round(f.duck*100)}% for ${f.dur}s`))); }
   else if(want==='score'){ // a score composed scene by scene from the story's moods (tools/make-score.js)
     musicFile=path.join(DIR,'.score-temp.wav'); musicName='scene score (changes with every scene)'; scoreMade=true;
     const plan=require('./make-score').makeScore(levels,duration,musicFile);
@@ -108,8 +118,12 @@ function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain()
   if(musicFile) console.log(`♫ background music: ${musicName}${audioArgs.length?' (dips gently while you speak)':''}`);
   // ---- sound effects (whoosh, boom, gong...): made from the story's transitions/hook by tools/sfx.js ----
   let sfxFile=null;
-  if(!opt('nosfx') && sfx && sfx.length){ const S=require('./sfx'); sfxFile=path.join(DIR,'.sfx-temp.wav'); S.writeWav(sfxFile,S.renderSfx(sfx,duration+0.5)); console.log(`♫ sound effects: ${sfx.length} (whoosh / boom / bell ...)`); }
-  const hasVoice=audioArgs.length>0, vol=+(opt('musicvol')||0.5), sfxVol=+(opt('sfxvol')||0.35), D=duration.toFixed(2);
+  const sfxVol=+(opt('sfxvol')||0.35);
+  if(!opt('nosfx') && sfx && sfx.length){ const S=require('./sfx'); sfxFile=path.join(DIR,'.sfx-temp.wav');
+    // dominant key-moment sounds ignore the quiet sfx level (they play at ~0.9) and start early so their main hit lands exactly on the picture
+    const evs=sfx.map(e=>e.dom?Object.assign({},e,{t:Math.max(0,e.t-(S.IMPACT[e.name]||0)),vol:(e.vol===undefined?1:e.vol)*0.9/sfxVol}):e);
+    S.writeWav(sfxFile,S.renderSfx(evs,duration+0.5)); console.log(`♫ sound effects: ${sfx.filter(e=>!e.dom).length} soft (beeps at scene changes ...) + ${sfx.filter(e=>e.dom).length} dominant`); }
+  const hasVoice=audioArgs.length>0, vol=+(opt('musicvol')||(scenesMode?1:0.5)), D=duration.toFixed(2);
   let nIn=hasVoice?2:1; const mIn=musicFile?nIn++:-1, sIn=sfxFile?nIn++:-1;
   const musicArgs = musicFile ? (scoreMade ? ['-i',musicFile] : ['-stream_loop','-1','-i',musicFile]) : [], sfxArgs = sfxFile ? ['-i',sfxFile] : [];
   const vChain = hasVoice ? [vf, shift<0?`adelay=${Math.round(-shift*1000)}:all=1`:null, 'apad'].filter(Boolean).join(',') : null;
@@ -120,7 +134,8 @@ function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain()
     for(let k=1;k<levels.length;k++){ const dg=levels[k].g-levels[k-1].g; if(Math.abs(dg)<0.005) continue; const b=levels[k].start; terms.push(`${dg.toFixed(3)}*min(1,max(0,(t-${(b-0.6).toFixed(2)})/1.2))`); }
     envExpr=`${g0.toFixed(3)}${terms.length?'+'+terms.join('+'):''}`; }
   if(musicFile){ fc.push(`[${mIn}:a]volume='${vol}*(${envExpr})':eval=frame,afade=t=in:d=1.5,afade=t=out:st=${Math.max(0,duration-3.4).toFixed(2)}:d=3.4[m]`);
-    if(hasVoice){ fc.push('[m][vs]sidechaincompress=threshold=0.1:ratio=2.5:attack=40:release=900[md]'); bed.push('md'); } else bed.push('m'); }
+    // music tucks under the voice: scene music is already set to a fixed level, so it ducks about 6 dB while you speak and swells back in pauses
+    if(hasVoice){ fc.push(scenesMode?'[m][vs]sidechaincompress=threshold=0.035:ratio=2.5:attack=30:release=700[md]':'[m][vs]sidechaincompress=threshold=0.1:ratio=2.5:attack=40:release=900[md]'); bed.push('md'); } else bed.push('m'); }
   let bedL=null;
   if(bed.length===2){ fc.push(`[${bed[0]}][${bed[1]}]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[bed]`); bedL='bed'; } else if(bed.length===1) bedL=bed[0];
   if(sfxFile) fc.push(`[${sIn}:a]aresample=48000,lowpass=f=6000,volume=${sfxVol}[s]`);
