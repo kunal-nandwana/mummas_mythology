@@ -9,7 +9,9 @@ canvas{position:absolute;inset:0;pointer-events:none;z-index:5}
 /* mood: colour wash, coloured light and vignette per emotion (core.js applyMood) */
 #mood{position:absolute;inset:0;z-index:5;pointer-events:none}
 #mood i{position:absolute;inset:0;display:block}
-#mood i:nth-child(2){mix-blend-mode:screen}
+#mood i:nth-child(2),#mood i:nth-child(4){mix-blend-mode:screen}
+/* look:'mumma': thin light along the edge of every character (colour + strength follow the mood) */
+.rimfx{filter:drop-shadow(1.3px -1.1px 0 color-mix(in srgb,var(--rimc,#fff) calc(var(--rimo,0)*100%),transparent)) drop-shadow(0 0 3px color-mix(in srgb,var(--rimc,#fff) calc(var(--rimo,0)*45%),transparent))}
 #trfx,#hook,#sting,#card{position:absolute;inset:0;width:540px;height:960px;pointer-events:none}
 #trfx{z-index:7}
 #card{z-index:9;display:none}

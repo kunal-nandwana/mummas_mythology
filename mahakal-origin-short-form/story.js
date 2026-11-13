@@ -117,7 +117,7 @@ const skyLamps=(n)=>[...Array(n)].map((_,i)=>A(`drift:${(i%2?1:-1)*30}:-420:${(9
 /* town street (used for several night scenes) */
 const townFar=(col)=>smallTemple(60,640,.9,col)+smallTemple(210,650,.7,col)+smallTemple(470,640,1,col);
 
-VIDEO({
+VIDEO({ look:'mumma',
   title:'महाकाल कहलाने की कथा',
   format:'short',
   target:84,

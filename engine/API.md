@@ -74,6 +74,9 @@ Balance (automatic): every scene is levelled to the same loudness, music sits ~1
 ## Opening montage
 (Owner dislikes it: not used.) `opening:N` + N shots with `art/cast/cam/tr` and NO `line` (0.8s each, or `dur`). Counts inside `target`. Plays with the hook, a riser, then a boom when narration starts. See `chandra-27-wives-short-form/story.js`.
 
+## Look polish (new, optional): `look:'mumma'`
+Add `look:'mumma'` to `VIDEO({...})` for a richer picture without changing the drawing style: thin **rim light along every character's silhouette** (colour and strength follow the shot's `mood`), soft **bokeh lights** tinted by the mood light, tiny floating **motes**, a warm **diya glow** at the bottom and a slightly deeper vignette. Off by default (old videos unchanged). Tune with an object: `look:{rim:1, bokeh:1, motes:1, warm:.08 /*0=off*/, vig:.1}`. Test video: `mahakal-origin-short-form` (see its `preview/look-before.png` / `look-after.png`).
+
 ## Animation upgrades (new, all optional)
 parallax layers · keyframed camera/close-ups · head turns, gestures, secondary motion · `tears` · mood · cinematic `tr` · handheld camera.
 
