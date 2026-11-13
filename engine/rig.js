@@ -78,7 +78,7 @@ function shade(hex,amt){ const n=parseInt(hex.slice(1),16); let r=n>>16, g=(n>>8
 const COSTUME0 = {skin:'#8c6248', top:'#1f2640', bottom:'#8e1d24', shin:null, foot:null, sleeve:null, skirt:false,
   trim:'url(#gold)', hair:'long', head:'crown', beard:null, mus:false, cape:null, quiver:false, garland:null, sash:null,
   veil:null, turban:'#ece5d4', tilak:false, earring:true, big:false, aura:null, jewel:true,
-  bare:false, ash:false, snake:false, tiger:false, rudra:false, third:false, tusks:false, spikes:false, eyeCol:null, fireHair:false};
+  bare:false, ash:false, snake:false, tiger:false, rudra:false, third:false, tusks:false, spikes:false, eyeCol:null, fireHair:false, blindfold:false};
 
 let RIG_ID=0;
 /* Build one character. cast = {c:COSTUME, x, y, s, flip, acts:[[t,pose,dur?],...], expr, eyes, talk,
@@ -125,13 +125,24 @@ function makeRig(cast){
       case 'sword': return `<g transform="rotate(-90)"><rect x="-3" y="-8" width="6" height="16" fill="#6a4218"/><rect x="-10" y="6" width="20" height="4" fill="url(#gold)"/><path d="M-3 10 L3 10 L2 96 L0 104 L-2 96Z" fill="#dfe3ea"/></g>`;
       case 'arrows3': return ['#ff4a3c','#4ee08a','#ffd25e'].map((col,i)=>`<g transform="rotate(${-58+i*14})"><line x1="0" y1="0" x2="72" y2="0" stroke="${col}" stroke-width="3"/><polygon points="72,-6 88,0 72,6" fill="${col}"/>${A('pulse:3','<circle cx="80" cy="0" r="7" fill="'+col+'" opacity=".45"/>')}<path d="M0 0 l-8 -5 M0 0 l-8 5" stroke="${col}" stroke-width="2"/></g>`).join('');
       case 'orb': return `<g transform="translate(14 -8)">${A('pulse:2','<circle r="54" fill="url(#gw)"/>')}<circle r="18" fill="#fff3c4"/></g>`;
+      /* heartCloth: both hands wrapped in thick white cloth, cupped; a golden-pink light beats inside (the light is seen, the object never is) */
+      case 'heartCloth': return `<g transform="translate(10 -4)">`+
+        A('beat:0:-6:.22','<circle cy="-6" r="78" fill="url(#heartG)"/>')+
+        `<ellipse cx="-13" cy="4" rx="24" ry="18" fill="#f1eadb" transform="rotate(-18 -13 4)"/><ellipse cx="13" cy="4" rx="24" ry="18" fill="#ece4d2" transform="rotate(18 13 4)"/>`+
+        `<path d="M-30 0 q12 -6 26 2 M-28 10 q12 -5 24 2 M30 0 q-12 -6 -26 2 M28 10 q-12 -5 -24 2" stroke="#cbbfa6" stroke-width="2" fill="none"/>`+
+        A('beat:0:-10:.3','<ellipse cy="-10" rx="16" ry="6" fill="#fff1d0" opacity=".9"/>')+`</g>`;
+      /* cloth: the same thick wrapped hands, without the light */
+      case 'cloth': return `<g transform="translate(10 -4)"><ellipse cx="-13" cy="4" rx="24" ry="18" fill="#f1eadb" transform="rotate(-18 -13 4)"/><ellipse cx="13" cy="4" rx="24" ry="18" fill="#ece4d2" transform="rotate(18 13 4)"/>`+
+        `<path d="M-30 0 q12 -6 26 2 M-28 10 q12 -5 24 2 M30 0 q-12 -6 -26 2 M28 10 q-12 -5 -24 2" stroke="#cbbfa6" stroke-width="2" fill="none"/></g>`;
+      /* mallet: craftsman's wooden mallet (in the hand) + chisel */
+      case 'mallet': return `<line x1="0" y1="10" x2="0" y2="-62" stroke="#6b4424" stroke-width="6" stroke-linecap="round"/><rect x="-17" y="-92" width="34" height="34" rx="5" fill="#8a5a2c" stroke="#5a3a1a" stroke-width="2"/><line x1="14" y1="-10" x2="52" y2="-10" stroke="#5a3a20" stroke-width="5" stroke-linecap="round"/><line x1="52" y1="-10" x2="80" y2="-10" stroke="#b8bcc4" stroke-width="4"/>`;
       case 'chakra': { let t=''; for(let i=0;i<16;i++) t+=`<path d="M0 -30 L4 -36 L-4 -36Z" transform="rotate(${i*22.5})" fill="#ffd25e"/>`;
         return `<g transform="translate(0 -40)">${A('spin:1.2:0:0',`<circle r="40" fill="url(#gw)" opacity=".7"/><circle r="28" fill="none" stroke="#ffd25e" stroke-width="4"/>${t}<circle r="6" fill="#ffd25e"/>`)}</g>`; }
       case 'flute': return `<g transform="rotate(-80)"><rect x="-3" y="-60" width="6" height="110" rx="3" fill="#a8742a"/><circle cx="0" cy="-30" r="1.6" fill="#3a2010"/><circle cx="0" cy="-15" r="1.6" fill="#3a2010"/><circle cx="0" cy="0" r="1.6" fill="#3a2010"/></g>`;
       case 'axe': return `<line x1="-4" y1="46" x2="6" y2="-150" stroke="#3a2a22" stroke-width="9" stroke-linecap="round"/><g transform="translate(6 -128)"><path d="M0 -8 C-34 -26 -62 -4 -56 40 C-38 20 -16 14 0 18Z" fill="#6a7078" stroke="#d4d8de" stroke-width="2"/><path d="M0 -8 C34 -26 62 -4 56 40 C38 20 16 14 0 18Z" fill="#585e66" stroke="#d4d8de" stroke-width="2"/><path d="M-4 -8 L0 -34 L4 -8Z" fill="#d4d8de"/><path d="M-50 30 C-34 14 -16 8 -2 12 M50 30 C34 14 16 8 2 12" stroke="#ff5a2a" stroke-width="2" fill="none" opacity=".8"/>${A('pulse:3','<circle cy="14" r="46" fill="url(#gr)" opacity=".5"/>')}</g>`;
       default: return '';
     } }
-  const UPRIGHT={axe:1,bow:1,mace:1,staff:1,lantern:1,diya:1,lotus:1,trishul:1,orb:1,chakra:1,arrows3:1};
+  const UPRIGHT={axe:1,bow:1,mace:1,staff:1,lantern:1,diya:1,lotus:1,trishul:1,orb:1,chakra:1,arrows3:1,heartCloth:1,cloth:1,mallet:1};
 
   /* ---- head ---- */
   let head='';
@@ -157,6 +168,10 @@ function makeRig(cast){
         (c.skirt?`<path d="M21.5 -270 l3.4 -2.6" stroke="#140a06" stroke-width="1.5" stroke-linecap="round"/>`:'')+`<path ${J('wet')} d="M10.5 -267.6 Q15 -266 20 -268" stroke="#fff" stroke-width="1" fill="none" opacity="0"/></g>`;
   head+=`<path ${J('lid')} d="M9 -270.5 q6.5 3 12.5 0" stroke="#140a06" stroke-width="2" fill="none" style="display:none"/>`;
   head+=`<path ${J('brow')} d="M8 -278 Q15 -281.5 22.5 -277.5" stroke="${c.beard==='white'?'#d9d2c4':dark}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
+  // blindfold: cloth band over the eyes, knot + two loose ends at the back of the head (blindfold:'#colour' or true)
+  if(c.blindfold){ const bf=c.blindfold===true?'#f6efe0':c.blindfold;
+    head+=`<path d="M-15 -279 Q8 -283 25 -277 L26 -265 Q8 -270 -15 -267Z" fill="${bf}"/><path d="M-12 -273 Q8 -276 24 -271" stroke="#000" stroke-opacity=".12" stroke-width="1.2" fill="none"/>`+
+      `<circle cx="-16" cy="-273" r="4.5" fill="${bf}"/><g ${J('hair')}><path d="M-17 -272 Q-30 -262 -32 -246 L-27 -246 Q-25 -260 -15 -269Z M-17 -274 Q-34 -270 -40 -256 L-35 -254 Q-30 -265 -15 -271Z" fill="${bf}"/></g>`; }
   head+=`<g ${J('furrow')} style="display:none"><path d="M10 -283 q2 -2 1 -5" stroke="#000" stroke-opacity=".38" stroke-width="1.3" fill="none" stroke-linecap="round"/><path d="M14 -284 q2 -2 1.4 -5" stroke="#000" stroke-opacity=".32" stroke-width="1.1" fill="none" stroke-linecap="round"/></g>`;
   // mouth variants
   head+=`<path ${J('m_neutral')} d="M17 -251 q4 0 7 -1" stroke="#3a1a10" stroke-width="2" fill="none"/>`+
