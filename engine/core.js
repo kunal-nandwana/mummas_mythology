@@ -119,6 +119,10 @@ function VIDEO(cfg){
         case 'glint':{ const u=(lt-a[0])/a[1], k=easeIO(clamp01(u)); e.setAttribute('transform',`translate(${(a[2]+(a[3]-a[2])*k).toFixed(1)} 0)`); op=(u<0||u>=1)?0:Math.min(1,Math.min(u,1-u)*8); break; }
         case 'fadeout':{ op=1-clamp01((lt-a[0])/a[1]); break; }
         case 'fadein':{ op=clamp01((lt-a[0])/a[1]); break; }
+        /* drift:dx:dy:period  loops forever: slides dx,dy over `period` s and fades in/out at the ends (clouds, smoke, embers, floating lamps; each copy starts at its own phase) */
+        case 'drift':{ const u=(lt/a[2]+ph/6.283)%1; tr=`translate(${r1(u*a[0])} ${r1(u*a[1])})`; op=Math.sin(Math.PI*u); break; }
+        /* ripple:period:cx:cy  a ring/glow that grows from (cx,cy) and fades, forever (shock-waves, holy light, water rings) */
+        case 'ripple':{ const u=(lt/a[0]+ph/6.283)%1, s=0.25+0.75*u; tr=`translate(${a[1]} ${a[2]}) scale(${s.toFixed(3)}) translate(${-a[1]} ${-a[2]})`; op=(1-u)*Math.min(1,u*8); break; }
         case 'orbit':{ const ang=(lt/a[4])*6.283, x=a[2]+a[0]*Math.cos(ang), y=a[3]+a[1]*Math.sin(ang), tang=Math.atan2(a[1]*Math.cos(ang),-a[0]*Math.sin(ang))*57.3; tr=`translate(${r1(x)} ${r1(y)}) rotate(${r1(tang)})`; op=Math.sin(ang)<-0.2?0.55:1; break; }
       }
       if(tr) e.setAttribute('transform',tr); if(op!==null) e.setAttribute('opacity',op.toFixed(3)); });

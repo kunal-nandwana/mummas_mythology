@@ -6,6 +6,7 @@
      rock:deg:speed:cx:cy | pop:delay | rise:dy:dur:delay
      slide:dx:dy:dur:delay | walk:dx:dur:delay | fadeout:at:dur
      orbit:rx:ry:cx:cy:period | reveal/glint (used by calligraphy())
+     drift:dx:dy:period (loops: slide + fade in/out: clouds, smoke, embers, lamps) | ripple:period:cx:cy (ring grows + fades, loops)
    ===================================================================== */
 const r1=n=>Math.round(n*10)/10;
 let seed=11; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
