@@ -27,8 +27,9 @@ All scene fields are functions: `art:()=>svg`.
 - `expr`: calm, smile, serene, sad, angry, surprise.
 
 ## Characters (engine/characters.js)
-BARBARIK KRISHNA BRAHMIN ARJUNA BHIMA YUDHISHTHIRA NAKULA SAHADEVA GHATOTKACH MOTHER DEVI SITA RAMA SHIVA RISHI SOLDIER VILLAGER DEVOTEE_F CHANDRA DAKSHA ROHINI NAKSHATRA (recolour: `{c:NAKSHATRA, with:{top,bottom,veil}}`) INDRA DEVA.
-Costume keys for `with`: skin top bottom shin foot sleeve skirt trim hair(long|bun|none) head(crown|feather|turban|band|big|jata|none) beard mus cape quiver garland sash veil turban tilak earring big aura(gw|saf|gr|gb|gg) jewel crescent.
+BARBARIK KRISHNA BRAHMIN ARJUNA BHIMA YUDHISHTHIRA NAKULA SAHADEVA GHATOTKACH MOTHER DEVI SITA RAMA SHIVA MAHAKAL DUSHAN ASURA RISHI SOLDIER VILLAGER DEVOTEE_F CHANDRA DAKSHA ROHINI NAKSHATRA (recolour: `{c:NAKSHATRA, with:{top,bottom,veil}}`) INDRA DEVA.
+**SHIVA** = Mahadev (topknot jata with Ganga + crescent, third eye, ash stripes, Vasuki, tiger skin, rudraksha, broad build). The third eye is a closed mark and opens by itself when `expr:'angry'`; or `thirdAt:secs` opens it at that time. **MAHAKAL** = fierce Shiva (flaming jata, red aura): use for the Mahakal/Rudra scenes. **DUSHAN** = horned, tusked asura with iron armour (give `props:{front:'axe'}`), **ASURA** = smaller demon soldier. They look nothing like YAMRAJ/DEVA.
+Costume keys for `with`: head(+mahadev|demon) bare ash snake tiger rudra third tusks spikes eyeCol fireHair skin top bottom shin foot sleeve skirt trim hair(long|bun|none) head(crown|feather|turban|band|big|jata|none) beard mus cape quiver garland sash veil turban tilak earring big aura(gw|saf|gr|gb|gg) jewel crescent.
 
 ## Poses
 stand relax point armUp bless offer give namaste think fist shock bowReady bowDraw carry shoulder pranam lookUp lookDown
@@ -38,7 +39,7 @@ Custom: pass an object `{a:[shoulder,elbow], b:[..], f:[hip,knee], k:[..], head,
 Talking characters nod/gesture automatically; capes, veils, hair, garlands sway by themselves.
 
 ## Props (`props:{front:'bow'}`)
-bow (+arrow with bowDraw) mace staff lantern diya lotus trishul sword arrows3 orb chakra flute
+bow (+arrow with bowDraw) mace axe(double-bladed) staff lantern diya lotus trishul sword arrows3 orb chakra flute
 
 ## Scenes (engine/scenes.js; all return SVG)
 - Base: `nightBase({moon:[x,y,r],fort:[x,y,s],camps:y,gy,hillsY})`, `warSky(sunY,r)`, `divine(cx,cy,col,ray)` (rays; skyDiv bg), `palace(y,tone)` / `palaceBack`+`palaceMid`+`palaceFloor`, `field('erase'|'mark'|'save')` (army)

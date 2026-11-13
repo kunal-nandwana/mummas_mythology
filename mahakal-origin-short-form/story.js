@@ -24,13 +24,6 @@ const temple=(x,y,s,col)=>`<g transform="translate(${x} ${y}) scale(${s})" fill=
 const smallTemple=(x,y,s,col)=>`<g transform="translate(${x} ${y}) scale(${s})" fill="${col||'#2a2458'}"><rect x="-70" y="-40" width="140" height="40"/><path d="M-56 -40 Q-40 -110 0 -170 Q40 -110 56 -40Z"/><rect x="-2" y="-210" width="3" height="42"/><path d="M1 -210 L18 -205 L1 -198Z" fill="#a8432a"/></g>`;
 const mist=(y,op)=>[0,1,2,3].map(i=>A(`orbit:${70+i*25}:${6+i*3}:${60+i*150}:${y+i*12}:${18+i*5}`,`<circle r="${100+i*10}" fill="#aab0e0" opacity="${op||.09}" filter="url(#b24)"/>`)).join('');
 const godRays=(x)=>A('pulse:.9',[0,1,2,3,4].map(i=>`<path d="M${x+i*26} -20 L${x+i*26+90+i*40} 800 L${x+i*26+40+i*40} 800Z" fill="#ffe9a8" opacity=".09"/>`).join(''));
-const redEyes=(x,y,s,flip)=>A('pulse:3',`<circle cx="${x+(flip?-1:1)*17*s}" cy="${y-270*s}" r="${14*s}" fill="url(#gr)"/>`);
-/* giant demon shadow looming on the wall */
-const bigShadow=(x,y,s,flip)=>`<g transform="translate(${x} ${y}) scale(${flip?-s:s} ${s})" opacity=".92">
-  <path d="M-110 0 L-84 -250 Q-70 -330 -26 -346 L-30 -372 Q-58 -380 -66 -420 Q-70 -470 -44 -520 Q-44 -460 -22 -430 L22 -430 Q44 -460 44 -520 Q70 -470 66 -420 Q58 -380 30 -372 L26 -346 Q70 -330 84 -250 L110 0Z" fill="#04020a"/>
-  <path d="M84 -250 L170 -330 L176 -300 L100 -200Z" fill="#04020a"/>
-  ${A('pulse:2.5',`<circle cx="-12" cy="-396" r="11" fill="url(#gr)"/><circle cx="14" cy="-396" r="11" fill="url(#gr)"/>`)}
-  <circle cx="-12" cy="-396" r="3.5" fill="#ff4a3a"/><circle cx="14" cy="-396" r="3.5" fill="#ff4a3a"/></g>`;
 const bolt=(x,y,s,sp)=>A('flick:'+sp,`<path transform="translate(${x} ${y}) scale(${s})" d="M0 0 L-18 70 L2 66 L-26 150 L30 52 L8 56 L26 0Z" fill="#f4f0ff" opacity=".9" style="filter:drop-shadow(0 0 10px #b8a8ff)"/>`);
 const stormFlash=()=>A('flick:13',`<rect width="540" height="960" fill="#c8b8ff" opacity=".07"/>`);
 /* fire glow on a burning city */
@@ -40,28 +33,47 @@ const chasm=(x,y,t0)=>A(`pop:${t0}`,`<g transform="translate(${x} ${y})">
   <ellipse rx="170" ry="46" fill="url(#gr)" opacity=".8"/><ellipse rx="120" ry="30" fill="#ff7a1c"/><ellipse rx="96" ry="22" fill="#ffd27a"/>
   <path d="M-170 0 L-120 -10 L-150 -22 M170 0 L124 -12 L158 -24 M-60 24 L-80 44 M70 26 L96 46" stroke="#1a0608" stroke-width="5" fill="none"/></g>`)
   +A(`pop:${t0}`,A('pulse:3',`<path d="M${x-40} ${y} L${x-90} -40 L${x+90} -40 L${x+40} ${y}Z" fill="#ffd27a" opacity=".22"/>`));
-/* killing-blow effects (same geometry as the proven Shiva strike in shiva-killed-yamraj) */
-const thrustTrishul=(t0,x,y,dx)=>{ const body=`<g transform="rotate(-90) scale(1.1)"><line x1="0" y1="-190" x2="0" y2="150" stroke="#d9d2c0" stroke-width="11"/><path d="M-22 -200 Q-22 -170 0 -168 Q22 -170 22 -200 M0 -168 L0 -232" stroke="#fff6dc" stroke-width="10" fill="none"/><path d="M-26 -198 l4 -16 l4 16Z M22 -198 l4 -16 l4 16Z M-4 -230 l4 -18 l4 18Z" fill="#f3ecd6"/></g>`;
-  return A(`fadeout:${t0}:.05`,`<g transform="translate(${x+dx} ${y})">${body}</g>`)+
-         A(`fadeout:3.6:.8`,A(`slide:${dx}:0:.16:${t0}`,`<g transform="translate(${x} ${y})"><circle cx="-190" r="70" fill="url(#gw)"/>${body}</g>`)); };
-const impact=(t0,x,y)=>{ let r=''; for(let i=0;i<14;i++) r+=`<path d="M${x} ${y} L${x+24} ${y-300} L${x-24} ${y-300}Z" transform="rotate(${i*25.7} ${x} ${y})" fill="#ffe2a0" opacity=".25"/>`;
-  return A(`pop:${t0}`,A(`fadeout:${t0+.5}:.9`,`<circle cx="${x}" cy="${y}" r="190" fill="url(#gw)"/>${r}<circle cx="${x}" cy="${y}" r="42" fill="#fff"/>`))+
-    [70,120,180,250].map((rr,i)=>A(`pop:${(t0+i*.12).toFixed(2)}`,A(`fadeout:${(t0+.5+i*.12).toFixed(2)}:.8`,`<circle cx="${x}" cy="${y}" r="${rr}" fill="none" stroke="#ffd27a" stroke-width="${5-i}"/>`))).join(''); };
-/* wheel of Time (Kaal) that shatters before Mahakal */
-const kaalChakra=(cx,cy,r)=>{ let t=''; for(let i=0;i<12;i++) t+=`<rect x="-3" y="${-r+6}" width="6" height="${i%3?12:22}" transform="rotate(${i*30})" fill="#d9a73a"/>`;
-  return A('fadeout:3.2:.5',A(`spin:30:${cx}:${cy}`,`<g transform="translate(${cx} ${cy})"><circle r="${r+30}" fill="url(#gr)" opacity=".5"/><circle r="${r}" fill="#160a18" stroke="#a8742a" stroke-width="5"/><circle r="${r-18}" fill="none" stroke="#6a3a2a" stroke-width="2"/>${t}<path d="M0 0 L0 ${-r+40}" stroke="#d9a73a" stroke-width="5" stroke-linecap="round"/><path d="M0 0 L${r*.5} 0" stroke="#d9a73a" stroke-width="7" stroke-linecap="round"/><circle r="9" fill="#d9a73a"/><path d="M${-r*.6} ${-r*.5} L-8 -6 L${r*.3} ${r*.7}" stroke="#ff6a3a" stroke-width="3" fill="none"/></g>`))
-   +A('pop:3.2',A('fadeout:4.2:.9',`<circle cx="${cx}" cy="${cy}" r="${r+90}" fill="url(#gw)"/>`)); };
 /* ring of 12 jyotirlingas, the Mahakaleshwar one glows brightest */
 const ring12=(cx,cy,r)=>[...Array(12)].map((_,i)=>{ const a=(i/12)*Math.PI*2-Math.PI/2, x=cx+r*Math.cos(a), y=cy+r*Math.sin(a);
   return A('pop:'+(0.3+i*.12).toFixed(2),`<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><circle r="${i===0?46:30}" fill="url(#${i===0?'saf':'gw'})" opacity="${i===0?.9:.5}"/><path d="M-12 12 L-12 -6 Q0 -26 12 -6 L12 12Z" fill="#2b2a31"/><ellipse cy="12" rx="20" ry="5" fill="#8c8884"/></g>`); }).join('');
 const jyotiGlow=(cx,cy)=>A('pulse:2',`<circle cx="${cx}" cy="${cy}" r="${190}" fill="url(#gw)" opacity=".45"/>`);
 
-/* ---- characters ---- */
+
+/* ---- new art for Mahakal (nothing here is shared with the Yamraj video) ---- */
+/* Wheel of Time (Kaal chakra). per = seconds per turn; fade = when it vanishes (99 = never); cracks glow red */
+const kaalChakra=(cx,cy,r,per=30,fade=99)=>{ let t=''; for(let i=0;i<12;i++) t+=`<rect x="-3" y="${-r+6}" width="6" height="${i%3?12:22}" transform="rotate(${i*30})" fill="#d9a73a"/>`;
+  const wheel=A(`spin:${per}:${cx}:${cy}`,`<g transform="translate(${cx} ${cy})"><circle r="${r+30}" fill="url(#gr)" opacity=".5"/><circle r="${r}" fill="#160a18" stroke="#a8742a" stroke-width="5"/><circle r="${r-18}" fill="none" stroke="#6a3a2a" stroke-width="2"/>${t}<path d="M0 0 L0 ${-r+40}" stroke="#d9a73a" stroke-width="5" stroke-linecap="round"/><path d="M0 0 L${r*.5} 0" stroke="#d9a73a" stroke-width="7" stroke-linecap="round"/><circle r="9" fill="#d9a73a"/><path d="M${-r*.6} ${-r*.5} L-8 -6 L${r*.3} ${r*.7}" stroke="#ff6a3a" stroke-width="3" fill="none"/></g>`);
+  return fade<50 ? A(`fadeout:${fade}:.5`,wheel)+A(`pop:${fade}`,A(`fadeout:${fade+1}:.9`,`<circle cx="${cx}" cy="${cy}" r="${r+90}" fill="url(#gw)"/>`)) : wheel; };
+/* glass shards / sand flying outwards (end at their drawn spot, start at the centre) */
+const shards=(t0,cx,cy,col)=>[...Array(18)].map((_,i)=>{ const a=i/18*6.283, d=140+(i%3)*80, ex=cx+Math.cos(a)*d, ey=cy+Math.sin(a)*d;
+  return A(`slide:${(-Math.cos(a)*d).toFixed(0)}:${(-Math.sin(a)*d).toFixed(0)}:1.3:${t0}`,A(`fadeout:${t0+1.2}:.9`,`<path transform="translate(${ex.toFixed(0)} ${ey.toFixed(0)}) rotate(${i*40})" d="M0 -16 L13 7 L-11 11Z" fill="${col||'#d9a73a'}"/>`)); }).join('');
+/* the hourglass of Time: it cracks and bursts when Mahakal appears */
+const hourglass=(cx,cy,s,t0)=>A(`fadeout:${t0}:.3`,`<g transform="translate(${cx} ${cy}) scale(${s})"><circle r="200" fill="url(#gr)" opacity=".4"/><rect x="-92" y="-176" width="184" height="16" rx="6" fill="#a8742a"/><rect x="-92" y="160" width="184" height="16" rx="6" fill="#a8742a"/><path d="M-72 -160 L72 -160 Q72 -64 8 0 Q72 64 72 160 L-72 160 Q-72 64 -8 0 Q-72 -64 -72 -160Z" fill="#cfe8ff" opacity=".22" stroke="#e8d9a8" stroke-width="4"/><path d="M-58 -156 L58 -156 Q52 -84 6 -8 L-6 -8 Q-52 -84 -58 -156Z" fill="#e8c46a" opacity=".85"/>${A('flick:3','<rect x="-2" y="0" width="4" height="150" fill="#e8c46a"/>')}<path d="M-64 156 Q0 84 64 156Z" fill="#e8c46a"/><path d="M-20 -150 L10 -90 L-8 -40 L16 10" stroke="#ff6a3a" stroke-width="3" fill="none"/></g>`)
+  +A(`pop:${t0}`,A(`fadeout:${t0+1}:.8`,`<circle cx="${cx}" cy="${cy}" r="280" fill="url(#gw)"/>`))+shards(t0,cx,cy,'#cfe8ff')+shards(t0+.1,cx,cy+40,'#e8c46a');
+/* birds crossing the dawn sky */
+const birds=(y,n,dir,sp)=>[...Array(n)].map((_,i)=>A(`slide:${dir*-640}:${-30-i*5}:${sp+i*1.4}:${(i*.3).toFixed(2)}`,`<g transform="translate(${dir>0?330+i*34:200-i*34} ${y+(i%3)*26})">${A('bob:5:'+(.9+i%3*.2).toFixed(1),`<path d="M-17 0 Q-8 -13 0 0 Q8 -13 17 0" stroke="#12081a" stroke-width="3.4" fill="none" stroke-linecap="round"/>`)}</g>`)).join('');
+/* horned asura horde (silhouettes with spears) */
+const horde=(y,n,col,s)=>[...Array(n)].map((_,i)=>{ const x=-40+i*70, h=(80+(i*37)%40)*s;
+  return A(`bob:3:${(.5+(i%4)*.12).toFixed(2)}`,`<g fill="${col}" transform="translate(${x} ${y})"><rect x="-9" y="${-h}" width="18" height="${h}"/><circle cy="${-h-12}" r="12"/><path d="M-10 ${-h-18} l-12 -22 l18 14Z M10 ${-h-18} l12 -22 l-18 14Z"/><path d="M17 ${-h+10} V${-h-80}" stroke="${col}" stroke-width="3"/><path d="M17 ${-h-80} l-6 -15 l12 0Z"/></g>`); }).join('');
+/* black sun with a fiery corona behind the demon */
+const darkSun=(x,y,r)=>A('pulse:2',`<circle cx="${x}" cy="${y}" r="${r*2.6}" fill="url(#gr)"/>`)+[...Array(16)].map((_,i)=>`<path d="M${x} ${y} L${x+22} ${y-r*2.2} L${x-22} ${y-r*2.2}Z" transform="rotate(${i*22.5} ${x} ${y})" fill="#ff5a1c" opacity=".14"/>`).join('')+`<circle cx="${x}" cy="${y}" r="${r}" fill="#050204"/><circle cx="${x}" cy="${y}" r="${r+3}" fill="none" stroke="#ff8a3a" stroke-width="4" opacity=".8"/>`;
+const smoke=(x,y,h,op)=>A('bob:7:.12',`<path d="M${x-26} ${y} Q${x-70} ${y-h*.4} ${x-34} ${y-h*.7} Q${x} ${y-h} ${x+44} ${y-h*.8} Q${x+12} ${y-h*.5} ${x+32} ${y}Z" fill="#1a0c10" opacity="${op}" filter="url(#b10)"/>`);
+/* fire column that erupts from the chasm when Mahakal rises */
+const geyser=(x,y,t0)=>A(`pop:${t0}`,A('pulse:4',`<path d="M${x-130} ${y} Q${x-80} ${y-260} ${x-34} ${y-640} Q${x} ${y-720} ${x+34} ${y-640} Q${x+80} ${y-260} ${x+130} ${y}Z" fill="#ff6a1c" opacity=".55"/><path d="M${x-74} ${y} Q${x-44} ${y-260} ${x-12} ${y-560} Q${x} ${y-620} ${x+12} ${y-560} Q${x+44} ${y-260} ${x+74} ${y}Z" fill="#ffd27a" opacity=".6"/>`))
+  +A(`pop:${t0}`,A('flick:7',`<circle cx="${x}" cy="${y-120}" r="170" fill="url(#gr)" opacity=".5"/>`));
+/* HUNKAR: the roar of Mahakal travels as shock-waves of sound (end at their drawn spot, start at his mouth) */
+const roarWaves=(t0,x,y)=>[0,1,2,3,4].map(i=>{ const t=(t0+i*.13).toFixed(2);
+  return A(`slide:260:0:.9:${t}`,A(`fadeout:${(+t+.5).toFixed(2)}:.5`,`<path d="M${x-260} ${y-60-i*16} Q${x-260-40-i*10} ${y} ${x-260} ${y+60+i*16}" stroke="#ffb347" stroke-width="${8-i}" fill="none" stroke-linecap="round" style="filter:drop-shadow(0 0 8px #ff6a1c)"/>`)); }).join('');
+/* the demon turns to ASH: grey flakes and a few embers drift away */
+const ashBurst=(t0,x,y)=>[...Array(40)].map((_,i)=>{ const ox=((i*47)%120)-60, oy=((i*71)%320)-170, ddx=-50+((i*29)%140)-20, ddy=-70-((i*37)%220), r=2+(i%4), t=(t0+(i%5)*.05).toFixed(2);
+  return A(`slide:${-ddx}:${-ddy}:${(2.2+(i%4)*.3).toFixed(1)}:${t}`,A(`fadeout:${(+t+1.6).toFixed(2)}:1.3`,`<circle cx="${x+ox+ddx}" cy="${y+oy+ddy}" r="${r}" fill="${i%4?'#d6cfc6':'#ff9a4a'}"/>`)); }).join('')
+  +[0,1,2].map(i=>A(`slide:0:0:2.4:${t0}`,A(`fadeout:${t0+1.2}:1.8`,`<circle cx="${x-40+i*50}" cy="${y-60-i*70}" r="${70+i*14}" fill="#9a9288" opacity=".38" filter="url(#b10)"/>`))).join('');
+const whiteFlash=(t0,x,y,rx,ry)=>A(`pop:${t0}`,A(`fadeout:${(t0+.12).toFixed(2)}:.45`,`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#fff" opacity=".95" filter="url(#b10)"/>`));
+const fireRing=(t0,x,y)=>[90,150,220,300].map((rr,i)=>A(`pop:${(t0+i*.1).toFixed(2)}`,A(`fadeout:${(t0+.5+i*.1).toFixed(2)}:.8`,`<circle cx="${x}" cy="${y}" r="${rr}" fill="none" stroke="#ff7a1c" stroke-width="${9-i*2}" opacity=".9"/>`))).join('');
+
+/* ---- characters (Mahadev, Dushan and his Asuras live in engine/characters.js) ---- */
 const BOY={tilak:true,head:'none',hair:'long'};
 const ELDER={tilak:true};                                  // Vedpriya
-/* Dushan: huge, dark red-black skin, blood-red/iron armour, crown, red aura, mace */
-const DUSHAN={skin:'#4a1620',top:'#2a0a10',bottom:'#12060a',head:'big',beard:'black',mus:true,big:true,cape:'#12040a',garland:'#d4a017',aura:'gr',sleeve:'#3a0a10',trim:'#a8432a'};
-const ASURA={skin:'#3a2a44',top:'#1e0a12',bottom:'#12060a',head:'band',aura:'gr'};   // his army
 
 /* town street (used for several night scenes) */
 const townFar=(col)=>smallTemple(60,640,.9,col)+smallTemple(210,650,.7,col)+smallTemple(470,640,1,col);
@@ -76,25 +88,28 @@ VIDEO({
   ending:3.2,
   handheld:.9, captionTop:400, captionChars:24, minShot:2.4, pace:13,
   shots:[
-    /* 1: the question */
+    /* 1: OPENING. Black screen, a third eye snaps open in close-up, we whip back to Mahakal against the cracking wheel of Time */
     {line:'क्या आप जानते हैं कि भगवान शिव को महाकाल क्यों कहा जाता है?',
-     scene:'mahakal-question', mood:'divine', fx:'embers', cam:{keys:[[0,270,620,1.0],[3.5,270,560,1.25]]},
-     sky:()=>`<rect width="540" height="960" fill="url(#skyDiv)"/>`+stars(80,500)+divine(270,470,'#ffb347',1),
-     far:()=>kaalChakra(270,470,170),
-     mid:()=>ground(800,'url(#gnd)','#9a8aba')+mist(780,.1),
-     cast:[{c:SHIVA,x:270,y:800,s:1.2,expr:'serene',talk:true,acts:[[0,'stand'],[2,'bless']],aura:'gw'}]},
-    /* 2: ancient Ujjain / Avanti */
+     scene:'mahakal-question', mood:'anger', fx:'embers', capTop:120, shake:[.5,.9,10],
+     cam:{keys:[[0,294,404,3.9],[.45,294,404,4.1],[.62,294,404,3.5,'snap'],[1.7,290,430,2.6],[3.4,270,540,1.2],[5,270,560,1.05]]},
+     sky:()=>`<rect width="540" height="960" fill="#05030a"/><rect width="540" height="960" fill="url(#skyDiv)" opacity=".8"/>`+stars(70,520)+stormFlash(),
+     far:()=>bolt(70,40,1.5,6)+bolt(470,30,1.3,8)+kaalChakra(270,470,200,9)+A('pulse:1.4',`<circle cx="270" cy="470" r="260" fill="url(#gr)" opacity=".35"/>`),
+     mid:()=>ground(830,'url(#gndW)','#a8432a')+mist(800,.1),
+     cast:[{c:MAHAKAL,x:270,y:830,s:1.5,expr:'angry',thirdAt:.55,acts:[[0,'stand'],[1.6,{a:[40,100],b:[150,10],hand:'fist',handB:'fist',head:12,lean:-4}]],props:{back:'trishul'}}],
+     front:()=>A('fadeout:0:.8',`<rect x="-900" y="-900" width="2400" height="3000" fill="#000"/>`)+A('pop:.55',A('fadeout:.6:.7',`<rect x="-900" y="-900" width="2400" height="3000" fill="#ff5a2a" opacity=".45"/>`))+A('flick:12',`<rect x="-900" y="-900" width="2400" height="3000" fill="#ff3a1c" opacity=".05"/>`),
+     focus:{at:.55,sound:'kaal',dur:2.6,duck:.35}},
+    /* 2: ancient Ujjain / Avanti: a golden sunrise crane-down over the temple city */
     {line:'यह कथा प्राचीन उज्जैन की है, जिसे उस समय अवंती नगरी के नाम से जाना जाता था।',
-     scene:'avanti-city', mood:'calm', tr:'fade', fx:'petals', cam:{keys:[[0,150,640,1.15],[5.5,390,620,1.15]]},
-     sky:()=>`<rect width="540" height="960" fill="url(#skyDawn)"/>`+A('orbit:260:230:270:520:9',`<circle r="52" fill="url(#gw)"/><circle r="26" fill="#ffd98a"/>`),
-     far:()=>hills(660,40,'#6a7f4a',40)+godRays(20)+temple(130,720,.9,'#8a6a56')+temple(420,730,1.05,'#7a5a4a'),
-     mid:()=>ground(780,'url(#gnd)','#7a8f5a')+peepal(280,730,1.0),
-     art:()=>flowers(790,16),
-     capTop:640},
+     scene:'avanti-city', mood:'joy', tr:'glow', fx:'sparks', sfx:[[.3,'bell',.5]], capTop:640,
+     cam:{keys:[[0,270,330,1.5],[2.4,290,480,1.25],[5.8,330,640,1.1]]},
+     sky:()=>`<rect width="540" height="960" fill="url(#skyDawn)"/>`+A('pulse:2.4',`<circle cx="270" cy="540" r="300" fill="url(#gw)" opacity=".9"/>`)+`<circle cx="270" cy="560" r="70" fill="#fff6d0"/>`+birds(250,8,1,11)+birds(330,6,-1,14),
+     far:()=>hills(700,14,'#6a4a52',60)+[40,150,235,330,410,500].map((x,i)=>smallTemple(x,735+(i%2)*8,.7+(i%3)*.18,i%2?'#3a2234':'#4a2c3c')).join('')+temple(95,745,.95,'#2e1a2c')+temple(455,750,1.05,'#2e1a2c')+godRays(40)+godRays(300),
+     mid:()=>`<path d="M0 760 Q270 740 540 764 L540 860 L0 860Z" fill="#e0805a" opacity=".65"/>`+[0,1,2,3,4,5].map(i=>A('flick:'+(1.5+i*.3),`<rect x="${120+i*55}" y="${770+i*10}" width="${60-i*5}" height="4" rx="2" fill="#fff0c0" opacity=".7"/>`)).join('')+ground(850,'url(#gnd)','#5a4a3a'),
+     art:()=>flowers(880,14)},
     /* 3: Vedpriya and his sons make the clay Shivling */
     {line:'वहाँ वेदप्रिय नाम के एक ब्राह्मण अपने पुत्रों के साथ रहते थे, जो प्रतिदिन मिट्टी का पार्थिव शिवलिंग बनाकर भगवान शिव की भक्ति भाव से पूजा किया करते थे।',
      scene:'vedpriya-puja', mood:'hope', tr:'fade', fx:'petals', cam:{keys:[[0,270,700,1.1],[5,330,720,1.3],[10,300,720,1.15]]},
-     sky:()=>`<rect width="540" height="960" fill="url(#skyDawn)"/>`+A('pulse:1.4',`<circle cx="270" cy="360" r="230" fill="url(#gw)" opacity=".45"/>`),
+     sky:()=>`<rect width="540" height="960" fill="url(#skyDawn)"/>`+A('pulse:1.4',`<circle cx="270" cy="360" r="230" fill="url(#gw)" opacity=".45"/>`)+birds(280,5,1,12),
      far:()=>hills(660,40,'#6a7f4a',40)+godRays(300)+temple(440,720,.8,'#8a6a56'),
      mid:()=>ground(775,'url(#gnd)','#7a8f5a')+peepal(60,720,1.1),
      art:()=>flowers(790,14)+clayLingam(330,810,1.5,'gw')+flameDiya(460,830)+flameDiya(200,845),
@@ -103,28 +118,25 @@ VIDEO({
        {c:BRAHMIN,x:215,y:845,s:.72,expr:'serene',with:BOY,acts:[[0,'kneelPray'],[5,'kneelBow']],aura:'gw'},
        {c:BRAHMIN,x:455,y:845,s:.68,flip:true,expr:'serene',with:BOY,acts:[[0,'kneelOffer'],[4.5,'kneelPray']],aura:'gw'}
      ]},
-    /* 4: Dushan the giant demon attacks Avanti */
+    /* 4: Dushan, horned giant under a black sun, leads his horde into Avanti */
     {line:'एक बार दूषण नाम के एक अहंकारी और क्रूर असुर ने अवंती पर आक्रमण कर दिया। उसका मुख्य उद्देश्य शिव भक्तों की पूजा को बंद करवाना था।',
-     scene:'dushan-attacks', mood:'shock', tr:'dip', fx:'embers', capTop:120, shake:[1.2,.8,7],
-     cam:{keys:[[0,270,700,1.0],[2.4,300,560,1.1,'snap'],[6.5,300,520,1.2],[9,300,540,1.1]]},
-     sky:()=>`<rect width="540" height="960" fill="url(#skyRed)"/>`+divine(300,520,'#ff5a1c',1)+stormFlash(),
-     far:()=>townFar('#2a0f1c')+burning(60,720,1.2)+burning(480,720,1.3)+bolt(100,40,1.4,6)+bolt(470,60,1.2,8)+mist(760,.12),
-     mid:()=>ground(790,'url(#gndW)','#a8432a'),
-     art:()=>A('fadein:.4:1.5',bigShadow(300,800,2.3,false)),
+     scene:'dushan-attacks', mood:'shock', tr:'dip', fx:'embers', capTop:120, shake:[1.3,.7,7],
+     cam:{keys:[[0,300,860,1.7],[1.4,300,800,1.5,'snap'],[3.2,300,560,1.15],[6.5,300,540,1.1],[9,300,520,1.2]]},
+     sky:()=>`<rect width="540" height="960" fill="url(#skyW)"/>`+darkSun(300,360,70),
+     far:()=>townFar('#1a0a14')+burning(60,720,1.2)+burning(480,720,1.3)+smoke(60,700,360,.6)+smoke(480,700,420,.6)+horde(740,9,'#12060c',.9),
+     mid:()=>ground(790,'url(#gndW)','#a8432a')+A('walk:-220:4:0',horde(800,6,'#0a0408',1.1)),
      cast:[
-       {c:SOLDIER,x:90,y:800,s:.7,expr:'angry',with:ASURA,acts:[[0,'carry']],walk:{from:-200,dur:2,delay:.2}},
-       {c:SOLDIER,x:470,y:805,s:.7,flip:true,expr:'angry',with:ASURA,acts:[[0,'carry']],walk:{from:200,dur:2,delay:.4}},
-       {c:DEVA,x:300,y:810,s:1.9,expr:'angry',talk:true,with:DUSHAN,props:{front:'mace'},acts:[[0,'carry'],[2.2,'armUp'],[5,'rage'],[8,'accuse']],walk:{from:-60,dur:2.4,delay:0}}
+       {c:ASURA,x:90,y:805,s:.85,expr:'angry',props:{front:'sword'},acts:[[0,'carry']],walk:{from:-200,dur:2,delay:.2}},
+       {c:ASURA,x:480,y:810,s:.85,flip:true,expr:'angry',props:{front:'sword'},acts:[[0,'carry']],walk:{from:200,dur:2,delay:.4}},
+       {c:DUSHAN,x:300,y:815,s:1.9,expr:'angry',talk:true,props:{front:'axe'},acts:[[0,'carry'],[2.2,'armUp'],[5,'rage'],[8,'accuse']],walk:{from:-60,dur:2.4,delay:0}}
      ],
-     front:()=>A('fadein:2.2:.5',redEyes(300,810,1.9,false)),
-     focus:{at:2.0,sound:'arrive',dur:2.4,duck:.3}},
-    /* 5: terror in the city; people run */
+     focus:{at:1.4,sound:'arrive',dur:2.4,duck:.3}},
+    /* 5: terror in the city; people run with the horde behind them */
     {line:'उसके आतंक से पूरे नगर में भय फैल गया और लोग अपनी जान बचाने के लिए भागने लगे।',
-     scene:'city-panic', mood:'sad', tr:'whip', fx:'dust', cam:{keys:[[0,400,640,1.1],[5.5,150,640,1.2]]},
-     sky:()=>`<rect width="540" height="960" fill="url(#skyRed)"/>`+stormFlash(),
-     far:()=>townFar('#2a0f1c')+burning(90,720,1.1)+burning(300,730,.9)+mist(760,.12),
-     mid:()=>ground(790,'url(#gnd)','#6a4a3a'),
-     art:()=>A('rise:30:3:.2',bigShadow(520,820,2.0,true)),
+     scene:'city-panic', mood:'anger', tr:'whip', fx:'dust', cam:{keys:[[0,400,640,1.1],[5.5,150,640,1.2]]},
+     sky:()=>`<rect width="540" height="960" fill="url(#skyW)"/>`+stormFlash(),
+     far:()=>divine(150,700,'#ff5a1c',1)+townFar('#2a0f1c')+burning(90,720,1.4)+burning(300,730,1.2)+burning(500,720,1.3)+smoke(200,720,380,.55),
+     mid:()=>ground(790,'url(#gndW)','#a8432a')+A('walk:-320:5:0',horde(800,8,'#0a0408',1.15)),
      cast:[
        {c:VILLAGER,x:110,y:820,s:.8,flip:true,expr:'surprise',acts:[[0,'recoil'],[.6,'carry']],walk:{from:300,dur:4,delay:0}},
        {c:DEVOTEE_F,x:200,y:825,s:.78,flip:true,expr:'sad',tears:true,acts:[[0,'recoil'],[.6,'carry']],walk:{from:330,dur:4.2,delay:.2}},
@@ -136,15 +148,13 @@ VIDEO({
      scene:'sons-stay', mood:'shock', tr:'cut', fx:'dust', cam:{keys:[[0,150,640,1.0],[4,300,700,1.3],[7.5,330,720,1.5]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyN)"/>`+stars(60,500)+stormFlash(),
      far:()=>hills(640,40,'#1d1d40',140)+townFar('#1e1a46')+bolt(120,30,1.3,7)+mist(740,.1),
-     mid:()=>ground(790,'url(#gnd)','#4a3e5a')+
-        A('walk:200:6:0',[0,1,2,3].map(i=>`<g fill="#06030a" transform="translate(${-260-i*60} 770)"><rect x="-8" y="-100" width="16" height="100"/><circle cy="-114" r="14"/><path d="M12 -110 V-30" stroke="#06030a" stroke-width="4"/></g>`).join('')),
+     mid:()=>ground(790,'url(#gnd)','#4a3e5a')+A('walk:-260:6:0',horde(790,7,'#06030a',1.0)),
      art:()=>clayLingam(430,812,1.4,'gw'),
      cast:[
-       {c:DEVA,x:110,y:800,s:1.7,expr:'angry',with:DUSHAN,props:{front:'mace'},acts:[[0,'carry'],[4,'accuse']],walk:{from:-300,dur:5,delay:0}},
+       {c:DUSHAN,x:110,y:805,s:1.75,expr:'angry',props:{front:'axe'},acts:[[0,'carry'],[4,'accuse']],walk:{from:-300,dur:5,delay:0}},
        {c:BRAHMIN,x:310,y:835,s:.75,expr:'serene',with:BOY,acts:[[0,'kneelPray']],eyes:'closed',aura:'gw'},
        {c:BRAHMIN,x:240,y:840,s:.7,expr:'serene',with:BOY,acts:[[0,'kneelPray']],eyes:'closed',aura:'gw'}
-     ],
-     front:()=>redEyes(110,800,1.7,false)},
+     ]},
     /* 7: fearless, absorbed in worship */
     {line:'वे निडर होकर शिवलिंग के सामने बैठे रहे और महादेव की आराधना में लीन रहे।',
      scene:'fearless-prayer', mood:'hope', tr:'fade', fx:'petals', cam:{keys:[[0,320,720,1.4],[5,330,740,1.9]]},
@@ -157,44 +167,44 @@ VIDEO({
        {c:BRAHMIN,x:220,y:840,s:.74,expr:'serene',with:BOY,acts:[[0,'kneelPray']],eyes:'closed',aura:'gw'},
        {c:BRAHMIN,x:150,y:846,s:.68,expr:'serene',with:BOY,acts:[[0,'kneelPray'],[3.5,'kneelBow']],eyes:'closed',aura:'gw'}
      ]},
-    /* 8: Dushan strikes; the earth splits; Shiva emerges in his fiercest form */
+    /* 8: Dushan swings his axe; the earth splits; a column of fire; Mahakal rises from the pit */
     {line:'शिव पुराण के अनुसार, जैसे ही असुर ने उन पर प्रहार करना चाहा, उसी स्थान पर धरती में एक गहरा गड्ढा प्रकट हुआ और उसमें से स्वयं भगवान शिव अपने अत्यंत प्रचंड रूप में प्रकट हुए।',
      scene:'shiva-emerges', mood:'anger', tr:'flash', fx:'sparks', capTop:120,
-     cam:{keys:[[0,300,700,1.2],[2.2,260,740,1.1],[3.4,270,640,1.0],[5.2,300,580,1.25],[8.5,300,560,1.3]]},
-     sky:()=>`<rect width="540" height="960" fill="url(#skyRed)"/>`+divine(260,640,'#ff6a1c',1)+stormFlash(),
+     cam:{keys:[[0,200,700,1.15],[2.2,160,640,1.25],[2.9,270,800,1.2,'snap'],[4.4,280,620,1.1],[8.5,290,500,1.35]]},
+     sky:()=>`<rect width="540" height="960" fill="url(#skyRed)"/>`+divine(290,640,'#ff6a1c',1)+stormFlash(),
      far:()=>hills(640,40,'#2a0f1c',140)+townFar('#2a0f1c'),
-     mid:()=>ground(790,'url(#gndW)','#a8432a')+chasm(250,800,2.4),
-     art:()=>clayLingam(470,815,1.2,'gw'),
+     mid:()=>ground(790,'url(#gndW)','#a8432a')+chasm(290,800,2.4)+geyser(290,800,2.6),
+     art:()=>clayLingam(480,815,1.2,'gw'),
      cast:[
-       {c:BRAHMIN,x:400,y:840,s:.62,expr:'serene',with:BOY,acts:[[0,'kneelPray']],eyes:'closed',aura:'gw'},
-       {c:DEVA,x:75,y:800,s:1.7,expr:'angry',with:DUSHAN,props:{front:'mace'},acts:[[0,'carry'],[1.2,'armUp'],[2.2,{a:[20,70],b:[40,80],lean:-14,head:10,hand:'open'}],[3.6,'recoil']]},
-       {c:SHIVA,x:250,y:800,s:1.4,flip:true,expr:'angry',talk:true,acts:[[0,'rage'],[5.5,'rage']],enter:{fade:.6,delay:3.1,rise:170},aura:'gr'}
+       {c:BRAHMIN,x:430,y:842,s:.62,expr:'serene',with:BOY,acts:[[0,'kneelPray']],eyes:'closed',aura:'gw'},
+       {c:DUSHAN,x:90,y:805,s:1.85,expr:'angry',props:{front:'axe'},acts:[[0,'carry'],[1.0,'armUp'],[2.0,{a:[20,70],b:[40,80],lean:-16,head:10,hand:'open'}],[3.5,{a:[10,60],b:[-20,50],lean:-30,drop:18,head:22,hand:'open'}]]},
+       {c:MAHAKAL,x:290,y:805,s:1.55,flip:true,expr:'angry',props:{front:'trishul'},acts:[[0,'carry'],[4.6,{a:[150,10],b:[100,40],hand:'fist',handB:'fist',head:12,lean:-4}]],enter:{fade:.7,delay:3.0,rise:280}}
      ],
-     front:()=>redEyes(75,800,1.7,false),
-     shake:[2.4,1.2,12], focus:[{at:2.4,sound:'emerge',dur:2.4,duck:.28}]},
-    /* 9: the instant Dushan dies */
+     shake:[2.4,1.4,12], focus:[{at:2.6,sound:'emerge',dur:2.6,duck:.28}]},
+    /* 9: the HUNKAR. Third eye blazes, the roar hits Dushan and he crumbles into ash */
     {line:'महादेव ने पल भर में असुर दूषण का वध कर दिया।',
      scene:'shiva-slays-dushan', mood:'anger', tr:'cut', fx:'embers', capTop:120,
-     cam:{keys:[[0,300,640,1.0],[1.0,320,560,1.15],[1.55,260,550,1.3,'snap'],[2.1,240,550,1.42],[3.2,250,590,1.2],[4.5,300,590,1.1]]},
-     sky:()=>`<rect width="540" height="960" fill="url(#skyRed)"/>`+divine(270,430,'#ff5a1c',1)+stormFlash(),
-     far:()=>hills(640,40,'#2a0f1c',140)+bolt(70,60,1.4,6)+bolt(450,90,1.1,8)+mist(760,.12),
+     dur:3.8,
+     cam:{keys:[[0,260,620,1.05],[.6,385,430,1.7],[1.0,376,396,2.5,'snap'],[1.7,300,540,1.2,'snap'],[2.4,200,560,1.1],[3.8,230,580,1.05]]},
+     sky:()=>`<rect width="540" height="960" fill="url(#skyRed)"/>`+divine(270,480,'#ff5a1c',1)+stormFlash(),
+     far:()=>hills(640,40,'#2a0f1c',140)+townFar('#2a0f1c')+smoke(70,720,360,.5)+mist(760,.12),
      mid:()=>ground(790,'url(#gndW)','#a8432a'),
-     art:()=>A('fadeout:1.7:.3',bigShadow(110,800,2.2,false))+impact(1.65,190,520),
+     art:()=>fireRing(1.85,130,500),
      cast:[
-       {c:SHIVA,x:395,y:780,s:1.35,flip:true,expr:'angry',talk:true,acts:[[0,'rage'],[1.2,{a:[96,6],b:[60,90],lean:16,head:6,hand:'fist'}],[1.5,{a:[100,0],b:[-30,40],lean:20,hand:'fist',head:4}],[3.2,'rage']],aura:'gr'},
-       {c:DEVA,x:150,y:785,s:1.8,expr:'angry',with:DUSHAN,props:{front:'mace'},acts:[[0,'carry'],[0.9,'armUp'],[1.7,{a:[20,70],b:[40,80],lean:-30,head:22,hand:'open'}],[2.6,{a:[10,60],b:[-20,50],lean:-42,drop:34,head:26,hand:'open'}]],exit:{at:3.3,fade:1.1}}
+       {c:MAHAKAL,x:400,y:800,s:1.5,flip:true,expr:'angry',talk:true,props:{front:'trishul'},acts:[[0,'carry'],[1.0,{a:[150,14],b:[120,24],hand:'fist',handB:'fist',head:14,lean:-8}],[3.2,'carry']]},
+       {c:DUSHAN,x:120,y:800,s:1.9,expr:'angry',props:{front:'axe'},acts:[[0,'carry'],[.5,'armUp'],[1.5,{a:[20,70],b:[40,80],lean:-14,head:10,hand:'open'}]],exit:{at:1.8,fade:.2}}
      ],
-     front:()=>A('fadeout:1.7:.2',redEyes(150,785,1.8,false))+thrustTrishul(1.45,445,520,95),
-     shake:[1.65,1.0,13], focus:{at:1.65,sound:'slay',dur:2.6,duck:.22}},
-    /* 10: Time itself is powerless before this form: Mahakal */
+     front:()=>roarWaves(.95,366,414)+whiteFlash(1.8,135,500,170,330)+ashBurst(1.8,135,500),
+     shake:[1.8,1.1,13], focus:{at:1.0,sound:'slay',dur:2.8,duck:.22}},
+    /* 10: Time itself (the hourglass) bursts before this form: Mahakal */
     {line:"भगवान शिव के इस स्वरूप के आगे स्वयं 'काल' (समय और मृत्यु) भी शक्तिहीन था, इसलिए वे यहाँ महाकाल कहलाए।",
      scene:'mahakal-glory', mood:'divine', tr:'glow', fx:'embers', focus:{at:3.0,sound:'kaal',dur:2.4,duck:.4},
-     cam:{keys:[[0,270,560,1.0],[3,270,520,1.2],[6.5,270,470,1.4]]},
-     sky:()=>`<rect width="540" height="960" fill="url(#skyDiv)"/>`+divine(270,520,'#ffb347',1),
-     far:()=>kaalChakra(270,520,200),
-     mid:()=>ground(790,'url(#gnd)','#9a8aba'),
+     cam:{keys:[[0,270,720,1.0],[3,270,660,1.15],[6.5,270,560,1.35]]},
+     sky:()=>`<rect width="540" height="960" fill="url(#skyDiv)"/>`+stars(90,560)+divine(270,500,'#ff9a3c',1),
+     far:()=>hourglass(270,400,1.5,3.0),
+     mid:()=>ground(800,'url(#gnd)','#9a8aba')+mist(780,.1),
      title:{text:'महाकाल',y:190,size:100,color:'#ffe9a8',delay:3.4},
-     cast:[{c:SHIVA,x:270,y:790,s:1.25,expr:'serene',talk:true,acts:[[0,'stand'],[3.5,'bless']],props:{front:'trishul'},aura:'gw'}]},
+     cast:[{c:MAHAKAL,x:270,y:800,s:1.5,expr:'angry',props:{front:'trishul'},acts:[[0,'carry'],[1.2,{a:[150,10],hand:'fist',head:12}],[4.2,'carry']],aura:'gr'}]},
     /* 11: devotees ask Mahadev to stay forever */
     {line:'असुर के अंत के बाद, भक्तों ने महादेव से प्रार्थना की कि वे हमेशा के लिए इसी स्थान पर विराजमान हो जाएं।',
      scene:'devotees-plead', mood:'hope', tr:'fade', fx:'petals', cam:{keys:[[0,270,700,1.25],[6,270,660,1.05]]},
@@ -203,7 +213,7 @@ VIDEO({
      mid:()=>ground(775,'url(#gnd)','#7a8f5a')+peepal(60,720,1.1),
      art:()=>flowers(790,14),
      cast:[
-       {c:SHIVA,x:300,y:790,s:1.2,expr:'smile',acts:[[0,'stand'],[3,'bless']],aura:'gw'},
+       {c:SHIVA,x:300,y:790,s:1.3,expr:'smile',acts:[[0,'stand'],[3,'bless']],aura:'gw'},
        {c:RISHI,x:110,y:830,s:.85,expr:'sad',with:ELDER,acts:[[0,'kneelPray'],[3,'kneelBow']],aura:'gw'},
        {c:BRAHMIN,x:185,y:840,s:.72,expr:'serene',with:BOY,acts:[[0,'kneelPray']],aura:'gw'},
        {c:VILLAGER,x:455,y:835,s:.78,flip:true,expr:'sad',acts:[[0,'kneelPray']],aura:'gw'},
@@ -218,7 +228,7 @@ VIDEO({
      mid:()=>ground(800,'url(#gnd)','#9a8aba')+mist(780,.08),
      art:()=>A('pop:3.4',A('rise:30:2:3.4',lingam(270,810,1.7,'saf')))+[[110,640],[430,620],[150,500],[400,470]].map(([x,y],i)=>A('flick:'+(2+i*.5),sparkle(x,y,1.3))).join(''),
      cast:[
-       {c:SHIVA,x:270,y:790,s:1.25,expr:'smile',acts:[[0,'bless'],[2.5,'namaste']],aura:'gw',exit:{at:3.6,fade:1.2}},
+       {c:SHIVA,x:270,y:790,s:1.3,expr:'smile',acts:[[0,'bless'],[2.5,'namaste']],aura:'gw',exit:{at:3.6,fade:1.2}},
        {c:RISHI,x:90,y:835,s:.8,expr:'serene',with:ELDER,acts:[[0,'kneelPray']],aura:'gw'},
        {c:BRAHMIN,x:455,y:840,s:.72,flip:true,expr:'serene',with:BOY,acts:[[0,'kneelPray']],aura:'gw'}
      ]},
@@ -239,7 +249,7 @@ VIDEO({
      mid:()=>ground(800,'url(#gnd)','#9a8aba')+flameDiya(60,880)+flameDiya(480,880)+mist(780,.08),
      art:()=>flowers(830,16),
      cast:[
-       {c:SHIVA,x:270,y:790,s:1.3,expr:'serene',talk:true,acts:[[0,'stand'],[3,'bless']],props:{front:'trishul'},aura:'gw'},
+       {c:SHIVA,x:270,y:790,s:1.35,expr:'serene',acts:[[0,'stand'],[3,'bless']],props:{front:'trishul'},aura:'gw'},
        {c:RISHI,x:90,y:845,s:.7,expr:'serene',with:ELDER,acts:[[0,'kneelPray'],[3.5,'kneelBow']],aura:'gw'},
        {c:VILLAGER,x:170,y:850,s:.66,expr:'serene',acts:[[0,'kneelPray'],[3.5,'kneelBow']],aura:'gw'},
        {c:DEVOTEE_F,x:400,y:850,s:.66,flip:true,expr:'serene',acts:[[0,'kneelPray'],[3.5,'kneelBow']],aura:'gw'},
