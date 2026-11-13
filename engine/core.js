@@ -120,6 +120,8 @@ function VIDEO(cfg){
         case 'reveal':{ const k=easeIO(clamp01((lt-a[0])/a[1])); e.setAttribute('width',((a[3]-a[2])*k).toFixed(1)); break; }
         case 'glint':{ const u=(lt-a[0])/a[1], k=easeIO(clamp01(u)); e.setAttribute('transform',`translate(${(a[2]+(a[3]-a[2])*k).toFixed(1)} 0)`); op=(u<0||u>=1)?0:Math.min(1,Math.min(u,1-u)*8); break; }
         case 'fadeout':{ op=1-clamp01((lt-a[0])/a[1]); break; }
+        /* draw:at:dur  lines inside (paths with pathLength="1" stroke-dasharray="1") are drawn in; used by famTree/timeline/mapRoute */
+        case 'draw':{ const k=easeIO(clamp01((lt-a[0])/a[1])); e.querySelectorAll('[pathLength]').forEach(q=>q.style.strokeDashoffset=(1-k).toFixed(4)); op=k>0?1:0; break; }
         case 'fadein':{ op=clamp01((lt-a[0])/a[1]); break; }
         /* drift:dx:dy:period  loops forever: slides dx,dy over `period` s and fades in/out at the ends (clouds, smoke, embers, floating lamps; each copy starts at its own phase) */
         case 'drift':{ const u=(lt/a[2]+ph/6.283)%1; tr=`translate(${r1(u*a[0])} ${r1(u*a[1])})`; op=Math.sin(Math.PI*u); break; }
