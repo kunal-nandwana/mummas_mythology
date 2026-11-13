@@ -77,7 +77,8 @@ function shade(hex,amt){ const n=parseInt(hex.slice(1),16); let r=n>>16, g=(n>>8
 
 const COSTUME0 = {skin:'#8c6248', top:'#1f2640', bottom:'#8e1d24', shin:null, foot:null, sleeve:null, skirt:false,
   trim:'url(#gold)', hair:'long', head:'crown', beard:null, mus:false, cape:null, quiver:false, garland:null, sash:null,
-  veil:null, turban:'#ece5d4', tilak:false, earring:true, big:false, aura:null, jewel:true};
+  veil:null, turban:'#ece5d4', tilak:false, earring:true, big:false, aura:null, jewel:true,
+  bare:false, ash:false, snake:false, tiger:false, rudra:false, third:false, tusks:false, spikes:false, eyeCol:null, fireHair:false};
 
 let RIG_ID=0;
 /* Build one character. cast = {c:COSTUME, x, y, s, flip, acts:[[t,pose,dur?],...], expr, eyes, talk,
@@ -92,6 +93,7 @@ function makeRig(cast){
 
   const leg=(n,back)=>{ const lc=back?shade(legC,-.25):legC, sc=back?shade(shinC,-.25):shinC, fc=back?shade(footC,-.2):footC;
     return `<g ${J(n)}><rect x="${-14*legW}" y="-8" width="${28*legW}" height="88" rx="${13*legW}" fill="${lc}"/>`+
+      (c.tiger?`<path d="M-13 6 l9 3 M5 14 l9 -2 M-13 26 l10 2 M4 36 l10 -3 M-13 46 l9 3 M5 56 l9 -2" stroke="#2a1608" stroke-width="3.2" stroke-linecap="round" opacity="${back?.6:.85}"/>`:'')+
       `<g ${J(n+'K')}><rect x="${-11.5*legW}" y="-6" width="${23*legW}" height="80" rx="${10*legW}" fill="${sc}"/>`+
       (c.skirt?'':`<rect x="-11.5" y="62" width="23" height="5" fill="url(#gold)" opacity=".85"/>`)+
       `<g ${J(n+'F')}><path d="M-10 -9 L12 -9 Q26 -6 27 0 L-10 0Z" fill="${fc}"/></g></g></g>`; };
@@ -103,8 +105,10 @@ function makeRig(cast){
   const arm=(n,back)=>{ const col=back?skinB:skin, sl=c.sleeve?(back?shade(c.sleeve,-.25):c.sleeve):col;
     return `<g ${J(n)}><line x1="0" y1="0" x2="0" y2="50" stroke="${sl}" stroke-width="${13*wide}" stroke-linecap="round"/>`+
       (c.jewel?`<line x1="${-6.5*wide}" y1="16" x2="${6.5*wide}" y2="16" stroke="#d9a73a" stroke-width="3"/>`:'')+
+      (c.rudra?`<line x1="${-7*wide}" y1="15" x2="${7*wide}" y2="15" stroke="${c.rudra===true?'#6a3a18':c.rudra}" stroke-width="5" stroke-dasharray="3 2"/>`:'')+
       `<g ${J(n+'E')}><line x1="0" y1="0" x2="0" y2="46" stroke="${col}" stroke-width="${11*wide}" stroke-linecap="round"/>`+
       (c.jewel?`<line x1="-5.5" y1="38" x2="5.5" y2="38" stroke="#e8b83a" stroke-width="2.5"/>`:'')+
+      (c.rudra?`<line x1="-6" y1="37" x2="6" y2="37" stroke="${c.rudra===true?'#6a3a18':c.rudra}" stroke-width="4" stroke-dasharray="3 2"/>`:'')+
       `<g ${J(n+'H')}>${hand(n,col)}<g ${J(n+'P')}>${prop(back?props.back:props.front, n)}</g></g></g></g>`; };
 
   function prop(p, n){ if(!p) return '';
@@ -117,21 +121,25 @@ function makeRig(cast){
       case 'lantern': return `<g transform="translate(0 16)"><line x1="0" y1="-14" x2="0" y2="0" stroke="#6a4a22" stroke-width="2"/>${A('flick:9','<circle r="90" fill="url(#saf)"/>')}<path d="M-8 0 h16 l-2 20 h-12Z" fill="#7a5420"/><rect x="-5" y="3" width="10" height="13" fill="#ffd27a"/><path d="M-9 0 L0 -8 L9 0Z" fill="#5a3a14"/></g>`;
       case 'diya': return `<g transform="translate(0 -8)">${A('flick:7','<circle cy="-14" r="46" fill="url(#saf)"/>')}<path d="M-14 0 Q0 12 14 0 L10 -6 L-10 -6Z" fill="#a8582a"/><path d="M4 -6 Q8 -18 2 -26 Q-2 -16 4 -6Z" fill="#ffd27a"/></g>`;
       case 'lotus': return `<g transform="translate(0 -10)">${[-50,-25,0,25,50].map(r=>`<ellipse rx="5" ry="14" transform="rotate(${r}) translate(0 -10)" fill="${r?'#f3a6c0':'#ffd0dc'}"/>`).join('')}</g>`;
-      case 'trishul': return `<line x1="0" y1="-190" x2="0" y2="150" stroke="#b9b2a0" stroke-width="5"/><path d="M-22 -200 Q-22 -170 0 -168 Q22 -170 22 -200 M0 -168 L0 -230" stroke="#d9d2c0" stroke-width="5" fill="none"/><path d="M-26 -198 l4 -14 l4 14Z M22 -198 l4 -14 l4 14Z M-4 -228 l4 -16 l4 16Z" fill="#d9d2c0"/>`;
+      case 'trishul': return `<line x1="0" y1="-190" x2="0" y2="150" stroke="#b9b2a0" stroke-width="5"/><path d="M-22 -200 Q-22 -170 0 -168 Q22 -170 22 -200 M0 -168 L0 -230" stroke="#d9d2c0" stroke-width="5" fill="none"/><path d="M-26 -198 l4 -14 l4 14Z M22 -198 l4 -14 l4 14Z M-4 -228 l4 -16 l4 16Z" fill="#d9d2c0"/><g transform="translate(0 -150)"><path d="M0 0 q-14 10 -12 30 M0 0 q14 8 12 26" stroke="#d63a2a" stroke-width="2.4" fill="none"/><path d="M-9 -9 L9 -9 L2 0 L9 9 L-9 9 L-2 0Z" fill="#b9843a" stroke="#6a4218" stroke-width="1.4"/></g>`;
       case 'sword': return `<g transform="rotate(-90)"><rect x="-3" y="-8" width="6" height="16" fill="#6a4218"/><rect x="-10" y="6" width="20" height="4" fill="url(#gold)"/><path d="M-3 10 L3 10 L2 96 L0 104 L-2 96Z" fill="#dfe3ea"/></g>`;
       case 'arrows3': return ['#ff4a3c','#4ee08a','#ffd25e'].map((col,i)=>`<g transform="rotate(${-58+i*14})"><line x1="0" y1="0" x2="72" y2="0" stroke="${col}" stroke-width="3"/><polygon points="72,-6 88,0 72,6" fill="${col}"/>${A('pulse:3','<circle cx="80" cy="0" r="7" fill="'+col+'" opacity=".45"/>')}<path d="M0 0 l-8 -5 M0 0 l-8 5" stroke="${col}" stroke-width="2"/></g>`).join('');
       case 'orb': return `<g transform="translate(14 -8)">${A('pulse:2','<circle r="54" fill="url(#gw)"/>')}<circle r="18" fill="#fff3c4"/></g>`;
       case 'chakra': { let t=''; for(let i=0;i<16;i++) t+=`<path d="M0 -30 L4 -36 L-4 -36Z" transform="rotate(${i*22.5})" fill="#ffd25e"/>`;
         return `<g transform="translate(0 -40)">${A('spin:1.2:0:0',`<circle r="40" fill="url(#gw)" opacity=".7"/><circle r="28" fill="none" stroke="#ffd25e" stroke-width="4"/>${t}<circle r="6" fill="#ffd25e"/>`)}</g>`; }
       case 'flute': return `<g transform="rotate(-80)"><rect x="-3" y="-60" width="6" height="110" rx="3" fill="#a8742a"/><circle cx="0" cy="-30" r="1.6" fill="#3a2010"/><circle cx="0" cy="-15" r="1.6" fill="#3a2010"/><circle cx="0" cy="0" r="1.6" fill="#3a2010"/></g>`;
+      case 'axe': return `<line x1="-4" y1="46" x2="6" y2="-150" stroke="#3a2a22" stroke-width="9" stroke-linecap="round"/><g transform="translate(6 -128)"><path d="M0 -8 C-34 -26 -62 -4 -56 40 C-38 20 -16 14 0 18Z" fill="#6a7078" stroke="#d4d8de" stroke-width="2"/><path d="M0 -8 C34 -26 62 -4 56 40 C38 20 16 14 0 18Z" fill="#585e66" stroke="#d4d8de" stroke-width="2"/><path d="M-4 -8 L0 -34 L4 -8Z" fill="#d4d8de"/><path d="M-50 30 C-34 14 -16 8 -2 12 M50 30 C34 14 16 8 2 12" stroke="#ff5a2a" stroke-width="2" fill="none" opacity=".8"/>${A('pulse:3','<circle cy="14" r="46" fill="url(#gr)" opacity=".5"/>')}</g>`;
       default: return '';
     } }
-  const UPRIGHT={bow:1,mace:1,staff:1,lantern:1,diya:1,lotus:1,trishul:1,orb:1,chakra:1,arrows3:1};
+  const UPRIGHT={axe:1,bow:1,mace:1,staff:1,lantern:1,diya:1,lotus:1,trishul:1,orb:1,chakra:1,arrows3:1};
 
   /* ---- head ---- */
   let head='';
   if(c.veil) head+=`<g ${J('veilB')}><path d="M-18 -292 C-40 -270 -50 -220 -56 -150 L-30 -150 C-28 -210 -20 -250 -8 -276Z" fill="${c.veil}"/><path d="M-30 -150 C-28 -210 -20 -250 -8 -276 L-14 -280 C-22 -246 -26 -206 -28 -150Z" fill="#000" opacity=".16"/></g>`;
   if(c.hair==='long' && !c.veil) head+=`<g ${J('hair')}><path d="M-12 -272 C-30 -262 -34 -230 -40 -196 L-22 -204 C-20 -226 -14 -244 -6 -256Z" fill="${dark}"/></g>`;
+  if(c.head==='mahadev') head+=`<g ${J('hair')}><path d="M-14 -278 C-50 -268 -66 -216 -74 -146 C-64 -158 -56 -168 -48 -178 C-46 -150 -42 -126 -34 -104 C-24 -138 -22 -190 -8 -252Z" fill="${dark}"/><path d="M-22 -262 C-40 -240 -50 -200 -54 -160 M-30 -236 C-40 -210 -42 -176 -38 -138" stroke="#322b44" stroke-width="2" fill="none"/>`+
+    `<path d="M-6 -296 C-36 -290 -52 -246 -58 -196 C-52 -176 -50 -160 -44 -142" stroke="#bfe8ff" stroke-width="6" fill="none" stroke-linecap="round" opacity=".92"/><path d="M-6 -296 C-36 -290 -52 -246 -58 -196 C-52 -176 -50 -160 -44 -142" stroke="#ffffff" stroke-width="2" fill="none" stroke-dasharray="3 7" stroke-linecap="round" opacity=".9"/></g>`;
+  if(c.head==='demon') head+=`<g ${J('hair')}><path d="M-14 -276 L-40 -300 L-34 -276 L-62 -280 L-40 -258 L-58 -244 L-34 -240 L-44 -218 L-20 -236 L-10 -250Z" fill="#2a0c10"/><path d="M-30 -270 L-50 -262 M-30 -250 L-46 -238" stroke="#5a1a1a" stroke-width="2" fill="none"/></g><path d="M-8 -288 C-14 -314 -30 -330 -42 -326 C-34 -316 -28 -302 -22 -284Z" fill="#bfb298"/>`;
   if(c.hair==='bun') head+=`<circle cx="-16" cy="-280" r="11" fill="${dark}"/>`;
   if(c.head==='jata') head+=`<g ${J('hair')}><path d="M-16 -272 C-46 -262 -52 -220 -58 -170 L-40 -180 C-36 -220 -28 -246 -8 -258Z" fill="${dark}"/></g><path d="M-14 -284 C-18 -320 10 -330 18 -300 L16 -286Z" fill="${dark}"/><path d="M2 -318 a12 12 0 1 0 10 -10 a9 9 0 1 1 -10 10Z" fill="#f3ecd2"/>`;
   head+=`<rect x="-6" y="-254" width="14" height="20" fill="${skin}"/><path d="M-6 -254 L8 -254 L8 -234 L-6 -234Z" fill="#000" opacity=".15"/>`;
@@ -142,7 +150,7 @@ function makeRig(cast){
         `<path d="M24 -258 q3 1.5 0 3" stroke="#000" stroke-opacity=".28" stroke-width="1.2" fill="none"/>`+
         `<ellipse ${J('blush')} cx="12" cy="-259" rx="6" ry="3.6" fill="#e0556a" opacity="0"/>`+
         `<path d="M-2 -273 q-6 4 -3 14 q3 5 7 2" fill="${shade(skin,-.08)}" stroke="${shade(skin,-.3)}" stroke-width="1.3"/><path d="M-2 -268 q-2 5 1 8" stroke="${shade(skin,-.35)}" stroke-width="1" fill="none"/>`;
-  if(c.head!=='turban' && !c.veil && c.head!=='jata' && c.hair!=='none') head+=`<path d="M-16 -268 C-20 -292 0 -300 18 -290 L14 -280 C2 -284 -8 -282 -12 -262Z" fill="${dark}"/>`;
+  if(c.head!=='turban' && !c.veil && c.head!=='jata' && c.head!=='mahadev' && c.head!=='demon' && c.hair!=='none') head+=`<path d="M-16 -268 C-20 -292 0 -300 18 -290 L14 -280 C2 -284 -8 -282 -12 -262Z" fill="${dark}"/>`;
   if(c.beard) head+=`<path d="M6 -248 Q26 -246 22 -222 Q12 -210 2 -222 Q-4 -236 -2 -246Z" fill="${c.beard==='white'?'#e7e1d4':dark}"/>`;
   // eye (almond, kajal line) with blink
   head+=`<g ${J('eye')}><path ${J('sclera')} d="M9 -270.5 Q15 -275.5 21.5 -270 Q15 -267.4 9 -270.5Z" fill="#f3ead8"/><circle ${J('pupil')} cx="16.8" cy="-270.6" r="2.1" fill="#3b2415"/><circle cx="16.9" cy="-270.6" r="1.1" fill="#0d0705"/><circle cx="17.7" cy="-271.4" r=".75" fill="#fff"/><path d="M8.5 -271 Q15 -276.5 22 -270" stroke="#140a06" stroke-width="1.7" fill="none"/>`+
@@ -163,6 +171,21 @@ function makeRig(cast){
   if(c.tilak) head+=`<path d="M20 -287 l1 7" stroke="#d63a2a" stroke-width="2.2"/>`;
   if(c.head==='turban') head+=`<path d="M-22 -270 C-24 -296 2 -306 24 -290 C30 -284 28 -276 22 -276 C10 -280 -4 -282 -18 -264Z" fill="${c.turban}"/><circle cx="-22" cy="-286" r="9" fill="${c.turban}"/>`;
   if(c.crescent) head+=`<path d="M-17 -330 A19 19 0 0 0 21 -330 A16 12 0 0 1 -17 -330Z" fill="#f6f1dc" style="filter:drop-shadow(0 0 6px #fff6c8)"/>`;
+  if(c.head==='mahadev'){
+    head+=`<path d="M-19 -283 C-30 -320 -18 -356 3 -362 C24 -356 28 -320 19 -288 C10 -298 -4 -298 -19 -283Z" fill="${dark}"/>`+
+      `<path d="M-10 -298 C-14 -322 -6 -344 4 -356 M2 -294 C0 -320 6 -340 13 -352 M11 -292 C13 -312 18 -328 20 -340" stroke="#3a3350" stroke-width="2.2" fill="none"/>`+
+      `<path d="M-18 -300 Q2 -291 20 -302" stroke="#7a4a22" stroke-width="5" fill="none" stroke-dasharray="3 3" stroke-linecap="round"/>`+
+      `<path d="M-13 -362 A15 15 0 0 0 17 -362 A13 10 0 0 1 -13 -362Z" fill="#f6f1dc" style="filter:drop-shadow(0 0 6px #fff6c8)"/>`+
+      `<path d="M-19 -287 C-30 -296 -28 -306 -22 -308 C-14 -304 -14 -294 -19 -287Z" fill="#2f3a3a"/><circle cx="-19" cy="-301" r="1.4" fill="#ff5a3a"/>`;
+    if(c.fireHair) head+=A('flick:5.5',`<g transform="translate(2 -358) scale(1.8) translate(-2 358)"><path d="M-12 -358 Q-26 -392 -10 -418 Q-6 -392 2 -406 Q4 -384 12 -396 Q20 -380 14 -358Z" fill="#ff7a1c" opacity=".92"/><path d="M-4 -358 Q-10 -380 0 -396 Q6 -380 8 -358Z" fill="#ffd27a"/></g>`)+A('pulse:3','<circle cx="2" cy="-376" r="46" fill="url(#gr)" opacity=".55"/>');
+  }
+  if(c.head==='demon'){
+    head+=`<path d="M8 -288 C16 -318 34 -338 48 -336 C38 -324 32 -308 24 -286Z" fill="#e8dcc0"/><path d="M8 -288 C14 -300 18 -306 22 -310 L24 -286Z" fill="#000" opacity=".18"/>`+
+      `<path d="M5 -282 Q15 -291 26 -281 L25 -275 Q15 -282 5 -277Z" fill="${shade(skin,-.4)}"/>`+
+      `<path d="M10 -264 l12 3 M11 -258 l11 2" stroke="#ffb02a" stroke-width="2" stroke-linecap="round" opacity=".9"/>`;
+  }
+  if(c.tusks) head+=`<path d="M15 -247 L17 -260 L21 -247Z M23 -248 L27 -259 L29 -248Z" fill="#f4ecd8" stroke="#8a7a60" stroke-width=".6"/>`;
+  if(c.third) head+=`<circle ${J('thirdG')} cx="15" cy="-284.5" r="15" fill="url(#gr)" opacity="0"/><ellipse ${J('thirdE')} cx="15" cy="-284.5" rx="2.3" ry="4.3" fill="#7a1a14" transform="translate(15 -284.5) scale(1 .12) translate(-15 284.5)"/>`;
   if(c.head==='crown'||c.head==='feather') head+=`<path d="M-16 -286 L-12 -318 L-4 -300 L2 -326 L8 -300 L16 -316 L18 -286Z" fill="url(#gold)"/><circle cx="2" cy="-296" r="3" fill="#d63a2a"/>`;
   if(c.head==='feather') head+=`<g transform="translate(0 -322) rotate(-14)"><path d="M0 0 Q-6 -24 0 -46" stroke="#3a7a4f" stroke-width="2.5" fill="none"/><ellipse cx="0" cy="-48" rx="9" ry="15" fill="#2e9a86"/><ellipse cx="0" cy="-48" rx="5.5" ry="9" fill="#1f5fb0"/><ellipse cx="0" cy="-48" rx="2.5" ry="4.5" fill="#e8c24a"/></g>`;
   if(c.head==='band') head+=`<path d="M-16 -282 Q2 -292 20 -284 L20 -277 Q2 -285 -16 -275Z" fill="url(#gold)"/><circle cx="4" cy="-286" r="2.6" fill="#d63a2a"/>`;
@@ -177,6 +200,15 @@ function makeRig(cast){
   else if(c.trim) torso+=`<path d="M-30 -156 L28 -156 L28 -146 L-30 -146Z" fill="${c.trim}"/>`;
   if(c.sash) torso+=`<g ${J('sashT')}><path d="M-34 -220 C-10 -200 10 -170 26 -150 L10 -150 C-6 -176 -22 -196 -36 -206Z" fill="${c.sash}"/></g>`;
   if(c.jewel) torso+=`<g ${J('pend')}><path d="M-22 -230 Q2 -196 22 -228" stroke="url(#gold)" stroke-width="3" fill="none"/><line x1="2" y1="-205" x2="2" y2="-196" stroke="#e8b83a" stroke-width="1.4"/><path d="M-3 -196 L2 -186 L7 -196Z" fill="url(#gold)"/><circle cx="2" cy="-195" r="2" fill="#d63a2a"/></g>`;
+  if(c.bare){
+    torso+=`<path d="M-2 -220 Q12 -204 28 -212" stroke="#000" stroke-opacity=".22" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M-26 -222 Q-12 -206 -2 -216" stroke="#000" stroke-opacity=".16" stroke-width="2" fill="none"/>`+
+      `<path d="M8 -196 v36 M-4 -188 h24 M-4 -176 h24 M-4 -164 h24" stroke="#000" stroke-opacity=".17" stroke-width="1.8" fill="none" stroke-linecap="round"/>`+
+      `<path d="M24 -232 Q32 -210 26 -190" stroke="#fff" stroke-opacity=".16" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  }
+  if(c.ash) torso+=`<path d="M-24 -224 Q4 -204 28 -218 M-24 -213 Q4 -193 28 -207 M-24 -202 Q4 -182 28 -196" stroke="#f3eee2" stroke-width="3.6" fill="none" stroke-linecap="round" opacity=".92"/>`;
+  if(c.tiger) torso+=`<g ${J('tig')}><path d="M-34 -172 Q-2 -160 30 -174 L33 -146 L-36 -146Z" fill="#d08a2a"/><path d="M-30 -170 l8 14 M-14 -166 l6 16 M2 -165 l5 17 M18 -168 l4 18 M-24 -154 l10 -1" stroke="#2a1608" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M-36 -146 l6 12 l6 -12 l6 12 l6 -12 l6 12 l6 -12 l6 12 l6 -12 l6 12 l6 -12" fill="#d08a2a" stroke="#d08a2a" stroke-width="1.5"/></g>`;
+  if(c.spikes) torso+=`<path d="M-36 -240 Q-14 -258 8 -242 L4 -220 L-34 -216Z" fill="#2a2428" stroke="#8a8088" stroke-width="1.6"/><path d="M-30 -246 l-6 -24 l13 22Z M-16 -252 l-2 -28 l11 26Z M-2 -250 l5 -26 l8 24Z" fill="#9a9298" stroke="#2a2428" stroke-width="1"/><path d="M-30 -230 l60 70" stroke="#2a2428" stroke-width="7"/><circle cx="-12" cy="-212" r="2" fill="#c8c0c4"/><circle cx="10" cy="-192" r="2" fill="#c8c0c4"/><rect x="-32" y="-160" width="62" height="10" fill="#2a2428"/><circle cx="2" cy="-153" r="8" fill="#e8dcc0"/><circle cx="-1" cy="-154" r="1.8" fill="#2a2428"/><circle cx="5" cy="-154" r="1.8" fill="#2a2428"/>`;
+  if(c.snake) torso+=`<g ${J('snk')}><path d="M-24 -238 Q-8 -226 6 -238 Q16 -226 28 -236" stroke="#2f3a3a" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M-24 -238 Q-8 -226 6 -238 Q16 -226 28 -236" stroke="#9fb8b0" stroke-width="3" fill="none" stroke-dasharray="2 5" stroke-linecap="round"/><path d="M24 -236 C40 -246 48 -228 40 -208 C36 -198 26 -202 24 -212Z" fill="#33403f"/><path d="M29 -230 C37 -234 42 -226 38 -216" stroke="#e8e0c0" stroke-width="1.8" fill="none"/><circle cx="40" cy="-226" r="1.8" fill="#ff4a3a"/><path d="M45 -222 l9 -2 m-9 2 l8 4" stroke="#d63a2a" stroke-width="1.2" fill="none"/></g>`;
   if(c.garland) torso+=`<g ${J('garl')}><path d="M-22 -234 Q2 -160 22 -230" stroke="${c.garland}" stroke-width="6" fill="none" stroke-dasharray="1 5" stroke-linecap="round"/></g>`;
   torso+=`<path d="M28 -194 C28 -222 18 -236 8 -238" fill="none" style="stroke:var(--rimc,#fff);stroke-opacity:var(--rimo,0);stroke-width:1.8" stroke-linecap="round"/>`;
   torso+='</g>';
@@ -305,6 +337,10 @@ function updateRig(r, lt, t, talking){
   if(q.hair) setT(q.hair, `rotate(${r1(Math.sin(t*1.1+sd)*2 + gk(dHead*0.9 + dLean*0.5,14))} -8 -262)`);
   if(q.aura) q.aura.setAttribute('opacity', (0.75+0.25*Math.sin(t*1.6)).toFixed(3));
 
+  if(q.thirdE){ const o = cast.thirdAt!==undefined ? smooth01((lt-cast.thirdAt)/0.5) : (ex==='angry'?smooth01(lt/0.6):0);
+    q.thirdE.setAttribute('transform',`translate(15 -284.5) scale(1 ${(0.12+0.88*o).toFixed(3)}) translate(-15 284.5)`);
+    q.thirdE.setAttribute('fill', o>0.05?'#ff3a1c':'#7a1a14'); q.thirdG.setAttribute('opacity',(o*(0.75+0.25*Math.sin(t*9))).toFixed(3)); }
+  setT(q.snk,`rotate(${r1(Math.sin(t*2.2+sd)*2.5 + gk(-dLean*0.8,8))} 6 -236)`);
   /* ---- face: expression, blink, talk, tears ---- */
   const bt=(t+sd*2.3)%3.7; let lid = bt<0.16 ? Math.sin(Math.PI*bt/0.16) : 0;
   if(cast.eyes==='closed') lid=1; else if(ex==='serene') lid=Math.max(lid,0.35); else if(ex==='sad') lid=Math.max(lid,0.22+0.08*Math.sin(t*1.7)); else if(ex==='angry') lid=Math.max(lid,0.16);
@@ -312,7 +348,8 @@ function updateRig(r, lt, t, talking){
   const ey=(1-lid)*widen; setT(q.eye, `translate(15 -270.5) scale(1 ${Math.max(0.05,ey).toFixed(3)}) translate(-15 270.5)`);
   show(q.eye, ey>0.2); show(q.lid, ey<=0.2);
   if(cast.look==='up' && q.pupil) q.pupil.setAttribute('cy','-271.6');
-  if(q.sclera) q.sclera.setAttribute('fill', ex==='angry'?'#f0c8b8':'#f3ead8');
+  if(q.sclera) q.sclera.setAttribute('fill', r.c.eyeCol || (ex==='angry'?'#f0c8b8':'#f3ead8'));
+  if(r.c.eyeCol && q.pupil) q.pupil.setAttribute('fill','#8a0a0a');
   setT(q.brow, ex==='angry'?'rotate(14 15 -278) translate(0 2)': ex==='sad'?'rotate(-12 15 -278) translate(0 -1)': ex==='surprise'?'translate(0 -3.5)':'');
   show(q.furrow, ex==='angry');
   const open = talking>0 ? (0.35+0.65*Math.abs(Math.sin(t*15.5+Math.sin(t*4))))*talking : (ex==='surprise'?0.8:0);
