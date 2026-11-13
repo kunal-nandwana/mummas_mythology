@@ -162,7 +162,7 @@ VIDEO({
      ]},
     /* 4: Dushan, horned giant under a black sun, leads his horde into Avanti */
     {line:'एक बार दूषण नाम के एक अहंकारी और क्रूर असुर ने अवंती पर आक्रमण कर दिया। उसका मुख्य उद्देश्य शिव भक्तों की पूजा को बंद करवाना था।',
-     scene:'dushan-attacks', mood:'shock', tr:'dip', fx:'embers', capTop:120, shake:[1.3,.7,7],
+     scene:'dushan-attacks', rec:'0:24.3', mood:'shock', tr:'dip', fx:'embers', capTop:120, shake:[1.3,.7,7],
      cam:{keys:[[0,300,860,1.7],[1.4,300,800,1.5,'snap'],[3.2,300,560,1.15],[6.5,300,540,1.1],[9,300,520,1.2]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyW)"/>`+darkSun(300,360,70)+cloudBand(180,4,'#3a140c',.6,30)+risingEmbers(0,540,500,14,220,6),
      far:()=>townFar('#1a0a14')+burning(60,720,1.2)+burning(480,720,1.3)+risingSmoke(60,700,5,360,'#1a0c10',.5)+risingSmoke(480,700,5,420,'#1a0c10',.5)+horde(740,9,'#12060c',.9),
@@ -177,7 +177,7 @@ VIDEO({
      focus:{at:1.4,sound:'arrive',dur:2.4,duck:.3}},
     /* 5: terror in the city; people run with the horde behind them */
     {line:'उसके आतंक से पूरे नगर में भय फैल गया और लोग अपनी जान बचाने के लिए भागने लगे।',
-     scene:'city-panic', mood:'anger', tr:'whip', fx:'dust', cam:{keys:[[0,400,640,1.1],[5.5,150,640,1.2]]},
+     scene:'city-panic', rec:'0:34.9', mood:'anger', tr:'whip', fx:'dust', cam:{keys:[[0,400,640,1.1],[5.5,150,640,1.2]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyW)"/>`+stormFlash()+cloudBand(200,4,'#3a140c',.55,26)+birds(300,8,-1,6)+birds(220,6,-1,8),
      far:()=>divine(150,700,'#ff5a1c',1)+townFar('#2a0f1c')+burning(90,720,1.4)+burning(300,730,1.2)+burning(500,720,1.3)+risingSmoke(200,720,5,380,'#1a0c10',.45)+risingEmbers(0,540,720,16,340,4.5),
      mid:()=>ground(790,'url(#gndW)','#a8432a')+dustTrail(808,9,-1)+A('walk:-320:5:0',horde(800,8,'#0a0408',1.15)),
@@ -190,7 +190,7 @@ VIDEO({
      ]},
     /* 6: the army marches on, the sons do not flee */
     {line:'लेकिन चारों तरफ डर का माहौल होने और दूषण की विशाल सेना के आगे बढ़ने के बावजूद, वेदप्रिय के पुत्र वहाँ से भागे नहीं।',
-     scene:'sons-stay', rec:'0:37.7', mood:'shock', tr:'cut', fx:'dust', cam:{keys:[[0,150,640,1.0],[4,300,700,1.3],[7.5,330,720,1.5]]},
+     scene:'sons-stay', rec:'0:41.4', mood:'shock', tr:'cut', fx:'dust', cam:{keys:[[0,150,640,1.0],[4,300,700,1.3],[7.5,330,720,1.5]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyN)"/>`+stars(60,500)+stormFlash(),
      far:()=>hills(640,40,'#1d1d40',140)+townFar('#1e1a46')+bolt(120,30,1.3,7)+mist(740,.1)+cloudBand(200,3,'#10102a',.6,34)+risingSmoke(60,700,4,300,'#120a18',.4),
      mid:()=>ground(790,'url(#gnd)','#4a3e5a')+A('walk:-260:6:0',horde(790,7,'#06030a',1.0))+flagWave(80,770,'#5a1a3a',1.4)+flagWave(210,775,'#5a1a3a',1.2),
@@ -203,7 +203,7 @@ VIDEO({
      ]},
     /* 7: fearless, absorbed in worship */
     {line:'वे निडर होकर शिवलिंग के सामने बैठे रहे और महादेव की आराधना में लीन रहे।',
-     scene:'fearless-prayer', mood:'hope', tr:'fade', fx:'petals', cam:{keys:[[0,320,720,1.4],[5,330,740,1.9]]},
+     scene:'fearless-prayer', rec:'0:51.2', mood:'hope', tr:'fade', fx:'petals', cam:{keys:[[0,320,720,1.4],[5,330,740,1.9]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyN)"/>`+stars(60,500)+A('pulse:1.6',`<circle cx="420" cy="700" r="260" fill="url(#gw)" opacity=".35"/>`),
      far:()=>hills(640,40,'#1d1d40',140)+townFar('#1e1a46')+mist(740,.1)+cloudBand(220,3,'#232a58',.45,40),
      mid:()=>ground(790,'url(#gnd)','#4a3e5a')+fireflies(8,40,500,680,800),
@@ -216,7 +216,7 @@ VIDEO({
      ]},
     /* 8: Dushan swings his axe; the earth splits; a column of fire; Mahakal rises from the pit */
     {line:'शिव पुराण के अनुसार, जैसे ही असुर ने उन पर प्रहार करना चाहा, उसी स्थान पर धरती में एक गहरा गड्ढा प्रकट हुआ और उसमें से स्वयं भगवान शिव अपने अत्यंत प्रचंड रूप में प्रकट हुए।',
-     scene:'shiva-emerges', mood:'anger', tr:'flash', fx:'sparks', capTop:120,
+     scene:'shiva-emerges', rec:'0:57.2', mood:'anger', tr:'flash', fx:'sparks', capTop:120,
      cam:{keys:[[0,200,700,1.15],[2.2,160,640,1.25],[2.9,270,800,1.2,'snap'],[4.4,280,620,1.1],[8.5,290,500,1.35]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyRed)"/>`+divine(290,640,'#ff6a1c',1)+stormFlash(),
      far:()=>hills(640,40,'#2a0f1c',140)+townFar('#2a0f1c')+cloudBand(210,3,'#3a140c',.5,28)+risingEmbers(0,540,720,12,300,5),
@@ -231,7 +231,7 @@ VIDEO({
      shake:[2.4,1.4,12], focus:[{at:2.6,sound:'emerge',dur:2.6,duck:.28}]},
     /* 9: the HUNKAR. Third eye blazes, the roar hits Dushan and he crumbles into ash */
     {line:'महादेव ने पल भर में असुर दूषण का वध कर दिया।',
-     scene:'shiva-slays-dushan', rec:'1:08.2', mood:'anger', tr:'cut', fx:'embers', capTop:120,
+     scene:'shiva-slays-dushan', rec:'1:12.1', mood:'anger', tr:'cut', fx:'embers', capTop:120,
      dur:3.8,
      cam:{keys:[[0,260,620,1.05],[.6,385,430,1.7],[1.0,376,396,2.5,'snap'],[1.7,300,540,1.2,'snap'],[2.4,200,560,1.1],[3.8,230,580,1.05]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyRed)"/>`+divine(270,480,'#ff5a1c',1)+stormFlash(),
@@ -247,7 +247,7 @@ VIDEO({
      shake:[1.8,1.1,13], focus:{at:1.0,sound:'slay',dur:2.8,duck:.22}},
     /* 10: Time itself (the hourglass) bursts before this form: Mahakal */
     {line:"भगवान शिव के इस स्वरूप के आगे स्वयं 'काल' (समय और मृत्यु) भी शक्तिहीन था, इसलिए वे यहाँ महाकाल कहलाए।",
-     scene:'mahakal-glory', mood:'divine', tr:'glow', fx:'embers', focus:{at:3.0,sound:'kaal',dur:2.4,duck:.4},
+     scene:'mahakal-glory', rec:'1:16.0', mood:'divine', tr:'glow', fx:'embers', focus:{at:3.0,sound:'kaal',dur:2.4,duck:.4},
      cam:{keys:[[0,270,720,1.0],[3,270,660,1.15],[6.5,270,560,1.35]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyDiv)"/>`+stars(90,560)+divine(270,500,'#ff9a3c',1),
      far:()=>A('fadeout:3.0:.6',kaalChakra(270,400,280,40))+hourglass(270,400,1.5,3.0)+A('pop:3.0',sunRays(270,400,560,'#ffe9a8',50)+holyRipple(270,400,240,'#ffd27a',2.4,3)),
@@ -257,7 +257,7 @@ VIDEO({
      cast:[{c:MAHAKAL,x:270,y:800,s:1.5,expr:'angry',props:{front:'trishul'},acts:[[0,'carry'],[1.2,{a:[150,10],hand:'fist',head:12}],[4.2,'carry']],aura:'gr'}]},
     /* 11: devotees ask Mahadev to stay forever */
     {line:'असुर के अंत के बाद, भक्तों ने महादेव से प्रार्थना की कि वे हमेशा के लिए इसी स्थान पर विराजमान हो जाएं।',
-     scene:'devotees-plead', mood:'hope', tr:'fade', fx:'petals', cam:{keys:[[0,270,700,1.25],[6,270,660,1.05]]},
+     scene:'devotees-plead', rec:'1:23.8', mood:'hope', tr:'fade', fx:'petals', cam:{keys:[[0,270,700,1.25],[6,270,660,1.05]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyDawn)"/>`+A('pulse:1.6',`<circle cx="270" cy="420" r="240" fill="url(#gw)" opacity=".4"/>`),
      far:()=>hills(660,40,'#6a7f4a',40)+godRays(180)+temple(440,720,.85,'#8a6a56')+risingSmoke(442,700,3,150,'#d8c0b0',.3),
      mid:()=>ground(775,'url(#gnd)','#7a8f5a')+A('rock:5:.8:60:720',peepal(60,720,1.1)),
@@ -272,7 +272,7 @@ VIDEO({
      ]},
     /* 12: Mahadev accepts and becomes the Jyotirlinga of Ujjain */
     {line:'महादेव ने उनकी प्रार्थना स्वीकार की और ज्योतिर्लिंग रूप में वहीं स्थापित हो गए—जिसे आज हम उज्जैन के श्री महाकालेश्वर ज्योतिर्लिंग के रूप में जानते हैं।',
-     scene:'jyotirlinga-established', mood:'divine', tr:'glow', fx:'petals', focus:{at:3.0,sound:'revive',dur:3.0,duck:.4},
+     scene:'jyotirlinga-established', rec:'1:32.4', mood:'divine', tr:'glow', fx:'petals', focus:{at:3.0,sound:'revive',dur:3.0,duck:.4},
      cam:{keys:[[0,270,620,1.0],[4,270,640,1.25],[9,270,600,1.4]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyDiv)"/>`+divine(270,520,'#ffe9a8',1)+stars(70,480),
      far:()=>temple(270,760,1.3,'#3a3470')+godRays(200)+A('pop:3.2',mandala(270,560,250,70,'#ffd27a')+mandala(270,560,170,-50,'#fff0c0')),
@@ -286,7 +286,7 @@ VIDEO({
      ]},
     /* 13: one of the 12, the only south-facing */
     {line:'12 ज्योतिर्लिंगों में से एक, महाकालेश्वर एकमात्र दक्षिणमुखी ज्योतिर्लिंग है।',
-     scene:'twelve-jyotirlinga', mood:'divine', tr:'iris', trAt:[270,480], fx:'stars', capTop:150,
+     scene:'twelve-jyotirlinga', rec:'1:44.9', mood:'divine', tr:'iris', trAt:[270,480], fx:'stars', capTop:150,
      cam:{keys:[[0,270,500,1.0],[5.5,270,470,1.18]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyDiv)"/>`+stars(90,560)+divine(270,480,'#ffd27a',1),
      far:()=>jyotiGlow(270,480)+mandala(270,480,250,90,'#ffd27a')+mandala(270,480,120,-60,'#fff0c0')+ring12(270,480,190)+holyRipple(270,480,215,'#ffd27a',4,3),
@@ -295,7 +295,7 @@ VIDEO({
      title:{text:'12',y:300,size:96,color:'#ffe9a8',delay:.3}},
     /* 14: the King of Ujjain is Baba Mahakal */
     {line:'यही कारण है कि उज्जैन में यह मान्यता प्रचलित है कि यहाँ का राजा कोई इंसान नहीं, बल्कि स्वयं बाबा महाकाल हैं।',
-     scene:'raja-mahakal', mood:'divine', tr:'glow', fx:'petals', cam:{keys:[[0,270,620,1.0],[5,270,560,1.25],[8,270,520,1.4]]},
+     scene:'raja-mahakal', rec:'1:51.0', mood:'divine', tr:'glow', fx:'petals', cam:{keys:[[0,270,620,1.0],[5,270,560,1.25],[8,270,520,1.4]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyDiv)"/>`+stars(70,480)+divine(270,470,'#ffb347',1),
      far:()=>temple(150,740,1.0,'#3a3470')+temple(400,745,1.1,'#3a3470')+godRays(260)+skyLamps(7),
      mid:()=>ground(800,'url(#gnd)','#9a8aba')+flameDiya(60,880)+flameDiya(480,880)+mist(780,.08),
