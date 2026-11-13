@@ -123,6 +123,9 @@ function VIDEO(cfg){
         /* draw:at:dur  lines inside (paths with pathLength="1" stroke-dasharray="1") are drawn in; used by famTree/timeline/mapRoute */
         case 'draw':{ const k=easeIO(clamp01((lt-a[0])/a[1])); e.querySelectorAll('[pathLength]').forEach(q=>q.style.strokeDashoffset=(1-k).toFixed(4)); op=k>0?1:0; break; }
         case 'fadein':{ op=clamp01((lt-a[0])/a[1]); break; }
+        /* beat:cx:cy:amp[:bpm]  heartbeat "lub-dub" (60 bpm default, on whole video seconds): scales around (cx,cy) and brightens on each beat */
+        case 'beat':{ const per=60/(a[3]||60), u=((t%per)+per)%per, g=(x,w)=>Math.exp(-(x*x)/(w*w)), b=g(u,.06)+g(u-per,.06)+.65*g(u-.26*per,.07), s=1+(a[2]||.2)*b;
+          tr=`translate(${a[0]} ${a[1]}) scale(${s.toFixed(3)}) translate(${-a[0]} ${-a[1]})`; op=.72+.28*Math.min(1,b); break; }
         /* drift:dx:dy:period  loops forever: slides dx,dy over `period` s and fades in/out at the ends (clouds, smoke, embers, floating lamps; each copy starts at its own phase) */
         case 'drift':{ const u=(lt/a[2]+ph/6.283)%1; tr=`translate(${r1(u*a[0])} ${r1(u*a[1])})`; op=Math.sin(Math.PI*u); break; }
         /* ripple:period:cx:cy  a ring/glow that grows from (cx,cy) and fades, forever (shock-waves, holy light, water rings) */

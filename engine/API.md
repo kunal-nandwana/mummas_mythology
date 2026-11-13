@@ -27,9 +27,10 @@ All scene fields are functions: `art:()=>svg`.
 - `expr`: calm, smile, serene, sad, angry, surprise.
 
 ## Characters (engine/characters.js)
-BARBARIK KRISHNA BRAHMIN ARJUNA BHIMA YUDHISHTHIRA NAKULA SAHADEVA GHATOTKACH MOTHER DEVI SITA RAMA SHIVA MAHAKAL DUSHAN ASURA RISHI SOLDIER VILLAGER DEVOTEE_F CHANDRA DAKSHA ROHINI NAKSHATRA (recolour: `{c:NAKSHATRA, with:{top,bottom,veil}}`) INDRA DEVA.
+BARBARIK KRISHNA BRAHMIN ARJUNA BHIMA YUDHISHTHIRA NAKULA SAHADEVA GHATOTKACH MOTHER DEVI SITA RAMA SHIVA MAHAKAL DUSHAN ASURA RISHI SOLDIER VILLAGER DEVOTEE_F CHANDRA DAKSHA ROHINI NAKSHATRA (recolour: `{c:NAKSHATRA, with:{top,bottom,veil}}`) INDRA DEVA INDRADYUMNA VISHWAKARMA PUJARI.
+**INDRADYUMNA** = King of Puri (tall gold crown, maroon + gold, dark cape; use `namaste`). **VISHWAKARMA** = divine craftsman (bare chest, cream dhoti, ochre shoulder cloth, white beard, hair bun; give `props:{front:'mallet'}`). **PUJARI** = Puri temple priest (shaven head, white dhoti, sacred thread); Nabakalebara look: `with:{blindfold:true}` + `props:{front:'heartCloth'}` or `'cloth'`.
 **SHIVA** = Mahadev (topknot jata with Ganga + crescent, third eye, ash stripes, Vasuki, tiger skin, rudraksha, broad build). The third eye is a closed mark and opens by itself when `expr:'angry'`; or `thirdAt:secs` opens it at that time. **MAHAKAL** = fierce Shiva (flaming jata, red aura): use for the Mahakal/Rudra scenes. **DUSHAN** = horned, tusked asura with iron armour (give `props:{front:'axe'}`), **ASURA** = smaller demon soldier. They look nothing like YAMRAJ/DEVA.
-Costume keys for `with`: head(+mahadev|demon) bare ash snake tiger rudra third tusks spikes eyeCol fireHair skin top bottom shin foot sleeve skirt trim hair(long|bun|none) head(crown|feather|turban|band|big|jata|none) beard mus cape quiver garland sash veil turban tilak earring big aura(gw|saf|gr|gb|gg) jewel crescent.
+Costume keys for `with`: head(+mahadev|demon) bare ash snake tiger rudra third tusks spikes eyeCol fireHair blindfold(true|'#colour': cloth band over the eyes, knot + loose ends) skin top bottom shin foot sleeve skirt trim hair(long|bun|none) head(crown|feather|turban|band|big|jata|none) beard mus cape quiver garland sash veil turban tilak earring big aura(gw|saf|gr|gb|gg) jewel crescent.
 
 ## Poses
 stand relax point armUp bless offer give namaste think fist shock bowReady bowDraw carry shoulder pranam lookUp lookDown
@@ -39,15 +40,16 @@ Custom: pass an object `{a:[shoulder,elbow], b:[..], f:[hip,knee], k:[..], head,
 Talking characters nod/gesture automatically; capes, veils, hair, garlands sway by themselves.
 
 ## Props (`props:{front:'bow'}`)
-bow (+arrow with bowDraw) mace axe(double-bladed) staff lantern diya lotus trishul sword arrows3 orb chakra flute
+bow (+arrow with bowDraw) mace axe(double-bladed) staff lantern diya lotus trishul sword arrows3 orb chakra flute mallet(wooden mallet + chisel) cloth(both hands wrapped in thick white cloth) heartCloth(the same, with a golden-pink light beating inside; the object itself is never shown). Use `cloth`/`heartCloth` with pose `offer`.
 
 ## Scenes (engine/scenes.js; all return SVG)
 - Base: `nightBase({moon:[x,y,r],fort:[x,y,s],camps:y,gy,hillsY})`, `warSky(sunY,r)`, `divine(cx,cy,col,ray)` (rays; skyDiv bg), `palace(y,tone)` / `palaceBack`+`palaceMid`+`palaceFloor`, `field('erase'|'mark'|'save')` (army)
 - Pieces: `stars(n,h) moon(x,y,r) clouds() hills(y,amp,col,step) ground(y) tufts flowers fg() chhatri fort tent fire(x,y,s) camps peepal(x,y,s) sol(x,y,s,col,flip) banner armies(y) sparkle(x,y,s,col) flyArrow(col,glow) headOnly(x,y,s) pedestal(x,y,s)`
 - Moon/space: `phaseMoon(x,y,r,'full'|'wane'|'wax'|num,dur,delay)`, `moonRow(y,r)`, `nakshatras(cx,cy,rx,ry,stagger)`, `earth(x,y,r)`, `orbitMoon(cx,cy,r,period,mr)`
 - Text: `big(x,y,size,col,text,delay)`, `parchment(x,y,w,h)`, `verse(x,y,[lines],size,col,delay,gap)`, `pothi(x,y,s)`
-- Gradients: `url(#skyN|skyW|skyDiv|gnd|fog|saf|gw|gg|gold|moonG)`.
-- Animate any group: `A('spec', svg)`: flick:spd pulse:spd bob:amp:spd spin:period:cx:cy rock:deg:spd:cx:cy pop:delay rise:dy:dur:delay slide:dx:dy:dur:delay walk:dx:dur:delay fadeout:at:dur fadein:at:dur orbit:rx:ry:cx:cy:period drift:dx:dy:period (looping slide+fade: clouds, smoke, rising embers, floating lamps) ripple:period:cx:cy (looping growing ring/glow: shock-waves, holy light)
+- Gradients: `url(#skyN|skyW|skyDiv|gnd|fog|saf|gw|gg|gold|moonG|heartG)` (heartG = golden-pink glow).
+- **Own gradients in a story:** Chrome only paints a gradient whose FIRST `id` in the page is visible, and hidden shots are `display:none`. If a story defines its own `<defs>`, give every shot its own ids (see `withDefs` in `jagannath-heart-short-form/story.js`), or the gradient is invisible in all later shots.
+- Animate any group: `A('spec', svg)`: flick:spd pulse:spd bob:amp:spd spin:period:cx:cy rock:deg:spd:cx:cy pop:delay rise:dy:dur:delay slide:dx:dy:dur:delay walk:dx:dur:delay fadeout:at:dur fadein:at:dur orbit:rx:ry:cx:cy:period drift:dx:dy:period (looping slide+fade: clouds, smoke, rising embers, floating lamps) ripple:period:cx:cy (looping growing ring/glow: shock-waves, holy light) beat:cx:cy:amp[:bpm] (heartbeat lub-dub, default 60 bpm on whole video seconds: scales around cx,cy by amp and brightens; for a living light / heart)
 
 ## Camera `cam`
 - Presets: `'in' 'out' 'panL' 'panR' 'up' 'down' 'still'`

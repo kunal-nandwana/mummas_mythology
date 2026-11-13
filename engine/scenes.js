@@ -19,6 +19,7 @@ const DEFS = `<defs>
  <linearGradient id="skyDawn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14183e"/><stop offset=".45" stop-color="#6a3a5a"/><stop offset=".75" stop-color="#e0805a"/><stop offset="1" stop-color="#f6c070"/></linearGradient>
  <linearGradient id="skyDiv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a0714"/><stop offset="1" stop-color="#241228"/></linearGradient>
  <linearGradient id="skyRed" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#160508"/><stop offset="1" stop-color="#4a1418"/></linearGradient>
+ <radialGradient id="heartG"><stop offset="0" stop-color="#ffe6b0" stop-opacity=".95"/><stop offset=".35" stop-color="#ff9aa8" stop-opacity=".45"/><stop offset="1" stop-color="#ff7a9a" stop-opacity="0"/></radialGradient>
  <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7da7e"/><stop offset="1" stop-color="#b98428"/></linearGradient>
  <linearGradient id="gnd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2236"/><stop offset="1" stop-color="#100d18"/></linearGradient>
  <linearGradient id="gndW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a1810"/><stop offset="1" stop-color="#140806"/></linearGradient>

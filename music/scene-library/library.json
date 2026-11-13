@@ -908,6 +908,408 @@
         "lead": 0.6
       },
       "auto": true
+    },
+    "jagannath-secret": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"jagannath-secret\" (calm): भगवान जगन्नाथ की लकड़ी की मूर्ति के भीतर एक ऐसा गह. Edit this recipe in library.json to change it.",
+      "level": [0.68, 0.74],
+      "pad": {
+        "chords": "maj",
+        "seg": 9,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.736, 3.016],
+        "rest": [1.841, 4.701],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "krishna-heart": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"krishna-heart\" (divine): भक्तों की मान्यता है कि यह स्वयं भगवान श्री कृष्ण . Edit this recipe in library.json to change it.",
+      "level": [0.74, 0.847],
+      "pad": {
+        "chords": "divine",
+        "seg": 8,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [19, 24],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 5, 4, 2, 3, 1],
+        "step": 0.893,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "krishna-departs": {
+      "mood": "sad",
+      "desc": "Auto-created for scene \"krishna-departs\" (sad): कथा के अनुसार, जब एक शिकारी के तीर से घायल होने के. Edit this recipe in library.json to change it.",
+      "level": [0.557, 0.37],
+      "pad": {
+        "chords": "min",
+        "seg": 9,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "bow",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.075,
+        "note": [2.727, 4.075],
+        "rest": [1.871, 3.622],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "body-to-light": {
+      "mood": "sad",
+      "desc": "Auto-created for scene \"body-to-light\" (sad): तो उनके पार्थिव शरीर का अंतिम संस्कार किया गया।. Edit this recipe in library.json to change it.",
+      "level": [0.572, 0.391],
+      "pad": {
+        "chords": "min",
+        "seg": 10,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.075,
+        "note": [2.523, 3.632],
+        "rest": [1.861, 4.143],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "heart-in-fire": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"heart-in-fire\" (divine): लेकिन केवल उनका हृदय नहीं जला—वह किसी दिव्य प्रकाश. Edit this recipe in library.json to change it.",
+      "level": [0.697, 0.873],
+      "pad": {
+        "chords": "divine",
+        "seg": 8,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [24],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 4, 2, 5, 4, 2],
+        "step": 0.822,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "heart-on-sea": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"heart-on-sea\" (calm): इसके बाद उस दिव्य हृदय को समुद्र में प्रवाहित कर द. Edit this recipe in library.json to change it.",
+      "level": [0.698, 0.764],
+      "pad": {
+        "chords": "open",
+        "seg": 9,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.403, 2.727],
+        "rest": [1.698, 4.026],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "king-waits": {
+      "mood": "hope",
+      "desc": "Auto-created for scene \"king-waits\" (hope): वहाँ राजा इंद्रद्युम्न, जिन्हें पहले ही स्वप्न में. Edit this recipe in library.json to change it.",
+      "level": [0.794, 1.123],
+      "pad": {
+        "chords": "maj",
+        "seg": 6,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 99,
+        "notes": [12, 19],
+        "amp": 0.07,
+        "len": 3,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 2],
+        "step": 0.458,
+        "amp": 0.13,
+        "ring": 1.4,
+        "lead": 0.4
+      },
+      "melody": {
+        "kind": "pluck",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.2,
+        "note": [1.081, 2.346],
+        "rest": [0.643, 1.659],
+        "phrase": [3, 4],
+        "rise": 0.7,
+        "lead": 0.9
+      },
+      "auto": true
+    },
+    "vishwakarma-carves": {
+      "mood": "hope",
+      "desc": "Auto-created for scene \"vishwakarma-carves\" (hope): देवताओं के शिल्पी विश्वकर्मा ने भगवान जगन्नाथ, बलभ. Edit this recipe in library.json to change it.",
+      "level": [0.756, 1.156],
+      "pad": {
+        "chords": "open",
+        "seg": 7,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 99,
+        "notes": [24],
+        "amp": 0.07,
+        "len": 3,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 5, 4, 2, 3, 1],
+        "step": 0.43,
+        "amp": 0.13,
+        "ring": 1.4,
+        "lead": 0.4
+      },
+      "melody": {
+        "kind": "pluck",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.2,
+        "note": [1.045, 2.493],
+        "rest": [0.644, 1.48],
+        "phrase": [3, 4],
+        "rise": 0.7,
+        "lead": 0.9
+      },
+      "auto": true
+    },
+    "heart-placed": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"heart-placed\" (divine): और उस पवित्र हृदय को भगवान जगन्नाथ की मूर्ति के भी. Edit this recipe in library.json to change it.",
+      "level": [0.718, 0.849],
+      "pad": {
+        "chords": "divine",
+        "seg": 7,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [12, 19],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 2],
+        "step": 0.806,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "brahma-padarth": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"brahma-padarth\" (divine): भक्त इस रहस्यमयी तत्व को 'ब्रह्म पदार्थ' यानी आत्म. Edit this recipe in library.json to change it.",
+      "level": [0.746, 0.845],
+      "pad": {
+        "chords": "divine",
+        "seg": 10,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [24],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 4, 2, 5, 4, 2],
+        "step": 0.911,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "nabakalebara-cycle": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"nabakalebara-cycle\" (calm): हर 12 से 19 वर्षों के अंतराल पर (नवकलेवर उत्सव के . Edit this recipe in library.json to change it.",
+      "level": [0.715, 0.757],
+      "pad": {
+        "chords": "open",
+        "seg": 9,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.814, 2.69],
+        "rest": [1.497, 4.46],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "puri-lights-off": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"puri-lights-off\" (calm): उस विशेष रात को पूरे पुरी शहर की बिजली बंद कर दी ज. Edit this recipe in library.json to change it.",
+      "level": [0.713, 0.749],
+      "pad": {
+        "chords": "maj",
+        "seg": 9,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.582, 2.754],
+        "rest": [1.537, 4.746],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "priests-darkness": {
+      "mood": "sad",
+      "desc": "Auto-created for scene \"priests-darkness\" (sad): मुख्य पुजारियों की आँखों पर पट्टी बाँधी जाती है. Edit this recipe in library.json to change it.",
+      "level": [0.553, 0.382],
+      "pad": {
+        "chords": "min",
+        "seg": 10,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.075,
+        "note": [2.604, 3.848],
+        "rest": [1.861, 3.531],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "heartbeat-hands": {
+      "mood": "sad",
+      "desc": "Jagannath Nabakalebara climax: priests in total darkness; very soft low heartbeat (lub-dub, 60 bpm) over a quiet pad. Only percussion in the video.",
+      "level": [0.566, 0.373],
+      "pad": {
+        "chords": "min",
+        "seg": 10,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "bow",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.045,
+        "note": [2.556, 3.761],
+        "rest": [2.001, 4.019],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      },
+      "drums": {
+        "step": 0.25,
+        "pat": [1, 0.62, 0, 0],
+        "amp": 0.2,
+        "f": [-31],
+        "len": 0.24
+      }
+    },
+    "jagannath-heartbeat": {
+      "mood": "divine",
+      "desc": "Jagannath ending: the heartbeat glowing inside the idol; the soft heartbeat continues, quieter, and fades with the ending.",
+      "level": [0.743, 0.866],
+      "pad": {
+        "chords": "divine",
+        "seg": 8,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [12, 19],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 5, 4, 2, 3, 1],
+        "step": 0.983,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "drums": {
+        "step": 0.25,
+        "pat": [1, 0.62, 0, 0],
+        "amp": 0.13,
+        "f": [-31],
+        "len": 0.24
+      }
     }
   }
 }
