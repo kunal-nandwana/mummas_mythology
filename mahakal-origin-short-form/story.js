@@ -190,7 +190,7 @@ VIDEO({
      ]},
     /* 6: the army marches on, the sons do not flee */
     {line:'लेकिन चारों तरफ डर का माहौल होने और दूषण की विशाल सेना के आगे बढ़ने के बावजूद, वेदप्रिय के पुत्र वहाँ से भागे नहीं।',
-     scene:'sons-stay', mood:'shock', tr:'cut', fx:'dust', cam:{keys:[[0,150,640,1.0],[4,300,700,1.3],[7.5,330,720,1.5]]},
+     scene:'sons-stay', rec:'0:37.7', mood:'shock', tr:'cut', fx:'dust', cam:{keys:[[0,150,640,1.0],[4,300,700,1.3],[7.5,330,720,1.5]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyN)"/>`+stars(60,500)+stormFlash(),
      far:()=>hills(640,40,'#1d1d40',140)+townFar('#1e1a46')+bolt(120,30,1.3,7)+mist(740,.1)+cloudBand(200,3,'#10102a',.6,34)+risingSmoke(60,700,4,300,'#120a18',.4),
      mid:()=>ground(790,'url(#gnd)','#4a3e5a')+A('walk:-260:6:0',horde(790,7,'#06030a',1.0))+flagWave(80,770,'#5a1a3a',1.4)+flagWave(210,775,'#5a1a3a',1.2),
@@ -231,7 +231,7 @@ VIDEO({
      shake:[2.4,1.4,12], focus:[{at:2.6,sound:'emerge',dur:2.6,duck:.28}]},
     /* 9: the HUNKAR. Third eye blazes, the roar hits Dushan and he crumbles into ash */
     {line:'महादेव ने पल भर में असुर दूषण का वध कर दिया।',
-     scene:'shiva-slays-dushan', mood:'anger', tr:'cut', fx:'embers', capTop:120,
+     scene:'shiva-slays-dushan', rec:'1:08.2', mood:'anger', tr:'cut', fx:'embers', capTop:120,
      dur:3.8,
      cam:{keys:[[0,260,620,1.05],[.6,385,430,1.7],[1.0,376,396,2.5,'snap'],[1.7,300,540,1.2,'snap'],[2.4,200,560,1.1],[3.8,230,580,1.05]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyRed)"/>`+divine(270,480,'#ff5a1c',1)+stormFlash(),
