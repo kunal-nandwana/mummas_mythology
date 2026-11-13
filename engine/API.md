@@ -74,8 +74,8 @@ Balance (automatic): every scene is levelled to the same loudness, music sits ~1
 ## Opening montage
 (Owner dislikes it: not used.) `opening:N` + N shots with `art/cast/cam/tr` and NO `line` (0.8s each, or `dur`). Counts inside `target`. Plays with the hook, a riser, then a boom when narration starts. See `chandra-27-wives-short-form/story.js`.
 
-## Look polish (new, optional): `look:'mumma'`
-Add `look:'mumma'` to `VIDEO({...})` for a richer picture without changing the drawing style: thin **rim light along every character's silhouette** (colour and strength follow the shot's `mood`), soft **bokeh lights** tinted by the mood light, tiny floating **motes**, a warm **diya glow** at the bottom and a slightly deeper vignette. Off by default (old videos unchanged). Tune with an object: `look:{rim:1, bokeh:1, motes:1, warm:.08 /*0=off*/, vig:.1}`. Test video: `mahakal-origin-short-form` (see its `preview/look-before.png` / `look-after.png`).
+## Look polish (engine default, approved)
+Every video now gets, automatically: a thin **rim light along every character's silhouette** (colour and strength follow the shot's `mood`), soft **bokeh lights** tinted by the mood light, tiny floating **motes**, a warm **diya glow** at the bottom and a slightly deeper vignette. Turn it off for one video with `look:false`; tune with `look:{rim:1, bokeh:1, motes:1, warm:.08 /*0=off*/, vig:.1}`. Before/after: `mahakal-origin-short-form/preview/look-before.png` / `look-after.png`.
 
 ## Explainer templates (new): reusable Hindi diagrams, gold on dark
 Put them in `art`/`mid`/`front`. Lines draw themselves in, nodes and labels appear one by one. Shot lines of 5-10 s suit them; use `capTop:120` so the caption stays above the diagram. Example: `explainer-test-short-form/story.js` (picture: its `preview/explainers.png`).

@@ -62,8 +62,8 @@ function VIDEO(cfg){
     cfg.shots=cfg.shots.map((s,i)=> i>=o && SY.durs[i-o]>0 ? Object.assign({},s,{dur:SY.durs[i-o], speech:SY.speech?SY.speech[i-o]:undefined}) : s); }
   const plan=planTiming(cfg), ENDING=plan.ending||0, DURATION=plan.duration, INTRO=plan.intro, NARR_END=plan.narrEnd, OUTRO=plan.outro;
   const KEY=(cfg.keywords||[]);
-  /* ---- look: optional extra polish (cfg.look:'mumma' or an object). Off unless set, so old videos stay the same ---- */
-  const LOOK = !cfg.look ? null : Object.assign({rim:1, bokeh:1, motes:1, warm:.08, vig:.1}, typeof cfg.look==='object'?cfg.look:{});
+  /* ---- look: extra polish, ON by default (cfg.look:false turns it off; an object tunes it) ---- */
+  const LOOK = cfg.look===false ? null : Object.assign({rim:1, bokeh:1, motes:1, warm:.08, vig:.1}, (cfg.look&&typeof cfg.look==='object')?cfg.look:{});
   const SH = cfg.shots.map((s,i)=>Object.assign({}, s, plan.shots[i]));
 
   /* Calligraphy follows the shot's REAL length: with the owner's voice, the lines are written across the time he actually chants
