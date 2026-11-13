@@ -58,6 +58,7 @@ Old stories keep working. New options, shown in `chandra-27-wives-short-form/sto
 - **Mood:** `mood:'calm'|'joy'|'hope'|'anger'|'sad'|'shock'|'divine'` sets the lighting, colour and rim light. Moods cross-fade between shots.
 - **Transitions into a shot:** `tr:'fade'|'glow'|'whip'|'zoom'|'iris'|'wipe'|'flash'|'dip'|'cut'` (`trAt:[x,y]` sets the iris centre).
 - **Look polish:** `look:'mumma'` adds a rim light on characters, soft bokeh, floating motes and a warm diya glow (details in `engine/API.md`).
+- **Explainer diagrams:** `famTree`, `timeline`, `mapRoute` (see `engine/API.md`, test video `explainer-test-short-form`).
 - **Hook text:** `hook:{at,hold,words:[{text,size,y,delay,count:[from,to]}]}` slams in during the first 2 seconds.
 - **Channel sting and end card:** switched off on purpose (no "Mumma's Mythology" intro or end card). Videos start straight with the story.
 

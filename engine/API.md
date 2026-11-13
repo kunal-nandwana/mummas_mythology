@@ -77,6 +77,14 @@ Balance (automatic): every scene is levelled to the same loudness, music sits ~1
 ## Look polish (new, optional): `look:'mumma'`
 Add `look:'mumma'` to `VIDEO({...})` for a richer picture without changing the drawing style: thin **rim light along every character's silhouette** (colour and strength follow the shot's `mood`), soft **bokeh lights** tinted by the mood light, tiny floating **motes**, a warm **diya glow** at the bottom and a slightly deeper vignette. Off by default (old videos unchanged). Tune with an object: `look:{rim:1, bokeh:1, motes:1, warm:.08 /*0=off*/, vig:.1}`. Test video: `mahakal-origin-short-form` (see its `preview/look-before.png` / `look-after.png`).
 
+## Explainer templates (new): reusable Hindi diagrams, gold on dark
+Put them in `art`/`mid`/`front`. Lines draw themselves in, nodes and labels appear one by one. Shot lines of 5-10 s suit them; use `capTop:120` so the caption stays above the diagram. Example: `explainer-test-short-form/story.js` (picture: its `preview/explainers.png`).
+- `famTree(cx, top, {n:'दशरथ', sub:'अयोध्या के राजा', hi:true, col?, mark?, kids:[{n:'राम',hi:true,col:'#8fb4ff'}, ...]}, {gapY:190, leafW:128, r:40, delay:.3, step:.55})`: family tree; kids spread automatically; `hi:true` glows.
+- `timeline(cx, top, [{t:'त्रेता', d:'राम का युग', hi:true}, ...], {gap:150, delay:.3, step:.7})`: vertical timeline, items alternate left/right.
+- `mapRoute([{x,y,n:'अयोध्या'}, ...], {step:.9, wiggle:26, label:'below'|'side', delay:.3})`: dotted journey between places; last place glows.
+- New animation spec `A('draw:at:dur', svg)` draws paths that have `pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"`.
+- Orbit / sky diagram already exists: `earth`, `orbitMoon`, `nakshatras`.
+
 ## Animation upgrades (new, all optional)
 parallax layers · keyframed camera/close-ups · head turns, gestures, secondary motion · `tears` · mood · cinematic `tr` · handheld camera.
 

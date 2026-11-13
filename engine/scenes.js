@@ -169,3 +169,49 @@ function calligraphy(lines,o){ o=Object.assign({y:300,size:34,delay:0.6,gap:1.5,
   if(o.source) out+=A(`pop:${(tEnd-.2).toFixed(2)}`,`<path d="M170 ${r1(o.y+lines.length*lh-S*.6)} L370 ${r1(o.y+lines.length*lh-S*.6)}" stroke="#f1c04e" stroke-width="1.6" opacity=".8"/><path d="M264 ${r1(o.y+lines.length*lh-S*.6)} l6 -5 l6 5 l-6 5Z" fill="#f1c04e"/>`+
     `<text x="270" y="${r1(o.y+lines.length*lh+S*.5)}" text-anchor="middle" font-size="${r1(S*.58)}" fill="#e6c98a" style="font-weight:700">${o.source}</text>`);
   return o.hold>0 ? A(`fadeout:${(tEnd+o.hold).toFixed(2)}:.7`,out) : out; }
+
+/* =====================================================================
+   EXPLAINER TEMPLATES (gold-on-dark, same look as the rest). All return SVG, put them in art/mid/front.
+   Lines draw themselves in, medallions and labels pop in one by one.  Text is Hindi (Mukta).
+   ===================================================================== */
+const _exLabel=(x,y,t,size,col)=>`<text x="${x}" y="${y}" text-anchor="middle" font-size="${size}" fill="${col||'#ffe9b8'}" stroke="#120a06" stroke-width="${(size*.22).toFixed(1)}" stroke-linejoin="round" paint-order="stroke" style="font-weight:800">${t}</text>`;
+const _exDraw=(d,delay,dur,col,w,dash)=>A(`draw:${delay.toFixed(2)}:${dur.toFixed(2)}`,`<path d="${d}" pathLength="1" stroke-dasharray="${dash||1}" stroke-dashoffset="1" fill="none" stroke="${col||'#f0d79a'}" stroke-width="${w||2.6}" stroke-linecap="round" opacity=".9"/>`);
+// medallion: dark disc, gold ring, first letter (or o.mark) inside; hi:true = bigger, glowing
+function _exNode(x,y,n,o){ o=o||{}; const r=o.r||32, hi=o.hi, mark=o.mark||String(n).charAt(0), col=o.col||'#f0d79a';
+  return `<g transform="translate(${x} ${y})">`+(hi?A('pulse:1.6',`<circle r="${r*1.9}" fill="url(#gw)" opacity=".9"/>`):'')+
+    `<circle r="${r+5}" fill="${col}" opacity=".16"/><circle r="${r}" fill="#24140c" stroke="${col}" stroke-width="${hi?3.6:2.4}"/><circle r="${r-6}" fill="none" stroke="${col}" stroke-opacity=".35" stroke-width="1"/>`+
+    `<text y="${r*.36}" text-anchor="middle" font-size="${(r*1.05).toFixed(0)}" fill="${col}" style="font-family:'Tiro',serif">${mark}</text></g>`; }
+/* famTree(cx, top, tree, opts): tree={n:'दशरथ', sub:'अयोध्या के राजा', hi:true, kids:[...]}. Siblings spread automatically.
+   opts: gapY 150, leafW 118, r 30, delay .3, step .55 (seconds between generations) */
+function famTree(cx,top,tree,o){ o=Object.assign({gapY:190,leafW:128,r:40,delay:.3,step:.55},o||{});
+  const wOf=t=>t._w=(t.kids&&t.kids.length)?Math.max(o.leafW,t.kids.reduce((a,k)=>a+wOf(k),0)):o.leafW;
+  wOf(tree); let lines='', nodes='';
+  (function place(t,x,y,d){ t._x=x; t._y=y;
+    if(t.kids&&t.kids.length){ let left=x-t._w/2; t.kids.forEach(k=>{ place(k,left+k._w/2,y+o.gapY,d+1); left+=k._w; }); }
+    t._d=d; })(tree,cx,top,0);
+  (function walk(t){ const dl=o.delay+t._d*o.step;
+    nodes+=A(`pop:${(dl+.25).toFixed(2)}`,_exNode(t._x,t._y,t.n,{r:o.r,hi:t.hi,mark:t.mark,col:t.col})+_exLabel(t._x,t._y+o.r+32,t.n,28)+(t.sub?_exLabel(t._x,t._y+o.r+58,t.sub,18,'#d8c496'):''));
+    (t.kids||[]).forEach(k=>{ const y1=t._y+o.r+(t.sub?68:42), y2=k._y-o.r-6, ym=(y1+y2)/2;
+      lines+=_exDraw(`M${t._x} ${y1} L${t._x} ${ym} L${k._x} ${ym} L${k._x} ${y2}`,dl+.15,o.step*.9); walk(k); }); })(tree);
+  return `<g>${lines}${nodes}</g>`; }
+/* timeline(cx, top, items, opts): vertical gold line with dots; items=[{t:'सतयुग', d:'धर्म चारों पैरों पर', hi:true}] alternate left/right.
+   opts: gap 130, delay .3, step .7 */
+function timeline(cx,top,items,o){ o=Object.assign({gap:150,delay:.3,step:.7},o||{});
+  const bot=top+o.gap*(items.length-1)+20; let s=_exDraw(`M${cx} ${top-20} L${cx} ${bot}`,o.delay,o.step*items.length*.9,'#f0d79a',3);
+  items.forEach((it,i)=>{ const y=top+i*o.gap, side=i%2?1:-1, dl=o.delay+i*o.step*.9+.2, tx=cx+side*40;
+    s+=A(`pop:${dl.toFixed(2)}`,(it.hi?A('pulse:1.6',`<circle cx="${cx}" cy="${y}" r="26" fill="url(#gw)"/>`):'')+`<circle cx="${cx}" cy="${y}" r="${it.hi?14:10}" fill="#24140c" stroke="#ffd25e" stroke-width="3.4"/>`+
+      `<path d="M${cx+side*11} ${y} L${tx} ${y}" stroke="#f0d79a" stroke-width="2"/>`+
+      `<text x="${tx+side*8}" y="${y-2}" text-anchor="${side>0?'start':'end'}" font-size="34" fill="${it.hi?'#ffd25e':'#ffe9b8'}" stroke="#120a06" stroke-width="5" stroke-linejoin="round" paint-order="stroke" style="font-weight:800">${it.t}</text>`+
+      (it.d?`<text x="${tx+side*8}" y="${y+26}" text-anchor="${side>0?'start':'end'}" font-size="21" fill="#d8c496" stroke="#120a06" stroke-width="4" stroke-linejoin="round" paint-order="stroke" style="font-weight:700">${it.d}</text>`:'')); });
+  return `<g>${s}</g>`; }
+/* mapRoute(points, opts): a dotted gold journey between places. points=[{x,y,n:'अयोध्या'}, ...]; the last place glows.
+   opts: delay .3, step .9 (seconds per leg), wiggle 26 (how curvy the legs are), label:'below'|'side' */
+function mapRoute(pts,o){ o=Object.assign({delay:.3,step:.9,wiggle:26},o||{}); let s='', marks='';
+  pts.forEach((p,i)=>{ const dl=o.delay+i*o.step;
+    if(i>0){ const q=pts[i-1], mx=(q.x+p.x)/2+(i%2?1:-1)*o.wiggle, my=(q.y+p.y)/2;
+      s+=_exDraw(`M${q.x} ${q.y} Q${mx} ${my} ${p.x} ${p.y}`,dl-o.step*.85,o.step*.8,'#ffd25e',3,'0.012 0.016'); }
+    const last=i===pts.length-1, side=p.x>270?-1:1;
+    marks+=A(`pop:${dl.toFixed(2)}`,(last?A('ripple:2.4:'+p.x+':'+p.y,`<circle cx="${p.x}" cy="${p.y}" r="40" fill="none" stroke="#ffd25e" stroke-width="2"/>`)+A('pulse:1.6',`<circle cx="${p.x}" cy="${p.y}" r="34" fill="url(#gw)"/>`):'')+
+      `<circle cx="${p.x}" cy="${p.y}" r="${last?14:10}" fill="#24140c" stroke="#ffd25e" stroke-width="3.4"/><circle cx="${p.x}" cy="${p.y}" r="${last?5.5:4}" fill="#ffd25e"/>`+
+      (o.label==='side'? `<text x="${p.x+side*20}" y="${p.y+7}" text-anchor="${side>0?'start':'end'}" font-size="28" fill="#ffe9b8" stroke="#120a06" stroke-width="6" stroke-linejoin="round" paint-order="stroke" style="font-weight:800">${p.n}</text>` : _exLabel(p.x,p.y+40,p.n,28))); });
+  return `<g>${s}${marks}</g>`; }
