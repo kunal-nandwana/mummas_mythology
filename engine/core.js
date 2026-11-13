@@ -36,7 +36,7 @@ function VIDEO(cfg){
   <div id="wrap"><div id="stage">
     <svg width="0" height="0" style="position:absolute" id="defs"></svg>
     <div id="scenes"></div><canvas id="fx" width="${W}" height="${H}"></canvas>
-    <div id="mood"><i></i><i></i><i></i></div>
+    <div id="mood"><i></i><i></i><i></i><i></i></div>
     <svg id="over" viewBox="0 0 ${W} ${H}"></svg><svg id="trfx" viewBox="0 0 ${W} ${H}"></svg><div id="flash"></div>
     <div id="shade"></div><div id="cap"></div>
     <svg id="card" viewBox="0 0 ${W} ${H}"></svg><svg id="sting" viewBox="0 0 ${W} ${H}"></svg><svg id="hook" viewBox="0 0 ${W} ${H}"></svg><div id="bar"></div>
@@ -62,6 +62,8 @@ function VIDEO(cfg){
     cfg.shots=cfg.shots.map((s,i)=> i>=o && SY.durs[i-o]>0 ? Object.assign({},s,{dur:SY.durs[i-o], speech:SY.speech?SY.speech[i-o]:undefined}) : s); }
   const plan=planTiming(cfg), ENDING=plan.ending||0, DURATION=plan.duration, INTRO=plan.intro, NARR_END=plan.narrEnd, OUTRO=plan.outro;
   const KEY=(cfg.keywords||[]);
+  /* ---- look: optional extra polish (cfg.look:'mumma' or an object). Off unless set, so old videos stay the same ---- */
+  const LOOK = !cfg.look ? null : Object.assign({rim:1, bokeh:1, motes:1, warm:.08, vig:.1}, typeof cfg.look==='object'?cfg.look:{});
   const SH = cfg.shots.map((s,i)=>Object.assign({}, s, plan.shots[i]));
 
   /* Calligraphy follows the shot's REAL length: with the owner's voice, the lines are written across the time he actually chants
@@ -84,7 +86,7 @@ function VIDEO(cfg){
     const title = sc.title ? big(W/2, sc.title.y||150, (sc.title.size||50)*0.82, sc.title.color||'#ffd25e', sc.title.text, sc.title.delay||0.5) : '';
     const d=document.createElement('div'); d.className='scene';
     const calli = sc.calli ? calligraphy(sc.calli.lines, fitCalli(sc)) : '';
-    const stage0=`${sc.art?sc.art():''}${rigs.map(r=>r.svg).join('')}${sc.front?sc.front():''}${calli}${title}`;
+    const stage0=`${sc.art?sc.art():''}${rigs.map(r=>LOOK&&LOOK.rim?`<g class="rimfx">${r.svg}</g>`:r.svg).join('')}${sc.front?sc.front():''}${calli}${title}`;
     const layered=!!(sc.sky||sc.far||sc.mid||sc.near);
     d.innerHTML=`<svg viewBox="0 0 ${W} ${H}">`+(layered ?
       `<g class="L" data-f="${LAYER_F.sky}" data-dof="1.6">${sc.sky?sc.sky():''}</g><g class="L" data-f="${LAYER_F.far}" data-dof="1">${sc.far?sc.far():''}</g><g class="L" data-f="${LAYER_F.mid}" data-dof="0.5">${sc.mid?sc.mid():''}</g>`+
@@ -163,6 +165,7 @@ function VIDEO(cfg){
     divine:{sat:1.08,bri:1.02,con:1.05,hue:2,tint:[190,140,255,.06],glow:[.5,.42,.65,255,226,150,.14],rim:[255,226,160,.85],vig:.2} };
   const moodOf=m=>{ if(!m) m='neutral'; if(typeof m==='string') m={base:m}; return Object.assign({},MOOD0,MOODS[m.base||'neutral'],m); };
   const mixV=(a,b,k)=>Array.isArray(a)?a.map((v,i)=>lerp(v,b[i],k)):lerp(a,b,k);
+  let lookGlow=[255,200,130];
   const moodEl=document.querySelectorAll('#mood i'), scenesBox=$('scenes');
   const smooth=k=>{ k=clamp01(k); return k*k*(3-2*k); };
   function applyMood(t,idx){
@@ -172,7 +175,9 @@ function VIDEO(cfg){
     const beat=Math.pow(Math.max(0,Math.sin(t*6.2)),6)+0.6*Math.pow(Math.max(0,Math.sin(t*6.2-1.1)),6), pu=1+M.pulse*(0.35*beat-0.1);
     const id=Math.abs(M.sat-1)+Math.abs(M.bri-1)+Math.abs(M.con-1)+Math.abs(M.hue)<0.01;
     scenesBox.style.filter= id?'':`saturate(${M.sat.toFixed(3)}) brightness(${M.bri.toFixed(3)}) contrast(${M.con.toFixed(3)}) hue-rotate(${M.hue.toFixed(1)}deg)`;
+    if(LOOK) M.vig=Math.min(.9,M.vig+LOOK.vig);
     const T=M.tint, G=M.glow, rgb=a=>a.map(Math.round).join(',');
+    if(LOOK){ lookGlow=[G[3],G[4],G[5]]; if(LOOK.warm>0) moodEl[3].style.background=`radial-gradient(ellipse at 50% 104%, rgba(255,168,70,${LOOK.warm}) 0%, rgba(255,140,50,${LOOK.warm*.4}) 32%, rgba(255,140,50,0) 62%)`; }
     moodEl[0].style.background = T[3]>0.003 ? `rgba(${rgb(T.slice(0,3))},${T[3].toFixed(3)})` : 'none';
     moodEl[1].style.background = G[6]>0.003 ? `radial-gradient(circle at ${(G[0]*100).toFixed(1)}% ${(G[1]*100).toFixed(1)}%, rgba(${rgb(G.slice(3,6))},${(G[6]*pu).toFixed(3)}) 0%, rgba(${rgb(G.slice(3,6))},0) ${(G[2]*100).toFixed(0)}%)` : 'none';
     moodEl[2].style.background = M.vig>0.003 ? `radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0) ${(46-18*M.vig).toFixed(0)}%, rgba(${(T[0]>200&&T[1]<80)?'30,0,0':'0,0,6'},${Math.min(.92,M.vig*pu).toFixed(3)}) 100%)` : 'none';
@@ -296,6 +301,17 @@ function VIDEO(cfg){
       cx.globalAlpha=Math.max(0,a); cx.fillStyle=FXC[kind]; cx.beginPath(); cx.arc(x,y,r,0,6.283); cx.fill(); cx.shadowBlur=0; });
     cx.globalAlpha=1; }
 
+  /* ---- look: soft bokeh lights (tinted by the mood's light colour) + tiny floating motes ---- */
+  const BOK=Array.from({length:9},(_,i)=>({x:rnd()*W,y:rnd()*H,r:34+rnd()*60,sp:4+rnd()*8,ph:rnd()*6.28,a:.05+rnd()*.07}));
+  const MOTE=Array.from({length:46},()=>({x:rnd()*W,y:rnd()*H,r:.5+rnd()*1.2,sp:5+rnd()*12,ph:rnd()*6.28}));
+  function drawLook(t){
+    const c=lookGlow.map(Math.round).join(',');
+    if(LOOK.bokeh){ BOK.forEach(b=>{ const x=(b.x+Math.sin(t*.12+b.ph)*26+W)%W, y=(b.y-t*b.sp*.6+H*20)%(H+160)-80, a=b.a*(.6+.4*Math.sin(t*.5+b.ph));
+      const g=cx.createRadialGradient(x,y,b.r*.15,x,y,b.r); g.addColorStop(0,`rgba(${c},${a})`); g.addColorStop(.8,`rgba(${c},${a*.7})`); g.addColorStop(1,`rgba(${c},0)`);
+      cx.globalAlpha=1; cx.fillStyle=g; cx.beginPath(); cx.arc(x,y,b.r,0,6.283); cx.fill(); }); }
+    if(LOOK.motes){ cx.fillStyle='#ffe2b0'; MOTE.forEach(m=>{ const y=(m.y-t*m.sp+H*20)%H, x=m.x+Math.sin(t*.4+m.ph)*10; cx.globalAlpha=.18+.3*Math.max(0,Math.sin(t*1.3+m.ph)); cx.beginPath(); cx.arc(x,y,m.r,0,6.283); cx.fill(); }); cx.globalAlpha=1; }
+  }
+
   /* ---- one frame ---- */
   const flash=$('flash'), bar=$('bar');
   function render(t){
@@ -329,6 +345,7 @@ function VIDEO(cfg){
     if(ENDING>0){ const fb=smooth((t-(DURATION-1.5))/1.4); if(fb>fl){ fl=fb; flash.style.background='#000'; } }   // ending: gentle fade to black
     flash.style.opacity=fl.toFixed(3);
     applyMood(t,cur);
+    if(LOOK) drawLook(t);
     if(active>=0) placeCap(SH[active].capTop||CAPTOP);
     SH.forEach((sc,i)=>{ let ag=-1; if(i===active) sc.chunks.forEach((c,ci)=>{ if(t>=c.t-0.05) ag=ci; });
       sc.chunks.forEach((c,ci)=>{ const on=ci===ag; c.el.style.display=on?'block':'none';

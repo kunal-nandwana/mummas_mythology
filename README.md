@@ -32,15 +32,18 @@ engine/            shared code for every video
   core.js          player: camera moves, transitions, effects, word-by-word Hindi captions, prompter
   fonts/           Mukta + Tiro Devanagari Hindi (SIL Open Font License)
 tools/build.js     turns <topic>/story.js into <topic>/index.html + <topic>/script.md
+tools/check.js     instant checker for story.js (poses, characters, art, exact Hindi words, timing)
+tools/contact-sheet.js  one picture with every shot, for a single review round
+tools/story-brief-template.md  fill this in before starting a new story
 ```
 
 Each video is one short file, `<topic>-short-form/story.js`. It lists the shots: the Hindi line, the background, the characters and their poses, and the camera. See `engine-test-short-form/story.js` for an example.
 
 ### Making one video, step by step
 
-1. **Story.** Start a new Kiro session. Say: "Make `<topic>-short-form`, about N seconds, story: ...". Kiro writes `story.js` with a Hindi line for every shot.
+1. **Story.** Start a new Kiro session (fill in `tools/story-brief-template.md` first: it saves credits). Say: "Make `<topic>-short-form`, about N seconds, story: ...". Kiro writes `story.js` with a Hindi line for every shot.
 2. **Build.** Run `node tools/build.js <topic>-short-form`. This writes `index.html` (the video) and `script.md` (your recording script).
-3. **Check.** Open `index.html` in Chrome. If something is wrong, send all the fixes in **one** message, using shot numbers (for example: "shot 4: Krishna should smile; shot 6 needs 1 more second").
+3. **Check.** Run `node tools/check.js <topic>` (instant: finds typos, unknown poses, words that differ from your script) and `node tools/contact-sheet.js <topic>` (one picture of every shot, saved in `<topic>/preview/`). Then open `index.html` in Chrome. If something is wrong, send all the fixes in **one** message, using shot numbers (for example: "shot 4: Krishna should smile; shot 6 needs 1 more second").
 4. **Record your voice.** Open `index.html?prompter=1`. Start your phone or Mac recorder, press **Start**, and after the 3-2-1 count read each line as it appears. `script.md` has the same lines with their timings.
 5. **Render the MP4.** Save your recording as `voice.m4a` in the topic folder, then double-click `make-video.command`. It produces a 1080×1920 MP4 with your voice, and the silence before your first word is cut automatically.
 6. **Upload** to YouTube.
@@ -54,6 +57,7 @@ Old stories keep working. New options, shown in `chandra-27-wives-short-form/sto
 - **Acting:** poses `lookAway`, `lookBack` (head turns), `explain`, `plead`, `accuse`, `rage`, `recoil`, `weep`, `grief`, `hold`; `tears:true`. Earrings, pendants, garlands, veils, sashes, skirts, hair and capes swing by themselves, and talking characters nod and gesture.
 - **Mood:** `mood:'calm'|'joy'|'hope'|'anger'|'sad'|'shock'|'divine'` sets the lighting, colour and rim light. Moods cross-fade between shots.
 - **Transitions into a shot:** `tr:'fade'|'glow'|'whip'|'zoom'|'iris'|'wipe'|'flash'|'dip'|'cut'` (`trAt:[x,y]` sets the iris centre).
+- **Look polish:** `look:'mumma'` adds a rim light on characters, soft bokeh, floating motes and a warm diya glow (details in `engine/API.md`).
 - **Hook text:** `hook:{at,hold,words:[{text,size,y,delay,count:[from,to]}]}` slams in during the first 2 seconds.
 - **Channel sting and end card:** switched off on purpose (no "Mumma's Mythology" intro or end card). Videos start straight with the story.
 

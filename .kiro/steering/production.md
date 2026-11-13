@@ -36,7 +36,8 @@ Targets: 30 Shorts + 4 long videos a month, with his own voice. **Credits matter
 - Read `engine/API.md` + the topic's `story.js` only. Don't open engine source unless changing the engine.
 
 ## Cheap workflow (follow it)
-1. For a new script, store it verbatim, then build `story.js`, then `node tools/build.js <topic>`.
+1. For a new script, store it verbatim, then build `story.js`, then `node tools/build.js <topic>`, then **`node tools/check.js <topic>`** (free: finds unknown poses/characters, broken art, words that differ from `my-script.md`, bad timing). Fix every ✗ before showing the user anything.
+   If the user fills in `tools/story-brief-template.md`, follow it. The user can make a one-picture review sheet on the Mac with `node tools/contact-sheet.js <topic>` (writes `<topic>/preview/contact-sheet.png`).
 2. Check frames once: use a Playwright `browser_run_code_unsafe` script that loads `index.html` via `setContent`, sets `?render=1`, calls `__ENGINE.seek(t)`, takes screenshots, and puts them on ONE contact sheet. Read only the contact sheet, not every frame. Scripts must live in `.kiro/artifacts/screenshots/`. Never print huge tool output.
 3. Fix only real problems, rebuild, commit, push, open the PR, and send a short summary.
 4. When editing an existing video, change only the shots the user names, and don't recapture shots that didn't change.
