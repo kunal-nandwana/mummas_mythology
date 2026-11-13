@@ -26,7 +26,7 @@ Targets: 30 Shorts + 4 long videos a month, with his own voice. **Credits matter
 ## Owner's standing rules
 - When the owner confirms a change works ("good", "ok", "approved"), make it the **engine default** (engine/ + tools/ + `engine/API.md`), not a one-video tweak, so every future video gets it.
 - No intro, hook text or end card. Every video ends with the natural `ending` (default on).
-- Music = the owner's own track in `music/` (never generate new music unless he asks). Exception, asked for on Chandra: `music:'score'` = scene-by-scene generated score (`tools/make-score.js`). SFX stay soft and quiet.
+- Music = the owner's own track in `music/` by default. Exceptions he asked for: `music:'score'` (Chandra) and **`music:'scenes'` = scene sound library** (`music/scene-library/library.json`, `tools/scene-audio.js`): tag every shot `scene:'name'` (new names are auto-created + saved by build.js; reuse existing names for the same kind of scene), and use `focus:{at,sound,dur,duck}` on the 1-3 key moments so a dominant sound plays and the music steps back. Scene changes get a soft beep/tune, NEVER whoosh/whoop. Voice stays on top. SFX stay soft except `focus` sounds.
 - Voice sync issue? Ask for `<topic>/voice-report.md`, then add `rec:'m:ss.s'` to the wrong shot. Don't re-render or screenshot to debug sync.
 
 ## Credit saving (important)

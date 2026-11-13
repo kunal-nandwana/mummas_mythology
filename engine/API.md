@@ -11,14 +11,15 @@ VIDEO({ title, format:'short', target:72 /*sec*/, keywords:['..'],   // keywords
   // opening:N (silent montage) exists but the owner does NOT want an intro before the story: do not use it
   sfx:true,                        // sound effects are automatic; false = none
   music:'flute',                   // background music = owner's track in music/ (default: first file; 'flute' = any file whose name has 'flute'); false = none;
-                  // 'score' = music composed scene by scene from each shot's mood (own tune + own volume per scene, tools/make-score.js)
+                  // 'scenes' = SCENE SOUND LIBRARY (see below): every shot has scene:'name' with its own saved music, smooth cross-fades, key-moment ducking.
+                  // 'score' = older mood-only version (tools/make-score.js)
   ending:3.2,                      // natural finish (default): last scene holds + slow push-in, music fades, fade to black; 0 = stop at once
   handheld:.6, captionTop:400, captionChars:24, minShot:2.4, pace:13, audio:'file',
   shots:[ SHOT, ... ] })
 ```
 **SHOT**: `line` (exact user words), `dur` (fix length), `nocap`, `capTop` (use 640 if no characters), `cast:[CAST]`,
 `art` (flat scene) **or** layers `sky`/`far`/`mid`/`art`/`near` (parallax .3/.6/.85/1/1.4), `front` (drawn over actors),
-`title:{text,y,size,color,delay}`, `calli:{lines:[..],source,y,size,col,delay,gap,write,hold,glow,scrim}` (verse written in calligraphy), `sfx:[[secsIntoShot,'gong',vol]]` (extra sound effect), `rec:'0:31.8'` (pin this shot's start to that time in the owner's recording; use when voice-report.md shows a wrong start), `cam`, `fx`, `tr`, `trAt:[x,y]` (iris centre), `mood`, `shake:[start,dur,amp]`.
+`title:{text,y,size,color,delay}`, `calli:{lines:[..],source,y,size,col,delay,gap,write,hold,glow,scrim}` (verse written in calligraphy), `sfx:[[secsIntoShot,'gong',vol]]` (extra sound effect), `rec:'0:31.8'` (pin this shot's start to that time in the owner's recording; use when voice-report.md shows a wrong start), `cam`, `fx`, `tr`, `trAt:[x,y]` (iris centre), `mood`, `shake:[start,dur,amp]`, `scene:'name'` (which saved music this shot uses), `focus:{at,sound,dur,duck}` (dominant sound at the key moment; see "Scene sound library").
 All scene fields are functions: `art:()=>svg`.
 
 **CAST**: `{c:CHAR, x, y, s, flip, expr, talk:true, acts:[[t,'pose',dur?]...], props:{front,back}, walk:{from,dur,delay}, enter:{fade,delay,rise}, exit:{at,fade}, eyes:'closed', look:'up', tears:true, aura, gesture:false, with:{costume overrides}}`
@@ -62,7 +63,12 @@ cut fade glow whip zoom iris (+`trAt`) wipe flash dip
 calm joy hope anger sad shock divine. The background music also follows the mood (a little louder for hope/anger, a little quieter for sad); override with `music:0.6` on a shot. With `music:'score'` each mood also gets its OWN music (calm flute, joy plucks, hope harp, divine bells, sad bowed strings, shock drum+hush, anger drums) and volume (sad softest, anger loudest). Object form: `{base:'sad', vig:.3, ...}`
 
 ## Sound effects (automatic, original)
-Kept soft and quiet: whoosh (whip/wipe), shimmer (glow/iris), bell (entering a `divine` shot), one low thump on the hook. Extra: `sfx:[[1.2,'gong']]` on a shot. Names: whoosh boom hit gong bell shimmer tick riser. Preview: `node tools/sfx.js`.
+Scene changes get a soft BEEP / short tune (never a whoosh): `beepUp` (2 rising notes) into calm/joy/hope/divine shots, `beepDown` (2 falling notes) into sad/anger/shock shots, `beep` otherwise; `cfg.transitionSound:'none'` turns them off. Extra: `sfx:[[1.2,'gong']]` on a shot. Names: beep beepUp beepDown boom hit gong bell shimmer whoosh tick riser, and the dominant ones: slay emerge arrive noose revive kaal. Preview: `node tools/sfx.js`.
+
+## Scene sound library (music:'scenes')
+`music/scene-library/library.json` = saved music recipes (committed to GitHub). Each shot: `scene:'yamraj-arrives'`. Same name = same tune every time (Shiva's music returns when Shiva strikes again). No `scene:` = default of its `mood` (`mood-calm`, `mood-sad` ...). **A new scene name is created and saved automatically by `node tools/build.js`** (from its mood; edit the recipe in library.json to change it). List: `node tools/scene-audio.js list`; listen: `node tools/scene-audio.js preview`; make one by hand: `node tools/scene-audio.js new <name> <mood>`.
+Key moment: `focus:{at:1.65, sound:'slay', dur:2.6, duck:.22}` (also an array) = that dominant sound plays loud at `at` seconds into the shot while the music dips to `duck` (0.3 = 30 %) for `dur` s and swells back. Sounds land exactly on `at`. Use it for the 1-3 big moments of a video only.
+Balance (automatic): every scene is levelled to the same loudness, music sits ~10-12 dB under the voice and ducks a further ~6 dB while speaking; `--musicvol 1.3`/`0.7` on render.js to nudge.
 
 ## Opening montage
 (Owner dislikes it: not used.) `opening:N` + N shots with `art/cast/cam/tr` and NO `line` (0.8s each, or `dur`). Counts inside `target`. Plays with the hook, a riser, then a boom when narration starts. See `chandra-27-wives-short-form/story.js`.

@@ -80,13 +80,13 @@ VIDEO({
   target:70,
   keywords:['महादेव','यमराज','मार्कंडेय','16','शिवलिंग','काल-पाश','चिरयुवा','कालान्तक'],
   sfx:true,
-  music:'flute',
+  music:'scenes',   // scene sound library (music/scene-library/library.json): each shot's scene:'name' has its own saved music; focus:{} = dominant key-moment sound
   ending:3.2,
   handheld:.9, captionTop:400, captionChars:24, minShot:2.4, pace:13,
   shots:[
     /* 1: the killing blow. Yamraj raises his mace, Shiva hurls the trishul through him */
     {line:'महादेव ने एक बार यमराज का वध कर दिया था... पर क्यों? सिर्फ़ अपने 16 वर्षीय भक्त को बचाने के लिए!',
-     mood:'anger', fx:'embers', cam:{keys:[[0,300,640,1.0],[1.0,320,560,1.15],[1.55,260,550,1.3,'snap'],[2.1,240,550,1.42],[3.2,250,590,1.2],[5,320,580,1.12],[6.3,330,570,1.05]]},
+     scene:'shiva-slays-yamraj', mood:'anger', fx:'embers', cam:{keys:[[0,300,640,1.0],[1.0,320,560,1.15],[1.55,260,550,1.3,'snap'],[2.1,240,550,1.42],[3.2,250,590,1.2],[5,320,580,1.12],[6.3,330,570,1.05]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyRed)"/>`+divine(270,430,'#ff5a1c',1)+stormFlash(),
      far:()=>kailash(780,'#2a0f1c','#ff9a7a')+bolt(70,60,1.4,6)+bolt(450,90,1.1,8)+mist(760,.12),
      mid:()=>ground(780,'url(#gndW)','#a8432a')+buffalo(40,780,.9,false),
@@ -96,10 +96,10 @@ VIDEO({
        {c:DEVA,x:150,y:775,s:1.35,expr:'angry',with:YAMRAJ,props:{front:'mace'},acts:[[0,'carry'],[0.9,'armUp'],[1.7,{a:[20,70],b:[40,80],lean:-30,head:22,hand:'open'}],[2.6,{a:[10,60],b:[-20,50],lean:-42,drop:34,head:26,hand:'open'}]],exit:{at:3.3,fade:1.1}}
      ],
      front:()=>A('fadeout:1.7:.2',redEyes(150,775,1.35,false))+thrustTrishul(1.45,445,520,95),
-     shake:[1.65,1.0,13], sfx:[[1.65,'boom',.8],[1.7,'hit',.6]]},
+     shake:[1.65,1.0,13], focus:{at:1.65,sound:'slay',dur:2.6,duck:.22}},   // the trishul strike is THE sound here; the music steps back
     /* 2: Mrikandu's tapasya; Shiva appears and grants the boon (16 years) */
     {line:'उस भक्त का नाम था मार्कंडेय। उनके पिता ऋषि मृकंडु को महादेव से यह वरदान मिला था कि उन्हें एक बुद्धिमान और गुणी पुत्र प्राप्त होगा, लेकिन उसकी आयु केवल 16 वर्ष की होगी।',
-     mood:'hope', tr:'fade', fx:'petals', cam:{keys:[[0,200,700,1.25],[4,300,600,1.1],[7,360,640,1.25],[10.8,300,700,1.05]]},
+     scene:'rishi-tapasya', mood:'hope', tr:'fade', fx:'petals', cam:{keys:[[0,200,700,1.25],[4,300,600,1.1],[7,360,640,1.25],[10.8,300,700,1.05]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyW)"/>`+clouds()+A('pulse:1.2',`<circle cx="400" cy="400" r="190" fill="url(#gw)" opacity=".5"/>`),
      far:()=>hills(660,40,'#6a7f4a',40),
      mid:()=>ground(770,'url(#gnd)','#7a8f5a')+peepal(70,720,1.1)+hut(450,770,1.0),
@@ -112,7 +112,7 @@ VIDEO({
      title:{text:'16',y:230,size:96,color:'#ffe9a8',delay:8.4}},
     /* 3: years pass; the boy grows into a deep devotee (sun crosses, offerings) */
     {line:'समय के साथ मार्कंडेय महादेव के परम भक्त बन गए।',
-     mood:'calm', tr:'fade', fx:'petals', cam:{keys:[[0,200,760,1.35],[3.3,330,720,1.1]]},
+     scene:'bhakt-devotion', mood:'calm', tr:'fade', fx:'petals', cam:{keys:[[0,200,760,1.35],[3.3,330,720,1.1]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyDawn)"/>`+A('orbit:260:230:270:500:7',`<circle r="52" fill="url(#gw)"/><circle r="26" fill="#ffd98a"/>`),
      far:()=>hills(660,40,'#6a7f4a',40)+godRays(20)+temple(430,700,.8,'#7a5a4a'),
      mid:()=>ground(770,'url(#gnd)','#7a8f5a')+peepal(70,720,1.1)+mist(740,.07),
@@ -122,7 +122,7 @@ VIDEO({
      ]},
     /* 4: night; Yamraj thunders in with his buffalo and a giant shadow */
     {line:'और जब वे 16 वर्ष के हुए, तो स्वयं मृत्यु के देवता यमराज उनके प्राण लेने आ पहुँचे।',
-     mood:'shock', tr:'dip', fx:'dust', cam:{keys:[[0,200,650,1.15],[2.2,300,640,1.0],[4,430,470,1.45,'snap'],[5.5,430,470,1.6]]},
+     scene:'yamraj-arrives', mood:'shock', tr:'dip', fx:'dust', cam:{keys:[[0,200,650,1.15],[2.2,300,640,1.0],[4,430,470,1.45,'snap'],[5.5,430,470,1.6]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyN)"/>`+stars(60,500)+stormFlash(),
      far:()=>hills(640,40,'#1d1d40',140)+temple(110,690,1.0)+bolt(120,40,1.5,7)+bolt(470,20,1.2,5)+mist(740,.1),
      mid:()=>ground(790,'url(#gnd)','#4a3e5a')+A('walk:200:2.6:.2',buffalo(520,790,.9,true)),
@@ -131,10 +131,10 @@ VIDEO({
        {c:BRAHMIN,x:140,y:830,s:.78,expr:'serene',with:BOY,acts:[[0,'kneelPray'],[3.3,'kneelPray+recoil']],eyes:'closed',aura:'gw'},
        {c:DEVA,x:450,y:795,s:1.5,flip:true,expr:'angry',with:YAMRAJ,props:{front:'mace'},acts:[[0,'carry'],[3.2,'accuse']],walk:{from:200,dur:2.6,delay:.2}}
      ],
-     front:()=>A('fadein:2.8:.5',redEyes(450,795,1.5,true)), shake:[2.7,.6,6], sfx:[[2.8,'boom',.5]]},
+     front:()=>A('fadein:2.8:.5',redEyes(450,795,1.5,true)), shake:[2.7,.6,6], focus:{at:2.8,sound:'arrive',dur:2.4,duck:.3}},
     /* 5: terrified, Markandeya clings to the Shivling (a real hug) */
     {line:'भयभीत होकर मार्कंडेय शिवलिंग से लिपट गए और महादेव की प्रार्थना करने लगे।',
-     mood:'sad', tr:'cut', cam:{keys:[[0,420,640,1.1],[1.2,300,690,1.4,'snap'],[4.8,300,700,1.9]]},
+     scene:'markandeya-prayer', mood:'sad', tr:'cut', cam:{keys:[[0,420,640,1.1],[1.2,300,690,1.4,'snap'],[4.8,300,700,1.9]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyN)"/>`+stars(60,500)+stormFlash(),
      far:()=>hills(640,40,'#1d1d40',140)+temple(120,690,1.0)+bolt(60,30,1.3,7)+mist(740,.1),
      mid:()=>ground(790,'url(#gnd)','#4a3e5a'),
@@ -144,7 +144,7 @@ VIDEO({
      ]},
     /* 6: Yamraj throws the Kaal-Pasha; it loops round both boy and Shivling */
     {line:'तभी यमराज ने मार्कंडेय के गले में अपना काल-पाश फेंका, जो मार्कंडेय के साथ-साथ शिवलिंग से भी जा लिपटा।',
-     mood:'shock', tr:'whip', fx:'dust', cam:{keys:[[0,420,620,1.0],[1.4,460,640,1.4],[2.2,320,690,1.6,'snap'],[6.5,320,690,1.9]]},
+     scene:'kaal-pash', mood:'shock', tr:'whip', fx:'dust', cam:{keys:[[0,420,620,1.0],[1.4,460,640,1.4],[2.2,320,690,1.6,'snap'],[6.5,320,690,1.9]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyN)"/>`+stars(60,500)+stormFlash(),
      far:()=>hills(640,40,'#1d1d40',140)+temple(120,690,1.0)+bolt(80,30,1.3,6)+mist(740,.1),
      mid:()=>ground(790,'url(#gnd)','#4a3e5a')+buffalo(540,790,.8,true),
@@ -156,10 +156,10 @@ VIDEO({
      front:()=>redEyes(480,795,1.35,true)+
        A('slide:-190:0:.35:1.5',`<path d="M420 640 Q360 600 300 650" stroke="#c0141c" stroke-width="7" fill="none" stroke-linecap="round" style="filter:drop-shadow(0 0 6px #ff2a2a)"/>`)+
        A('pop:1.85',A('pulse:5',`<g fill="none" stroke="#d01822" stroke-width="9" style="filter:drop-shadow(0 0 8px #ff3a2a)"><ellipse cx="318" cy="680" rx="104" ry="52" transform="rotate(-12 318 680)"/><ellipse cx="318" cy="690" rx="98" ry="46" transform="rotate(-12 318 690)" stroke-width="4"/></g>`)),
-     shake:[1.8,.6,8], sfx:[[1.9,'hit',.5]]},
+     shake:[1.8,.6,8], focus:{at:1.9,sound:'noose',dur:1.5,duck:.4}},
     /* 7: the Shivling bursts open, Mahadev emerges and strikes Yamraj down */
     {line:'यह देखकर महादेव इतने क्रोधित हुए कि वे स्वयं शिवलिंग से प्रकट हुए और यमराज का वध कर दिया।',
-     mood:'anger', tr:'flash', fx:'sparks', cam:{keys:[[0,320,700,1.3],[1.6,310,620,1.0],[3.4,340,600,1.05],[4.2,400,620,1.25,'snap'],[6,370,600,1.1]]},
+     scene:'shiva-slays-yamraj', mood:'anger', tr:'flash', fx:'sparks', cam:{keys:[[0,320,700,1.3],[1.6,310,620,1.0],[3.4,340,600,1.05],[4.2,400,620,1.25,'snap'],[6,370,600,1.1]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyRed)"/>`+divine(320,640,'#ff6a1c',1)+stormFlash(),
      far:()=>hills(640,40,'#2a0f1c',140),
      mid:()=>ground(790,'url(#gndW)','#a8432a'),
@@ -171,10 +171,10 @@ VIDEO({
      ],
      front:()=>flyTrishul(3.1,430,620,-300)+
        A('pop:3.7',A('fadeout:4.2:.8',`<circle cx="430" cy="640" r="150" fill="url(#gw)"/><circle cx="430" cy="640" r="30" fill="#fff"/>`)),
-     shake:[3.7,.9,12], sfx:[[.4,'boom',.7],[3.7,'hit',.7]]},
+     shake:[3.7,.9,12], focus:[{at:1.1,sound:'emerge',dur:2.0,duck:.3},{at:3.7,sound:'slay',dur:2.6,duck:.22}]},   // Shiva bursts out, then the killing blow
     /* 8: who will run death? Souls wait around Earth; devas beg Mahadev */
     {line:'लेकिन यमराज के बिना सृष्टि में मृत्यु का संचालन कौन करता? इसलिए सभी देवताओं ने महादेव से प्रार्थना की।',
-     mood:'sad', tr:'dip', cam:{keys:[[0,270,260,1.6],[2.6,270,330,1.4],[3.6,270,560,1.0],[6.6,270,580,1.12]]},
+     scene:'devas-plead', mood:'sad', tr:'dip', cam:{keys:[[0,270,260,1.6],[2.6,270,330,1.4],[3.6,270,560,1.0],[6.6,270,580,1.12]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyDiv)"/>`+stars(70,480)+divine(270,520,'#ffd27a',1),
      far:()=>A('bob:5:.15',souls(270,240))+kailash(790,'#15122e','#9a96c0'),
      mid:()=>ground(790,'url(#gnd)','#6a5e8a')+mist(770,.1),
@@ -187,7 +187,7 @@ VIDEO({
      ]},
     /* 9: Yamraj revived, Markandeya blessed with eternal youth */
     {line:'तब महादेव ने यमराज को पुनः जीवित कर दिया और अपने भक्त मार्कंडेय को चिरयुवा, यानी अमर यौवन का आशीर्वाद दिया।',
-     mood:'divine', tr:'glow', fx:'petals', cam:{keys:[[0,270,560,1.0],[2,170,640,1.25],[4.2,330,600,1.1],[5.5,430,640,1.55],[7,430,640,1.7]]},
+     scene:'revival-blessing', mood:'divine', tr:'glow', focus:{at:.7,sound:'revive',dur:3.4,duck:.5}, fx:'petals', cam:{keys:[[0,270,560,1.0],[2,170,640,1.25],[4.2,330,600,1.1],[5.5,430,640,1.55],[7,430,640,1.7]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyDiv)"/>`+divine(280,420,'#ffe9a8',1),
      far:()=>kailash(790,'#2c2656','#fff2d0')+godRays(300),
      mid:()=>ground(790,'url(#gnd)','#9a8aba')+lingam(60,800,.7,'gw')+mist(770,.08),
@@ -200,7 +200,7 @@ VIDEO({
      ]},
     /* 10a: the source: Brahma Purana manuscript */
     {line:'ब्रह्म पुराण के अध्याय 35, श्लोक 11 में महादेव की इसी रूप में स्तुति की गई है:',
-     mood:'divine', tr:'fade', capTop:660, fx:'petals', cam:{keys:[[0,270,560,1.0],[4,270,520,1.18]]},
+     scene:'shloka-intro', mood:'divine', tr:'fade', capTop:660, fx:'petals', cam:{keys:[[0,270,560,1.0],[4,270,520,1.18]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyDiv)"/>`+stars(80,500)+divine(270,470,'#ffd27a',1),
      far:()=>kailash(800,'#2c2656','#fff2d0')+mist(780,.1),
      mid:()=>ground(850,'url(#gnd)','#9a8aba')+flameDiya(120,900)+flameDiya(420,900),
@@ -209,7 +209,7 @@ VIDEO({
         [[90,420],[450,440],[110,610],[440,600]].map(([x,y],k)=>A('flick:'+(2+k*.5),sparkle(x,y,1.3))).join('')},
     /* 10b: the shloka itself, written line by line inside a golden frame */
     {line:'"नमः कालान्तकायाथ नमो मन्दरवासिने। हिरण्यकवचायैव नमः केयूरधारिणे॥"',
-     mood:'divine', tr:'glow', nocap:true, fx:'petals', dur:9, cam:{keys:[[0,270,470,1.0],[8,270,500,1.1]]},
+     scene:'shloka-chant', mood:'divine', tr:'glow', nocap:true, fx:'petals', dur:9, cam:{keys:[[0,270,470,1.0],[8,270,500,1.1]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyDiv)"/>`+stars(80,500)+divine(270,330,'#ffd27a',1),
      far:()=>kailash(820,'#2c2656','#fff2d0')+mist(790,.1),
      mid:()=>ground(850,'url(#gnd)','#9a8aba')+flameDiya(70,905)+flameDiya(470,905)+godRays(120),
@@ -220,7 +220,7 @@ VIDEO({
      calli:{lines:['नमः कालान्तकायाथ','नमो मन्दरवासिने।','हिरण्यकवचायैव','नमः केयूरधारिणे॥'],source:'ब्रह्म पुराण 35.11',y:230,size:42,col:'#ffe9a8',delay:.6,gap:1.6,write:1.3,hold:0,glow:true,scrim:false}},
     /* 11: Kaalaantak: Shiva stands before the wheel of Time as it shatters */
     {line:"यहाँ 'कालान्तक' का अर्थ है—स्वयं काल यानी मृत्यु का विनाश करने वाले! -",
-     mood:'divine', tr:'glow', cam:{keys:[[0,270,560,1.0],[2.4,270,520,1.2],[4.4,270,470,1.4]]},
+     scene:'kaalantak-glory', mood:'divine', tr:'glow', focus:{at:.5,sound:'kaal',dur:2.2,duck:.4}, cam:{keys:[[0,270,560,1.0],[2.4,270,520,1.2],[4.4,270,470,1.4]]},
      sky:()=>`<rect width="540" height="960" fill="url(#skyDiv)"/>`+divine(270,520,'#ffb347',1),
      far:()=>kaalChakra(270,520,200),
      mid:()=>ground(790,'url(#gnd)','#9a8aba'),

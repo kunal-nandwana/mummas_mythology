@@ -6,3 +6,5 @@ out/
 *.wav
 music/*
 !music/README.md
+!music/scene-library/
+music/scene-library/*.wav
