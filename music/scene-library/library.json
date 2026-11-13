@@ -1,79 +1,913 @@
 {
   "_about": "Scene sound library. One entry = one scene's music recipe. Used with music:'scenes' and shot field scene:'name' in story.js. New scene names get a recipe created and saved here automatically (tools/scene-audio.js). Listen: node tools/scene-audio.js preview",
   "cues": {
-    "mood-calm":   { "mood": "calm",   "desc": "default for calm scenes: soft pad + gentle bansuri", "level": [0.70, 0.78],
-      "pad": { "chords": "maj", "seg": 8, "amp": 0.50 },
-      "melody": { "kind": "flute", "scale": "MAJ", "oct": 12, "amp": 0.17, "note": [1.6, 3], "rest": [1.8, 4], "phrase": [3, 4], "lead": 0.8 } },
-    "mood-joy":    { "mood": "joy",    "desc": "default for happy scenes: light plucks + soft shaker", "level": [0.95, 1.0],
-      "pad": { "chords": "maj", "seg": 6, "amp": 0.30 },
-      "arp": { "scale": "MAJ", "oct": 12, "pattern": [0, 2, 4, 5, 4, 2, 3, 1], "step": 0.30, "amp": 0.14, "ring": 0.7, "lead": 0.2 },
-      "shaker": { "step": 0.30, "amp": 0.07 },
-      "drums": { "step": 1.2, "pat": [0.26, 0.16], "amp": 1, "f": [-12], "len": 0.4 },
-      "melody": { "kind": "flute", "scale": "MAJ", "oct": 24, "amp": 0.09, "note": [0.5, 1], "rest": [1, 2.5], "phrase": [3, 4], "lead": 1.2 } },
-    "mood-hope":   { "mood": "hope",   "desc": "default for hopeful scenes: rising harp + flute", "level": [0.80, 1.12],
-      "pad": { "chords": "maj", "seg": 7, "amp": 0.52, "rich": true },
-      "bells": { "every": 99, "notes": [24], "amp": 0.07, "len": 3, "start": 0.1 },
-      "arp": { "scale": "MAJ", "oct": 12, "pattern": [0, 1, 2, 3, 4, 5, 6, 7, 4, 5], "step": 0.5, "amp": 0.13, "ring": 1.4, "lead": 0.4 },
-      "melody": { "kind": "flute", "scale": "MAJ", "oct": 12, "amp": 0.20, "note": [1.2, 2.4], "rest": [0.6, 1.6], "phrase": [3, 4], "rise": 0.7, "lead": 0.9 } },
-    "mood-divine": { "mood": "divine", "desc": "default for divine scenes: choir-like pad + temple bells", "level": [0.72, 0.84],
-      "pad": { "chords": "divine", "seg": 9, "amp": 0.60, "rich": true },
-      "bells": { "every": 3.4, "notes": [24, 12, 19], "amp": 0.12, "len": 5, "start": 0.1 },
-      "arp": { "scale": "MAJ", "oct": 12, "pattern": [0, 2, 4, 2, 5, 4], "step": 0.9, "amp": 0.08, "ring": 2.2, "lead": 0.6 } },
-    "mood-sad":    { "mood": "sad",    "desc": "default for sad scenes: slow bowed strings, sparse", "level": [0.55, 0.38],
-      "pad": { "chords": "min", "seg": 9, "amp": 0.42 },
-      "melody": { "kind": "bow", "scale": "MIN", "oct": 0, "amp": 0.075, "note": [2.4, 4], "rest": [2, 3.5], "phrase": [2, 3], "start": 4, "lead": 0.6 } },
-    "mood-shock":  { "mood": "shock",  "desc": "default for shock: one low drum + bell, then hush", "level": [0.95, 0.40],
-      "pad": { "chords": "fifth", "seg": 5, "amp": 0.22 },
-      "hit": { "drum": { "f": -24, "amp": 0.70, "len": 0.9 }, "bell": { "f": -12, "amp": 0.22, "len": 4.5 } } },
-    "mood-anger":  { "mood": "anger",  "desc": "default for anger: steady soft drum + strong bowed line", "level": [1.05, 1.2],
-      "pad": { "chords": "min", "seg": 5, "amp": 0.42 },
-      "drums": { "step": 0.30, "pat": [1, 0, 0, 0.5, 0, 0.6, 0, 0.45], "amp": 0.32, "f": [-17, -14], "len": 0.45 },
-      "melody": { "kind": "bow", "scale": "MIN", "oct": 12, "amp": 0.095, "note": [0.55, 1.1], "rest": [0.2, 0.8], "phrase": [3, 5], "rise": 0.4, "start": 3, "lead": 0.2, "gap": 1.0 } },
-
-    "shiva-slays-yamraj": { "mood": "anger", "desc": "Mahadev's fury: damaru drum roll over driving drums + strong bowed line. Comes back whenever Shiva strikes.", "level": [1.0, 1.15],
-      "pad": { "chords": "min", "seg": 5, "amp": 0.36 },
-      "drums": { "step": 0.30, "pat": [1, 0, 0.5, 0.5, 0, 0.6, 0, 0.45], "amp": 0.34, "f": [-17, -14], "len": 0.45 },
-      "roll": { "every": 3.6, "count": 9, "amp": 0.14, "f": 5 },
-      "melody": { "kind": "bow", "scale": "MIN", "oct": 12, "amp": 0.10, "note": [0.55, 1.1], "rest": [0.2, 0.8], "phrase": [3, 5], "rise": 0.4, "start": 3, "lead": 0.2, "gap": 1.0 } },
-    "rishi-tapasya": { "mood": "hope", "desc": "Mrikandu's prayer and the boon: warm pad, flute, slow harp, one far temple bell", "level": [0.70, 0.95],
-      "pad": { "chords": "maj", "seg": 8, "amp": 0.46, "rich": true },
-      "bells": { "every": 6.5, "notes": [24], "amp": 0.06, "len": 4, "start": 0.5 },
-      "arp": { "scale": "MAJ", "oct": 12, "pattern": [0, 2, 4, 2], "step": 0.8, "amp": 0.07, "ring": 1.8, "lead": 0.6 },
-      "melody": { "kind": "flute", "scale": "MAJ", "oct": 12, "amp": 0.17, "note": [1.8, 3], "rest": [1.4, 3], "phrase": [3, 4], "lead": 0.8 } },
-    "bhakt-devotion": { "mood": "calm", "desc": "Markandeya grows into a devotee: peaceful bansuri with distant temple bells", "level": [0.70, 0.85],
-      "pad": { "chords": "open", "seg": 8, "amp": 0.42 },
-      "bells": { "every": 7, "notes": [12, 19], "amp": 0.05, "len": 4, "start": 1 },
-      "melody": { "kind": "flute", "scale": "MAJ", "oct": 12, "amp": 0.16, "note": [1.6, 3], "rest": [1.8, 3.6], "phrase": [3, 4], "lead": 0.6 } },
-    "yamraj-arrives": { "mood": "shock", "desc": "The death-god arrives: slow heartbeat drum, low hush, one deep bell. Not horror, just heavy.", "level": [1.0, 0.60],
-      "pad": { "chords": "deep", "seg": 6, "amp": 0.30 },
-      "drums": { "step": 0.62, "pat": [1, 0.55, 0, 0, 0, 0], "amp": 0.42, "f": [-24], "len": 0.6 },
-      "hit": { "bell": { "f": -12, "amp": 0.18, "len": 5 } } },
-    "markandeya-prayer": { "mood": "sad", "desc": "The frightened boy prays: slow bowed strings, very sparse, one soft bell", "level": [0.60, 0.45],
-      "pad": { "chords": "min", "seg": 9, "amp": 0.40 },
-      "bells": { "every": 8, "notes": [19], "amp": 0.04, "len": 5, "start": 2 },
-      "melody": { "kind": "bow", "scale": "MIN", "oct": 0, "amp": 0.08, "note": [2.4, 4], "rest": [2, 3.5], "phrase": [2, 3], "start": 4, "lead": 0.6 } },
-    "kaal-pash": { "mood": "shock", "desc": "The noose of Time flies: quicker heartbeat, low drum hit, then it fades to hush", "level": [0.95, 0.45],
-      "pad": { "chords": "deep", "seg": 5, "amp": 0.24 },
-      "drums": { "step": 0.45, "pat": [1, 0.5, 0, 0], "amp": 0.40, "f": [-22], "len": 0.5 },
-      "hit": { "drum": { "f": -24, "amp": 0.55, "len": 0.9 } } },
-    "devas-plead": { "mood": "sad", "desc": "The gods beg Mahadev: soft strings, low pad, sparse bells", "level": [0.55, 0.50],
-      "pad": { "chords": "min", "seg": 8, "amp": 0.38 },
-      "bells": { "every": 6, "notes": [12], "amp": 0.05, "len": 4, "start": 1.5 },
-      "melody": { "kind": "bow", "scale": "MIN", "oct": 0, "amp": 0.07, "note": [2.2, 3.6], "rest": [2, 3.2], "phrase": [2, 3], "start": 3, "lead": 0.8 } },
-    "revival-blessing": { "mood": "divine", "desc": "Yamraj lives again, Markandeya blessed: glowing choir pad, bells, rising harp, hopeful flute", "level": [0.80, 1.12],
-      "pad": { "chords": "divine", "seg": 9, "amp": 0.58, "rich": true },
-      "bells": { "every": 3.2, "notes": [24, 19, 12], "amp": 0.12, "len": 5, "start": 0.2 },
-      "arp": { "scale": "MAJ", "oct": 12, "pattern": [0, 1, 2, 3, 4, 5, 6, 7], "step": 0.45, "amp": 0.10, "ring": 2.0, "lead": 0.5 },
-      "melody": { "kind": "flute", "scale": "MAJ", "oct": 12, "amp": 0.15, "note": [1.4, 2.6], "rest": [0.8, 1.8], "phrase": [3, 4], "rise": 0.6, "lead": 1.0 } },
-    "shloka-intro": { "mood": "divine", "desc": "Before the verse: still temple air, slow bells, nothing that competes with the voice", "level": [0.65, 0.75],
-      "pad": { "chords": "divine", "seg": 9, "amp": 0.50, "rich": true },
-      "bells": { "every": 4.5, "notes": [12, 24], "amp": 0.10, "len": 5, "start": 0.4 } },
-    "shloka-chant": { "mood": "divine", "desc": "While the shloka is recited: drone and pad only, very quiet", "level": [0.50, 0.50],
-      "pad": { "chords": "divine", "seg": 9, "amp": 0.40 },
-      "bells": { "every": 6, "notes": [12], "amp": 0.07, "len": 6, "start": 1 } },
-    "kaalantak-glory": { "mood": "divine", "desc": "Shiva as destroyer of Time: deep gong-like bells over a low glowing pad", "level": [0.70, 0.95],
-      "pad": { "chords": "deep", "seg": 9, "amp": 0.52, "rich": true },
-      "bells": { "every": 3.0, "notes": [0, 7, 12], "amp": 0.13, "len": 6, "start": 0.3 },
-      "hit": { "bell": { "f": -12, "amp": 0.20, "len": 6 } } }
+    "mood-calm": {
+      "mood": "calm",
+      "desc": "default for calm scenes: soft pad + gentle bansuri",
+      "level": [0.7, 0.78],
+      "pad": {
+        "chords": "maj",
+        "seg": 8,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.6, 3],
+        "rest": [1.8, 4],
+        "phrase": [3, 4],
+        "lead": 0.8
+      }
+    },
+    "mood-joy": {
+      "mood": "joy",
+      "desc": "default for happy scenes: light plucks + soft shaker",
+      "level": [0.95, 1],
+      "pad": {
+        "chords": "maj",
+        "seg": 6,
+        "amp": 0.3
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 5, 4, 2, 3, 1],
+        "step": 0.3,
+        "amp": 0.14,
+        "ring": 0.7,
+        "lead": 0.2
+      },
+      "shaker": {
+        "step": 0.3,
+        "amp": 0.07
+      },
+      "drums": {
+        "step": 1.2,
+        "pat": [0.26, 0.16],
+        "amp": 1,
+        "f": [-12],
+        "len": 0.4
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 24,
+        "amp": 0.09,
+        "note": [0.5, 1],
+        "rest": [1, 2.5],
+        "phrase": [3, 4],
+        "lead": 1.2
+      }
+    },
+    "mood-hope": {
+      "mood": "hope",
+      "desc": "default for hopeful scenes: rising harp + flute",
+      "level": [0.8, 1.12],
+      "pad": {
+        "chords": "maj",
+        "seg": 7,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 99,
+        "notes": [24],
+        "amp": 0.07,
+        "len": 3,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 1, 2, 3, 4, 5, 6, 7, 4, 5],
+        "step": 0.5,
+        "amp": 0.13,
+        "ring": 1.4,
+        "lead": 0.4
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.2,
+        "note": [1.2, 2.4],
+        "rest": [0.6, 1.6],
+        "phrase": [3, 4],
+        "rise": 0.7,
+        "lead": 0.9
+      }
+    },
+    "mood-divine": {
+      "mood": "divine",
+      "desc": "default for divine scenes: choir-like pad + temple bells",
+      "level": [0.72, 0.84],
+      "pad": {
+        "chords": "divine",
+        "seg": 9,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [24, 12, 19],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 2, 5, 4],
+        "step": 0.9,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      }
+    },
+    "mood-sad": {
+      "mood": "sad",
+      "desc": "default for sad scenes: slow bowed strings, sparse",
+      "level": [0.55, 0.38],
+      "pad": {
+        "chords": "min",
+        "seg": 9,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "bow",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.075,
+        "note": [2.4, 4],
+        "rest": [2, 3.5],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      }
+    },
+    "mood-shock": {
+      "mood": "shock",
+      "desc": "default for shock: one low drum + bell, then hush",
+      "level": [0.95, 0.4],
+      "pad": {
+        "chords": "fifth",
+        "seg": 5,
+        "amp": 0.22
+      },
+      "hit": {
+        "drum": {
+          "f": -24,
+          "amp": 0.7,
+          "len": 0.9
+        },
+        "bell": {
+          "f": -12,
+          "amp": 0.22,
+          "len": 4.5
+        }
+      }
+    },
+    "mood-anger": {
+      "mood": "anger",
+      "desc": "default for anger: steady soft drum + strong bowed line",
+      "level": [1.05, 1.2],
+      "pad": {
+        "chords": "min",
+        "seg": 5,
+        "amp": 0.42
+      },
+      "drums": {
+        "step": 0.3,
+        "pat": [1, 0, 0, 0.5, 0, 0.6, 0, 0.45],
+        "amp": 0.32,
+        "f": [-17, -14],
+        "len": 0.45
+      },
+      "melody": {
+        "kind": "bow",
+        "scale": "MIN",
+        "oct": 12,
+        "amp": 0.095,
+        "note": [0.55, 1.1],
+        "rest": [0.2, 0.8],
+        "phrase": [3, 5],
+        "rise": 0.4,
+        "start": 3,
+        "lead": 0.2,
+        "gap": 1
+      }
+    },
+    "shiva-slays-yamraj": {
+      "mood": "anger",
+      "desc": "Mahadev's fury: damaru drum roll over driving drums + strong bowed line. Comes back whenever Shiva strikes.",
+      "level": [1, 1.15],
+      "pad": {
+        "chords": "min",
+        "seg": 5,
+        "amp": 0.36
+      },
+      "drums": {
+        "step": 0.3,
+        "pat": [1, 0, 0.5, 0.5, 0, 0.6, 0, 0.45],
+        "amp": 0.34,
+        "f": [-17, -14],
+        "len": 0.45
+      },
+      "roll": {
+        "every": 3.6,
+        "count": 9,
+        "amp": 0.14,
+        "f": 5
+      },
+      "melody": {
+        "kind": "bow",
+        "scale": "MIN",
+        "oct": 12,
+        "amp": 0.1,
+        "note": [0.55, 1.1],
+        "rest": [0.2, 0.8],
+        "phrase": [3, 5],
+        "rise": 0.4,
+        "start": 3,
+        "lead": 0.2,
+        "gap": 1
+      }
+    },
+    "rishi-tapasya": {
+      "mood": "hope",
+      "desc": "Mrikandu's prayer and the boon: warm pad, flute, slow harp, one far temple bell",
+      "level": [0.7, 0.95],
+      "pad": {
+        "chords": "maj",
+        "seg": 8,
+        "amp": 0.46,
+        "rich": true
+      },
+      "bells": {
+        "every": 6.5,
+        "notes": [24],
+        "amp": 0.06,
+        "len": 4,
+        "start": 0.5
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 2],
+        "step": 0.8,
+        "amp": 0.07,
+        "ring": 1.8,
+        "lead": 0.6
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.8, 3],
+        "rest": [1.4, 3],
+        "phrase": [3, 4],
+        "lead": 0.8
+      }
+    },
+    "bhakt-devotion": {
+      "mood": "calm",
+      "desc": "Markandeya grows into a devotee: peaceful bansuri with distant temple bells",
+      "level": [0.7, 0.85],
+      "pad": {
+        "chords": "open",
+        "seg": 8,
+        "amp": 0.42
+      },
+      "bells": {
+        "every": 7,
+        "notes": [12, 19],
+        "amp": 0.05,
+        "len": 4,
+        "start": 1
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.16,
+        "note": [1.6, 3],
+        "rest": [1.8, 3.6],
+        "phrase": [3, 4],
+        "lead": 0.6
+      }
+    },
+    "yamraj-arrives": {
+      "mood": "shock",
+      "desc": "The death-god arrives: slow heartbeat drum, low hush, one deep bell. Not horror, just heavy.",
+      "level": [1, 0.6],
+      "pad": {
+        "chords": "deep",
+        "seg": 6,
+        "amp": 0.3
+      },
+      "drums": {
+        "step": 0.62,
+        "pat": [1, 0.55, 0, 0, 0, 0],
+        "amp": 0.42,
+        "f": [-24],
+        "len": 0.6
+      },
+      "hit": {
+        "bell": {
+          "f": -12,
+          "amp": 0.18,
+          "len": 5
+        }
+      }
+    },
+    "markandeya-prayer": {
+      "mood": "sad",
+      "desc": "The frightened boy prays: slow bowed strings, very sparse, one soft bell",
+      "level": [0.6, 0.45],
+      "pad": {
+        "chords": "min",
+        "seg": 9,
+        "amp": 0.4
+      },
+      "bells": {
+        "every": 8,
+        "notes": [19],
+        "amp": 0.04,
+        "len": 5,
+        "start": 2
+      },
+      "melody": {
+        "kind": "bow",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.08,
+        "note": [2.4, 4],
+        "rest": [2, 3.5],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      }
+    },
+    "kaal-pash": {
+      "mood": "shock",
+      "desc": "The noose of Time flies: quicker heartbeat, low drum hit, then it fades to hush",
+      "level": [0.95, 0.45],
+      "pad": {
+        "chords": "deep",
+        "seg": 5,
+        "amp": 0.24
+      },
+      "drums": {
+        "step": 0.45,
+        "pat": [1, 0.5, 0, 0],
+        "amp": 0.4,
+        "f": [-22],
+        "len": 0.5
+      },
+      "hit": {
+        "drum": {
+          "f": -24,
+          "amp": 0.55,
+          "len": 0.9
+        }
+      }
+    },
+    "devas-plead": {
+      "mood": "sad",
+      "desc": "The gods beg Mahadev: soft strings, low pad, sparse bells",
+      "level": [0.55, 0.5],
+      "pad": {
+        "chords": "min",
+        "seg": 8,
+        "amp": 0.38
+      },
+      "bells": {
+        "every": 6,
+        "notes": [12],
+        "amp": 0.05,
+        "len": 4,
+        "start": 1.5
+      },
+      "melody": {
+        "kind": "bow",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.07,
+        "note": [2.2, 3.6],
+        "rest": [2, 3.2],
+        "phrase": [2, 3],
+        "start": 3,
+        "lead": 0.8
+      }
+    },
+    "revival-blessing": {
+      "mood": "divine",
+      "desc": "Yamraj lives again, Markandeya blessed: glowing choir pad, bells, rising harp, hopeful flute",
+      "level": [0.8, 1.12],
+      "pad": {
+        "chords": "divine",
+        "seg": 9,
+        "amp": 0.58,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.2,
+        "notes": [24, 19, 12],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.2
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 1, 2, 3, 4, 5, 6, 7],
+        "step": 0.45,
+        "amp": 0.1,
+        "ring": 2,
+        "lead": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.15,
+        "note": [1.4, 2.6],
+        "rest": [0.8, 1.8],
+        "phrase": [3, 4],
+        "rise": 0.6,
+        "lead": 1
+      }
+    },
+    "shloka-intro": {
+      "mood": "divine",
+      "desc": "Before the verse: still temple air, slow bells, nothing that competes with the voice",
+      "level": [0.65, 0.75],
+      "pad": {
+        "chords": "divine",
+        "seg": 9,
+        "amp": 0.5,
+        "rich": true
+      },
+      "bells": {
+        "every": 4.5,
+        "notes": [12, 24],
+        "amp": 0.1,
+        "len": 5,
+        "start": 0.4
+      }
+    },
+    "shloka-chant": {
+      "mood": "divine",
+      "desc": "While the shloka is recited: drone and pad only, very quiet",
+      "level": [0.5, 0.5],
+      "pad": {
+        "chords": "divine",
+        "seg": 9,
+        "amp": 0.4
+      },
+      "bells": {
+        "every": 6,
+        "notes": [12],
+        "amp": 0.07,
+        "len": 6,
+        "start": 1
+      }
+    },
+    "kaalantak-glory": {
+      "mood": "divine",
+      "desc": "Shiva as destroyer of Time: deep gong-like bells over a low glowing pad",
+      "level": [0.7, 0.95],
+      "pad": {
+        "chords": "deep",
+        "seg": 9,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 3,
+        "notes": [0, 7, 12],
+        "amp": 0.13,
+        "len": 6,
+        "start": 0.3
+      },
+      "hit": {
+        "bell": {
+          "f": -12,
+          "amp": 0.2,
+          "len": 6
+        }
+      }
+    },
+    "mahakal-question": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"mahakal-question\" (divine): क्या आप जानते हैं कि भगवान शिव को महाकाल क्यों कहा. Edit this recipe in library.json to change it.",
+      "level": [0.759, 0.87],
+      "pad": {
+        "chords": "open",
+        "seg": 7,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [24],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 2],
+        "step": 1.013,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "avanti-city": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"avanti-city\" (calm): यह कथा प्राचीन उज्जैन की है, जिसे उस समय अवंती नगर. Edit this recipe in library.json to change it.",
+      "level": [0.736, 0.801],
+      "pad": {
+        "chords": "maj",
+        "seg": 9,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.791, 2.646],
+        "rest": [1.986, 3.526],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "vedpriya-puja": {
+      "mood": "hope",
+      "desc": "Auto-created for scene \"vedpriya-puja\" (hope): वहाँ वेदप्रिय नाम के एक ब्राह्मण अपने पुत्रों के स. Edit this recipe in library.json to change it.",
+      "level": [0.818, 1.13],
+      "pad": {
+        "chords": "open",
+        "seg": 8,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 99,
+        "notes": [24],
+        "amp": 0.07,
+        "len": 3,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 5, 4, 2, 3, 1],
+        "step": 0.544,
+        "amp": 0.13,
+        "ring": 1.4,
+        "lead": 0.4
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.2,
+        "note": [1.063, 2.447],
+        "rest": [0.662, 1.335],
+        "phrase": [3, 4],
+        "rise": 0.7,
+        "lead": 0.9
+      },
+      "auto": true
+    },
+    "dushan-attacks": {
+      "mood": "shock",
+      "desc": "Auto-created for scene \"dushan-attacks\" (shock): एक बार दूषण नाम के एक अहंकारी और क्रूर असुर ने अवं. Edit this recipe in library.json to change it.",
+      "level": [0.952, 0.417],
+      "pad": {
+        "chords": "fifth",
+        "seg": 5,
+        "amp": 0.22
+      },
+      "hit": {
+        "drum": {
+          "f": -24,
+          "amp": 0.7,
+          "len": 0.9
+        },
+        "bell": {
+          "f": -12,
+          "amp": 0.22,
+          "len": 4.5
+        }
+      },
+      "auto": true
+    },
+    "city-panic": {
+      "mood": "sad",
+      "desc": "Auto-created for scene \"city-panic\" (sad): उसके आतंक से पूरे नगर में भय फैल गया और लोग अपनी ज. Edit this recipe in library.json to change it.",
+      "level": [0.557, 0.373],
+      "pad": {
+        "chords": "min",
+        "seg": 9,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "bow",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.075,
+        "note": [2.178, 3.919],
+        "rest": [1.89, 3.965],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "sons-stay": {
+      "mood": "shock",
+      "desc": "Auto-created for scene \"sons-stay\" (shock): लेकिन चारों तरफ डर का माहौल होने और दूषण की विशाल . Edit this recipe in library.json to change it.",
+      "level": [0.984, 0.397],
+      "pad": {
+        "chords": "fifth",
+        "seg": 5,
+        "amp": 0.22
+      },
+      "hit": {
+        "drum": {
+          "f": -24,
+          "amp": 0.7,
+          "len": 0.9
+        },
+        "bell": {
+          "f": -12,
+          "amp": 0.22,
+          "len": 4.5
+        }
+      },
+      "auto": true
+    },
+    "fearless-prayer": {
+      "mood": "hope",
+      "desc": "Auto-created for scene \"fearless-prayer\" (hope): वे निडर होकर शिवलिंग के सामने बैठे रहे और महादेव क. Edit this recipe in library.json to change it.",
+      "level": [0.802, 1.164],
+      "pad": {
+        "chords": "maj",
+        "seg": 6,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 99,
+        "notes": [24],
+        "amp": 0.07,
+        "len": 3,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 1, 2, 3, 4, 2],
+        "step": 0.541,
+        "amp": 0.13,
+        "ring": 1.4,
+        "lead": 0.4
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.2,
+        "note": [1.023, 2.592],
+        "rest": [0.674, 1.694],
+        "phrase": [3, 4],
+        "rise": 0.7,
+        "lead": 0.9
+      },
+      "auto": true
+    },
+    "shiva-emerges": {
+      "mood": "anger",
+      "desc": "Auto-created for scene \"shiva-emerges\" (anger): शिव पुराण के अनुसार, जैसे ही असुर ने उन पर प्रहार . Edit this recipe in library.json to change it.",
+      "level": [1.109, 1.174],
+      "pad": {
+        "chords": "min",
+        "seg": 6,
+        "amp": 0.42
+      },
+      "drums": {
+        "step": 0.276,
+        "pat": [1, 0, 0, 0.5, 0, 0.6, 0, 0.45],
+        "amp": 0.32,
+        "f": [-17, -14],
+        "len": 0.45
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MIN",
+        "oct": 12,
+        "amp": 0.095,
+        "note": [0.575, 1.067],
+        "rest": [0.205, 0.744],
+        "phrase": [3, 5],
+        "rise": 0.4,
+        "start": 3,
+        "lead": 0.2,
+        "gap": 1
+      },
+      "auto": true
+    },
+    "shiva-slays-dushan": {
+      "mood": "anger",
+      "desc": "Auto-created for scene \"shiva-slays-dushan\" (anger): महादेव ने पल भर में असुर दूषण का वध कर दिया।. Edit this recipe in library.json to change it.",
+      "level": [1.109, 1.139],
+      "pad": {
+        "chords": "min",
+        "seg": 4,
+        "amp": 0.42
+      },
+      "drums": {
+        "step": 0.272,
+        "pat": [1, 0, 0, 0.5, 0, 0.6, 0, 0.45],
+        "amp": 0.32,
+        "f": [-17, -14],
+        "len": 0.45
+      },
+      "melody": {
+        "kind": "bow",
+        "scale": "MIN",
+        "oct": 12,
+        "amp": 0.095,
+        "note": [0.529, 1.16],
+        "rest": [0.187, 0.696],
+        "phrase": [3, 5],
+        "rise": 0.4,
+        "start": 3,
+        "lead": 0.2,
+        "gap": 1
+      },
+      "auto": true
+    },
+    "mahakal-glory": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"mahakal-glory\" (divine): भगवान शिव के इस स्वरूप के आगे स्वयं 'काल' (समय और . Edit this recipe in library.json to change it.",
+      "level": [0.711, 0.806],
+      "pad": {
+        "chords": "divine",
+        "seg": 8,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [12, 19],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 2],
+        "step": 0.895,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "devotees-plead": {
+      "mood": "hope",
+      "desc": "Auto-created for scene \"devotees-plead\" (hope): असुर के अंत के बाद, भक्तों ने महादेव से प्रार्थना . Edit this recipe in library.json to change it.",
+      "level": [0.814, 1.142],
+      "pad": {
+        "chords": "maj",
+        "seg": 6,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 99,
+        "notes": [24, 12, 19],
+        "amp": 0.07,
+        "len": 3,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 1, 2, 3, 4, 2],
+        "step": 0.437,
+        "amp": 0.13,
+        "ring": 1.4,
+        "lead": 0.4
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.2,
+        "note": [1.142, 2.299],
+        "rest": [0.658, 1.794],
+        "phrase": [3, 4],
+        "rise": 0.7,
+        "lead": 0.9
+      },
+      "auto": true
+    },
+    "jyotirlinga-established": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"jyotirlinga-established\" (divine): महादेव ने उनकी प्रार्थना स्वीकार की और ज्योतिर्लिं. Edit this recipe in library.json to change it.",
+      "level": [0.678, 0.864],
+      "pad": {
+        "chords": "open",
+        "seg": 8,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [19, 24],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 1, 2, 3, 4, 2],
+        "step": 0.977,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "twelve-jyotirlinga": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"twelve-jyotirlinga\" (divine): 12 ज्योतिर्लिंगों में से एक, महाकालेश्वर एकमात्र द. Edit this recipe in library.json to change it.",
+      "level": [0.687, 0.791],
+      "pad": {
+        "chords": "divine",
+        "seg": 10,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [19, 24],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 4, 2, 5, 4, 2],
+        "step": 0.803,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "raja-mahakal": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"raja-mahakal\" (divine): यही कारण है कि उज्जैन में यह मान्यता प्रचलित है कि. Edit this recipe in library.json to change it.",
+      "level": [0.707, 0.818],
+      "pad": {
+        "chords": "divine",
+        "seg": 8,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [24],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 5, 4, 2, 3, 1],
+        "step": 0.797,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    }
   }
 }
