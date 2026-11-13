@@ -54,7 +54,8 @@ function probe(file,nShots){
 
 /* nar = planned lengths (s) of the narration shots. Returns null if the recording has no clear speech.
    -> {durs[], speech[][] (speech parts inside each shot, relative to the shot start), cuts[], start, end, snapped, report[]} */
-function planSync({silences,total,nar,forced,weights}){   // weights[i] = how much text shot i has (seconds at the plan pace); default = nar   // forced[i] = time (s) in the recording where narration shot i must start
+function planSync({silences,total,nar,forced,weights,words}){   // words[i] = word strings of narration shot i (enables sentence alignment)
+   // weights[i] = how much text shot i has (seconds at the plan pace); default = nar   // forced[i] = time (s) in the recording where narration shot i must start
   const n=nar.length; if(!n) return null;
   const first=silences[0], last=silences[silences.length-1];
   const start = first && first.s<=0.08 ? first.e : 0;
@@ -67,7 +68,18 @@ function planSync({silences,total,nar,forced,weights}){   // weights[i] = how mu
   const quietBefore=x=>{ let q=0; for(const p of P){ if(p.e<=x) q+=p.len; else if(p.s<x) q+=x-p.s; else break; } return q; };
   const SPT=x=>(x-start)-quietBefore(x);
   const textW=(weights||nar.map(d=>d-0.45)).map(d=>Math.max(0.5,d)), sumW=textW.reduce((a,b)=>a+b,0), kS=SPT(end)/sumW;
-  if(n>1){
+  let aligned=null;
+  if(n>1 && words && words.length===n && P.length){
+    const S=scriptBreaks(words,weights||null), al=alignSentences({P,start,end,br:S.br,total:S.total});
+    if(al){ aligned=al;
+      const onPause={}; al.anchors.forEach(a=>{ const b=S.br[a.b]; if(b.shot) onPause[b.shot]=a; });   // shot ends that have their own pause
+      for(let i=0;i<n-1;i++){ const a=onPause[i+1];
+        if(a){ const len=a.t1-a.t0; cuts[i]=Math.max(a.t0+len*0.5, a.t1-0.25); how[i]='at your pause'; }
+        else { cuts[i]=al.timeAt(S.shotAt[i+1]); how[i]='by sentence pace'; } }
+      for(let i=1;i<n-1;i++) if(cuts[i]<cuts[i-1]+0.8) cuts[i]=cuts[i-1]+0.8;
+      steadiness=al.worst;
+      for(let i=0;i<n-1;i++){ const f=forced&&forced[i+1]; if(f!==undefined&&f!==null){ cuts[i]=f; how[i]='pinned (rec)'; } } } }
+  if(n>1 && !aligned){
     // candidates: your real pauses + "no pause" points every 0.25 s (used when you read two lines without stopping)
     const C=P.map(p=>({mid:p.mid, cut:Math.max(p.s+p.len*0.5, p.e-0.25), len:p.len, real:true}));
     for(let x=start+0.6; x<end-0.6; x+=0.25){ if(!P.some(p=>x>p.s-0.15 && x<p.e+0.15)) C.push({mid:x, cut:x, len:0, real:false}); }
@@ -106,9 +118,65 @@ function planSync({silences,total,nar,forced,weights}){   // weights[i] = how mu
     segs=segs.filter(([x,y])=>y-x>0.12).map(([x,y])=>[+(x-a).toFixed(3),+(y-a).toFixed(3)]);
     speech.push(segs.length?segs:[[0.18,Math.max(0.6,b-a-0.3)]]);
     if(i>0){ if(how[i-1]==='at your pause') snapped++; report.push({shot:i+1, at:B[i], how:how[i-1]}); } }
-  return {durs, speech, cuts:B, start, end, snapped, pauses:P, report, steadiness}; }
+  return {durs, speech, cuts:B, start, end, snapped, pauses:P, report, steadiness, mode:aligned?'sentences':'pauses'}; }
 
-module.exports={AUDIO_EXT, parseSilences, probe, planSync};
+/* ---------------------------------------------------------------------
+   SENTENCE ALIGNMENT (used when the shots' words are known: planSync({..., words}))
+   Why: with few pauses the old fit treated a breath inside a sentence as a shot change, and from that
+   point every later cut drifted early (Mahakal short, Nov 2026: shots 4-14 were 2.5-4.5 s early).
+   How: every pause is matched to a sentence/clause end in the SCRIPT (। ? ! , — and every shot end)
+   or marked as a breath, choosing the matching where the speaking pace (characters per second of speech)
+   stays steadiest. The matched pauses become anchors; each shot cut is then placed on its own pause if it
+   has one, otherwise between the two nearest anchors at the local pace. This works even when only a few
+   lines end with a pause.
+   --------------------------------------------------------------------- */
+const BRK_SENT=/[।?!.॥]["'”’)]*$/, BRK_SOFT=/[,—;:–]["'”’)]*$|—/;
+function scriptBreaks(words,weights){
+  // words[i] = array of word strings of narration shot i; weights[i] = how much text shot i has (keeps chant slow-down)
+  const strip=w=>w.replace(/[.,!?'"‘’“”—\-–…:;।॥()]/g,'');
+  const br=[], shotAt=[]; let c=0;
+  words.forEach((ws,si)=>{ const raw=ws.map(w=>strip(w).length+2), tot=raw.reduce((a,b)=>a+b,0)||1, k=weights?(weights[si]/tot):1;
+    shotAt.push(c);
+    ws.forEach((w,wi)=>{ c+=raw[wi]*k; const end=wi===ws.length-1;
+      if(end) br.push({c, kind:2, shot:si+1}); else if(BRK_SENT.test(w)) br.push({c,kind:2}); else if(BRK_SOFT.test(w)) br.push({c,kind:1}); }); });
+  return {br, shotAt, total:c}; }
+
+function alignSentences({P,start,end,br,total}){
+  const m=P.length, nb=br.length; if(!m||!nb||total<=0) return null;
+  const quiet=(a,b)=>P.reduce((q,p)=>q+Math.max(0,Math.min(b,p.e)-Math.max(a,p.s)),0);
+  const K=((end-start)-quiet(start,end))/total;            // seconds of speech per unit of text (whole recording)
+  // anchor = {t0: speech stops, t1: speech resumes, c: text position}
+  const A0={t0:start,t1:start,c:0}, AE={t0:end,t1:end,c:total};
+  const seg=(a,b)=>{ const sp=(b.t0-a.t1)-quiet(a.t1,b.t0), c=b.c-a.c; if(c<=0||sp<=0.05) return 1e9;
+    const r=Math.log(sp/(c*K)), sg=0.06+0.16/Math.sqrt(Math.max(0.3,c)); return (r/sg)*(r/sg); };
+  const reward=(p,kind)=> kind===2 ? -1.2-1.5*Math.min(p.len,0.6) : -0.4-0.6*Math.min(p.len,0.6);
+  const skipCost=p=>0.5+3*Math.max(0,p.len-0.35);         // calling a pause "just a breath" (long pauses rarely are)
+  const SKIPMAX=6;
+  // dp[j][b]: best cost with pause j matched to break b (pauses between matched ones are breaths)
+  const INF=1e18, dp=[...Array(m)].map(()=>new Float64Array(nb).fill(INF)), bk=[...Array(m)].map(()=>new Int32Array(nb*2).fill(-1));
+  const anc=(j,b)=>({t0:P[j].s,t1:P[j].e,c:br[b].c});
+  const skips=(j0,j1)=>{ let s=0; for(let j=j0+1;j<j1;j++) s+=skipCost(P[j]); return s; };
+  for(let j=0;j<m;j++) for(let b=0;b<nb;b++){ const me=anc(j,b), rw=reward(P[j],br[b].kind);
+    if(br[b].c>=total-1e-6) continue;                      // the last break is the end of the recording
+    let best=(j<=SKIPMAX? seg(A0,me)+skips(-1,j) : INF), bj=-1, bb=-1;
+    for(let pj=Math.max(0,j-SKIPMAX-1);pj<j;pj++) for(let pb=0;pb<b;pb++){ if(dp[pj][pb]>=INF) continue;
+      const v=dp[pj][pb]+seg(anc(pj,pb),me)+skips(pj,j); if(v<best){ best=v; bj=pj; bb=pb; } }
+    dp[j][b]=best+rw; bk[j][b*2]=bj; bk[j][b*2+1]=bb; }
+  let bestV=seg(A0,AE)+skips(-1,m), bj=-1, bb=-1;
+  for(let j=Math.max(0,m-SKIPMAX-1);j<m;j++) for(let b=0;b<nb;b++){ if(dp[j][b]>=INF) continue; const v=dp[j][b]+seg(anc(j,b),AE)+skips(j,m); if(v<bestV){ bestV=v; bj=j; bb=b; } }
+  const anchors=[]; while(bj>=0){ anchors.unshift({...anc(bj,bb), j:bj, b:bb}); const nj=bk[bj][bb*2], nb2=bk[bj][bb*2+1]; bj=nj; bb=nb2; }
+  // how steady is the pace between anchors? (1.0 = perfectly even). Shown in the report.
+  const all=[A0,...anchors,AE], rates=[];
+  for(let i=1;i<all.length;i++){ const a=all[i-1], b=all[i], sp=(b.t0-a.t1)-quiet(a.t1,b.t0), c=b.c-a.c; if(c>0&&sp>0.05) rates.push({r:sp/(c*K), w:c}); }
+  const worst=rates.reduce((x,y)=>Math.max(x,Math.abs(Math.log(y.r))),0);
+  // time in the recording where text position c is spoken (pace interpolated between anchors, breaths skipped)
+  const timeAt=c=>{ let i=1; while(i<all.length-1 && all[i].c<c) i++; const a=all[i-1], b=all[i];
+    const sp=(b.t0-a.t1)-quiet(a.t1,b.t0), want=(b.c>a.c?(c-a.c)/(b.c-a.c):0)*sp;
+    let t=a.t1, left=want; for(const p of P){ if(p.e<=a.t1||p.s>=b.t0) continue; const run=p.s-t; if(run>=left) break; left-=Math.max(0,run); t=p.e; }
+    return Math.min(b.t0,t+left); };
+  return {anchors, timeAt, worst, K}; }
+
+module.exports={AUDIO_EXT, parseSilences, probe, planSync, scriptBreaks, alignSentences};
 
 /* self-test:  node tools/voicesync.js */
 if(require.main===module){
