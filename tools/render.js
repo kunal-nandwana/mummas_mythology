@@ -58,7 +58,8 @@ function voiceChain(){ const dn=opt('denoise')===null?12:+opt('denoise');
     'acompressor=threshold=-20dB:ratio=3:attack=10:release=150:makeup=3'].join(','); }   // even volume
 function measureLoud(file,chain){ const r=spawnSync('ffmpeg',['-hide_banner','-i',file,'-af',chain+',loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json','-f','null','-'],{encoding:'utf8'});
   const m=/\{[^{}]*"input_i"[^{}]*\}/.exec(r.stderr||''); try{ return m?JSON.parse(m[0]):null; }catch(e){ return null; } }
-function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain(), L=measureLoud(file,chain);
+function voiceFilter(file){ if(opt('raw')) return null; const chain=voiceChain(); let L=measureLoud(file,chain);
+  if(L && !(+L.input_i>-70 && +L.input_i<=-1 && isFinite(+L.input_tp) && isFinite(+L.input_lra) && isFinite(+L.input_thresh) && isFinite(+L.target_offset))){ console.log('! loudness measure looked wrong ('+L.input_i+' LUFS): using one-pass loudness instead'); L=null; }
   const ln = L ? `loudnorm=I=-14:TP=-1.5:LRA=11:measured_I=${L.input_i}:measured_TP=${L.input_tp}:measured_LRA=${L.input_lra}:measured_thresh=${L.input_thresh}:offset=${L.target_offset}:linear=true`
                : 'loudnorm=I=-14:TP=-1.5:LRA=11';
   console.log(L?`♪ voice clean-up on: loudness ${(+L.input_i).toFixed(1)} → -14 LUFS`:'♪ voice clean-up on (one-pass loudness)');
