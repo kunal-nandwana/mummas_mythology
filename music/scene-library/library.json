@@ -1310,6 +1310,34 @@
         "f": [-31],
         "len": 0.24
       }
+    },
+    "king-dream": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"king-dream\" (divine): जिन्हें पहले ही स्वप्न में इसका संकेत मिल चुका था,. Edit this recipe in library.json to change it.",
+      "level": [0.683, 0.872],
+      "pad": {
+        "chords": "divine",
+        "seg": 10,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [24, 12, 19],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 4, 2, 5, 4, 2],
+        "step": 0.847,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
     }
   }
 }
