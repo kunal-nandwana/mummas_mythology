@@ -103,30 +103,46 @@ VIDEO({
   handheld: .4,
   keywords: ['जगन्नाथ', 'रहस्य', 'हृदय', 'श्री कृष्ण', 'पुरी', 'इंद्रद्युम्न', 'विश्वकर्मा', 'ब्रह्म पदार्थ', 'नवकलेवर', 'अंधेरा', 'धड़कता'],
   shots: withDefs([
-    /* 1 — opening: closed wooden idol face in indigo dark, one tiny pulse inside */
-    { line: 'भगवान जगन्नाथ की लकड़ी की मूर्ति के भीतर एक ऐसा गहरा रहस्य छिपा है,', scene: 'jagannath-secret', mood: 'calm', capTop: 90, fx: 'dust',
-      cam: { from: [270, 470, 1.0], to: [270, 500, 1.1] },
-      sky: () => SKY(50, 500), art: () => IDOL('jag', 270, 470, .52, .82) + HEART(270, CHEST('jag', 470, .52), 8, .8) },
-    /* 2 — never seen: slow push toward the glow (never a close view of the secret) */
-    { line: 'जिसे आज तक किसी भी इंसान ने अपनी आँखों से नहीं देखा है।', scene: 'jagannath-secret', mood: DARK, capTop: 90, tr: 'fade',
-      cam: { from: [270, 560, 1.12], to: [270, 650, 1.35] },
-      sky: () => SKY(40, 500), art: () => IDOL('jag', 270, 470, .52, .62) + HEART(270, CHEST('jag', 470, .52), 7, .85) },
+    /* 1 — opening: the camera drifts down out of the dark toward the idol; lamps float up, incense curls, the pulse inside beats and sends out rings */
+    { line: 'भगवान जगन्नाथ की लकड़ी की मूर्ति के भीतर एक ऐसा गहरा रहस्य छिपा है,', scene: 'jagannath-secret', mood: { base: 'calm', bri: .85 }, capTop: 90, fx: 'dust',
+      cam: { keys: [[0, 270, 330, .92], [2.2, 270, 440, 1.02], [5.5, 270, 540, 1.28]] },
+      sky: () => SKY(70, 500) + `<circle cx="270" cy="520" r="260" fill="url(#jgHalo)" opacity=".55"/>`,
+      far: () => MOTES(40, 500, 880, 14, '#ffc880', 21, 420) + MOTES(60, 480, 900, 10, '#ffe2a8', 22, 300),
+      art: () => A('fadein:0:1.8', IDOL('jag', 270, 470, .52, 1)) + A('rise:-18:6:0', `<circle cx="270" cy="470" r="1" fill="none"/>`) + RINGS(270, CHEST('jag', 470, .52)) + HEART(270, CHEST('jag', 470, .52), 10, 1),
+      near: () => A('drift:30:-200:6', `<path d="M120 900 C100 840 150 800 120 740 C95 690 140 660 120 610" stroke="#cdbfd8" stroke-opacity=".25" stroke-width="10" fill="none" stroke-linecap="round"/>`) +
+        A('drift:-30:-200:7', `<path d="M430 900 C450 840 400 800 430 740 C455 690 410 660 430 610" stroke="#cdbfd8" stroke-opacity=".25" stroke-width="10" fill="none" stroke-linecap="round"/>`) +
+        `<g>${A('flick:6', `<circle cx="70" cy="880" r="46" fill="url(#jgWin)"/><path d="M70 892 Q62 878 70 862 Q78 878 70 892Z" fill="#ffd27a"/>`)}${A('flick:7', `<circle cx="470" cy="880" r="46" fill="url(#jgWin)"/><path d="M470 892 Q462 878 470 862 Q478 878 470 892Z" fill="#ffd27a"/>`)}</g>` },
+    /* 2 — never seen: the light grows, rays turn, then the dark closes over the face */
+    { line: 'जिसे आज तक किसी भी इंसान ने अपनी आँखों से नहीं देखा है।', scene: 'jagannath-secret', mood: { base: 'calm', bri: .7, sat: .9, vig: .6 }, capTop: 90, tr: 'fade',
+      cam: { keys: [[0, 270, 540, 1.28], [2.5, 270, 640, 1.55], [5.5, 270, 700, 1.9]] },
+      sky: () => SKY(40, 500),
+      art: () => IDOL('jag', 270, 470, .52, .95) + A('spin:40:270:' + CHEST('jag', 470, .52), `<g stroke="#ffcfa8" stroke-opacity=".25" stroke-width="6">${[0, 30, 60, 90, 120, 150].map(a => `<path d="M270 ${CHEST('jag', 470, .52) - 220} V${+CHEST('jag', 470, .52) + 220}" transform="rotate(${a} 270 ${CHEST('jag', 470, .52)})"/>`).join('')}</g>`) +
+        RINGS(270, CHEST('jag', 470, .52)) + HEART(270, CHEST('jag', 470, .52), 12, 1) + A('fadein:1.5:3', `<rect x="-20" y="-20" width="580" height="1000" fill="#03030c" opacity=".45"/>`) },
     /* 3 — Krishna, serene, the heart beating on his chest */
     { line: 'भक्तों की मान्यता है कि यह स्वयं भगवान श्री कृष्ण का धड़कता हुआ हृदय है।', scene: 'krishna-heart', mood: 'divine', tr: 'glow', fx: 'stars',
       cam: { from: [270, 600, 1.05], to: [270, 620, 1.18] },
       sky: () => SKY(80, 700) + `<circle cx="270" cy="560" r="230" fill="url(#saf)" opacity=".28"/>`, art: () => NIGHTGROUND(880),
       cast: [{ c: KRISHNA, x: 270, y: 900, s: 1.08, expr: 'serene', acts: [[0, 'stand'], [1.2, 'bless', .9]] }],
       front: () => HEART(268, 720, 8, .95) },
-    /* 4 — the departure, told gently: Krishna fades into light under the peepal (no hunter, no wound) */
-    { line: 'कथा के अनुसार, जब एक शिकारी के तीर से घायल होने के बाद श्री कृष्ण ने इस संसार से प्रस्थान किया,', scene: 'krishna-departs', mood: 'sad', tr: 'fade', fx: 'stars',
+    /* 4a — the hunter's arrow, told gently: it only touches the foot, a soft glow, no blood */
+    { line: 'कथा के अनुसार, जब एक शिकारी के तीर से घायल होने के बाद', scene: 'krishna-departs', mood: 'sad', tr: 'fade', fx: 'stars',
+      cam: { from: [300, 600, 1.0], to: [330, 640, 1.12] },
+      sky: () => SKY(90, 700), far: () => peepal(160, 880, 1.2), art: () => NIGHTGROUND(880),
+      cast: [{ c: KRISHNA, x: 190, y: 890, s: 1.0, expr: 'serene', acts: [[0, 'relax']] },
+             { c: VILLAGER, x: 470, y: 895, s: .85, flip: true, expr: 'calm', gesture: false, props: { front: 'bow' }, acts: [[0, 'stand'], [.8, 'bowDraw', .7]] }],
+      front: () => A('slide:200:-120:.9:1.5', `<g transform="translate(205 872) scale(-1 1)"><path d="M-40 0H30" stroke="#e8d8b0" stroke-width="3"/><path d="M30 -5L44 0L30 5Z" fill="#f0e0b8"/><path d="M-40 0l-9-6M-40 0l-9 6" stroke="#9a7a4a" stroke-width="2"/></g>`) +
+        A('fadein:2.4:.8', `<circle cx="205" cy="872" r="70" fill="url(#jgLight)" opacity=".8"/>`) },
+    /* 4b — Krishna departs: fades into light under the peepal */
+    { line: 'श्री कृष्ण ने इस संसार से प्रस्थान किया,', scene: 'krishna-departs', mood: 'sad', tr: 'fade', fx: 'stars',
       cam: { from: [270, 560, 1.12], to: [270, 520, 1.0] },
       sky: () => SKY(90, 700), far: () => peepal(400, 880, 1.1), art: () => NIGHTGROUND(880),
-      cast: [{ c: KRISHNA, x: 250, y: 890, s: 1.0, expr: 'serene', eyes: 'closed', acts: [[0, 'namaste']], exit: { at: 2.6, fade: 2.4 } }],
-      front: () => A('fadein:2.2:1.6', `<ellipse cx="250" cy="760" rx="90" ry="170" fill="url(#jgLight)" opacity=".7"/>` + MOTES(170, 330, 760, 40, '#cfe0ff', 3, 260)) },
+      cast: [{ c: KRISHNA, x: 250, y: 890, s: 1.0, expr: 'serene', eyes: 'closed', acts: [[0, 'namaste']], exit: { at: 1.6, fade: 2.0 } }],
+      front: () => A('fadein:1.4:1.6', `<ellipse cx="250" cy="760" rx="90" ry="170" fill="url(#jgLight)" opacity=".7"/>` + MOTES(170, 330, 760, 40, '#cfe0ff', 3, 260)) },
     /* 5 — the last rites: a body of light above the pyre; the fire stays low, never on him */
     { line: 'तो उनके पार्थिव शरीर का अंतिम संस्कार किया गया।', scene: 'body-to-light', mood: 'sad', tr: 'fade', fx: 'embers', capTop: 330,
       cam: { from: [270, 640, 1.0], to: [270, 660, 1.12] },
-      sky: () => SKY(80, 600), art: () => NIGHTGROUND(860) + PYRE(270, 800) + FLAMES(150, 390, 800, 46) + LIGHTBODY(270, 690, .45) },
+      sky: () => SKY(80, 600), art: () => NIGHTGROUND(860) + PYRE(270, 800) + FLAMES(150, 390, 800, 46) + LIGHTBODY(270, 690, .45),
+      cast: [{ c: ARJUNA, x: 62, y: 905, s: .8, expr: 'sad', tears: true, acts: [[0, 'grief']] }, { c: VILLAGER, x: 478, y: 905, s: .8, flip: true, expr: 'sad', tears: true, acts: [[0, 'namaste']] }] },
     /* 6 — the body melts into light (pancha-tattva), only the heart stays */
     { line: 'अग्नि में उनका संपूर्ण शरीर पंचतत्व में विलीन हो गया,', scene: 'body-to-light', mood: 'sad', fx: 'embers', capTop: 330,
       cam: { from: [270, 660, 1.12], to: [270, 680, 1.2] },
@@ -143,18 +159,37 @@ VIDEO({
     { line: 'और समुद्र की लहरें उसे बहाकर पुरी के तट तक ले आईं।', scene: 'heart-on-sea', mood: 'calm', capTop: 120,
       cam: { from: [270, 560, 1.05], to: [250, 650, 1.18] },
       sky: () => SKY(90, 380) + moon(420, 170, 30), art: () => SEA(390, 820, 12) + MOONPATH(420, 392, 760) + SHORE(820) + A('bob:3:.3', A('slide:90:-240:3.8:0', GLOWREF(250, 806) + HEART(250, 806, 11))) },
-    /* 10 — King Indradyumna, told in a dream, waits at the shore with folded hands */
-    { line: 'वहाँ राजा इंद्रद्युम्न, जिन्हें पहले ही स्वप्न में इसका संकेत मिल चुका था, उसकी प्रतीक्षा कर रहे थे।', scene: 'king-waits', mood: 'hope', tr: 'fade',
+    /* 10a — King Indradyumna of Puri */
+    { line: 'वहाँ राजा इंद्रद्युम्न,', scene: 'king-waits', mood: 'hope', tr: 'fade',
+      cam: { from: [300, 600, 1.35], to: [280, 600, 1.1] },
+      sky: () => SKY(80, 400) + moon(110, 170, 30), far: () => SEA(420, 700, 10) + MOONPATH(110, 422, 690), art: () => SHORE(700),
+      cast: [{ c: INDRADYUMNA, x: 390, y: 880, s: 1.05, flip: true, expr: 'serene', acts: [[0, 'stand'], [1.0, 'namaste', .8]] }] },
+    /* 10b — the dream: the king sleeps, a dream cloud shows Jagannath and the glowing heart */
+    { line: 'जिन्हें पहले ही स्वप्न में इसका संकेत मिल चुका था,', scene: 'king-dream', mood: 'divine', tr: 'glow', capTop: 120,
+      cam: { from: [270, 620, 1.0], to: [270, 560, 1.12] },
+      sky: () => SKY(100, 600), art: () => `<rect y="800" width="540" height="160" fill="#150f22"/><rect x="60" y="820" width="420" height="40" rx="14" fill="#3a1d2a"/>` +
+        A('fadein:.8:1.2', `<g fill="#cfd8ff" opacity=".22"><ellipse cx="270" cy="400" rx="190" ry="120"/><ellipse cx="150" cy="450" rx="80" ry="60"/><ellipse cx="390" cy="450" rx="80" ry="60"/></g><circle cx="270" cy="400" r="150" fill="url(#jgHalo)"/>`) +
+        A('fadein:1.6:1.2', IDOL('jag', 270, 380, .2, 1) + HEART(270, CHEST('jag', 380, .2), 5, 1)),
+      cast: [{ c: INDRADYUMNA, x: 270, y: 850, s: .85, expr: 'serene', eyes: 'closed', acts: [[0, 'lookDown']] }] },
+    /* 10c — he waits on the shore, the heart-light arriving on the waves */
+    { line: 'उसकी प्रतीक्षा कर रहे थे।', scene: 'king-waits', mood: 'hope', tr: 'fade',
       cam: { from: [300, 560, 1.0], to: [280, 580, 1.1] },
       sky: () => SKY(80, 400) + moon(110, 170, 30), far: () => SEA(420, 700, 10) + MOONPATH(110, 422, 690), art: () => SHORE(700) + GLOWREF(130, 712) + HEART(130, 712, 11),
       cast: [{ c: INDRADYUMNA, x: 390, y: 880, s: 1.05, flip: true, expr: 'serene', acts: [[0, 'namaste']] }],
       front: () => A('fadeout:2.4:1.6', HEART(392, 500, 5, .5)) },
-    /* 11 — Vishwakarma carves the wood */
-    { line: 'देवताओं के शिल्पी विश्वकर्मा ने भगवान जगन्नाथ, बलभद्र और सुभद्रा की मूर्तियों का निर्माण किया,', scene: 'vishwakarma-carves', mood: 'hope', tr: 'wipe', fx: 'dust',
-      cam: { from: [300, 600, 1.12], to: [320, 600, 1.0] },
+    /* 11a — Vishwakarma, the divine craftsman, arrives in light */
+    { line: 'देवताओं के शिल्पी विश्वकर्मा ने', scene: 'vishwakarma-carves', mood: 'divine', tr: 'glow', fx: 'stars', capTop: 120,
+      cam: { from: [270, 700, 1.0], to: [270, 640, 1.25] },
+      sky: () => SKY(120, 700) + `<circle cx="270" cy="600" r="260" fill="url(#saf)" opacity=".25"/>`, art: () => NIGHTGROUND(880),
+      cast: [{ c: VISHWAKARMA, x: 270, y: 890, s: 1.05, expr: 'calm', gesture: false, props: { front: 'mallet' }, enter: { fade: 1.2, rise: 40 }, acts: [[0, 'stand'], [1.2, 'bless', .9]] }],
+      front: () => MOTES(150, 390, 800, 30, '#ffe2a8', 11, 260) },
+    /* 11b — he carves the three idols one by one */
+    { line: 'भगवान जगन्नाथ, बलभद्र और सुभद्रा की मूर्तियों का निर्माण किया,', scene: 'vishwakarma-carves', mood: 'hope', tr: 'wipe', fx: 'dust', capTop: 120,
+      cam: { from: [320, 640, 1.0], to: [340, 620, 1.15] },
       sky: () => DEFS + `<rect width="540" height="960" fill="url(#jgSky)"/><circle cx="140" cy="900" r="330" fill="url(#saf)" opacity=".22"/>`,
-      art: () => NIGHTGROUND(880) + `<rect x="300" y="430" width="170" height="460" rx="24" fill="url(#jgWood)"/>` + A('fadein:.4:3.4', IDOL('jag', 385, 545, .26, .9)) + MOTES(290, 330, 600, 24, '#c99a5e', 9, 120),
-      cast: [{ c: VISHWAKARMA, x: 190, y: 885, s: 1.0, expr: 'calm', gesture: false, props: { front: 'mallet' }, acts: [[0, 'offer'], [.5, 'armUp', .25], [.85, 'offer', .15], [1.5, 'armUp', .25], [1.85, 'offer', .15], [2.5, 'armUp', .25], [2.85, 'offer', .15], [3.5, 'armUp', .25], [3.85, 'offer', .15]] }] },
+      art: () => NIGHTGROUND(880) +
+        [['bal', 230, 1.2], ['sub', 340, 3.0], ['jag', 450, 4.8]].map(([t, x, d]) => `<rect x="${x - 50}" y="540" width="100" height="340" rx="20" fill="url(#jgWood)"/>` + A(`fadein:${d}:1.2`, IDOL(t, x, 640, .17, 1))).join('') + MOTES(200, 500, 640, 30, '#c99a5e', 9, 120),
+      cast: [{ c: VISHWAKARMA, x: 100, y: 885, s: .95, expr: 'calm', gesture: false, props: { front: 'mallet' }, acts: [[0, 'offer'], [.5, 'armUp', .25], [.85, 'offer', .15], [1.5, 'armUp', .25], [1.85, 'offer', .15], [2.5, 'armUp', .25], [2.85, 'offer', .15], [3.5, 'armUp', .25], [3.85, 'offer', .15], [4.5, 'armUp', .25], [4.85, 'offer', .15]] }] },
     /* 12 — the three idols; the holy heart placed within Jagannath (light only) */
     { line: 'और उस पवित्र हृदय को भगवान जगन्नाथ की मूर्ति के भीतर स्थापित किया गया।', scene: 'heart-placed', mood: 'divine', tr: 'glow', capTop: 120,
       cam: { from: [270, 560, 1.0], to: [270, 580, 1.06] }, focus: { at: 2.6, sound: 'revive', dur: 3, duck: .45 },
@@ -164,11 +199,17 @@ VIDEO({
     { line: "भक्त इस रहस्यमयी तत्व को 'ब्रह्म पदार्थ' यानी आत्मा का सार कहते हैं।", scene: 'brahma-padarth', mood: 'divine', tr: 'iris', trAt: [270, 470], capTop: 640, fx: 'stars',
       cam: { from: [270, 470, 1.0], to: [270, 470, 1.1] },
       sky: () => SKY(110, 960), art: () => A('ripple:3:270:470', `<circle cx="270" cy="470" r="170" fill="none" stroke="#ffcfb8" stroke-opacity=".3" stroke-width="2"/>`) + HEART(270, 470, 24, 1) + big(270, 250, 40, '#ffe2a8', 'ब्रह्म पदार्थ', .8) },
-    /* 14 — Nabakalebara: every 12 to 19 years (glowing text + the new timeline template) */
-    { line: 'हर 12 से 19 वर्षों के अंतराल पर (नवकलेवर उत्सव के दौरान) पुरानी मूर्तियों के स्थान पर नई लकड़ी की मूर्तियाँ स्थापित की जाती हैं।', scene: 'nabakalebara-cycle', mood: 'calm', tr: 'fade', capTop: 120, fx: 'stars',
+    /* 14a — every 12 to 19 years */
+    { line: 'हर 12 से 19 वर्षों के अंतराल पर (नवकलेवर उत्सव के दौरान)', scene: 'nabakalebara-cycle', mood: 'calm', tr: 'fade', capTop: 120, fx: 'stars',
       cam: 'up',
       sky: () => SKY(80, 960), art: () => big(270, 285, 54, '#ffd9a8', '12 से 19 वर्ष', .3) + `<circle cx="270" cy="270" r="160" fill="url(#jgHalo)"/>` +
         timeline(270, 380, [{ t: 'नवकलेवर', d: 'पुरानी मूर्तियाँ' }, { t: '12 से 19 वर्ष', d: 'अंतराल', hi: true }, { t: 'नवकलेवर', d: 'नई लकड़ी की मूर्तियाँ' }], { gap: 165, delay: 1.2, step: .9 }) },
+    /* 14b — the old wooden idol is replaced by a new one */
+    { line: 'पुरानी मूर्तियों के स्थान पर नई लकड़ी की मूर्तियाँ स्थापित की जाती हैं।', scene: 'nabakalebara-cycle', mood: 'hope', tr: 'fade', capTop: 120,
+      cam: { from: [270, 560, 1.0], to: [270, 580, 1.1] },
+      sky: () => SKY(70, 600), art: () => `<rect y="800" width="540" height="160" fill="#120d1c"/>` +
+        A('fadeout:1.8:1.6', IDOL('jag', 140, 520, .27, .55)) + A('fadein:2.6:1.6', IDOL('jag', 400, 520, .27, 1)) +
+        A('fadein:1.2:.8', `<path d="M205 500 H335 M315 482 L338 500 L315 518" stroke="#ffd9a8" stroke-width="5" fill="none" stroke-linecap="round"/>`) },
     /* 15 — the lights of Puri go off, one by one, the temple lamps last */
     { line: 'उस विशेष रात को पूरे पुरी शहर की बिजली बंद कर दी जाती है', scene: 'puri-lights-off', mood: 'calm', tr: 'fade', capTop: 120,
       cam: { from: [270, 560, 1.0], to: [270, 600, 1.08] },
@@ -187,11 +228,16 @@ VIDEO({
       cam: { from: [270, 600, 1.12], to: [270, 640, 1.22] },
       sky: () => DEFS + `<rect width="540" height="960" fill="#04040a"/><circle cx="270" cy="700" r="320" fill="url(#jgWarm)" opacity=".4"/>`,
       cast: [PRIEST(120, 880, .9, 'cloth'), PRIEST(400, 880, .9, 'cloth'), PRIEST(260, 905, 1.0, 'cloth')] },
-    /* 19 — carried in darkness from the old idol to the new one */
-    { line: 'और इसी अवस्था में वे ब्रह्म पदार्थ को पुरानी मूर्ति से निकालकर नई मूर्ति में स्थानांतरित करते हैं।', scene: 'priests-darkness', mood: DARK, tr: 'fade', capTop: 120,
-      cam: { from: [220, 600, 1.1], to: [330, 600, 1.1] },
-      sky: () => DEFS + `<rect width="540" height="960" fill="#03030a"/>`, art: () => IDOL('jag', 75, 520, .2, .35) + IDOL('jag', 470, 520, .2, .7),
-      cast: [PRIEST(300, 885, .95, 'heartCloth', { walk: { from: -180, dur: 4.2 } })] },
+    /* 19a — taken out of the old idol, in darkness */
+    { line: 'और इसी अवस्था में वे ब्रह्म पदार्थ को पुरानी मूर्ति से निकालकर', scene: 'priests-darkness', mood: DARK, tr: 'fade', capTop: 120,
+      cam: { from: [300, 620, 1.1], to: [240, 620, 1.25] },
+      sky: () => DEFS + `<rect width="540" height="960" fill="#03030a"/>`, art: () => IDOL('jag', 130, 560, .42, .55),
+      cast: [PRIEST(300, 890, 1.0, 'heartCloth', { flip: true })] },
+    /* 19b — placed into the new idol */
+    { line: 'नई मूर्ति में स्थानांतरित करते हैं।', scene: 'priests-darkness', mood: DARK, tr: 'fade', capTop: 120,
+      cam: { from: [240, 620, 1.1], to: [330, 620, 1.2] },
+      sky: () => DEFS + `<rect width="540" height="960" fill="#03030a"/>`, art: () => IDOL('jag', 410, 560, .42, .85),
+      cast: [PRIEST(260, 890, 1.0, 'heartCloth', { walk: { from: -120, dur: 2.4 } })] },
     /* 20 — every priest who did it says the same thing — the heartbeat begins */
     { line: 'जिन पुजारियों ने इस प्रक्रिया को संपन्न किया है,', scene: 'heartbeat-hands', mood: DARK, tr: 'dip', capTop: 120,
       cam: { from: [270, 620, 1.2], to: [270, 650, 1.4] },
