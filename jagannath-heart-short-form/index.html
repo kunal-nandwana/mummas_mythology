@@ -1318,14 +1318,16 @@ VIDEO({
       sky: () => SKY(80, 700) + `<circle cx="270" cy="560" r="230" fill="url(#saf)" opacity=".28"/>`, art: () => NIGHTGROUND(880),
       cast: [{ c: KRISHNA, x: 270, y: 900, s: 1.08, expr: 'serene', acts: [[0, 'stand'], [1.2, 'bless', .9]] }],
       front: () => HEART(268, 720, 8, .95) },
-    /* 4a — the hunter's arrow, told gently: it only touches the foot, a soft glow, no blood */
+    /* 4a — Krishna plays his flute in the forest; a hunter hidden in the bushes mistakes his foot for a deer and shoots. A gentle glow at the foot, no blood. */
     { line: 'कथा के अनुसार, जब एक शिकारी के तीर से घायल होने के बाद', scene: 'krishna-departs', mood: 'sad', tr: 'fade', fx: 'stars',
-      cam: { from: [300, 600, 1.0], to: [330, 640, 1.12] },
-      sky: () => SKY(90, 700), far: () => peepal(160, 880, 1.2), art: () => NIGHTGROUND(880),
-      cast: [{ c: KRISHNA, x: 190, y: 890, s: 1.0, expr: 'serene', acts: [[0, 'relax']] },
-             { c: VILLAGER, x: 470, y: 895, s: .85, flip: true, expr: 'calm', gesture: false, props: { front: 'bow' }, acts: [[0, 'stand'], [.8, 'bowDraw', .7]] }],
-      front: () => A('slide:200:-120:.9:1.5', `<g transform="translate(205 872) scale(-1 1)"><path d="M-40 0H30" stroke="#e8d8b0" stroke-width="3"/><path d="M30 -5L44 0L30 5Z" fill="#f0e0b8"/><path d="M-40 0l-9-6M-40 0l-9 6" stroke="#9a7a4a" stroke-width="2"/></g>`) +
-        A('fadein:2.4:.8', `<circle cx="205" cy="872" r="70" fill="url(#jgLight)" opacity=".8"/>`) },
+      cam: { from: [300, 600, 1.0], to: [300, 700, 1.25] },
+      sky: () => SKY(90, 700), far: () => peepal(160, 880, 1.2), art: () => NIGHTGROUND(880) +
+        A('drift:20:-160:3.5', `<g fill="#cfe0ff" fill-opacity=".85"><ellipse cx="250" cy="640" rx="7" ry="5" transform="rotate(-20 250 640)"/><rect x="255" y="614" width="2.5" height="26"/><path d="M257 614 q10 6 6 16" stroke="#cfe0ff" stroke-width="2.5" fill="none"/></g>`) + A('drift:-14:-170:4.2', `<g fill="#cfe0ff" fill-opacity=".85"><ellipse cx="150" cy="660" rx="7" ry="5" transform="rotate(-20 150 660)"/><rect x="155" y="634" width="2.5" height="26"/><path d="M157 634 q10 6 6 16" stroke="#cfe0ff" stroke-width="2.5" fill="none"/></g>`),
+      cast: [{ c: KRISHNA, x: 190, y: 890, s: 1.0, expr: 'serene', eyes: 'closed', gesture: false, props: { front: 'flute' }, acts: [[0, { a: [62, 120], b: [48, 128], head: -8 }]] },
+             { c: VILLAGER, x: 455, y: 900, s: .7, flip: true, expr: 'calm', gesture: false, props: { front: 'bow' }, acts: [[0, 'kneel'], [.5, 'kneel+bowDraw', .6], [2.4, 'kneel+shock', .4]] }],
+      front: () => `<g fill="#14301f"><ellipse cx="455" cy="860" rx="110" ry="70"/><ellipse cx="520" cy="830" rx="70" ry="80"/><ellipse cx="380" cy="880" rx="70" ry="48"/></g><g fill="#1d4029"><ellipse cx="430" cy="885" rx="90" ry="45"/><ellipse cx="505" cy="870" rx="60" ry="50"/></g>` + MOTES(340, 540, 820, 12, "#3f6a48", 31, 30) +
+        A('slide:220:-70:.8:1.3', `<g transform="translate(222 878) scale(-1 1)"><path d="M-40 0H30" stroke="#e8d8b0" stroke-width="3"/><path d="M30 -5L44 0L30 5Z" fill="#f0e0b8"/><path d="M-40 0l-9-6M-40 0l-9 6" stroke="#9a7a4a" stroke-width="2"/></g>`) +
+        A('fadein:2.2:.8', `<circle cx="222" cy="878" r="60" fill="url(#jgLight)" opacity=".8"/>`) },
     /* 4b — Krishna departs: fades into light under the peepal */
     { line: 'श्री कृष्ण ने इस संसार से प्रस्थान किया,', scene: 'krishna-departs', mood: 'sad', tr: 'fade', fx: 'stars',
       cam: { from: [270, 560, 1.12], to: [270, 520, 1.0] },
