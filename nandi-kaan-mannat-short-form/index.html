@@ -723,7 +723,12 @@ const easeSpring=k=>{ k=clamp01(k); const c1=1.1, c3=c1+1; return 1+c3*Math.pow(
 function poseAt(r, lt){
   const K=r.keys; let i=0; while(i+1<K.length && K[i+1].t<=lt) i++;
   const cur=K[i]; if(i===0 || lt-cur.t>=cur.d) return cur.p;
-  return blendPose(K[i-1].p, cur.p, easeSpring((lt-cur.t)/cur.d));
+  const u=(lt-cur.t)/cur.d;
+  // cast.anticipate: first ~22% of a pose change pulls slightly the OTHER way (wind-up), then springs to the new pose
+  if(r.cast.anticipate){ const A=0.22, amt=+r.cast.anticipate===1||r.cast.anticipate===true?0.3:+r.cast.anticipate;
+    const k = u<A ? -amt*Math.sin(Math.PI*u/A) : easeSpring((u-A)/(1-A));
+    return blendPose(K[i-1].p, cur.p, k); }
+  return blendPose(K[i-1].p, cur.p, easeSpring(u));
 }
 const show=(e,on)=>{ if(e) e.style.display=on?'':'none'; };
 const setT=(e,tr)=>{ if(e) e.setAttribute('transform',tr); };
@@ -1327,7 +1332,7 @@ const MORNSKY = () => `<rect width="540" height="960" fill="url(#skyDawn)"/><cir
 const MORNFAR = () => shikhara(430, 650, 200, 330, '#b07a4a', '#ffd890') + shikhara(70, 700, 120, 190, '#9a6a4a', '#f0c070') + `<rect y="640" width="540" height="140" fill="#6a4a3a"/><rect y="600" width="540" height="60" fill="url(#fogW)" opacity=".8"/>`;
 const INTSKY = () => `<rect width="540" height="960" fill="#2a1626"/><circle cx="430" cy="700" r="320" fill="url(#saf)" opacity=".3"/>`;
 const INTFAR = () => [0, 1, 2, 3].map(i => `<path d="M${i * 150 - 20} 800 V540 Q${i * 150 + 55} 440 ${i * 150 + 130} 540 V800Z" fill="#3d2434"/>`).join('');
-const COMMON = { c: VILLAGER, with: { top: '#e9e2cf', bottom: '#efe9da', turban: '#9a3a1e', sash: '#9a3a1e' } };   // an ordinary village man (replaces the lady devotee)
+const COMMON = { anticipate: true, c: VILLAGER, with: { top: '#e9e2cf', bottom: '#efe9da', turban: '#9a3a1e', sash: '#9a3a1e' } };   // an ordinary village man (replaces the lady devotee)
 
 /* ---------- ashram (golden afternoon) ---------- */
 const ASH_SKY = () => `<rect width="540" height="960" fill="url(#skyDawn)"/><circle cx="400" cy="520" r="200" fill="url(#gw)" opacity=".6"/>`;
@@ -1347,9 +1352,9 @@ const RIV_GND = () => riverBank(800);
 const LIGHTSHAFTS = () => [...Array(5)].map((_, i) => A('pulse:' + (.3 + i * .08).toFixed(2), `<path d="M${60 + i * 100} 0 L${150 + i * 100} 0 L${40 + i * 100} 800 L${-30 + i * 100} 800Z" fill="#fff6d0" opacity=".1"/>`)).join('');
 
 /* ---------- characters ---------- */
-const SHILAD = { c: RISHI, with: { top: '#e6b050', bottom: '#e6b050', garland: '#6a3c1a', sash: '#f6f1e4' } };
-const MITRA = { c: RISHI, with: { top: '#efe9da', bottom: '#efe9da', big: true, skin: '#9a6a4a', garland: '#f0e6d0', sash: '#c98a2e' } };
-const VARUN = { c: RISHI, with: { top: '#a8461e', bottom: '#a8461e', beard: 'black', skin: '#7a4e34', head: 'turban', turban: '#efe9da', sash: '#e5b324' } };
+const SHILAD = { anticipate: true, c: RISHI, with: { top: '#e6b050', bottom: '#e6b050', garland: '#6a3c1a', sash: '#f6f1e4' } };
+const MITRA = { anticipate: true, c: RISHI, with: { top: '#efe9da', bottom: '#efe9da', big: true, skin: '#9a6a4a', garland: '#f0e6d0', sash: '#c98a2e' } };
+const VARUN = { anticipate: true, c: RISHI, with: { top: '#a8461e', bottom: '#a8461e', beard: 'black', skin: '#7a4e34', head: 'turban', turban: '#efe9da', sash: '#e5b324' } };
 const PETAL = (x, y, d) => A('drift:30:200:5.5', `<path transform="translate(${x} ${y}) rotate(25)" d="M0 -8 Q7 -2 0 9 Q-7 -2 0 -8Z" fill="#ffd2d8"/><circle cx="${x}" cy="${y}" r="16" fill="url(#gw)" opacity=".5"/>`);
 
 VIDEO({
@@ -1400,15 +1405,15 @@ VIDEO({
       cam: { from: [300, 640, 1.0], to: [285, 620, 1.05] }, focus: { at: 1.4, sound: 'shimmer', dur: 2.4, duck: .45 },
       sky: () => divine(330, 560, 'gw'), far: () => hills(700, 40, '#4a3a5a', 130), art: ASH_GND,
       cast: [{ ...SHILAD, x: 130, y: 850, s: .85, expr: 'smile', acts: [[0, 'kneelPray']] },
-             { c: SHIVA, x: 360, y: 860, s: .95, flip: true, expr: 'serene', acts: [[0, 'stand'], [1.2, 'bless', .8]], enter: { fade: 1.4, delay: .4 } },
-             { c: NANDI, x: 250, y: 880, s: .45, expr: 'smile', acts: [[0, 'namaste']], enter: { fade: 1.6, delay: 2.4, rise: 20 } }] },
+             { anticipate: true, c: SHIVA, x: 360, y: 860, s: .95, flip: true, expr: 'serene', acts: [[0, 'stand'], [1.2, 'bless', .8]], enter: { fade: 1.4, delay: .4 } },
+             { anticipate: true, c: NANDI, x: 250, y: 880, s: .45, expr: 'smile', acts: [[0, 'namaste']], enter: { fade: 1.6, delay: 2.4, rise: 20 } }] },
 
     /* 8 — the two rishis arrive when Nandi is seven */
     { line: 'जब नंदी सात वर्ष के हुए, तब मित्र और वरुण नामक दो ऋषि महर्षि शिलाद के आश्रम में पधारे।', scene: 'ashram-warm', mood: 'joy', fx: 'dust', capTop: 330, tr: 'wipe',
       cam: { from: [250, 620, 1.0], to: [270, 630, 1.03] },
       sky: ASH_SKY, far: ASH_FAR, mid: ASH_MID, art: ASH_GND,
       cast: [{ ...SHILAD, x: 190, y: 870, s: .82, flip: false, expr: 'smile', acts: [[0, 'stand'], [3, 'namaste', .8]] },
-             { c: NANDI, x: 120, y: 880, s: .55, expr: 'smile', acts: [[0, 'stand']] },
+             { anticipate: true, c: NANDI, x: 120, y: 880, s: .55, expr: 'smile', acts: [[0, 'stand']] },
              { ...MITRA, x: 360, y: 880, s: .84, flip: true, expr: 'serene', walk: { from: 240, dur: 3 }, acts: [[0, 'stand'], [3.2, 'namaste', .8]] },
              { ...VARUN, x: 470, y: 880, s: .78, flip: true, expr: 'serene', walk: { from: 250, dur: 3.2 }, acts: [[0, 'stand'], [3.4, 'namaste', .8]] }] },
 
@@ -1419,7 +1424,7 @@ VIDEO({
       cast: [{ ...MITRA, x: 340, y: 880, s: .84, flip: true, expr: 'serene', acts: [[0, 'bless']] },
              { ...VARUN, x: 450, y: 880, s: .78, flip: true, expr: 'serene', acts: [[0, 'stand'], [1, 'lookAway'], [2, 'stand']] },
              { ...SHILAD, x: 215, y: 870, s: .82, expr: 'smile', acts: [[0, 'namaste']] },
-             { c: NANDI, x: 110, y: 880, s: .55, expr: 'calm', acts: [[0, 'stand'], [2.2, 'lookDown', .8]] }] },
+             { anticipate: true, c: NANDI, x: 110, y: 880, s: .55, expr: 'calm', acts: [[0, 'stand'], [2.2, 'lookDown', .8]] }] },
 
     /* 10 — Shilad asks; the rishis answer with kind faces */
     { line: 'जब शिलाद ने इसका कारण पूछा, तो ऋषियों ने बताया कि नंदी की आयु बहुत कम है और उनके जीवन का केवल एक वर्ष ही शेष बचा है।', scene: 'prophecy-soft', mood: { base: 'calm', bri: .95, vig: .15 }, fx: 'dust', capTop: 330, tr: 'fade',
@@ -1441,20 +1446,20 @@ VIDEO({
     { line: 'नंदी ने जब अपने पिता को रोते देखा तो कारण पूछा।', scene: 'ashram-soft', mood: { base: 'calm', bri: .95, vig: .15 }, capTop: 330, tr: 'fade',
       cam: { from: [270, 640, 1.0], to: [260, 650, 1.12] },
       sky: EVESKY, far: ASH_FAR, mid: () => ASH_MID() + fire(480, 830, .9), art: ASH_GND,
-      cast: [{ c: NANDI, x: 150, y: 880, s: .7, expr: 'sad', talk: true, acts: [[0, 'stand'], [.6, 'lookUp', .6], [2.4, 'plead', .8]] },
+      cast: [{ anticipate: true, c: NANDI, x: 150, y: 880, s: .7, expr: 'sad', talk: true, acts: [[0, 'stand'], [.6, 'lookUp', .6], [2.4, 'plead', .8]] },
              { ...SHILAD, x: 330, y: 880, s: .86, flip: true, expr: 'sad', tears: true, acts: [[0, 'weep']] }] },
 
     /* 13 — Nandi decides: "to Mahadev's refuge" */
     { line: 'सारी बात जानने के बाद बालक नंदी ने दृढ़ता से कहा कि जिस महादेव की कृपा से मुझे यह जीवन मिला है, मैं उन्हीं की शरण में जाऊँगा।', scene: 'nandi-resolve', mood: 'hope', fx: 'dust', capTop: 150, tr: 'fade',
       cam: { keys: [[0, 270, 620, 1.05], [3.5, 270, 600, 1.15], [6.7, 270, 590, 1.2]] },
       sky: ASH_SKY, far: ASH_FAR, mid: () => `<circle cx="270" cy="620" r="230" fill="url(#gw)" opacity=".5"/>` + peepal(40, 830, .6) + peepal(500, 830, .55), art: ASH_GND,
-      cast: [{ c: NANDI, x: 270, y: 880, s: .85, expr: 'serene', talk: true, acts: [[0, 'stand'], [1, 'lookUp', .7], [4, 'namaste', .8]] }] },
+      cast: [{ anticipate: true, c: NANDI, x: 270, y: 880, s: .85, expr: 'serene', talk: true, acts: [[0, 'stand'], [1, 'lookUp', .7], [4, 'namaste', .8]] }] },
 
     /* 14 — he walks to the forest */
     { line: 'यह कहकर वे वन की ओर चल पड़े।', scene: 'nandi-walks', mood: 'hope', fx: 'dust', capTop: 300, tr: 'wipe',
       cam: { from: [180, 660, 1.0], to: [330, 660, 1.0] },
       sky: ASH_SKY, far: ASH_FAR, mid: ASH_MID, art: ASH_GND,
-      cast: [{ c: NANDI, x: 400, y: 870, s: .75, expr: 'serene', walk: { from: -250, dur: 3.2 }, acts: [[0, 'stand']] }] },
+      cast: [{ anticipate: true, c: NANDI, x: 400, y: 870, s: .75, expr: 'serene', walk: { from: -250, dur: 3.2 }, acts: [[0, 'stand']] }] },
 
     /* 15 — tapasya on the river bank */
     { line: 'वहाँ एक नदी के किनारे आसन लगाकर नंदी ने अपना पूरा मन भगवान शिव की तपस्या में लीन कर दिया।', scene: 'river-tapasya', mood: 'calm', fx: 'dust', capTop: 300, tr: 'fade',
@@ -1468,21 +1473,21 @@ VIDEO({
       sky: () => divine(300, 600, 'gw'), far: RIV_FAR, art: RIV_GND,
       front: () => A('fadein:2.6:1.6', `<circle cx="300" cy="660" r="240" fill="url(#gw)" opacity=".7"/>`) + A('ripple:3:300:640', `<circle cx="300" cy="640" r="150" fill="none" stroke="#fff3c4" stroke-width="3"/>`),
       cast: [{ c: NANDI_SADHAK, x: 250, y: 900, s: .8, expr: 'serene', eyes: 'closed', acts: [[0, 'kneelPray'], [2.4, 'stand', .5], [3.0, { a: [60, 20], b: [60, 20], lean: -4, head: 6 }, .8]], aura: 'gw', walk: undefined },
-             { c: SHIVA, x: 330, y: 900, s: 1.1, flip: true, expr: 'smile', acts: [[0, 'stand'], [2.4, { a: [48, 40], b: [52, 46], lean: 10 }, .9]], enter: { fade: 1.2, delay: 1.0 } }] },
+             { anticipate: true, c: SHIVA, x: 330, y: 900, s: 1.1, flip: true, expr: 'smile', acts: [[0, 'stand'], [2.4, { a: [48, 40], b: [52, 46], lean: 10 }, .9]], enter: { fade: 1.2, delay: 1.0 } }] },
 
     /* 17 — amar + gana-adhyaksha */
     { line: 'शिव ने नंदी को अमरत्व का वरदान दिया, उन्हें अपने गणों का प्रमुख (गणाध्यक्ष) बनाया', scene: 'shiv-boon', mood: 'divine', fx: 'petals', capTop: 120, tr: 'dip',
       cam: { from: [270, 650, 1.0], to: [270, 630, 1.12] },
       sky: () => divine(270, 580, 'gw'), far: RIV_FAR, art: RIV_GND,
       cast: [{ c: NANDI_SADHAK, x: 190, y: 900, s: .8, expr: 'smile', acts: [[0, 'kneelBow'], [2, 'kneelPray', .8]], aura: 'gw' },
-             { c: SHIVA, x: 350, y: 900, s: 1.1, flip: true, expr: 'smile', acts: [[0, 'bless']] }] },
+             { anticipate: true, c: SHIVA, x: 350, y: 900, s: 1.1, flip: true, expr: 'smile', acts: [[0, 'bless']] }] },
 
     /* 18 — "where Nandi lives, Mahadev lives" */
     { line: 'और यह वचन दिया कि जहाँ भी नंदी का वास होगा, वहाँ स्वयं महादेव भी विराजमान रहेंगे।', scene: 'shiv-boon', mood: 'divine', fx: 'sparks', capTop: 120, tr: 'fade',
       cam: { from: [270, 600, 1.1], to: [270, 560, 1.0] },
       sky: () => divine(270, 520, 'gw'), far: () => hills(700, 40, '#4a3a5a', 130), art: () => ground(800, '#5a4a38', '#c8a060') + marigoldString(60, 640, 480, 640, 24, 18),
       mid: () => nandiBull(150, 800, .8) + A('pulse:1.8', `<circle cx="400" cy="680" r="80" fill="url(#gw)" opacity=".6"/>`),
-      cast: [{ c: SHIVA, x: 390, y: 810, s: .95, flip: true, expr: 'smile', acts: [[0, 'stand'], [1.6, 'bless', .8]], enter: { fade: 1.6, delay: 1.2 } }] },
+      cast: [{ anticipate: true, c: SHIVA, x: 390, y: 810, s: .95, flip: true, expr: 'smile', acts: [[0, 'stand'], [1.6, 'bless', .8]], enter: { fade: 1.6, delay: 1.2 } }] },
 
     /* 19 — hence Nandi outside every Shiv temple */
     { line: 'यही कारण है कि हर शिव मंदिर के बाहर नंदी की स्थापना की जाती है।', scene: 'temple-dusk', mood: 'calm', fx: 'embers', capTop: 130, tr: 'dip',
@@ -1499,13 +1504,13 @@ VIDEO({
     { line: 'अब जानते हैं नंदी के कान में मन्नत मांगने का रहस्य।', scene: 'shiv-samadhi', mood: 'calm', fx: 'stars', capTop: 120, tr: 'glow',
       cam: { from: [270, 700, 1.0], to: [270, 670, 1.05] },
       sky: HIM_SKY, far: HIM_FAR, art: HIM_GND,
-      cast: [{ c: SHIVA, x: 270, y: 820, s: .8, expr: 'serene', eyes: 'closed', acts: [[0, 'kneelPray']], aura: 'gb' }] },
+      cast: [{ anticipate: true, c: SHIVA, x: 270, y: 820, s: .8, expr: 'serene', eyes: 'closed', acts: [[0, 'kneelPray']], aura: 'gb' }] },
 
     /* 22 — Shiva stays in samadhi; no one disturbs his tapasya */
     { line: 'ऐसी मान्यता है कि भगवान शिव अधिकांश समय गहरी समाधि और तपस्या में लीन रहते हैं, और उनकी साधना में विघ्न डालना उचित नहीं माना जाता।', scene: 'shiv-samadhi', mood: 'calm', fx: 'stars', capTop: 120, tr: 'fade',
       cam: { from: [270, 560, 1.0], to: [270, 640, 1.1] },
       sky: () => HIM_SKY() + moon(420, 180, 34), far: HIM_FAR, art: HIM_GND,
-      cast: [{ c: SHIVA, x: 270, y: 820, s: .85, expr: 'serene', eyes: 'closed', acts: [[0, 'kneelPray']], aura: 'gb' }],
+      cast: [{ anticipate: true, c: SHIVA, x: 270, y: 820, s: .85, expr: 'serene', eyes: 'closed', acts: [[0, 'kneelPray']], aura: 'gb' }],
       front: () => A('pulse:2.5', `<circle cx="270" cy="600" r="110" fill="url(#gb)" opacity=".5"/>`) },
 
     /* 23 — so devotees whisper softly, a quiet voice */

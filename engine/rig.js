@@ -257,7 +257,12 @@ const easeSpring=k=>{ k=clamp01(k); const c1=1.1, c3=c1+1; return 1+c3*Math.pow(
 function poseAt(r, lt){
   const K=r.keys; let i=0; while(i+1<K.length && K[i+1].t<=lt) i++;
   const cur=K[i]; if(i===0 || lt-cur.t>=cur.d) return cur.p;
-  return blendPose(K[i-1].p, cur.p, easeSpring((lt-cur.t)/cur.d));
+  const u=(lt-cur.t)/cur.d;
+  // cast.anticipate: first ~22% of a pose change pulls slightly the OTHER way (wind-up), then springs to the new pose
+  if(r.cast.anticipate){ const A=0.22, amt=+r.cast.anticipate===1||r.cast.anticipate===true?0.3:+r.cast.anticipate;
+    const k = u<A ? -amt*Math.sin(Math.PI*u/A) : easeSpring((u-A)/(1-A));
+    return blendPose(K[i-1].p, cur.p, k); }
+  return blendPose(K[i-1].p, cur.p, easeSpring(u));
 }
 const show=(e,on)=>{ if(e) e.style.display=on?'':'none'; };
 const setT=(e,tr)=>{ if(e) e.setAttribute('transform',tr); };
