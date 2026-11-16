@@ -35,6 +35,8 @@ const DEVA      = {skin:'#c98a6a', top:'#e8e0cc', bottom:'#c8641e', head:'crown'
 const INDRADYUMNA = {skin:'#94603f', top:'#6e1d3a', bottom:'#e5b324', head:'big', beard:'black', mus:true, cape:'#3e0c22', garland:'#ffd25e', sash:'#e5b324', tilak:true};   // King of Puri (Jagannath story): tall gold crown, maroon + gold, dark cape
 const VISHWAKARMA = {skin:'#a8754f', top:'#a8754f', bottom:'#efe4c8', shin:'#a8754f', bare:true, hair:'bun', head:'none', beard:'white', sash:'#c98a3a', trim:null, jewel:false, earring:false};   // divine craftsman: bare chest, simple cream dhoti, ochre shoulder cloth, white beard, hair bun
 const PUJARI    = {skin:'#9a6844', top:'#9a6844', bottom:'#f2ece0', shin:'#9a6844', bare:true, hair:'none', head:'none', sash:'#f6f1e4', tilak:true, trim:null, jewel:false, earring:false};   // Puri temple priest: shaven head, white dhoti, sacred thread. Nabakalebara: with:{blindfold:true}, props:{front:'heartCloth'}
+const NANDI     = {skin:'#a8754f', top:'#a8754f', bottom:'#f2ead6', shin:'#a8754f', bare:true, hair:'bun', head:'none', tilak:true, rudra:'#7a4a22', sash:'#f6f1e4', trim:null, jewel:false, earring:false};   // Nandi as a 7-year-old boy: bare chest, simple white dhoti, small top-knot, tilak, rudraksha. Use s about .6-.7 so he looks a child next to adults. The grown white bull is the scene piece nandiBull() in scenes.js
+const NANDI_SADHAK = Object.assign({}, NANDI, {sash:null, garland:'#f2b134'});   // same boy, marigold garland (used in his tapasya)
 
 const CHARACTER_LIST = {BARBARIK, KRISHNA, BRAHMIN, ARJUNA, BHIMA, YUDHISHTHIRA, NAKULA, SAHADEVA, GHATOTKACH, MOTHER, DEVI, SITA, RAMA, SHIVA, MAHAKAL, DUSHAN, ASURA, RISHI, SOLDIER, VILLAGER, DEVOTEE_F,
-  CHANDRA, DAKSHA, ROHINI, NAKSHATRA, INDRA, DEVA, INDRADYUMNA, VISHWAKARMA, PUJARI};
+  CHANDRA, DAKSHA, ROHINI, NAKSHATRA, INDRA, DEVA, INDRADYUMNA, VISHWAKARMA, PUJARI, NANDI, NANDI_SADHAK};

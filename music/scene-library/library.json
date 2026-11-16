@@ -1338,6 +1338,495 @@
         "lead": 0.6
       },
       "auto": true
+    },
+    "temple-dusk": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"temple-dusk\" (calm): क्या आपने कभी शिव मंदिर में किसी भक्त को नंदी के प. Edit this recipe in library.json to change it.",
+      "level": [0.737, 0.753],
+      "pad": {
+        "chords": "maj",
+        "seg": 7,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.821, 3.153],
+        "rest": [1.682, 3.311],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "whisper-closeup": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"whisper-closeup\" (calm): वह अपनी मनोकामना महादेव तक पहुँचाना चाहता है,. Edit this recipe in library.json to change it.",
+      "level": [0.732, 0.772],
+      "pad": {
+        "chords": "open",
+        "seg": 6,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.497, 2.802],
+        "rest": [1.568, 4.341],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "nandi-gaze": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"nandi-gaze\" (calm): और नंदी—जिनके कान में वह अपनी बात कह रहा है—चुपचाप. Edit this recipe in library.json to change it.",
+      "level": [0.684, 0.808],
+      "pad": {
+        "chords": "maj",
+        "seg": 8,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.51, 3.156],
+        "rest": [1.796, 4.476],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "legend-begins": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"legend-begins\" (divine): इसे समझने के लिए नंदी के बचपन की इस पौराणिक कथा को. Edit this recipe in library.json to change it.",
+      "level": [0.739, 0.835],
+      "pad": {
+        "chords": "divine",
+        "seg": 10,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [24],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 2],
+        "step": 0.904,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "shilad-tapasya": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"shilad-tapasya\" (calm): शिव पुराण के अनुसार, महर्षि शिलाद ने संतान प्राप्त. Edit this recipe in library.json to change it.",
+      "level": [0.729, 0.744],
+      "pad": {
+        "chords": "maj",
+        "seg": 7,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.365, 3.343],
+        "rest": [1.591, 4.482],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "shiv-boon": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"shiv-boon\" (divine): उनकी भक्ति से प्रसन्न होकर महादेव ने उन्हें एक पुत. Edit this recipe in library.json to change it.",
+      "level": [0.69, 0.885],
+      "pad": {
+        "chords": "divine",
+        "seg": 8,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [24],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 5, 4, 2, 3, 1],
+        "step": 0.8,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "ashram-warm": {
+      "mood": "joy",
+      "desc": "Auto-created for scene \"ashram-warm\" (joy): जब नंदी सात वर्ष के हुए, तब मित्र और वरुण नामक दो . Edit this recipe in library.json to change it.",
+      "level": [1.006, 1.011],
+      "pad": {
+        "chords": "open",
+        "seg": 5,
+        "amp": 0.3
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 4, 2, 5, 4, 2],
+        "step": 0.327,
+        "amp": 0.14,
+        "ring": 0.7,
+        "lead": 0.2
+      },
+      "shaker": {
+        "step": 0.3,
+        "amp": 0.07
+      },
+      "drums": {
+        "step": 1.27,
+        "pat": [0.26, 0.16],
+        "amp": 1,
+        "f": [-12],
+        "len": 0.4
+      },
+      "melody": {
+        "kind": "pluck",
+        "scale": "MAJ",
+        "oct": 24,
+        "amp": 0.09,
+        "note": [0.539, 1.067],
+        "rest": [0.888, 2.126],
+        "phrase": [3, 4],
+        "lead": 1.2
+      },
+      "auto": true
+    },
+    "prophecy-soft": {
+      "mood": "sad",
+      "desc": "Auto-created for scene \"prophecy-soft\" (sad): जब शिलाद ने इसका कारण पूछा, तो ऋषियों ने बताया कि . Edit this recipe in library.json to change it.",
+      "level": [0.53, 0.387],
+      "pad": {
+        "chords": "min",
+        "seg": 8,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "bow",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.075,
+        "note": [2.148, 3.47],
+        "rest": [1.894, 3.952],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "ashram-soft": {
+      "mood": "sad",
+      "desc": "Auto-created for scene \"ashram-soft\" (sad): नंदी ने जब अपने पिता को रोते देखा तो कारण पूछा।. Edit this recipe in library.json to change it.",
+      "level": [0.521, 0.369],
+      "pad": {
+        "chords": "min",
+        "seg": 10,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "bow",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.075,
+        "note": [2.298, 4.329],
+        "rest": [1.849, 3.771],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "nandi-resolve": {
+      "mood": "hope",
+      "desc": "Auto-created for scene \"nandi-resolve\" (hope): सारी बात जानने के बाद बालक नंदी ने दृढ़ता से कहा क. Edit this recipe in library.json to change it.",
+      "level": [0.828, 1.06],
+      "pad": {
+        "chords": "open",
+        "seg": 6,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 99,
+        "notes": [12, 19],
+        "amp": 0.07,
+        "len": 3,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 4, 2, 5, 4, 2],
+        "step": 0.552,
+        "amp": 0.13,
+        "ring": 1.4,
+        "lead": 0.4
+      },
+      "melody": {
+        "kind": "pluck",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.2,
+        "note": [1.312, 2.265],
+        "rest": [0.661, 1.829],
+        "phrase": [3, 4],
+        "rise": 0.7,
+        "lead": 0.9
+      },
+      "auto": true
+    },
+    "nandi-walks": {
+      "mood": "hope",
+      "desc": "Auto-created for scene \"nandi-walks\" (hope): यह कहकर वे वन की ओर चल पड़े।. Edit this recipe in library.json to change it.",
+      "level": [0.768, 1.064],
+      "pad": {
+        "chords": "maj",
+        "seg": 6,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 99,
+        "notes": [12, 19],
+        "amp": 0.07,
+        "len": 3,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 5, 4, 2, 3, 1],
+        "step": 0.56,
+        "amp": 0.13,
+        "ring": 1.4,
+        "lead": 0.4
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.2,
+        "note": [1.283, 2.134],
+        "rest": [0.644, 1.897],
+        "phrase": [3, 4],
+        "rise": 0.7,
+        "lead": 0.9
+      },
+      "auto": true
+    },
+    "river-tapasya": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"river-tapasya\" (calm): वहाँ एक नदी के किनारे आसन लगाकर नंदी ने अपना पूरा . Edit this recipe in library.json to change it.",
+      "level": [0.722, 0.753],
+      "pad": {
+        "chords": "open",
+        "seg": 9,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.434, 3.041],
+        "rest": [1.68, 4.718],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "shiv-hug": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"shiv-hug\" (divine): नंदी की अटूट तपस्या से प्रसन्न होकर महादेव स्वयं प. Edit this recipe in library.json to change it.",
+      "level": [0.725, 0.89],
+      "pad": {
+        "chords": "open",
+        "seg": 7,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [24, 12, 19],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 1, 2, 3, 4, 2],
+        "step": 0.915,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "shiv-samadhi": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"shiv-samadhi\" (calm): अब जानते हैं नंदी के कान में मन्नत मांगने का रहस्य. Edit this recipe in library.json to change it.",
+      "level": [0.709, 0.756],
+      "pad": {
+        "chords": "open",
+        "seg": 9,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.399, 3.287],
+        "rest": [2.069, 3.635],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "whisper-reaches": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"whisper-reaches\" (divine): यह अटूट विश्वास है कि स्वयं महादेव ने नंदी को यह व. Edit this recipe in library.json to change it.",
+      "level": [0.704, 0.865],
+      "pad": {
+        "chords": "open",
+        "seg": 8,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [19, 24],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 1, 2, 3, 4, 2],
+        "step": 0.964,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "lesson-calm": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"lesson-calm\" (calm): इस कथा में जीवन की एक गहरी सीख भी छिपी है।. Edit this recipe in library.json to change it.",
+      "level": [0.691, 0.809],
+      "pad": {
+        "chords": "maj",
+        "seg": 9,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.546, 2.901],
+        "rest": [1.977, 4.469],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "temple-return": {
+      "mood": "hope",
+      "desc": "Auto-created for scene \"temple-return\" (hope): अगली बार जब आप किसी शिव मंदिर जाएं, तो नंदी के पास. Edit this recipe in library.json to change it.",
+      "level": [0.795, 1.091],
+      "pad": {
+        "chords": "maj",
+        "seg": 7,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 99,
+        "notes": [12, 19],
+        "amp": 0.07,
+        "len": 3,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 4, 2, 5, 4, 2],
+        "step": 0.44,
+        "amp": 0.13,
+        "ring": 1.4,
+        "lead": 0.4
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.2,
+        "note": [1.184, 2.75],
+        "rest": [0.578, 1.57],
+        "phrase": [3, 4],
+        "rise": 0.7,
+        "lead": 0.9
+      },
+      "auto": true
+    },
+    "har-har": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"har-har\" (divine): हर हर महादेव!. Edit this recipe in library.json to change it.",
+      "level": [0.685, 0.833],
+      "pad": {
+        "chords": "open",
+        "seg": 10,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [12, 19],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 1, 2, 3, 4, 2],
+        "step": 0.841,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
     }
   }
 }

@@ -216,3 +216,110 @@ function mapRoute(pts,o){ o=Object.assign({delay:.3,step:.9,wiggle:26},o||{}); l
       `<circle cx="${p.x}" cy="${p.y}" r="${last?14:10}" fill="#24140c" stroke="#ffd25e" stroke-width="3.4"/><circle cx="${p.x}" cy="${p.y}" r="${last?5.5:4}" fill="#ffd25e"/>`+
       (o.label==='side'? `<text x="${p.x+side*20}" y="${p.y+7}" text-anchor="${side>0?'start':'end'}" font-size="28" fill="#ffe9b8" stroke="#120a06" stroke-width="6" stroke-linejoin="round" paint-order="stroke" style="font-weight:800">${p.n}</text>` : _exLabel(p.x,p.y+40,p.n,28))); });
   return `<g>${s}${marks}</g>`; }
+
+
+/* =====================================================================
+   SHIV TEMPLE + NANDI PIECES (Nandi story). Ground is at y; faces right unless flip:true.
+   Own gradients get a fresh id each call (Chrome only paints a gradient whose FIRST id in the page is visible).
+   ===================================================================== */
+let _ndN=0;
+function _lg(x2,y2,stops){ const id='nd'+(_ndN++); return {id, def:`<linearGradient id="${id}" x1="0" y1="0" x2="${x2}" y2="${y2}">${stops.map(([o,c,a])=>`<stop offset="${o}" stop-color="${c}"${a===undefined?'':` stop-opacity="${a}"`}/>`).join('')}</linearGradient>`}; }
+function skyBand(stops){ const g=_lg(0,1,stops); return `<defs>${g.def}</defs><rect width="540" height="960" fill="url(#${g.id})"/>`; }
+
+/* Shivling on its base (yoni peetham), centre x, base at y. Black stone, three white ash lines, marigold ring, one bilva leaf. */
+function shivling(x,y,s){ s=s||1;
+  const m=[...Array(9)].map((_,i)=>{ const a=Math.PI*(i/8); return `<circle cx="${r1(Math.cos(a)*40)}" cy="${r1(-Math.sin(a)*9-2)}" r="5.5" fill="${i%2?'#ff9d2a':'#ffc83a'}"/>`; }).join('');
+  return `<g transform="translate(${x} ${y}) scale(${s})"><ellipse cx="0" cy="0" rx="62" ry="10" fill="#000" opacity=".35"/>
+   <path d="M-56 0 L-46 -20 L46 -20 L56 0Z" fill="#6a5560"/><path d="M-46 -20 L46 -20 L40 -28 L-40 -28Z" fill="#8a7078"/><path d="M-44 -22 L-62 -17 L-62 -11 L-44 -16Z" fill="#6a5560"/>
+   <path d="M-34 -28 L-30 -92 C-28 -112 28 -112 30 -92 L34 -28Z" fill="#2c2a34"/><path d="M-22 -34 L-20 -92 C-19 -104 -10 -108 -8 -108 C-14 -96 -14 -60 -12 -34Z" fill="#4a4858" opacity=".7"/>
+   <g fill="none" stroke="#f1ead6" stroke-width="3" stroke-linecap="round" opacity=".92"><path d="M-27 -80 Q0 -68 27 -80"/><path d="M-28 -66 Q0 -54 28 -66"/><path d="M-29 -52 Q0 -40 29 -52"/></g>
+   <g transform="translate(0 -28)">${m}</g><path d="M-6 -111 l6 -12 l6 12 q-6 6 -12 0Z" fill="#3f8a46"/><circle cx="14" cy="-108" r="4.5" fill="#fff3d0"/></g>`; }
+
+/* A hanging row of diyas along y, from x1 to x2 (n lamps). Flames flicker, each with a warm glow. */
+function diyaRow(x1,x2,y,n,s){ s=s||1; let o=''; for(let i=0;i<n;i++){ const x=r1(x1+(x2-x1)*(n<2?0:i/(n-1)));
+  o+=`<g transform="translate(${x} ${y}) scale(${s})">${A('flick:'+(5+rnd()*4).toFixed(2),'<circle cy="-10" r="26" fill="url(#saf)"/>')}<path d="M-9 0 Q0 9 9 0 L7 -4 L-7 -4Z" fill="#b2562a"/><path d="M-9 0 L9 0" stroke="#e8b83a" stroke-width="1.2"/>${A('flick:'+(7+rnd()*4).toFixed(2),'<path d="M0 -4 Q-4 -10 0 -18 Q4 -10 0 -4Z" fill="#ffd27a"/><path d="M0 -4 Q-1.6 -8 0 -12 Q1.6 -8 0 -4Z" fill="#fff3c4"/>')}</g>`; } return o; }
+
+/* A drooping marigold garland between two points. */
+function marigoldString(x1,y1,x2,y2,sag,n){ n=n||16; let o=`<path d="M${x1} ${y1} Q${r1((x1+x2)/2)} ${r1((y1+y2)/2+(sag||30)*2)} ${x2} ${y2}" fill="none" stroke="#6a3c1a" stroke-width="1.6"/>`;
+  for(let i=0;i<=n;i++){ const t=i/n, x=(1-t)*(1-t)*x1+2*t*(1-t)*((x1+x2)/2)+t*t*x2, y=(1-t)*(1-t)*y1+2*t*(1-t)*((y1+y2)/2+(sag||30)*2)+t*t*y2; o+=`<circle cx="${r1(x)}" cy="${r1(y+5)}" r="${i%2?5.2:4.4}" fill="${i%3===0?'#ff8a1a':'#ffc83a'}"/>`; } return o; }
+
+/* A temple tower (shikhara) in stepped tiers with a golden kalash on top; base centre x, bottom y, width w. */
+function shikhara(x,y,w,h,col,lit){ let o=''; const tiers=7, c2='#00000022';
+  for(let i=0;i<tiers;i++){ const tw=w*(1-i*.12), th=h/tiers; o+=`<path d="M${r1(x-tw/2)} ${r1(y-i*th)} L${r1(x-tw/2+6)} ${r1(y-(i+1)*th)} L${r1(x+tw/2-6)} ${r1(y-(i+1)*th)} L${r1(x+tw/2)} ${r1(y-i*th)}Z" fill="${col}"/><rect x="${r1(x-tw/2)}" y="${r1(y-i*th-3)}" width="${r1(tw)}" height="3" fill="${lit||'#e0a04a'}" opacity=".5"/>`; }
+  return o+`<path d="M${x-w*.2} ${r1(y-h)} Q${x} ${r1(y-h-w*.5)} ${x+w*.2} ${r1(y-h)}Z" fill="${col}"/><rect x="${x-1.5}" y="${r1(y-h-w*.5-14)}" width="3" height="16" fill="#e8b83a"/><circle cx="${x}" cy="${r1(y-h-w*.5-16)}" r="4" fill="#ffd25e"/>`; }
+
+/* The sanctum doorway (garbhagriha): carved stone frame, warm inner glow, Shivling and lamps inside. x = centre, y = floor, s = scale. */
+function sanctum(x,y,s){ s=s||1; const w=150, h=250;
+  return `<g transform="translate(${x} ${y}) scale(${s})"><rect x="${-w-34}" y="${-h-30}" width="${(w+34)*2}" height="${h+30}" fill="#3a2630"/>
+   <path d="M${-w} 0 L${-w} ${-h+60} Q${-w} ${-h} 0 ${-h-6} Q${w} ${-h} ${w} ${-h+60} L${w} 0Z" fill="#1a0c0e"/>
+   <ellipse cx="0" cy="-80" rx="${w*.95}" ry="170" fill="url(#saf)" opacity=".85"/>
+   <path d="M${-w} 0 L${-w} ${-h+60} Q${-w} ${-h} 0 ${-h-6} Q${w} ${-h} ${w} ${-h+60} L${w} 0Z" fill="none" stroke="#e0a04a" stroke-width="5"/>
+   <path d="M${-w+14} 0 L${-w+14} ${-h+66} Q${-w+14} ${-h+16} 0 ${-h+10} Q${w-14} ${-h+16} ${w-14} ${-h+66} L${w-14} 0" fill="none" stroke="#e0a04a" stroke-width="1.6" opacity=".6"/>
+   ${shivling(0,-6,1.45)}${A('rock:5:1.1:0:'+(-h+14),'<path d="M-9 '+(-h+14)+' h18 l4 16 h-26Z" fill="#e8b83a"/><circle cx="0" cy="'+(-h+32)+'" r="3" fill="#a8741c"/>')}
+   ${diyaRow(-w+40,-w+40,-30,1,1.2)}${diyaRow(w-40,w-40,-30,1,1.2)}
+   <rect x="${-w-34}" y="-12" width="${(w+34)*2}" height="12" fill="#2a1a22"/><rect x="${-w-20}" y="-30" width="${(w+20)*2}" height="18" fill="#4a3038"/>
+   ${[-1,1].map(k=>`<rect x="${k*(w+10)-9}" y="${-h-20}" width="18" height="${h+20}" fill="#4a3038"/><rect x="${k*(w+10)-13}" y="${-h-24}" width="26" height="10" fill="#e0a04a" opacity=".85"/>`).join('')}</g>`; }
+
+/* The white bull NANDI, seated (front legs folded) and looking right toward the Shivling; flip:true looks left.
+   o = {flip, eyes:'closed', garland:true, calm:true}. Ground at y, s = scale (1 = about 300 px long). Big ear for the whisper close-up
+   (the ear tip is at about (x+78*s, y-146*s) when facing right). Bells on the neck and the tail sway by themselves. */
+function nandiBull(x,y,s,o){ o=Object.assign({flip:false,eyes:null,garland:true},o||{}); s=s||1;
+  const cream='#f6f1e6', shade='#dcd2c0', deep='#c4b8a4', pink='#e8a8a0', gold='url(#gold)';
+  const eye = o.eyes==='closed' ? `<path d="M116 -128 q7 5 14 0" stroke="#2a1a14" stroke-width="2.4" fill="none" stroke-linecap="round"/>` :
+    `<ellipse cx="123" cy="-128" rx="6.5" ry="5" fill="#2a1a14"/><circle cx="125" cy="-130" r="1.8" fill="#fff"/><path d="M115 -134 q8 -5 17 -1" stroke="#b8a890" stroke-width="2.2" fill="none"/><path d="M116 -127 q7 5 14 0" stroke="#d8c8b0" stroke-width="1.2" fill="none" opacity=".7"/>`;
+  const gar = o.garland ? `<path d="M70 -130 Q60 -88 96 -62" fill="none" stroke="#6a3c1a" stroke-width="1.4"/>`+[...Array(9)].map((_,i)=>{ const t=i/8, px=(1-t)*(1-t)*70+2*t*(1-t)*58+t*t*96, py=(1-t)*(1-t)*-130+2*t*(1-t)*-84+t*t*-62; return `<circle cx="${r1(px)}" cy="${r1(py)}" r="${i%2?6.4:5.6}" fill="${i%3===0?'#ff8a1a':'#ffc83a'}"/>`; }).join('') : '';
+  const bells=[[84,-104],[92,-92],[100,-78]].map(([bx,by],i)=>A(`rock:14:${(2+i*.4).toFixed(1)}:${bx}:${by-6}`,`<line x1="${bx}" y1="${by-6}" x2="${bx}" y2="${by}" stroke="#a8741c" stroke-width="1.5"/><path d="M${bx-5} ${by+8} Q${bx} ${by-3} ${bx+5} ${by+8}Z" fill="#e8b83a"/><circle cx="${bx}" cy="${by+9}" r="1.7" fill="#7a4a10"/>`)).join('');
+  return `<g transform="translate(${r1(x)} ${r1(y)}) scale(${o.flip?-s:s} ${s})">
+   <ellipse cx="0" cy="2" rx="150" ry="11" fill="#000" opacity=".28"/>
+   ${A('rock:9:1.1:-122:-56',`<path d="M-122 -56 C-150 -48 -158 -20 -150 -4" fill="none" stroke="${cream}" stroke-width="7" stroke-linecap="round"/><path d="M-152 -10 q-8 6 -2 16 q10 -2 6 -16Z" fill="#a89a84"/>`)}
+   <path d="M-128 0 C-146 -44 -128 -96 -84 -112 C-54 -122 -34 -156 4 -156 C36 -156 48 -128 74 -118 L104 -92 L108 0Z" fill="${cream}"/>
+   <path d="M-128 0 C-140 -30 -134 -60 -120 -80 C-100 -40 -60 -20 -20 -14 L-20 0Z" fill="${shade}" opacity=".7"/>
+   <ellipse cx="-70" cy="-24" rx="52" ry="24" fill="${shade}"/><ellipse cx="-70" cy="-24" rx="52" ry="24" fill="none" stroke="${deep}" stroke-width="1.4"/><path d="M-118 -10 q-10 10 -2 12 h16" fill="#a89a84"/>
+   <path d="M-82 -118 C-62 -128 -40 -150 -8 -152 L-6 -112 C-30 -104 -56 -100 -82 -96Z" fill="#b8202a"/><path d="M-82 -118 C-62 -128 -40 -150 -8 -152 M-82 -96 C-56 -100 -30 -104 -6 -112" fill="none" stroke="${gold}" stroke-width="3"/>
+   ${[-70,-50,-30].map(a=>`<circle cx="${a}" cy="-120" r="3.2" fill="#ffd25e"/>`).join('')}
+   <path d="M20 -2 C46 -34 118 -34 168 -10 L170 0 L20 0Z" fill="${cream}"/><path d="M20 -2 C46 -34 118 -34 168 -10" fill="none" stroke="${deep}" stroke-width="1.6"/><path d="M168 -10 L172 0 L156 0Z" fill="#8a7a64"/>
+   <path d="M76 -142 C96 -158 128 -150 142 -128 C154 -110 166 -98 164 -86 C160 -72 142 -74 130 -80 C114 -86 98 -98 86 -112Z" fill="${cream}"/>
+   <path d="M130 -80 C142 -74 160 -72 164 -86 C168 -96 156 -104 150 -112 C148 -94 140 -84 130 -80Z" fill="#ecd2c4"/><ellipse cx="156" cy="-92" rx="2.8" ry="2" fill="#7a5a4c"/>
+   <path d="M102 -148 C94 -184 124 -200 144 -178 C128 -184 116 -172 118 -146Z" fill="#efe2bc"/><path d="M144 -178 C148 -184 146 -190 142 -192 C138 -186 138 -182 144 -178Z" fill="#c8b480"/>
+   <circle cx="116" cy="-146" r="3.4" fill="#c0202a"/>
+   ${A('rock:5:1.4:80:-134',`<path d="M82 -136 C56 -150 40 -146 36 -130 C44 -118 66 -122 84 -126Z" fill="${cream}"/><path d="M78 -134 C60 -142 48 -140 46 -131 C52 -125 66 -127 80 -129Z" fill="${pink}"/><path d="M82 -136 C56 -150 40 -146 36 -130" fill="none" stroke="${deep}" stroke-width="1.4"/>`)}
+   ${eye}${gar}
+   <path d="M86 -100 C84 -78 92 -54 102 -40" fill="none" stroke="${shade}" stroke-width="12" stroke-linecap="round" opacity=".7"/>
+   <path d="M84 -108 L100 -78" stroke="#b8202a" stroke-width="5" stroke-linecap="round"/>${bells}</g>`; }
+
+/* Whisper trail: soft golden motes drift from point 1 (the ear) to point 2 (the Shivling), as a stream, with a glowing thread that draws itself.
+   delay = secs into the shot when it begins. A sound-less, light-only effect for "the whisper reaches Mahadev". */
+function whisperTrail(x1,y1,x2,y2,delay,n){ n=n||14; delay=delay||0; const dx=x2-x1, dy=y2-y1, mx=(x1+x2)/2, my=Math.min(y1,y2)-70;
+  let o=A(`fadein:${delay.toFixed(2)}:1.2`,`<path d="M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}" fill="none" stroke="#ffe7a8" stroke-width="7" opacity=".28" filter="url(#b4)"/><path d="M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}" fill="none" stroke="#fff3c4" stroke-width="1.6" stroke-dasharray="2 7" stroke-linecap="round" opacity=".8"/>`);
+  for(let i=0;i<n;i++){ const k=i/n, ox=Math.sin(i*2.1)*7, oy=Math.cos(i*1.7)*6; o+=A(`fadein:${(delay+k*1.2).toFixed(2)}:.6`, A(`drift:${r1(dx)}:${r1(dy)}:${(3.2+k*1.2).toFixed(2)}`,`<g transform="translate(${r1(x1+ox)} ${r1(y1+oy)})"><circle r="${r1(10+k*5)}" fill="url(#gw)"/><circle r="${r1(2+k*2)}" fill="#fff6d8"/></g>`)); }
+  return o+A(`pop:${(delay+1.4).toFixed(2)}`,A('pulse:1.8',`<circle cx="${x2}" cy="${y2}" r="46" fill="url(#gw)" opacity=".9"/>`)); }
+
+/* Forest river bank at dawn (soft teal + green + gold). Layers: riverSky() / riverFar() / riverBank(y). */
+function riverSky(){ return skyBand([[0,'#2a5a6e'],[.45,'#7ab5a8'],[.75,'#f4d796'],[1,'#fbe6b0']])+`<circle cx="360" cy="560" r="170" fill="url(#gw)" opacity=".85"/><circle cx="360" cy="560" r="38" fill="#fff6d8"/>`; }
+function riverFar(){ let o=hills(600,50,'#5c9a8a',120)+`<rect y="570" width="540" height="90" fill="url(#fogW)" opacity=".7"/>`; for(let i=0;i<9;i++){ const x=-10+i*66+rnd()*20, h=170+rnd()*90; o+=`<rect x="${r1(x)}" y="${r1(640-h)}" width="9" height="${r1(h)}" fill="#2e5a4c"/><ellipse cx="${r1(x+4)}" cy="${r1(640-h)}" rx="46" ry="34" fill="#3e7a62"/><ellipse cx="${r1(x+16)}" cy="${r1(640-h+16)}" rx="34" ry="24" fill="#4a8a6e"/>`; } return o; }
+function riverBank(y){ let rip=''; for(let i=0;i<12;i++){ const rx=rnd()*500+20, ry=y-170+rnd()*130; rip+=A('flick:'+(1.5+rnd()*2).toFixed(2),`<path d="M${r1(rx)} ${r1(ry)} q14 -5 28 0" stroke="#f6f0d0" stroke-width="2" fill="none" opacity=".75"/>`); }
+  return `<path d="M0 ${y-210} L540 ${y-210} L540 ${y-40} Q270 ${y-70} 0 ${y-30}Z" fill="#5aa6a0"/><path d="M0 ${y-210} L540 ${y-210} L540 ${y-150} L0 ${y-150}Z" fill="#9ad2c0" opacity=".6"/>`+
+   `<ellipse cx="360" cy="${y-180}" rx="140" ry="9" fill="#fff0c0" opacity=".55"/><ellipse cx="360" cy="${y-150}" rx="80" ry="6" fill="#fff0c0" opacity=".4"/>`+rip+
+   `<path d="M0 ${y} Q130 ${y-34} 280 ${y-22} T540 ${y-30} L540 1000 L0 1000Z" fill="#6a5a3c"/><path d="M0 ${y} Q130 ${y-34} 280 ${y-22} T540 ${y-30}" stroke="#a89060" stroke-width="3" fill="none"/>`+tufts(y-10,'#3e7a3a',40)+flowers(y,12); }
+
+/* Hermitage (ashram) hut: thatched roof, mud walls, door glow, tulsi plant and a small havan fire. */
+function ashramHut(x,y,s){ s=s||1; return `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-90" y="-100" width="180" height="100" fill="#b8825a"/><rect x="-90" y="-100" width="180" height="100" fill="#000" opacity=".08"/>
+  <path d="M-124 -92 L0 -190 L124 -92Z" fill="#8a6a2a"/><path d="M-124 -92 L0 -190 L124 -92" fill="none" stroke="#5a4418" stroke-width="3"/>${[-90,-60,-30,0,30,60,90].map(k=>`<path d="M${k} -${100+ (190-100)*(1-Math.abs(k)/124)*0 } l${k*.3} -${(1-Math.abs(k)/124)*85}" stroke="#a88a40" stroke-width="2" opacity=".6"/>`).join('')}
+  <path d="M-26 0 L-26 -62 Q0 -86 26 -62 L26 0Z" fill="#2a1408"/><ellipse cx="0" cy="-28" rx="30" ry="40" fill="url(#saf)" opacity=".8"/><rect x="-92" y="-6" width="184" height="8" fill="#8a6a44"/>
+  <g transform="translate(-130 0)"><rect x="-10" y="-12" width="20" height="12" fill="#a8603a"/><path d="M0 -12 q-14 -14 -4 -28 q4 12 4 14 q0 -16 10 -22 q-2 18 -6 36Z" fill="#3e8a3a"/></g></g>`; }
+
+/* Nandi seen from BEHIND (seated, facing away toward the sanctum): round white back, red-and-gold cloth, two ears and curved horns, tail. Ground at y. */
+function nandiBack(x,y,s){ s=s||1; const cream='#f6f1e6', shade='#dcd2c0', deep='#c4b8a4';
+  return `<g transform="translate(${r1(x)} ${r1(y)}) scale(${s})"><ellipse cx="0" cy="2" rx="120" ry="12" fill="#000" opacity=".3"/>
+   <ellipse cx="-62" cy="-18" rx="46" ry="20" fill="${shade}"/><ellipse cx="62" cy="-18" rx="46" ry="20" fill="${shade}"/>
+   <path d="M-104 -4 C-118 -60 -92 -128 -40 -142 C-14 -148 14 -148 40 -142 C92 -128 118 -60 104 -4Z" fill="${cream}"/>
+   <path d="M-104 -4 C-112 -40 -104 -80 -84 -108 C-70 -60 -60 -30 -50 -4Z" fill="${shade}" opacity=".7"/>
+   <path d="M-46 -142 C-30 -170 30 -170 46 -142 C30 -134 -30 -134 -46 -142Z" fill="${cream}"/>
+   <path d="M-84 -112 C-50 -128 50 -128 84 -112 L92 -50 C50 -38 -50 -38 -92 -50Z" fill="#b8202a"/><path d="M-84 -112 C-50 -128 50 -128 84 -112 M-92 -50 C-50 -38 50 -38 92 -50" fill="none" stroke="url(#gold)" stroke-width="4"/>
+   ${[-60,-30,0,30,60].map(a=>`<circle cx="${a}" cy="-82" r="3.6" fill="#ffd25e"/>`).join('')}<path d="M-14 -96 L0 -66 L14 -96Z" fill="#ffd25e" opacity=".85"/>
+   <ellipse cx="0" cy="-172" rx="30" ry="34" fill="${cream}"/>
+   <ellipse cx="-44" cy="-178" rx="22" ry="9" transform="rotate(-18 -44 -178)" fill="${cream}"/><ellipse cx="44" cy="-178" rx="22" ry="9" transform="rotate(18 44 -178)" fill="${cream}"/>
+   <ellipse cx="-42" cy="-178" rx="12" ry="4.5" transform="rotate(-18 -42 -178)" fill="#e8a8a0"/><ellipse cx="42" cy="-178" rx="12" ry="4.5" transform="rotate(18 42 -178)" fill="#e8a8a0"/>
+   <path d="M-24 -192 C-48 -214 -50 -240 -30 -250 C-40 -232 -34 -214 -18 -200Z" fill="#efe2bc"/><path d="M24 -192 C48 -214 50 -240 30 -250 C40 -232 34 -214 18 -200Z" fill="#efe2bc"/>
+   <path d="M-34 -150 Q0 -128 34 -150" fill="none" stroke="#ffc83a" stroke-width="9" stroke-linecap="round" stroke-dasharray="1 9"/>
+   ${A('rock:6:1.2:0:-60','<path d="M0 -60 C6 -40 6 -18 0 -4" fill="none" stroke="'+cream+'" stroke-width="7" stroke-linecap="round"/><path d="M-5 -8 q5 12 10 0Z" fill="#a89a84"/>')}</g>`; }

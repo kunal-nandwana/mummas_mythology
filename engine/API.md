@@ -27,7 +27,8 @@ All scene fields are functions: `art:()=>svg`.
 - `expr`: calm, smile, serene, sad, angry, surprise.
 
 ## Characters (engine/characters.js)
-BARBARIK KRISHNA BRAHMIN ARJUNA BHIMA YUDHISHTHIRA NAKULA SAHADEVA GHATOTKACH MOTHER DEVI SITA RAMA SHIVA MAHAKAL DUSHAN ASURA RISHI SOLDIER VILLAGER DEVOTEE_F CHANDRA DAKSHA ROHINI NAKSHATRA (recolour: `{c:NAKSHATRA, with:{top,bottom,veil}}`) INDRA DEVA INDRADYUMNA VISHWAKARMA PUJARI.
+BARBARIK KRISHNA BRAHMIN ARJUNA BHIMA YUDHISHTHIRA NAKULA SAHADEVA GHATOTKACH MOTHER DEVI SITA RAMA SHIVA MAHAKAL DUSHAN ASURA RISHI SOLDIER VILLAGER DEVOTEE_F CHANDRA DAKSHA ROHINI NAKSHATRA (recolour: `{c:NAKSHATRA, with:{top,bottom,veil}}`) INDRA DEVA INDRADYUMNA VISHWAKARMA PUJARI NANDI NANDI_SADHAK.
+**NANDI** = Nandi as a 7-year-old boy (bare chest, white dhoti, top-knot, tilak, rudraksha; use `s` .6-.8 next to adults). **NANDI_SADHAK** = same boy with a marigold garland (tapasya). The grown white bull is a scene piece, see below.
 **INDRADYUMNA** = King of Puri (tall gold crown, maroon + gold, dark cape; use `namaste`). **VISHWAKARMA** = divine craftsman (bare chest, cream dhoti, ochre shoulder cloth, white beard, hair bun; give `props:{front:'mallet'}`). **PUJARI** = Puri temple priest (shaven head, white dhoti, sacred thread); Nabakalebara look: `with:{blindfold:true}` + `props:{front:'heartCloth'}` or `'cloth'`.
 **SHIVA** = Mahadev (topknot jata with Ganga + crescent, third eye, ash stripes, Vasuki, tiger skin, rudraksha, broad build). The third eye is a closed mark and opens by itself when `expr:'angry'`; or `thirdAt:secs` opens it at that time. **MAHAKAL** = fierce Shiva (flaming jata, red aura): use for the Mahakal/Rudra scenes. **DUSHAN** = horned, tusked asura with iron armour (give `props:{front:'axe'}`), **ASURA** = smaller demon soldier. They look nothing like YAMRAJ/DEVA.
 Costume keys for `with`: head(+mahadev|demon) bare ash snake tiger rudra third tusks spikes eyeCol fireHair blindfold(true|'#colour': cloth band over the eyes, knot + loose ends) skin top bottom shin foot sleeve skirt trim hair(long|bun|none) head(crown|feather|turban|band|big|jata|none) beard mus cape quiver garland sash veil turban tilak earring big aura(gw|saf|gr|gb|gg) jewel crescent.
@@ -41,6 +42,9 @@ Talking characters nod/gesture automatically; capes, veils, hair, garlands sway 
 
 ## Props (`props:{front:'bow'}`)
 bow (+arrow with bowDraw) mace axe(double-bladed) staff lantern diya lotus trishul sword arrows3 orb chakra flute mallet(wooden mallet + chisel) cloth(both hands wrapped in thick white cloth) heartCloth(the same, with a golden-pink light beating inside; the object itself is never shown). Use `cloth`/`heartCloth` with pose `offer`.
+
+## Shiv temple + Nandi pieces (scenes.js, all return SVG; used by nandi-kaan-mannat-short-form)
+`nandiBull(x,y,s,{flip,eyes:'closed',garland})` seated white bull with garland, bells, red-gold cloth, big ear (faces right) · `nandiBack(x,y,s)` the same seen from behind · `shivling(x,y,s)` · `sanctum(x,y,s)` stone doorway with glow, Shivling and lamps inside · `shikhara(x,y,w,h,col,lit)` temple tower · `diyaRow(x1,x2,y,n,s)` flickering lamps · `marigoldString(x1,y1,x2,y2,sag,n)` · `whisperTrail(x1,y1,x2,y2,delay,n)` golden motes stream from one point to another (light-only "prayer reaches Mahadev") · `riverSky() riverFar() riverBank(y)` forest river at dawn (teal + green + gold) · `ashramHut(x,y,s)` · `skyBand([[offset,col],...])` own vertical sky gradient (unique id per call, safe).
 
 ## Scenes (engine/scenes.js; all return SVG)
 - Base: `nightBase({moon:[x,y,r],fort:[x,y,s],camps:y,gy,hillsY})`, `warSky(sunY,r)`, `divine(cx,cy,col,ray)` (rays; skyDiv bg), `palace(y,tone)` / `palaceBack`+`palaceMid`+`palaceFloor`, `field('erase'|'mark'|'save')` (army)
