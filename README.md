@@ -16,6 +16,14 @@ style-test-short-form/       style test, 9:16
 style-test-long-form/        style test, 16:9
 ```
 
+## Pacing check (before rendering)
+
+```
+node tools/timeline.js <topic>     writes <topic>/preview/timeline.json + prints shot lengths, reading speed (words/s), caption length, sfx cues outside their shot, monotone runs
+```
+
+Suggested order for a new video: `check.js` (story errors), `timeline.js` (rhythm), then build and a contact sheet. Look at 2-4 key shots first and approve the look before polishing all of them.
+
 ## Viewing
 
 - Open any `index.html` in Chrome. Add `?shot=N` to jump to one shot, `?notext=1` to hide captions, or `?clean=1` to hide the controls.
