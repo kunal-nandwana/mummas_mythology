@@ -25,7 +25,7 @@ const E=(m)=>errors.push(m), W=(m)=>warns.push(m);
 const ctx={ console:{log(){},warn(m){ if(String(m).startsWith('unknown pose')) E('engine: '+m); },error(){}}, Math, Object, Array, String, Number, JSON };
 vm.createContext(ctx);
 try{
-  vm.runInContext(['timing.js','scenes.js','rig.js','characters.js'].map(f=>read(path.join(ENG,f))).join('\n'), ctx);
+  vm.runInContext(['timing.js','scenes.js','wide.js','rig.js','characters.js'].map(f=>read(path.join(ENG,f))).join('\n'), ctx);
 }catch(e){ console.error('engine failed to load: '+e.message); process.exit(2); }
 const known=(expr,def)=>{ try{ return vm.runInContext(expr,ctx); }catch(e){ return def; } };
 const POSES=known('POSES',{}), CHARS=known('Object.keys({})',[]);
@@ -35,7 +35,7 @@ const coreSrc=read(path.join(ENG,'core.js'));
 const MOODS=[...((coreSrc.match(/const MOODS=\{([\s\S]*?)\n\s*\};?/)||['',''])[1]).matchAll(/(?:^|[\s,{])([a-z]+):\{/g)].map(m=>m[1]);
 const GRADS=new Set([...(coreSrc+read(path.join(ENG,'scenes.js'))).matchAll(/id=["']([A-Za-z0-9_]+)["']/g)].map(m=>m[1]));
 
-const TRANS=['cut','fade','glow','whip','zoom','iris','wipe','flash','dip'];
+const TRANS=['cut','fade','dissolve','glow','whip','zoom','iris','wipe','flash','dip'];
 const FX=['dust','embers','sparks','stars','flies','petals'];
 const CAMS=['in','out','panL','panR','up','down','still'];
 const EXPRS=['calm','smile','serene','sad','angry','surprise'];
@@ -51,6 +51,7 @@ catch(e){
 }
 if(!CFG){ console.log('✗ story.js must call VIDEO({...})'); process.exit(1); }
 const shots=CFG.shots||[];
+const LONGF=CFG.format==='long', DW=LONGF?960:540;
 if(!shots.length) E('no shots');
 
 /* 3) options on the whole video */
@@ -63,7 +64,8 @@ if(CFG.music==='scenes' && shots.some(s=>!s.scene)) W('music:\'scenes\' but some
 const bad=(arr,v)=>v && !arr.includes(v);
 shots.forEach((s,i)=>{
   const n=i+1, P=m=>`shot ${n}: ${m}`;
-  if(!s.line && !CFG.opening) W(P('no line (silent shot).'));
+  if(!s.line && !CFG.opening && !s.chapter) W(P('no line (silent shot).'));
+  if(s.chapter && !(s.chapter.no>0 && s.chapter.name)) E(P('chapter needs {no, name}'));
   if(s.tr && !TRANS.includes(s.tr)) E(P(`unknown transition "${s.tr}" (${TRANS.join(', ')})`));
   if(typeof s.fx==='string' && bad(FX,s.fx)) E(P(`unknown fx "${s.fx}" (${FX.join(', ')})`));
   if(typeof s.cam==='string' && bad(CAMS,s.cam)) E(P(`unknown camera preset "${s.cam}" (${CAMS.join(', ')})`));
@@ -79,7 +81,7 @@ shots.forEach((s,i)=>{
     [...svg.matchAll(/url\(#([A-Za-z0-9_]+)\)/g)].forEach(m=>{ if(GRADS.size && !GRADS.has(m[1]) && !svg.includes(`id="${m[1]}"`)) W(P(`${k}() uses gradient #${m[1]} that is not defined in the engine`)); });
     if(/NaN|undefined/.test(svg)) E(P(`${k}() produced "NaN" or "undefined" in the SVG (a wrong number or missing argument)`));
   });
-  if(!s.art && !s.sky && !s.mid && !s.far) W(P('no background (art / sky / mid).'));
+  if(!s.art && !s.sky && !s.mid && !s.far && !s.chapter) W(P('no background (art / sky / mid).'));
 
   /* cast */
   (s.cast||[]).forEach((c,ci)=>{
@@ -87,8 +89,8 @@ shots.forEach((s,i)=>{
     if(!c.c || typeof c.c!=='object') { E(P(`${who}: "c" must be a character like KRISHNA`)); return; }
     if(typeof c.x!=='number'||typeof c.y!=='number') E(P(`${who}: needs x and y numbers`));
     else{
-      if(c.x<-60||c.x>600) { if(!c.walk && !c.enter) W(P(`${who}: x=${c.x} is off-screen (0-540)`)); }
-      if(c.y<400||c.y>1000) W(P(`${who}: feet y=${c.y} is unusual (normally 700-900)`));
+      if(c.x<-60||c.x>DW+60) { if(!c.walk && !c.enter) W(P(`${who}: x=${c.x} is off-screen (0-${DW})`)); }
+      if(LONGF ? (c.y<250||c.y>560) : (c.y<400||c.y>1000)) W(P(`${who}: feet y=${c.y} is unusual (normally ${LONGF?'380-450':'700-900'})`));
     }
     if(c.s!==undefined && !(c.s>0.2&&c.s<3)) W(P(`${who}: scale ${c.s} looks odd`));
     if(c.expr && !EXPRS.includes(c.expr)) E(P(`${who}: unknown expr "${c.expr}" (${EXPRS.join(', ')})`));
