@@ -1,15 +1,16 @@
 /* Thumbnail for "परशुराम जी ने रावण का वध क्यों नहीं किया?" : one still frame (render with .kiro/artifacts/screenshots/thumb.js) */
 const lay = mk => ({ sky:()=>mk().sky(), far:()=>mk().far(), mid:()=>mk().mid(), near:()=>mk().near() });
 const TXT = (y,size,t,col) => `<text x="480" y="${y}" text-anchor="middle" font-size="${size}" style="font-family:'Mukta',sans-serif;font-weight:800;paint-order:stroke;stroke:#1a0a05;stroke-width:${size*.2}px;stroke-linejoin:round" fill="${col}">${t}</text>`;
+/* clean YouTube thumbnail: fiery red storm sky, two big full-body characters with thick dark outlines, huge short text in the middle (text + outlines are added by thumb.js) */
 VIDEO({
-  title:'thumbnail', format:'long', target:3, music:false, sfx:false, ending:0, handheld:0, look:{rim:1.3,bokeh:.6,motes:1,warm:.06,vig:.1},
+  title:'thumbnail', format:'long', target:3, music:false, sfx:false, ending:0, handheld:0, look:{rim:.8,bokeh:0,motes:0,warm:0,vig:.05},
   shots:[
-    { line:`परशुराम रावण`, nocap:true, dur:3, mood:'hope', cam:'fit',
-      ...lay(()=>vardanSky({gx:480,gy:300})),
-      art:()=>`<defs><linearGradient id="thb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a0410" stop-opacity="0"/><stop offset="1" stop-color="#0a0410" stop-opacity=".92"/></linearGradient></defs>`+
-        wglow(480,300,260,'#ff8a2a',.55)+wglow(760,250,200,'#ffb060',.5)+wglow(190,250,180,'#ffb060',.4)+wglow(480,300,120,'#fff0c0',.7)+wsparks(300,660,120,460,24,'#ffb45a'),
+    { line:`परशुराम रावण`, nocap:true, dur:3, cam:'fit',
+      art:()=>wsky([[0,'#2a0610'],[.4,'#8a1018'],[.75,'#e0381a'],[1,'#ffa030']])+wglow(480,470,520,'#ffb040',.75)+wglow(480,300,300,'#ff5a2a',.35)+
+        wclouds(70,'#3a0810',6,60,.6)+
+        wbolt(330,-20,420,6,0,'#ffe1a0')+wbolt(640,-20,420,8,2.2,'#ffe1a0')+wbolt(480,-20,150,9,4.6,'#fff0c0')+
+        wridge(470,40,'#1a0508',60)+wsparks(0,960,120,520,40,'#ffb45a'),
       cast:[
-        {c:PARSHURAM, x:185, y:640, s:1.5, expr:'angry', props:{front:'parashu'}, acts:[[0,'stand'],[.1,'rage']], gesture:false},
-        {c:RAVAN, x:745, y:640, s:1.3, flip:true, expr:'angry', props:{front:'khadga'}, acts:[[0,'stand'],[.1,'rage']], gesture:false} ],
-      front:()=>A('pulse:2',`<g transform="translate(520 120)">${wglow(0,0,110,'#ffd98a',.5)}<text text-anchor="middle" y="58" font-size="170" style="font-family:'Tiro',serif" fill="url(#gold)" stroke="#2a1000" stroke-width="7" paint-order="stroke">?</text></g>`) }
+        {c:PARSHURAM, x:190, y:540, s:1.1, expr:'angry', props:{front:'parashu'}, acts:[[0,'stand'],[.1,'armUp']], gesture:false},
+        {c:RAVAN, x:790, y:528, s:1.1, flip:true, expr:'angry', props:{front:'khadga'}, acts:[[0,'stand'],[.1,'fist']], gesture:false} ] }
   ] });
