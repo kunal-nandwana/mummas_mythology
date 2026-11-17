@@ -49,205 +49,356 @@ const MITRA = { c: RISHI, with: { top: '#efe9da', bottom: '#efe9da', big: true, 
 const VARUN = { c: RISHI, with: { top: '#a8461e', bottom: '#a8461e', beard: 'black', skin: '#7a4e34', head: 'turban', turban: '#efe9da', sash: '#e5b324' } };
 const PETAL = (x, y, d) => A('drift:30:200:5.5', `<path transform="translate(${x} ${y}) rotate(25)" d="M0 -8 Q7 -2 0 9 Q-7 -2 0 -8Z" fill="#ffd2d8"/><circle cx="${x}" cy="${y}" r="16" fill="url(#gw)" opacity=".5"/>`);
 
+
+/* ---------- animation style v2 (same language as parshuram-ravan-vadh-long-form) ----------
+   short shots, every line gets wide -> medium -> face close-up, dissolve/glow cuts, drifting mist, rising sparks, slow mandalas */
+/* split one long script line into several shots (cuts only at spaces after the given phrases), each part with its own picture */
+const SPLIT = (text, cuts, parts) => { const bits = []; let rest = text; cuts.forEach(c => { const i = rest.indexOf(c); if (i < 0) throw new Error('SPLIT cut not found: ' + c); bits.push(rest.slice(0, i + c.length).trim()); rest = rest.slice(i + c.length).trim(); }); bits.push(rest); if (bits.length !== parts.length) throw new Error('SPLIT parts mismatch'); return parts.map((p, k) => Object.assign({ line: bits[k] }, p)); };
+const MISTD = (y, op, per) => A('drift:-300:0:' + (per || 18), `<rect x="-120" y="${y}" width="780" height="120" fill="url(#fogW)" opacity="${op || .5}"/>`);                       // slow drifting mist band
+const EMB = (x1, x2, y, n, col) => [...Array(n)].map((_, i) => A(`drift:${(i % 3 - 1) * 18}:${-90 - (i % 4) * 22}:${(4 + (i % 5) * .8).toFixed(1)}`, `<circle cx="${x1 + ((i * 83) % (x2 - x1))}" cy="${y - (i * 37) % 70}" r="${1.6 + (i % 3)}" fill="${col || '#ffd890'}" opacity=".85"/>`)).join('');   // rising sparks
+const MAND = (x, y, r, col, petals, per, op) => A(`spin:${per}:${x}:${y}`, `<g transform="translate(${x} ${y})" opacity="${op || .4}">` + [...Array(petals)].map((_, i) => `<path transform="rotate(${i * 360 / petals})" d="M0 ${-r * .3} Q${r * .13} ${-r * .65} 0 ${-r} Q${-r * .13} ${-r * .65} 0 ${-r * .3}Z" fill="none" stroke="${col}" stroke-width="2"/>`).join('') + `<circle r="${r * 1.02}" fill="none" stroke="${col}" stroke-width="1.5"/><circle r="${r * .3}" fill="none" stroke="${col}" stroke-width="1.5"/></g>`);   // slowly turning mandala
+const GLOW = (x, y, r, op, at) => A(`fadein:${at || 0}:1.6`, `<circle cx="${x}" cy="${y}" r="${r}" fill="url(#gw)" opacity="${op}"/>`);
+const SHAFT = () => A('pulse:.35', `<path d="M120 0 L250 0 L170 800 L40 800Z M330 0 L430 0 L400 800 L300 800Z" fill="#fff6d0" opacity=".08"/>`);
+const DEV = o => ({ ...COMMON, x: 215, y: 812, s: .72, expr: 'serene', acts: [[0, 'pranam']], ...o });         // the whispering devotee
+const NS = o => ({ c: NANDI, expr: 'smile', acts: [[0, 'stand']], ...o });                                  // Nandi the boy
+const SH = o => ({ ...SHILAD, expr: 'smile', acts: [[0, 'kneelPray']], ...o });                            // Shilad
+
 VIDEO({
-  title: 'नंदी के कान में मन्नत', format: 'short', target: 135,
-  music: 'scenes',
-  handheld: .4,
+  title: 'नंदी के कान में मन्नत', format: 'short', target: 142,
+  music: 'scenes', sfx: true, ending: 3.6, handheld: .6, minShot: 2.4, pace: 13,
+  look: { rim: 1, bokeh: .9, motes: 1, warm: .1, vig: .12 },
   keywords: ['नंदी', 'शिव मंदिर', 'महादेव', 'शिलाद', 'मित्र', 'वरुण', 'शिव पुराण', 'वरदान', 'गणाध्यक्ष', 'द्वारपाल', 'शिवलिंग', 'मन्नत', 'कान', 'हर हर महादेव'],
   shots: [
-    /* 1 — a child's-eye start: low among the diyas, the camera rises and pulls back; a devotee whispers to Nandi */
-    { line: 'क्या आपने कभी शिव मंदिर में किसी भक्त को नंदी के पास झुककर उनके कान में धीरे से कुछ फुसफुसाते हुए देखा है?', scene: 'temple-dusk', mood: 'calm', fx: 'dust', capTop: 330,
-      cam: { keys: [[0, 270, 720, 1.2], [3, 270, 660, 1.1], [5.7, 270, 640, 1.0]] },
-      ...TEMPLE({ nx: 200, ns: .8, crowd: true, pillars: true }),
-      cast: [{ ...COMMON, x: 215, y: 812, s: .72, expr: 'serene', acts: [[0, 'stand'], [1.0, 'pranam', .9]] }] },
+    /* ===== 1. the question ===== */
+    ...SPLIT('क्या आपने कभी शिव मंदिर में किसी भक्त को नंदी के पास झुककर उनके कान में धीरे से कुछ फुसफुसाते हुए देखा है?', ['शिव मंदिर में', 'झुककर'], [
+      /* crane up from a lamp flame (new opening: macro lamp -> temple reveal) */
+      { scene: 'temple-dusk', mood: 'calm', fx: 'dust', capTop: 330,
+        cam: { keys: [[0, 70, 930, 2.8], [2.2, 270, 760, 1.2], [3.2, 270, 700, 1.05]] },
+        ...TEMPLE({ nx: 200, ns: .8, crowd: true, pillars: true, near: () => TNEAR() + EMB(20, 520, 940, 10) }),
+        cast: [DEV({ x: 215, s: .72 })] },
+      { scene: 'temple-dusk', mood: 'calm', fx: 'dust', capTop: 330, tr: 'dissolve',
+        cam: { keys: [[0, 300, 720, 1.05], [3, 235, 690, 1.5]] },
+        ...TEMPLE({ nx: 200, ns: .8, crowd: true, pillars: true }),
+        cast: [DEV({ x: 215, acts: [[0, 'stand'], [.4, 'pranam', .9]] })] },
+      { scene: 'whisper-closeup', mood: 'calm', fx: 'dust', capTop: 150, tr: 'fade',
+        cam: { keys: [[0, 245, 665, 1.6], [3.4, 255, 655, 2.15]] },
+        ...TEMPLE({ nx: 220, ns: .9, sky: MOONSKY, pillars: true }),
+        cast: [DEV({ x: 240, y: 830, talk: true, eyes: 'closed' })] }
+    ]),
 
-    /* 2 — the whisper close-up (must-have): the devotee at Nandi's ear */
-    { line: 'वह अपनी मनोकामना महादेव तक पहुँचाना चाहता है,', scene: 'whisper-closeup', mood: 'calm', fx: 'dust', capTop: 150, tr: 'fade',
-      cam: { keys: [[0, 270, 690, 1.15], [2.5, 285, 680, 1.25]] },
-      ...TEMPLE({ nx: 220, ns: .9, sky: MOONSKY, crowd: true }),
-      cast: [{ ...COMMON, x: 240, y: 830, s: .72, expr: 'serene', talk: true, eyes: 'closed', acts: [[0, 'pranam']] }] },
+    { line: 'वह अपनी मनोकामना महादेव तक पहुँचाना चाहता है,', scene: 'whisper-closeup', mood: 'calm', fx: 'dust', capTop: 150, tr: 'dissolve',
+      cam: { keys: [[0, 330, 700, 1.0], [2.8, 270, 690, 1.35]] },
+      ...TEMPLE({ nx: 220, ns: .9, sky: MOONSKY, crowd: true, near: () => TNEAR() + EMB(100, 440, 940, 8) }),
+      cast: [DEV({ x: 240, y: 830, talk: true, eyes: 'closed' })] },
 
-    /* 3 — Nandi stares ahead at the Shivling (the whisper goes in; he does not move) */
-    { line: 'और नंदी—जिनके कान में वह अपनी बात कह रहा है—चुपचाप सामने स्थित शिवलिंग की ओर एकटक देख रहे होते हैं।', scene: 'nandi-gaze', mood: 'calm', fx: 'dust', capTop: 170, tr: 'fade',
-      cam: { keys: [[0, 230, 700, 1.15], [3, 270, 700, 1.08], [5.2, 330, 700, 1.0]] },
-      ...TEMPLE({ nx: 190, ns: .85, pillars: true }),
-      cast: [{ ...COMMON, x: 210, y: 830, s: .72, expr: 'serene', eyes: 'closed', acts: [[0, 'pranam'], [3.4, 'namaste', .8]] }],
-      front: () => A('fadein:3:3', `<ellipse cx="430" cy="690" rx="90" ry="120" fill="url(#gw)" opacity=".35"/>`) },
+    /* Nandi's calm eye, then the gaze travels to the Shivling */
+    ...SPLIT('और नंदी—जिनके कान में वह अपनी बात कह रहा है—चुपचाप सामने स्थित शिवलिंग की ओर एकटक देख रहे होते हैं।', ['है—चुपचाप'], [
+      { scene: 'nandi-gaze', mood: 'calm', fx: 'dust', capTop: 170, tr: 'dissolve',
+        cam: { keys: [[0, 280, 700, 1.4], [3.2, 258, 700, 2.1]] },
+        ...TEMPLE({ nx: 190, ns: .85, pillars: true }),
+        cast: [DEV({ x: 210, y: 830, eyes: 'closed' })] },
+      { scene: 'nandi-gaze', mood: 'calm', fx: 'dust', capTop: 170, tr: 'fade',
+        cam: { keys: [[0, 255, 700, 1.4], [3.4, 400, 700, 1.55]] },
+        ...TEMPLE({ nx: 190, ns: .85, pillars: true }),
+        cast: [DEV({ x: 210, y: 830, eyes: 'closed' })],
+        front: () => A('pulse:1.8', `<ellipse cx="430" cy="690" rx="90" ry="120" fill="url(#gw)" opacity=".45"/>`) + EMB(380, 480, 760, 6) }
+    ]),
 
-    /* 4 — why? */
     { line: 'आखिर ऐसा क्यों होता है?', scene: 'temple-dusk', mood: 'calm', fx: 'embers', capTop: 130, tr: 'zoom',
-      cam: { from: [270, 600, 1.15], to: [270, 700, 1.0] },
+      cam: { keys: [[0, 270, 560, 1.25], [2.2, 270, 700, 1.0]] },
       sky: MOONSKY, far: () => shikhara(270, 780, 320, 600, '#2e1a28', '#d08a3a') + shikhara(60, 760, 110, 220, '#26162a', '#a8683a') + shikhara(490, 760, 110, 220, '#26162a', '#a8683a') + `<rect y="700" width="540" height="100" fill="url(#fogW)" opacity=".7"/>`,
-      mid: () => marigoldString(0, 640, 540, 620, 26, 16), art: () => TFLOOR() + diyaRow(60, 480, 860, 7, 1.4) },
+      mid: () => marigoldString(0, 640, 540, 620, 26, 16) + MISTD(690, .5, 14), art: () => TFLOOR() + diyaRow(60, 480, 860, 7, 1.4) },
 
-    /* 5 — begin the legend: soft glow, pull to the past */
     { line: 'इसे समझने के लिए नंदी के बचपन की इस पौराणिक कथा को सुनिए।', scene: 'legend-begins', mood: 'divine', fx: 'petals', capTop: 120, tr: 'glow',
-      cam: { from: [270, 600, 1.05], to: [270, 540, 1.0] },
-      sky: () => divine(270, 520, 'saf', '#ffd890'), far: () => hills(700, 40, '#4a2a3a', 130), art: () => ground(800, '#4a2a2a', '#c8903a') + diyaRow(120, 420, 830, 5, 1.4),
-      mid: () => A('rise:30:1.6:.3', pothi(270, 560, 1.15)) },
+      cam: { keys: [[0, 270, 640, 1.0], [3, 270, 560, 1.18]] },
+      sky: () => divine(270, 520, 'saf', '#ffd890') + MAND(270, 520, 230, '#ffd98a', 16, 120, .35), far: () => hills(700, 40, '#4a2a3a', 130), art: () => ground(800, '#4a2a2a', '#c8903a') + diyaRow(120, 420, 830, 5, 1.4),
+      mid: () => A('rise:30:1.6:.3', pothi(270, 560, 1.15)) + EMB(60, 480, 800, 12) },
 
-    /* 6 — Shilad's severe tapasya in the forest, with a small fire */
-    { line: 'शिव पुराण के अनुसार, महर्षि शिलाद ने संतान प्राप्ति के लिए वर्षों तक भगवान शिव की कठोर तपस्या की।', scene: 'shilad-tapasya', mood: 'calm', fx: 'dust', capTop: 330, tr: 'fade',
-      cam: { from: [270, 600, 1.0], to: [260, 620, 1.08] },
-      sky: ASH_SKY, far: ASH_FAR, mid: () => `<ellipse cx="270" cy="830" rx="150" ry="16" fill="#3a2410" opacity=".4"/>` + fire(380, 826, 1.6), art: ASH_GND,
-      cast: [{ ...SHILAD, x: 210, y: 850, s: .85, expr: 'serene', eyes: 'closed', acts: [[0, 'kneelPray']] }] },
+    /* ===== 2. Shilad's tapasya: years pass (dusk -> night), then a face close-up ===== */
+    ...SPLIT('शिव पुराण के अनुसार, महर्षि शिलाद ने संतान प्राप्ति के लिए वर्षों तक भगवान शिव की कठोर तपस्या की।', ['महर्षि शिलाद', 'वर्षों तक'], [
+      { scene: 'shilad-tapasya', mood: 'calm', fx: 'dust', capTop: 330, tr: 'dissolve',
+        cam: { keys: [[0, 270, 620, 1.0], [3, 285, 650, 1.12]] },
+        sky: ASH_SKY, far: ASH_FAR, mid: () => ASH_MID() + MISTD(740, .5, 16), art: ASH_GND,
+        cast: [SH({ x: 320, y: 850, s: .7, expr: 'serene', eyes: 'closed' })] },
+      { scene: 'shilad-tapasya', mood: 'calm', fx: 'embers', capTop: 330, tr: 'dissolve',
+        cam: { keys: [[0, 270, 660, 1.1], [3, 235, 650, 1.45]] },
+        sky: EVESKY, far: ASH_FAR, mid: () => `<ellipse cx="270" cy="830" rx="150" ry="16" fill="#3a2410" opacity=".4"/>` + fire(380, 826, 1.6), art: ASH_GND,
+        cast: [SH({ x: 210, y: 850, s: .85, expr: 'serene', eyes: 'closed' })] },
+      { scene: 'shilad-tapasya', mood: 'calm', fx: 'embers', capTop: 150, tr: 'dissolve',
+        cam: { keys: [[0, 235, 650, 1.55], [3.2, 212, 625, 2.1]] },
+        sky: MOONSKY, far: ASH_FAR, mid: () => `<ellipse cx="270" cy="830" rx="150" ry="16" fill="#3a2410" opacity=".4"/>` + fire(380, 826, 1.6), art: ASH_GND,
+        cast: [SH({ x: 210, y: 850, s: .85, expr: 'serene', eyes: 'closed' })],
+        front: () => EMB(150, 420, 860, 10) }
+    ]),
 
-    /* 7 — Mahadev blesses him with a son: boon of light only */
-    { line: 'उनकी भक्ति से प्रसन्न होकर महादेव ने उन्हें एक पुत्र का वरदान दिया, जिनका नाम नंदी रखा गया।', scene: 'shiv-boon', mood: 'divine', fx: 'petals', capTop: 120, tr: 'glow',
-      cam: { from: [300, 640, 1.0], to: [285, 620, 1.05] }, focus: { at: 1.4, sound: 'shimmer', dur: 2.4, duck: .45 },
-      sky: () => divine(330, 560, 'gw'), far: () => hills(700, 40, '#4a3a5a', 130), art: ASH_GND,
-      cast: [{ ...SHILAD, x: 130, y: 850, s: .85, expr: 'smile', acts: [[0, 'kneelPray']] },
-             { c: SHIVA, x: 360, y: 860, s: .95, flip: true, expr: 'serene', acts: [[0, 'stand'], [1.2, 'bless', .8]], enter: { fade: 1.4, delay: .4 } },
-             { c: NANDI, x: 250, y: 880, s: .45, expr: 'smile', acts: [[0, 'namaste']], enter: { fade: 1.6, delay: 2.4, rise: 20 } }] },
+    /* ===== 3. the boon ===== */
+    ...SPLIT('उनकी भक्ति से प्रसन्न होकर महादेव ने उन्हें एक पुत्र का वरदान दिया, जिनका नाम नंदी रखा गया।', ['होकर', 'दिया,'], [
+      { scene: 'shiv-boon', mood: 'divine', fx: 'petals', capTop: 150, tr: 'glow',
+        cam: { keys: [[0, 215, 650, 1.5], [2.4, 212, 625, 1.9]] },
+        sky: () => divine(330, 560, 'gw') + MAND(330, 560, 240, '#fff3c4', 18, 110, .3), far: () => hills(700, 40, '#4a3a5a', 130), art: ASH_GND,
+        cast: [SH({ x: 210, y: 850, s: .85, expr: 'smile' })], front: () => GLOW(330, 560, 200, .5, .2) },
+      { scene: 'shiv-boon', mood: 'divine', fx: 'petals', capTop: 120, tr: 'dissolve',
+        cam: { from: [260, 660, 1.0], to: [300, 640, 1.18] }, focus: { at: 1.2, sound: 'shimmer', dur: 2.4, duck: .45 },
+        sky: () => divine(360, 560, 'gw') + MAND(360, 560, 250, '#fff3c4', 20, 100, .35), far: () => hills(700, 40, '#4a3a5a', 130), art: ASH_GND,
+        cast: [SH({ x: 130, y: 850, s: .85 }),
+               { c: SHIVA, x: 360, y: 860, s: .95, flip: true, expr: 'serene', acts: [[0, 'stand'], [1.0, 'bless', .8]], enter: { fade: 1.2, delay: .3 } }] },
+      { scene: 'shiv-boon', mood: 'divine', fx: 'petals', capTop: 120, tr: 'dissolve',
+        cam: { keys: [[0, 300, 720, 1.2], [3, 300, 710, 1.65]] },
+        sky: () => divine(300, 600, 'gw'), far: () => hills(700, 40, '#4a3a5a', 130), art: ASH_GND,
+        cast: [SH({ x: 120, y: 850, s: .8 }),
+               { c: SHIVA, x: 440, y: 860, s: .9, flip: true, expr: 'smile', acts: [[0, 'bless']] },
+               NS({ x: 300, y: 880, s: .6, acts: [[0, 'namaste']], enter: { fade: 1.2, delay: .3, rise: 20 } })],
+        front: () => EMB(200, 400, 860, 10, '#fff3c4') }
+    ]),
 
-    /* 8 — the two rishis arrive when Nandi is seven */
-    { line: 'जब नंदी सात वर्ष के हुए, तब मित्र और वरुण नामक दो ऋषि महर्षि शिलाद के आश्रम में पधारे।', scene: 'ashram-warm', mood: 'joy', fx: 'dust', capTop: 330, tr: 'wipe',
-      cam: { from: [250, 620, 1.0], to: [270, 630, 1.03] },
-      sky: ASH_SKY, far: ASH_FAR, mid: ASH_MID, art: ASH_GND,
-      cast: [{ ...SHILAD, x: 190, y: 870, s: .82, flip: false, expr: 'smile', acts: [[0, 'stand'], [3, 'namaste', .8]] },
-             { c: NANDI, x: 120, y: 880, s: .55, expr: 'smile', acts: [[0, 'stand']] },
-             { ...MITRA, x: 360, y: 880, s: .84, flip: true, expr: 'serene', walk: { from: 240, dur: 3 }, acts: [[0, 'stand'], [3.2, 'namaste', .8]] },
-             { ...VARUN, x: 470, y: 880, s: .78, flip: true, expr: 'serene', walk: { from: 250, dur: 3.2 }, acts: [[0, 'stand'], [3.4, 'namaste', .8]] }] },
+    /* ===== 4. the two rishis ===== */
+    ...SPLIT('जब नंदी सात वर्ष के हुए, तब मित्र और वरुण नामक दो ऋषि महर्षि शिलाद के आश्रम में पधारे।', ['हुए,'], [
+      { scene: 'ashram-warm', mood: 'joy', fx: 'dust', capTop: 330, tr: 'wipe',
+        cam: { keys: [[0, 270, 720, 1.15], [3, 285, 745, 1.5]] },
+        sky: ASH_SKY, far: ASH_FAR, mid: ASH_MID, art: ASH_GND,
+        cast: [SH({ x: 200, y: 870, s: .82, acts: [[0, 'stand']] }), NS({ x: 330, y: 880, s: .6, acts: [[0, 'stand']] })] },
+      { scene: 'ashram-warm', mood: 'joy', fx: 'dust', capTop: 330, tr: 'dissolve',
+        cam: { from: [250, 640, 1.0], to: [300, 640, 1.1] },
+        sky: ASH_SKY, far: ASH_FAR, mid: ASH_MID, art: ASH_GND,
+        cast: [SH({ x: 190, y: 870, s: .82, acts: [[0, 'stand'], [3, 'namaste', .8]] }),
+               NS({ x: 120, y: 880, s: .55 }),
+               { ...MITRA, x: 360, y: 880, s: .84, flip: true, expr: 'serene', walk: { from: 240, dur: 3 }, acts: [[0, 'stand'], [3.2, 'namaste', .8]] },
+               { ...VARUN, x: 470, y: 880, s: .78, flip: true, expr: 'serene', walk: { from: 250, dur: 3.2 }, acts: [[0, 'stand'], [3.4, 'namaste', .8]] }] }
+    ]),
 
-    /* 9 — they bless everyone but Nandi (soft, no fear) */
-    { line: 'जाते समय ऋषियों ने सभी को आशीर्वाद दिया, लेकिन नंदी को आशीर्वाद नहीं दिया।', scene: 'ashram-warm', mood: 'calm', fx: 'dust', capTop: 330, tr: 'fade',
-      cam: { from: [300, 640, 1.0], to: [270, 640, 1.02] },
-      sky: ASH_SKY, far: ASH_FAR, mid: ASH_MID, art: ASH_GND,
-      cast: [{ ...MITRA, x: 340, y: 880, s: .84, flip: true, expr: 'serene', acts: [[0, 'bless']] },
-             { ...VARUN, x: 450, y: 880, s: .78, flip: true, expr: 'serene', acts: [[0, 'stand'], [1, 'lookAway'], [2, 'stand']] },
-             { ...SHILAD, x: 215, y: 870, s: .82, expr: 'smile', acts: [[0, 'namaste']] },
-             { c: NANDI, x: 110, y: 880, s: .55, expr: 'calm', acts: [[0, 'stand'], [2.2, 'lookDown', .8]] }] },
+    ...SPLIT('जाते समय ऋषियों ने सभी को आशीर्वाद दिया, लेकिन नंदी को आशीर्वाद नहीं दिया।', ['दिया,'], [
+      { scene: 'ashram-warm', mood: 'calm', fx: 'dust', capTop: 330, tr: 'dissolve',
+        cam: { keys: [[0, 330, 660, 1.1], [3, 350, 650, 1.45]] },
+        sky: ASH_SKY, far: ASH_FAR, mid: ASH_MID, art: ASH_GND,
+        cast: [{ ...MITRA, x: 340, y: 880, s: .84, flip: true, expr: 'serene', acts: [[0, 'bless']] },
+               { ...VARUN, x: 450, y: 880, s: .78, flip: true, expr: 'serene', acts: [[0, 'stand'], [1, 'lookAway'], [2, 'stand']] },
+               SH({ x: 215, y: 870, s: .82, acts: [[0, 'namaste']] })] },
+      { scene: 'ashram-soft', mood: { base: 'calm', bri: .95, vig: .15 }, fx: 'dust', capTop: 150, tr: 'dissolve',
+        cam: { keys: [[0, 270, 690, 1.35], [3.2, 270, 655, 2.0]] },
+        sky: ASH_SKY, far: ASH_FAR, mid: ASH_MID, art: ASH_GND,
+        cast: [NS({ x: 270, y: 880, s: .85, expr: 'calm', acts: [[0, 'stand'], [1.4, 'lookDown', .8]] })] }
+    ]),
 
-    /* 10 — Shilad asks; the rishis answer with kind faces */
-    { line: 'जब शिलाद ने इसका कारण पूछा, तो ऋषियों ने बताया कि नंदी की आयु बहुत कम है और उनके जीवन का केवल एक वर्ष ही शेष बचा है।', scene: 'prophecy-soft', mood: { base: 'calm', bri: .95, vig: .15 }, fx: 'dust', capTop: 330, tr: 'fade',
-      cam: { from: [260, 630, 1.0], to: [300, 620, 1.1] },
-      sky: EVESKY, far: ASH_FAR, mid: () => ASH_MID() + fire(40, 830, 1.0), art: ASH_GND,
-      cast: [{ ...SHILAD, x: 190, y: 870, s: .84, expr: 'sad', acts: [[0, 'plead'], [4, 'grief', .8]] },
-             { ...MITRA, x: 360, y: 880, s: .84, flip: true, expr: 'calm', talk: true, acts: [[0, 'explain']] },
-             { ...VARUN, x: 470, y: 880, s: .78, flip: true, expr: 'sad', acts: [[0, 'stand'], [3, 'namaste', .8]] }],
-      front: () => PETAL(300, 300) + PETAL(420, 380) },
+    ...SPLIT('जब शिलाद ने इसका कारण पूछा, तो ऋषियों ने बताया कि नंदी की आयु बहुत कम है और उनके जीवन का केवल एक वर्ष ही शेष बचा है।', ['पूछा,', 'कम है'], [
+      { scene: 'prophecy-soft', mood: { base: 'calm', bri: .95, vig: .15 }, fx: 'dust', capTop: 150, tr: 'dissolve',
+        cam: { keys: [[0, 270, 690, 1.3], [2.8, 268, 640, 1.8]] },
+        sky: EVESKY, far: ASH_FAR, mid: ASH_MID, art: ASH_GND,
+        cast: [SH({ x: 270, y: 880, s: .9, expr: 'sad', acts: [[0, 'plead']] })] },
+      { scene: 'prophecy-soft', mood: { base: 'calm', bri: .95, vig: .15 }, fx: 'dust', capTop: 330, tr: 'dissolve',
+        cam: { from: [260, 640, 1.0], to: [330, 640, 1.25] },
+        sky: EVESKY, far: ASH_FAR, mid: () => ASH_MID() + fire(40, 830, 1.0), art: ASH_GND,
+        cast: [SH({ x: 170, y: 870, s: .84, expr: 'sad', acts: [[0, 'plead'], [3, 'grief', .8]] }),
+               { ...MITRA, x: 360, y: 880, s: .84, flip: true, expr: 'calm', talk: true, acts: [[0, 'explain']] },
+               { ...VARUN, x: 470, y: 880, s: .78, flip: true, expr: 'sad', acts: [[0, 'stand'], [2.4, 'namaste', .8]] }] },
+      /* one year left: the light dims, camera pulls away from the small boy */
+      { scene: 'prophecy-soft', mood: 'sad', fx: 'petals', capTop: 200, tr: 'dissolve',
+        cam: { keys: [[0, 270, 700, 1.7], [4.6, 270, 650, 1.0]] },
+        sky: EVESKY, far: ASH_FAR, mid: () => ASH_MID() + MISTD(740, .55, 12), art: ASH_GND,
+        cast: [NS({ x: 270, y: 880, s: .65, expr: 'calm', acts: [[0, 'stand'], [1, 'lookUp', .8]] })],
+        front: () => PETAL(300, 300) + PETAL(200, 420) + PETAL(400, 250) }
+    ]),
 
-    /* 11 — Shilad weeps (warm lamplight, one petal) */
-    { line: 'यह सुनकर महर्षि शिलाद फूट-फूट कर रोने लगे।', scene: 'prophecy-soft', mood: { base: 'calm', bri: .95, vig: .15 }, capTop: 330, tr: 'fade',
-      cam: { keys: [[0, 270, 650, 1.05], [4, 255, 630, 1.2]] },
+    { line: 'यह सुनकर महर्षि शिलाद फूट-फूट कर रोने लगे।', scene: 'prophecy-soft', mood: { base: 'calm', bri: .95, vig: .15 }, capTop: 200, tr: 'dissolve',
+      cam: { keys: [[0, 260, 680, 1.3], [4, 258, 640, 1.9]] },
       sky: MOONSKY, far: ASH_FAR, mid: ASH_MID, art: ASH_GND,
-      cast: [{ ...SHILAD, x: 260, y: 880, s: .88, expr: 'sad', tears: true, acts: [[0, 'weep']] }],
+      cast: [SH({ x: 260, y: 880, s: .88, expr: 'sad', tears: true, acts: [[0, 'weep']] })],
       front: () => PETAL(150, 200) + PETAL(360, 260) },
 
-    /* 12 — Nandi sees his father crying */
-    { line: 'नंदी ने जब अपने पिता को रोते देखा तो कारण पूछा।', scene: 'ashram-soft', mood: { base: 'calm', bri: .95, vig: .15 }, capTop: 330, tr: 'fade',
-      cam: { from: [270, 640, 1.0], to: [260, 650, 1.12] },
+    { line: 'नंदी ने जब अपने पिता को रोते देखा तो कारण पूछा।', scene: 'ashram-soft', mood: { base: 'calm', bri: .95, vig: .15 }, capTop: 200, tr: 'fade',
+      cam: { keys: [[0, 330, 660, 1.4], [1.6, 330, 650, 1.5], [2.1, 160, 700, 1.5, 'snap'], [4, 150, 690, 1.75]] },
       sky: EVESKY, far: ASH_FAR, mid: () => ASH_MID() + fire(480, 830, .9), art: ASH_GND,
-      cast: [{ c: NANDI, x: 150, y: 880, s: .7, expr: 'sad', talk: true, acts: [[0, 'stand'], [.6, 'lookUp', .6], [2.4, 'plead', .8]] },
-             { ...SHILAD, x: 330, y: 880, s: .86, flip: true, expr: 'sad', tears: true, acts: [[0, 'weep']] }] },
+      cast: [NS({ x: 150, y: 880, s: .7, expr: 'sad', talk: true, acts: [[0, 'stand'], [2.2, 'lookUp', .6], [3.4, 'plead', .8]] }),
+             SH({ x: 330, y: 880, s: .86, flip: true, expr: 'sad', tears: true, acts: [[0, 'weep']] })] },
 
-    /* 13 — Nandi decides: "to Mahadev's refuge" */
-    { line: 'सारी बात जानने के बाद बालक नंदी ने दृढ़ता से कहा कि जिस महादेव की कृपा से मुझे यह जीवन मिला है, मैं उन्हीं की शरण में जाऊँगा।', scene: 'nandi-resolve', mood: 'hope', fx: 'dust', capTop: 150, tr: 'fade',
-      cam: { keys: [[0, 270, 620, 1.05], [3.5, 270, 600, 1.15], [6.7, 270, 590, 1.2]] },
-      sky: ASH_SKY, far: ASH_FAR, mid: () => `<circle cx="270" cy="620" r="230" fill="url(#gw)" opacity=".5"/>` + peepal(40, 830, .6) + peepal(500, 830, .55), art: ASH_GND,
-      cast: [{ c: NANDI, x: 270, y: 880, s: .85, expr: 'serene', talk: true, acts: [[0, 'stand'], [1, 'lookUp', .7], [4, 'namaste', .8]] }] },
+    /* ===== 5. Nandi decides ===== */
+    ...SPLIT('सारी बात जानने के बाद बालक नंदी ने दृढ़ता से कहा कि जिस महादेव की कृपा से मुझे यह जीवन मिला है, मैं उन्हीं की शरण में जाऊँगा।', ['कहा कि', 'मिला है,'], [
+      { scene: 'nandi-resolve', mood: 'hope', fx: 'dust', capTop: 150, tr: 'fade',
+        cam: { keys: [[0, 270, 700, 1.1], [3, 270, 690, 1.3]] },
+        sky: ASH_SKY, far: ASH_FAR, mid: () => peepal(40, 830, .6) + peepal(500, 830, .55), art: ASH_GND,
+        cast: [NS({ x: 270, y: 880, s: .8, expr: 'serene', acts: [[0, 'stand'], [1.4, 'lookUp', .7]] })] },
+      { scene: 'nandi-resolve', mood: 'hope', fx: 'sparks', capTop: 150, tr: 'dissolve',
+        cam: { keys: [[0, 270, 670, 1.5], [3.2, 270, 650, 2.1]] },
+        sky: ASH_SKY, far: ASH_FAR, mid: () => `<circle cx="270" cy="640" r="230" fill="url(#gw)" opacity=".55"/>` + MAND(270, 640, 190, '#fff3c4', 16, 90, .3), art: ASH_GND,
+        cast: [NS({ x: 270, y: 880, s: .8, expr: 'serene', talk: true, acts: [[0, 'stand'], [.8, 'lookUp', .7]] })] },
+      /* low angle hero shot: the camera rises as he folds his hands */
+      { scene: 'nandi-resolve', mood: 'hope', fx: 'petals', capTop: 150, tr: 'dissolve',
+        cam: { keys: [[0, 270, 760, 1.35], [3.2, 270, 600, 1.05]] },
+        sky: ASH_SKY, far: ASH_FAR, mid: () => `<circle cx="270" cy="620" r="230" fill="url(#gw)" opacity=".5"/>` + peepal(40, 830, .6) + peepal(500, 830, .55), art: ASH_GND,
+        cast: [NS({ x: 270, y: 880, s: .85, expr: 'serene', talk: true, acts: [[0, 'stand'], [.6, 'namaste', .8]] })] }
+    ]),
 
-    /* 14 — he walks to the forest */
     { line: 'यह कहकर वे वन की ओर चल पड़े।', scene: 'nandi-walks', mood: 'hope', fx: 'dust', capTop: 300, tr: 'wipe',
-      cam: { from: [180, 660, 1.0], to: [330, 660, 1.0] },
-      sky: ASH_SKY, far: ASH_FAR, mid: ASH_MID, art: ASH_GND,
-      cast: [{ c: NANDI, x: 400, y: 870, s: .75, expr: 'serene', walk: { from: -250, dur: 3.2 }, acts: [[0, 'stand']] }] },
+      cam: { keys: [[0, 160, 690, 1.15], [3.2, 340, 690, 1.15]] },
+      sky: ASH_SKY, far: ASH_FAR, mid: () => ASH_MID() + MISTD(760, .4, 12), art: ASH_GND,
+      cast: [NS({ x: 400, y: 870, s: .75, expr: 'serene', walk: { from: -250, dur: 3.2 } })] },
 
-    /* 15 — tapasya on the river bank */
-    { line: 'वहाँ एक नदी के किनारे आसन लगाकर नंदी ने अपना पूरा मन भगवान शिव की तपस्या में लीन कर दिया।', scene: 'river-tapasya', mood: 'calm', fx: 'dust', capTop: 300, tr: 'fade',
-      cam: { from: [250, 680, 1.0], to: [265, 690, 1.08] },
-      sky: RIV_SKY, far: RIV_FAR, art: RIV_GND, near: LIGHTSHAFTS,
-      cast: [{ c: NANDI_SADHAK, x: 270, y: 900, s: .8, expr: 'serene', eyes: 'closed', acts: [[0, 'kneelPray']], aura: 'gw' }] },
+    /* ===== 6. tapasya by the river ===== */
+    ...SPLIT('वहाँ एक नदी के किनारे आसन लगाकर नंदी ने अपना पूरा मन भगवान शिव की तपस्या में लीन कर दिया।', ['किनारे', 'मन'], [
+      { scene: 'river-tapasya', mood: 'calm', fx: 'dust', capTop: 300, tr: 'dissolve',
+        cam: { keys: [[0, 270, 540, 1.0], [2.6, 270, 690, 1.05]] },
+        sky: RIV_SKY, far: RIV_FAR, art: RIV_GND, near: () => LIGHTSHAFTS() + MISTD(780, .5, 14) },
+      { scene: 'river-tapasya', mood: 'calm', fx: 'dust', capTop: 300, tr: 'dissolve',
+        cam: { keys: [[0, 250, 700, 1.05], [3, 268, 700, 1.3]] },
+        sky: RIV_SKY, far: RIV_FAR, art: RIV_GND, near: LIGHTSHAFTS,
+        cast: [{ c: NANDI_SADHAK, x: 270, y: 900, s: .8, expr: 'serene', eyes: 'closed', acts: [[0, 'kneelPray']], aura: 'gw', enter: { fade: .8 } }] },
+      { scene: 'river-tapasya', mood: 'calm', fx: 'dust', capTop: 150, tr: 'dissolve',
+        cam: { keys: [[0, 270, 720, 1.5], [3.4, 270, 690, 2.1]] },
+        sky: RIV_SKY, far: RIV_FAR, art: RIV_GND, near: LIGHTSHAFTS,
+        cast: [{ c: NANDI_SADHAK, x: 270, y: 900, s: .8, expr: 'serene', eyes: 'closed', acts: [[0, 'kneelPray']], aura: 'gw' }],
+        front: () => EMB(190, 350, 880, 8) }
+    ]),
 
-    /* 16 — THE moment: Shiv appears and hugs Nandi (light only) */
-    { line: 'नंदी की अटूट तपस्या से प्रसन्न होकर महादेव स्वयं प्रकट हुए और उन्हें उठाकर अपने गले से लगा लिया।', scene: 'shiv-hug', mood: 'divine', fx: 'petals', capTop: 120, tr: 'glow',
-      cam: { keys: [[0, 270, 650, 1.0], [2.6, 285, 655, 1.08], [5.1, 300, 650, 1.15]] }, focus: { at: 2.8, sound: 'shimmer', dur: 2.8, duck: .3 },
-      sky: () => divine(300, 600, 'gw'), far: RIV_FAR, art: RIV_GND,
-      front: () => A('fadein:2.6:1.6', `<circle cx="300" cy="660" r="240" fill="url(#gw)" opacity=".7"/>`) + A('ripple:3:300:640', `<circle cx="300" cy="640" r="150" fill="none" stroke="#fff3c4" stroke-width="3"/>`),
-      cast: [{ c: NANDI_SADHAK, x: 250, y: 900, s: .8, expr: 'serene', eyes: 'closed', acts: [[0, 'kneelPray'], [2.4, 'stand', .5], [3.0, { a: [60, 20], b: [60, 20], lean: -4, head: 6 }, .8]], aura: 'gw', walk: undefined },
-             { c: SHIVA, x: 330, y: 900, s: 1.1, flip: true, expr: 'smile', acts: [[0, 'stand'], [2.4, { a: [48, 40], b: [52, 46], lean: 10 }, .9]], enter: { fade: 1.2, delay: 1.0 } }] },
+    /* ===== 7. Mahadev appears and embraces Nandi ===== */
+    ...SPLIT('नंदी की अटूट तपस्या से प्रसन्न होकर महादेव स्वयं प्रकट हुए और उन्हें उठाकर अपने गले से लगा लिया।', ['होकर', 'हुए'], [
+      { scene: 'shiv-hug', mood: 'divine', fx: 'sparks', capTop: 120, tr: 'glow',
+        cam: { keys: [[0, 270, 700, 1.3], [2.4, 270, 680, 1.0]] },
+        sky: () => divine(300, 600, 'gw'), far: RIV_FAR, art: RIV_GND,
+        cast: [{ c: NANDI_SADHAK, x: 270, y: 900, s: .8, expr: 'serene', eyes: 'closed', acts: [[0, 'kneelPray']], aura: 'gw' }],
+        front: () => GLOW(300, 640, 260, .65, .2) },
+      { scene: 'shiv-hug', mood: 'divine', fx: 'petals', capTop: 120, tr: 'flash',
+        cam: { keys: [[0, 270, 650, 1.0], [2.4, 300, 640, 1.2]] }, focus: { at: 1.0, sound: 'shimmer', dur: 2.6, duck: .3 },
+        sky: () => divine(330, 600, 'gw') + MAND(330, 600, 260, '#fff3c4', 20, 100, .35), far: RIV_FAR, art: RIV_GND,
+        cast: [{ c: NANDI_SADHAK, x: 190, y: 900, s: .8, expr: 'serene', eyes: 'closed', acts: [[0, 'kneelPray']], aura: 'gw' },
+               { c: SHIVA, x: 360, y: 900, s: 1.1, flip: true, expr: 'smile', acts: [[0, 'stand'], [1.2, 'bless', .8]], enter: { fade: 1.0, delay: .5 } }],
+        front: () => A('ripple:3:330:600', `<circle cx="330" cy="600" r="150" fill="none" stroke="#fff3c4" stroke-width="3"/>`) },
+      { scene: 'shiv-hug', mood: 'divine', fx: 'petals', capTop: 120, tr: 'dissolve',
+        cam: { keys: [[0, 270, 650, 1.0], [2.6, 285, 655, 1.12], [5.1, 300, 640, 1.3]] },
+        sky: () => divine(300, 600, 'gw'), far: RIV_FAR, art: RIV_GND,
+        front: () => A('fadein:2.2:1.6', `<circle cx="300" cy="660" r="240" fill="url(#gw)" opacity=".7"/>`) + A('ripple:3:300:640', `<circle cx="300" cy="640" r="150" fill="none" stroke="#fff3c4" stroke-width="3"/>`),
+        cast: [{ c: NANDI_SADHAK, x: 250, y: 900, s: .8, expr: 'serene', eyes: 'closed', acts: [[0, 'kneelPray'], [2.0, 'stand', .5], [2.6, { a: [60, 20], b: [60, 20], lean: -4, head: 6 }, .8]], aura: 'gw' },
+               { c: SHIVA, x: 330, y: 900, s: 1.1, flip: true, expr: 'smile', acts: [[0, 'stand'], [2.0, { a: [48, 40], b: [52, 46], lean: 10 }, .9]] }] }
+    ]),
 
-    /* 17 — amar + gana-adhyaksha */
-    { line: 'शिव ने नंदी को अमरत्व का वरदान दिया, उन्हें अपने गणों का प्रमुख (गणाध्यक्ष) बनाया', scene: 'shiv-boon', mood: 'divine', fx: 'petals', capTop: 120, tr: 'dip',
-      cam: { from: [270, 650, 1.0], to: [270, 630, 1.12] },
-      sky: () => divine(270, 580, 'gw'), far: RIV_FAR, art: RIV_GND,
-      cast: [{ c: NANDI_SADHAK, x: 190, y: 900, s: .8, expr: 'smile', acts: [[0, 'kneelBow'], [2, 'kneelPray', .8]], aura: 'gw' },
-             { c: SHIVA, x: 350, y: 900, s: 1.1, flip: true, expr: 'smile', acts: [[0, 'bless']] }] },
+    ...SPLIT('शिव ने नंदी को अमरत्व का वरदान दिया, उन्हें अपने गणों का प्रमुख (गणाध्यक्ष) बनाया', ['दिया,'], [
+      { scene: 'shiv-boon', mood: 'divine', fx: 'petals', capTop: 120, tr: 'dip',
+        cam: { keys: [[0, 330, 700, 1.0], [3, 345, 640, 1.5]] },
+        sky: () => divine(270, 580, 'gw') + MAND(350, 600, 230, '#fff3c4', 18, 110, .3), far: RIV_FAR, art: RIV_GND,
+        cast: [{ c: NANDI_SADHAK, x: 190, y: 900, s: .8, expr: 'smile', acts: [[0, 'kneelBow']], aura: 'gw' },
+               { c: SHIVA, x: 350, y: 900, s: 1.1, flip: true, expr: 'smile', acts: [[0, 'bless']] }] },
+      { scene: 'shiv-boon', mood: 'divine', fx: 'sparks', capTop: 120, tr: 'dissolve',
+        cam: { keys: [[0, 240, 760, 1.4], [3, 220, 700, 1.15]] },
+        sky: () => divine(270, 580, 'gw'), far: RIV_FAR, art: RIV_GND,
+        cast: [{ c: NANDI_SADHAK, x: 240, y: 900, s: .8, expr: 'smile', acts: [[0, 'kneelPray']], aura: 'gw' }],
+        front: () => A('fadein:.4:1.4', `<circle cx="240" cy="640" r="200" fill="url(#gw)" opacity=".6"/>`) + EMB(120, 380, 880, 12, '#fff3c4') }
+    ]),
 
-    /* 18 — "where Nandi lives, Mahadev lives" */
-    { line: 'और यह वचन दिया कि जहाँ भी नंदी का वास होगा, वहाँ स्वयं महादेव भी विराजमान रहेंगे।', scene: 'shiv-boon', mood: 'divine', fx: 'sparks', capTop: 120, tr: 'fade',
-      cam: { from: [270, 600, 1.1], to: [270, 560, 1.0] },
-      sky: () => divine(270, 520, 'gw'), far: () => hills(700, 40, '#4a3a5a', 130), art: () => ground(800, '#5a4a38', '#c8a060') + marigoldString(60, 640, 480, 640, 24, 18),
-      mid: () => nandiBull(150, 800, .8) + A('pulse:1.8', `<circle cx="400" cy="680" r="80" fill="url(#gw)" opacity=".6"/>`),
-      cast: [{ c: SHIVA, x: 390, y: 810, s: .95, flip: true, expr: 'smile', acts: [[0, 'stand'], [1.6, 'bless', .8]], enter: { fade: 1.6, delay: 1.2 } }] },
+    ...SPLIT('और यह वचन दिया कि जहाँ भी नंदी का वास होगा, वहाँ स्वयं महादेव भी विराजमान रहेंगे।', ['होगा,'], [
+      { scene: 'shiv-boon', mood: 'divine', fx: 'sparks', capTop: 120, tr: 'dissolve',
+        cam: { keys: [[0, 200, 700, 1.4], [3, 215, 720, 1.1]] },
+        sky: () => divine(270, 520, 'gw'), far: () => hills(700, 40, '#4a3a5a', 130), art: () => ground(800, '#5a4a38', '#c8a060') + marigoldString(60, 640, 480, 640, 24, 18),
+        mid: () => nandiBull(150, 800, .8) },
+      { scene: 'shiv-boon', mood: 'divine', fx: 'sparks', capTop: 120, tr: 'dissolve',
+        cam: { keys: [[0, 270, 700, 1.0], [3.2, 330, 660, 1.3]] },
+        sky: () => divine(300, 520, 'gw') + MAND(390, 640, 210, '#fff3c4', 18, 100, .3), far: () => hills(700, 40, '#4a3a5a', 130), art: () => ground(800, '#5a4a38', '#c8a060') + marigoldString(60, 640, 480, 640, 24, 18),
+        mid: () => nandiBull(150, 800, .8) + A('pulse:1.8', `<circle cx="400" cy="680" r="80" fill="url(#gw)" opacity=".6"/>`),
+        cast: [{ c: SHIVA, x: 390, y: 810, s: .95, flip: true, expr: 'smile', acts: [[0, 'stand'], [1.2, 'bless', .8]], enter: { fade: 1.2, delay: .3 } }] }
+    ]),
 
-    /* 19 — hence Nandi outside every Shiv temple */
-    { line: 'यही कारण है कि हर शिव मंदिर के बाहर नंदी की स्थापना की जाती है।', scene: 'temple-dusk', mood: 'calm', fx: 'embers', capTop: 130, tr: 'dip',
-      cam: { from: [270, 650, 1.0], to: [230, 650, 1.06] },
-      ...TEMPLE({ nx: 170, ns: .72, sky: MORNSKY, far: MORNFAR, crowd: true }) },
+    { line: 'यही कारण है कि हर शिव मंदिर के बाहर नंदी की स्थापना की जाती है।', dur: 4, scene: 'temple-dusk', mood: 'calm', fx: 'embers', capTop: 130, tr: 'dissolve',
+      cam: { keys: [[0, 330, 600, 1.0], [4.4, 215, 700, 1.15]] },
+      ...TEMPLE({ nx: 170, ns: .72, sky: MORNSKY, far: MORNFAR, crowd: true, near: () => TNEAR() + EMB(20, 520, 940, 8) }) },
 
-    /* 20 — Nandi as dwarpal at the sanctum door, eyes on the Shivling (must-have) */
-    { line: 'चूँकि नंदी शिव के वाहन और प्रमुख द्वारपाल हैं, इसलिए उनका स्थान गर्भगृह के द्वार पर होता है और उनकी दृष्टि सदैव भीतर विराजमान शिवलिंग पर टिकी रहती है।', scene: 'nandi-gaze', mood: 'calm', fx: 'dust', capTop: 150, tr: 'fade',
-      cam: { keys: [[0, 230, 700, 1.0], [4, 280, 705, 1.05], [7.8, 320, 710, 1.12]] },
-      ...TEMPLE({ nx: 200, ns: .9, sky: INTSKY, far: INTFAR, pillars: true }),
-      front: () => A('fadein:4:3', `<ellipse cx="420" cy="700" rx="100" ry="140" fill="url(#gw)" opacity=".3"/>`) },
+    /* Nandi as dwarpal: close -> door -> the gaze goes inside */
+    ...SPLIT('चूँकि नंदी शिव के वाहन और प्रमुख द्वारपाल हैं, इसलिए उनका स्थान गर्भगृह के द्वार पर होता है और उनकी दृष्टि सदैव भीतर विराजमान शिवलिंग पर टिकी रहती है।', ['हैं,', 'होता है'], [
+      { scene: 'nandi-gaze', mood: 'calm', fx: 'dust', capTop: 150, tr: 'dissolve',
+        cam: { keys: [[0, 255, 705, 1.9], [3, 250, 700, 1.35]] },
+        ...TEMPLE({ nx: 200, ns: .9, sky: INTSKY, far: INTFAR, pillars: true }) },
+      { scene: 'nandi-gaze', mood: 'calm', fx: 'dust', capTop: 150, tr: 'dissolve',
+        cam: { keys: [[0, 200, 700, 1.0], [3, 350, 700, 1.35]] },
+        ...TEMPLE({ nx: 200, ns: .9, sky: INTSKY, far: INTFAR, pillars: true }) },
+      { scene: 'nandi-gaze', mood: 'calm', fx: 'dust', capTop: 150, tr: 'dissolve',
+        cam: { keys: [[0, 300, 710, 1.2], [3.2, 430, 700, 1.9]] },
+        ...TEMPLE({ nx: 200, ns: .9, sky: INTSKY, far: INTFAR, pillars: true }),
+        front: () => A('pulse:1.8', `<ellipse cx="430" cy="700" rx="100" ry="140" fill="url(#gw)" opacity=".4"/>`) + EMB(390, 480, 780, 8) }
+    ]),
 
-    /* 21 — secret of whispering: Shiva in deep samadhi */
+    /* ===== 8. why we whisper ===== */
     { line: 'अब जानते हैं नंदी के कान में मन्नत मांगने का रहस्य।', scene: 'shiv-samadhi', mood: 'calm', fx: 'stars', capTop: 120, tr: 'glow',
-      cam: { from: [270, 700, 1.0], to: [270, 670, 1.05] },
-      sky: HIM_SKY, far: HIM_FAR, art: HIM_GND,
+      cam: { keys: [[0, 270, 600, 1.0], [3.4, 270, 700, 1.15]] },
+      sky: () => HIM_SKY() + MAND(270, 620, 250, '#bcd0ff', 18, 140, .25), far: HIM_FAR, mid: () => MISTD(700, .45, 16), art: HIM_GND,
       cast: [{ c: SHIVA, x: 270, y: 820, s: .8, expr: 'serene', eyes: 'closed', acts: [[0, 'kneelPray']], aura: 'gb' }] },
 
-    /* 22 — Shiva stays in samadhi; no one disturbs his tapasya */
-    { line: 'ऐसी मान्यता है कि भगवान शिव अधिकांश समय गहरी समाधि और तपस्या में लीन रहते हैं, और उनकी साधना में विघ्न डालना उचित नहीं माना जाता।', scene: 'shiv-samadhi', mood: 'calm', fx: 'stars', capTop: 120, tr: 'fade',
-      cam: { from: [270, 560, 1.0], to: [270, 640, 1.1] },
-      sky: () => HIM_SKY() + moon(420, 180, 34), far: HIM_FAR, art: HIM_GND,
-      cast: [{ c: SHIVA, x: 270, y: 820, s: .85, expr: 'serene', eyes: 'closed', acts: [[0, 'kneelPray']], aura: 'gb' }],
-      front: () => A('pulse:2.5', `<circle cx="270" cy="600" r="110" fill="url(#gb)" opacity=".5"/>`) },
+    ...SPLIT('ऐसी मान्यता है कि भगवान शिव अधिकांश समय गहरी समाधि और तपस्या में लीन रहते हैं, और उनकी साधना में विघ्न डालना उचित नहीं माना जाता।', ['रहते हैं,'], [
+      { scene: 'shiv-samadhi', mood: 'calm', fx: 'stars', capTop: 120, tr: 'dissolve',
+        cam: { keys: [[0, 270, 560, 1.0], [4, 270, 650, 1.12]] },
+        sky: () => HIM_SKY() + moon(420, 180, 34), far: HIM_FAR, mid: () => MISTD(690, .5, 14), art: HIM_GND,
+        cast: [{ c: SHIVA, x: 270, y: 820, s: .85, expr: 'serene', eyes: 'closed', acts: [[0, 'kneelPray']], aura: 'gb' }],
+        front: () => A('pulse:2.5', `<circle cx="270" cy="600" r="110" fill="url(#gb)" opacity=".5"/>`) },
+      { scene: 'shiv-samadhi', mood: 'calm', fx: 'stars', capTop: 150, tr: 'dissolve',
+        cam: { keys: [[0, 270, 620, 1.5], [4, 270, 600, 2.0]] },
+        sky: () => HIM_SKY() + MAND(270, 600, 200, '#bcd0ff', 16, 100, .3), far: HIM_FAR, art: HIM_GND,
+        cast: [{ c: SHIVA, x: 270, y: 820, s: .85, expr: 'serene', eyes: 'closed', acts: [[0, 'kneelPray']], aura: 'gb' }],
+        front: () => A('pulse:2.5', `<circle cx="270" cy="600" r="110" fill="url(#gb)" opacity=".5"/>`) }
+    ]),
 
-    /* 23 — so devotees whisper softly, a quiet voice */
-    { line: 'इसलिए भक्त ज़ोर से बोलने के बजाय नंदी के कान में धीरे से अपनी प्रार्थना कहते हैं।', scene: 'whisper-closeup', mood: 'calm', fx: 'dust', capTop: 150, tr: 'fade',
-      cam: { keys: [[0, 275, 690, 1.05], [4.4, 285, 685, 1.18]] },
+    { line: 'इसलिए भक्त ज़ोर से बोलने के बजाय नंदी के कान में धीरे से अपनी प्रार्थना कहते हैं।', scene: 'whisper-closeup', mood: 'calm', fx: 'dust', capTop: 150, tr: 'dissolve',
+      cam: { keys: [[0, 330, 700, 1.0], [2.4, 262, 670, 1.5], [4.6, 258, 655, 2.0]] },
       ...TEMPLE({ nx: 220, ns: .9, sky: MORNSKY, far: MORNFAR, pillars: true }),
-      cast: [{ ...COMMON, x: 240, y: 830, s: .72, expr: 'serene', talk: true, eyes: 'closed', acts: [[0, 'pranam']] }] },
+      cast: [DEV({ x: 240, y: 830, talk: true, eyes: 'closed' })] },
 
-    /* 24 — CLIMAX: whatever is whispered in Nandi's ear reaches Shiv (light only) */
-    { line: 'यह अटूट विश्वास है कि स्वयं महादेव ने नंदी को यह वरदान दिया है कि उनके कान में कही गई हर सच्ची इच्छा सीधे शिव तक पहुँचेगी।', scene: 'whisper-reaches', mood: 'divine', fx: 'sparks', capTop: 130, tr: 'glow',
-      cam: { keys: [[0, 250, 700, 1.15], [2.8, 270, 695, 1.08], [5.4, 300, 700, 1.0], [6.6, 300, 700, 1.0]] }, focus: { at: 3.0, sound: 'shimmer', dur: 3.4, duck: .3 },
-      ...TEMPLE({ nx: 190, ns: .9, sky: MOONSKY, crowd: true }),
-      front: () => whisperTrail(236, 690, 428, 700, 2.8, 14),
-      cast: [{ ...COMMON, x: 210, y: 830, s: .72, expr: 'serene', eyes: 'closed', acts: [[0, 'pranam'], [5, 'namaste', .8]] }] },
+    /* climax: the wish travels as light */
+    ...SPLIT('यह अटूट विश्वास है कि स्वयं महादेव ने नंदी को यह वरदान दिया है कि उनके कान में कही गई हर सच्ची इच्छा सीधे शिव तक पहुँचेगी।', ['वरदान दिया है कि'], [
+      { scene: 'whisper-reaches', mood: 'divine', fx: 'sparks', capTop: 130, tr: 'glow',
+        cam: { keys: [[0, 250, 700, 1.0], [3.4, 300, 640, 1.2]] },
+        ...TEMPLE({ nx: 190, ns: .9, sky: MOONSKY, crowd: true, near: () => TNEAR() + EMB(20, 520, 940, 8) }),
+        front: () => MAND(430, 690, 150, '#fff3c4', 16, 90, .25),
+        cast: [DEV({ x: 210, y: 830 })] },
+      { scene: 'whisper-reaches', mood: 'divine', fx: 'sparks', capTop: 130, tr: 'dissolve',
+        cam: { keys: [[0, 240, 700, 1.5], [2.0, 330, 700, 1.15], [4.4, 330, 700, 1.0]] }, focus: { at: 1.4, sound: 'shimmer', dur: 3.4, duck: .3 },
+        ...TEMPLE({ nx: 190, ns: .9, sky: MOONSKY, crowd: true }),
+        front: () => whisperTrail(236, 690, 428, 700, 1.2, 14) + A('fadein:3:2', `<ellipse cx="430" cy="690" rx="110" ry="140" fill="url(#gw)" opacity=".5"/>`),
+        cast: [DEV({ x: 210, y: 830, acts: [[0, 'pranam'], [4, 'namaste', .8]] })] }
+    ]),
 
-    /* 25 — lesson */
-    { line: 'इस कथा में जीवन की एक गहरी सीख भी छिपी है।', scene: 'lesson-calm', mood: 'calm', fx: 'dust', capTop: 150, tr: 'fade',
-      cam: { from: [270, 620, 1.05], to: [270, 580, 1.0] },
-      sky: () => divine(270, 560, 'saf', '#ffd890'), far: () => hills(700, 40, '#4a2a3a', 130), art: () => ground(800, '#4a2a2a', '#c8903a') + diyaRow(70, 470, 850, 6, 1.3),
+    /* ===== 9. the lesson ===== */
+    { line: 'इस कथा में जीवन की एक गहरी सीख भी छिपी है।', scene: 'lesson-calm', mood: 'calm', fx: 'dust', capTop: 150, tr: 'dissolve',
+      cam: { keys: [[0, 270, 760, 1.35], [3.2, 270, 600, 1.0]] },
+      sky: () => divine(270, 560, 'saf', '#ffd890') + MAND(270, 600, 240, '#ffd98a', 18, 120, .3), far: () => hills(700, 40, '#4a2a3a', 130), art: () => ground(800, '#4a2a2a', '#c8903a') + diyaRow(70, 470, 850, 6, 1.3),
       mid: () => A('pulse:2.2', `<circle cx="270" cy="680" r="170" fill="url(#gw)" opacity=".45"/>`) + nandiBull(270, 800, .8) },
 
-    /* 26 — the bull as a symbol of anger and wild desire, then calm Nandi */
-    { line: 'साधारणतः बैल को क्रोध और अनियंत्रित इच्छाओं का प्रतीक माना जाता है,', scene: 'lesson-calm', mood: 'calm', fx: 'sparks', capTop: 150, tr: 'fade',
-      cam: { from: [250, 640, 1.0], to: [230, 640, 1.15] },
+    { line: 'साधारणतः बैल को क्रोध और अनियंत्रित इच्छाओं का प्रतीक माना जाता है,', scene: 'lesson-calm', mood: 'calm', fx: 'sparks', capTop: 150, tr: 'dissolve',
+      cam: { keys: [[0, 300, 640, 1.0], [4.4, 250, 670, 1.35]] },
       sky: () => skyBand([[0, '#2a1830'], [.6, '#8a3a2a'], [1, '#e0803a']]), far: () => hills(700, 40, '#3a1a22', 130), art: () => ground(800, '#3a2018', '#c8803a'),
       mid: () => A('rock:2:2.5:270:800', nandiBull(270, 800, .75)) + [...Array(3)].map((_, i) => A('drift:0:-120:' + (3 + i * .8), `<circle cx="${190 + i * 70}" cy="640" r="${14 + i * 4}" fill="url(#gr)" opacity=".5"/>`)).join('') },
 
-    { line: 'लेकिन महादेव के सामने शांत और स्थिर बैठे नंदी यह संदेश देते हैं कि जो मनुष्य अपनी इंद्रियों पर नियंत्रण रखकर अपना संपूर्ण ध्यान ईश्वर में लगा देता है, वह स्वयं पूजनीय बन जाता है।', scene: 'nandi-gaze', mood: 'calm', fx: 'dust', capTop: 150, tr: 'glow',
-      cam: { keys: [[0, 230, 690, 1.08], [4.5, 260, 700, 1.0], [9.3, 300, 700, 1.05]] },
-      ...TEMPLE({ nx: 200, ns: .85, bull: { eyes: 'closed' }, sky: MOONSKY, pillars: true }),
-      front: () => A('fadein:5:3', `<ellipse cx="205" cy="680" rx="140" ry="160" fill="url(#gw)" opacity=".28"/>`) },
+    ...SPLIT('लेकिन महादेव के सामने शांत और स्थिर बैठे नंदी यह संदेश देते हैं कि जो मनुष्य अपनी इंद्रियों पर नियंत्रण रखकर अपना संपूर्ण ध्यान ईश्वर में लगा देता है, वह स्वयं पूजनीय बन जाता है।', ['देते हैं कि', 'लगा देता है,'], [
+      { scene: 'nandi-gaze', mood: 'calm', fx: 'dust', capTop: 150, tr: 'dissolve',
+        cam: { keys: [[0, 200, 700, 1.0], [3, 255, 700, 1.7]] },
+        ...TEMPLE({ nx: 200, ns: .85, bull: { eyes: 'closed' }, sky: MOONSKY, pillars: true }) },
+      { scene: 'nandi-gaze', mood: 'calm', fx: 'dust', capTop: 150, tr: 'dissolve',
+        cam: { keys: [[0, 255, 700, 1.7], [3.4, 420, 700, 1.6]] },
+        ...TEMPLE({ nx: 200, ns: .85, bull: { eyes: 'closed' }, sky: MOONSKY, pillars: true }),
+        front: () => GLOW(430, 690, 120, .4, 1.5) },
+      { scene: 'nandi-gaze', mood: 'hope', fx: 'petals', capTop: 150, tr: 'glow',
+        cam: { keys: [[0, 220, 740, 1.5], [3.4, 250, 690, 1.0]] },
+        ...TEMPLE({ nx: 200, ns: .85, bull: { eyes: 'closed' }, sky: MOONSKY, pillars: true }),
+        front: () => A('fadein:.6:2.4', `<ellipse cx="205" cy="680" rx="170" ry="180" fill="url(#gw)" opacity=".4"/>`) + MAND(205, 690, 150, '#fff3c4', 16, 100, .3) }
+    ]),
 
-    /* 28 — next time: a devotee pauses beside Nandi; seen from behind, all eyes on the Shivling */
-    { line: 'अगली बार जब आप किसी शिव मंदिर जाएं, तो नंदी के पास एक पल ज़रूर ठहरिए—भक्ति का वास्तविक मार्ग यही है कि बिना किसी भटकाव के केवल अपने आराध्य की ओर देखा जाए।', scene: 'temple-return', mood: 'hope', fx: 'petals', capTop: 130, tr: 'fade',
-      cam: { keys: [[0, 270, 760, 1.0], [4, 270, 720, 1.05], [8.1, 290, 650, 1.15]] },
-      sky: TSKY, far: TFAR, mid: () => sanctum(270, 800, 1.0) + marigoldString(10, 560, 530, 560, 14, 16) + diyaRow(70, 470, 812, 6, 1.1),
-      art: () => TFLOOR() + nandiBack(300, 960, 1.1),
-      cast: [{ ...COMMON, x: 150, y: 930, s: .7, expr: 'smile', walk: { from: -220, dur: 3.5 }, acts: [[0, 'stand'], [3.6, 'namaste', .8]] }] },
+    /* ===== 10. next time you visit ===== */
+    ...SPLIT('अगली बार जब आप किसी शिव मंदिर जाएं, तो नंदी के पास एक पल ज़रूर ठहरिए—भक्ति का वास्तविक मार्ग यही है कि बिना किसी भटकाव के केवल अपने आराध्य की ओर देखा जाए।', ['जाएं,', 'यही है कि'], [
+      { scene: 'temple-return', mood: 'hope', fx: 'petals', capTop: 130, tr: 'dissolve',
+        cam: { keys: [[0, 270, 780, 1.0], [3, 270, 740, 1.05]] },
+        sky: TSKY, far: TFAR, mid: () => sanctum(270, 800, 1.0) + marigoldString(10, 560, 530, 560, 14, 16) + diyaRow(70, 470, 812, 6, 1.1),
+        art: () => TFLOOR() + nandiBack(300, 960, 1.1),
+        cast: [{ ...COMMON, x: 150, y: 930, s: .7, expr: 'smile', walk: { from: -220, dur: 3 }, acts: [[0, 'stand']] }] },
+      { scene: 'temple-return', mood: 'hope', fx: 'petals', capTop: 130, tr: 'dissolve',
+        cam: { keys: [[0, 220, 780, 1.2], [3.6, 200, 740, 1.7]] },
+        sky: TSKY, far: TFAR, mid: () => sanctum(270, 800, 1.0) + marigoldString(10, 560, 530, 560, 14, 16) + diyaRow(70, 470, 812, 6, 1.1),
+        art: () => TFLOOR() + nandiBack(300, 960, 1.1),
+        cast: [{ ...COMMON, x: 180, y: 930, s: .7, expr: 'smile', acts: [[0, 'stand'], [.6, 'namaste', .8]] }] },
+      { scene: 'temple-return', mood: 'hope', fx: 'petals', capTop: 130, tr: 'dissolve',
+        cam: { keys: [[0, 270, 760, 1.0], [4.4, 270, 650, 1.25]] },
+        sky: TSKY, far: TFAR, mid: () => sanctum(270, 800, 1.0) + marigoldString(10, 560, 530, 560, 14, 16) + diyaRow(70, 470, 812, 6, 1.1) + GLOW(270, 680, 170, .45, 1),
+        art: () => TFLOOR() + nandiBack(300, 960, 1.1),
+        cast: [{ ...COMMON, x: 180, y: 930, s: .7, expr: 'smile', acts: [[0, 'namaste']] }] }
+    ]),
 
-    /* 30 — final: wonder (Har Har Mahadev) */
     { line: 'हर हर महादेव!', scene: 'har-har', mood: 'divine', fx: 'petals', capTop: 120, tr: 'glow',
-      cam: { from: [270, 700, 1.1], to: [270, 650, 1.2] }, focus: { at: .6, sound: 'gong', dur: 3, duck: .35 },
-      sky: TSKY, far: TFAR,
+      cam: { from: [270, 700, 1.1], to: [270, 650, 1.25] }, focus: { at: .6, sound: 'gong', dur: 3, duck: .35 },
+      sky: () => TSKY() + MAND(270, 680, 260, '#ffd98a', 20, 100, .3), far: TFAR,
       mid: () => sanctum(270, 800, 1.0) + marigoldString(10, 560, 530, 560, 14, 16) + diyaRow(70, 470, 812, 6, 1.1) + A('pulse:2', `<circle cx="270" cy="680" r="160" fill="url(#gw)" opacity=".5"/>`),
       art: () => TFLOOR() + nandiBack(270, 960, 1.1),
-      front: () => [...Array(6)].map((_, i) => sparkle(80 + i * 76, 300 + (i % 3) * 60, 1.1)).join('') }
+      front: () => [...Array(6)].map((_, i) => sparkle(80 + i * 76, 300 + (i % 3) * 60, 1.1)).join('') + EMB(40, 500, 900, 14) }
   ]
 });
