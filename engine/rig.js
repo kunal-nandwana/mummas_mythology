@@ -78,7 +78,7 @@ function shade(hex,amt){ const n=parseInt(hex.slice(1),16); let r=n>>16, g=(n>>8
 const COSTUME0 = {skin:'#8c6248', top:'#1f2640', bottom:'#8e1d24', shin:null, foot:null, sleeve:null, skirt:false,
   trim:'url(#gold)', hair:'long', head:'crown', beard:null, mus:false, cape:null, quiver:false, garland:null, sash:null,
   veil:null, turban:'#ece5d4', tilak:false, earring:true, big:false, aura:null, jewel:true,
-  bare:false, ash:false, snake:false, tiger:false, rudra:false, third:false, tusks:false, spikes:false, eyeCol:null, fireHair:false, blindfold:false, faces:null, arms:0, armItems:null};
+  bare:false, ash:false, snake:false, tiger:false, rudra:false, third:false, tusks:false, spikes:false, eyeCol:null, fireHair:false, blindfold:false, faces:null, arms:0, armItems:null, beardLen:0};
 
 let RIG_ID=0;
 /* Build one character. cast = {c:COSTUME, x, y, s, flip, acts:[[t,pose,dur?],...], expr, eyes, talk,
@@ -150,13 +150,13 @@ function makeRig(cast){
 
   /* ---- head ---- */
   /* extra faces (c.faces:[[dx,dy,scale],...]): small profile faces fanned behind the main head (Ravan's ten heads, Brahma's four) */
-  const miniFace=(dx,dy,sc,k)=>`<g transform="translate(${dx} ${dy}) translate(0 -266) scale(${sc}) translate(0 266)"><path d="M-14 -262 C-16 -286 0 -294 14 -288 C22 -284 24 -276 24 -270 L32 -260 L24 -258 C24 -252 22 -248 16 -246 L-6 -244Z" fill="${shade(skin,-.06*(k%3))}"/><path d="M-16 -268 C-20 -292 0 -300 18 -290 L14 -280 C2 -284 -8 -282 -12 -262Z" fill="${dark}"/>`+
+  const miniFace=(dx,dy,sc,k,rot)=>`<g transform="${rot?`rotate(${rot} 0 -240) `:''}translate(${dx} ${dy}) translate(0 -266) scale(${sc}) translate(0 266)"><path d="M-14 -262 C-16 -286 0 -294 14 -288 C22 -284 24 -276 24 -270 L32 -260 L24 -258 C24 -252 22 -248 16 -246 L-6 -244Z" fill="${shade(skin,-.06*(k%3))}"/><path d="M-16 -268 C-20 -292 0 -300 18 -290 L14 -280 C2 -284 -8 -282 -12 -262Z" fill="${dark}"/>`+
     (c.beard?`<path d="M6 -248 Q26 -246 22 -222 Q12 -210 2 -222 Q-4 -236 -2 -246Z" fill="${c.beard==='white'?'#e7e1d4':dark}"/>`:'')+
     (c.head==='big'?`<path d="M-18 -284 L-16 -326 L-6 -308 L2 -340 L10 -308 L20 -324 L20 -284Z" fill="url(#gold)"/><circle cx="2" cy="-300" r="4" fill="#2ec28a"/>`:`<path d="M-16 -286 L-12 -318 L-4 -300 L2 -326 L8 -300 L16 -316 L18 -286Z" fill="url(#gold)"/>`)+
     `<path d="M8.5 -271 Q15 -276 21.5 -270" stroke="#140a06" stroke-width="1.7" fill="none"/><circle cx="16.5" cy="-270.4" r="1.8" fill="#140a06"/><path d="M8 -278 Q15 -281.5 22.5 -277.5" stroke="${dark}" stroke-width="2.4" fill="none"/>`+
     (c.mus?`<path d="M12 -254 q8 -4 15 1" stroke="${dark}" stroke-width="3" fill="none" stroke-linecap="round"/>`:'')+`</g>`;
   let head='';
-  if(c.faces) head+=c.faces.map((f,i)=>A(`bob:${(1+(i%3)*.5).toFixed(1)}:${(.16+i*.025).toFixed(3)}`,miniFace(f[0],f[1],f[2],i))).join('');
+  if(c.faces) head+=c.faces.map((f,i)=>A(`bob:${(1+(i%3)*.5).toFixed(1)}:${(.16+i*.025).toFixed(3)}`,miniFace(f[0],f[1],f[2],i,f[3]))).join('');
   if(c.veil) head+=`<g ${J('veilB')}><path d="M-18 -292 C-40 -270 -50 -220 -56 -150 L-30 -150 C-28 -210 -20 -250 -8 -276Z" fill="${c.veil}"/><path d="M-30 -150 C-28 -210 -20 -250 -8 -276 L-14 -280 C-22 -246 -26 -206 -28 -150Z" fill="#000" opacity=".16"/></g>`;
   if(c.hair==='long' && !c.veil) head+=`<g ${J('hair')}><path d="M-12 -272 C-30 -262 -34 -230 -40 -196 L-22 -204 C-20 -226 -14 -244 -6 -256Z" fill="${dark}"/></g>`;
   if(c.head==='mahadev') head+=`<g ${J('hair')}><path d="M-14 -278 C-50 -268 -66 -216 -74 -146 C-64 -158 -56 -168 -48 -178 C-46 -150 -42 -126 -34 -104 C-24 -138 -22 -190 -8 -252Z" fill="${dark}"/><path d="M-22 -262 C-40 -240 -50 -200 -54 -160 M-30 -236 C-40 -210 -42 -176 -38 -138" stroke="#322b44" stroke-width="2" fill="none"/>`+
@@ -175,7 +175,12 @@ function makeRig(cast){
         `<ellipse ${J('blush')} cx="12" cy="-259" rx="6" ry="3.6" fill="#e0556a" opacity="0"/>`+
         `<path d="M-2 -273 q-6 4 -3 14 q3 5 7 2" fill="${shade(skin,-.08)}" stroke="${shade(skin,-.3)}" stroke-width="1.3"/><path d="M-2 -268 q-2 5 1 8" stroke="${shade(skin,-.35)}" stroke-width="1" fill="none"/>`;
   if(c.head!=='turban' && !c.veil && c.head!=='jata' && c.head!=='mahadev' && c.head!=='demon' && c.hair!=='none') head+=`<path d="M-16 -268 C-20 -292 0 -300 18 -290 L14 -280 C2 -284 -8 -282 -12 -262Z" fill="${dark}"/>`;
-  if(c.beard) head+=`<path d="M6 -248 Q26 -246 22 -222 Q12 -210 2 -222 Q-4 -236 -2 -246Z" fill="${c.beard==='white'?'#e7e1d4':dark}"/>`;
+  if(c.beard && c.beardLen>0){ /* long thick sage beard: sideburn to chin, flowing down the chest to a point, grey streaks, sways */
+    const L=c.beardLen, bc=c.beard==='white'?'#e7e1d4':(c.beard==='grey'?'#a8a29a':'#2a1a12'), st=c.beard==='white'?'#bdb6a6':'#8a7a68', D=84*L, T=-246+D, Y=f=>r1(-246+D*f);
+    head+=`<g ${J('beard')}><path d="M-8 -262 C-4 -252 4 -246 14 -245 L26 -246 C44 -240 50 ${Y(.3)} 42 ${Y(.62)} C38 ${Y(.82)} 26 ${Y(.95)} 14 ${r1(T)} C2 ${Y(.92)} -10 ${Y(.7)} -14 ${Y(.4)} C-16 -236 -12 -252 -8 -262Z" fill="${bc}"/>`+
+      `<path d="M-8 -238 C-6 ${Y(.3)} 0 ${Y(.7)} 12 ${Y(.97)} M8 -240 C12 ${Y(.3)} 16 ${Y(.6)} 16 ${Y(.92)} M24 -240 C32 ${Y(.25)} 32 ${Y(.55)} 26 ${Y(.85)} M38 -236 C46 ${Y(.2)} 44 ${Y(.4)} 40 ${Y(.58)}" stroke="${st}" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".85"/>`+
+      `<path d="M-6 -248 C4 -243 18 -242 28 -246" stroke="#000" stroke-opacity=".3" stroke-width="3" fill="none"/></g>`; }
+  else if(c.beard) head+=`<path d="M6 -248 Q26 -246 22 -222 Q12 -210 2 -222 Q-4 -236 -2 -246Z" fill="${c.beard==='white'?'#e7e1d4':dark}"/>`;
   // eye (almond, kajal line) with blink
   head+=`<g ${J('eye')}><path ${J('sclera')} d="M9 -270.5 Q15 -275.5 21.5 -270 Q15 -267.4 9 -270.5Z" fill="#f3ead8"/><circle ${J('pupil')} cx="16.8" cy="-270.6" r="2.1" fill="#3b2415"/><circle cx="16.9" cy="-270.6" r="1.1" fill="#0d0705"/><circle cx="17.7" cy="-271.4" r=".75" fill="#fff"/><path d="M8.5 -271 Q15 -276.5 22 -270" stroke="#140a06" stroke-width="1.7" fill="none"/>`+
         (c.skirt?`<path d="M21.5 -270 l3.4 -2.6" stroke="#140a06" stroke-width="1.5" stroke-linecap="round"/>`:'')+`<path ${J('wet')} d="M10.5 -267.6 Q15 -266 20 -268" stroke="#fff" stroke-width="1" fill="none" opacity="0"/></g>`;
@@ -377,6 +382,7 @@ function updateRig(r, lt, t, talking){
   if(q.skirt){ q.skirt.setAttribute('opacity', (1-clamp01(P.drop/40)).toFixed(2));
     setT(q.skirt, `translate(0 -150) skewX(${r1(gk(wind*1.4+wind2*0.9 + dLean*0.4, 6))}) translate(0 150)`); }
   if(q.cape) setT(q.cape, `rotate(${r1(Math.sin(t*1.3+sd)*2.2 - P.lean*0.85 + gk(dLean*1.4,12))} -16 -230) translate(-16 -230) scale(1 ${(1-clamp01(P.drop/72)*0.32).toFixed(3)}) translate(16 230)`);
+  if(q.beard) setT(q.beard, `rotate(${r1(Math.sin(t*1.25+sd+1)*1.6 + gk(dHead*0.7 + dLean*0.4,10))} 4 -248)`);
   if(q.hair) setT(q.hair, `rotate(${r1(Math.sin(t*1.1+sd)*2 + gk(dHead*0.9 + dLean*0.5,14))} -8 -262)`);
   if(q.aura) q.aura.setAttribute('opacity', (0.75+0.25*Math.sin(t*1.6)).toFixed(3));
 

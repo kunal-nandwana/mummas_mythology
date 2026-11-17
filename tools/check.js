@@ -37,7 +37,7 @@ const GRADS=new Set([...(coreSrc+read(path.join(ENG,'scenes.js'))).matchAll(/id=
 
 const TRANS=['cut','fade','dissolve','glow','whip','zoom','iris','wipe','flash','dip'];
 const FX=['dust','embers','sparks','stars','flies','petals'];
-const CAMS=['in','out','panL','panR','up','down','still'];
+const CAMS=['in','out','panL','panR','up','down','still','fit'];
 const EXPRS=['calm','smile','serene','sad','angry','surprise'];
 const MOODNAMES=['calm','joy','hope','anger','sad','shock','divine','neutral'];
 

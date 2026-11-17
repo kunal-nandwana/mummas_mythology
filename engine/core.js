@@ -144,7 +144,7 @@ function VIDEO(cfg){
   const CX=W/2, CY=H/2, KX=W/540, KY=H/960;
   const CAMS={ in:{from:[CX,CY,1],to:[CX,CY,1.08]}, out:{from:[CX,CY,1.1],to:[CX,CY,1]},
     panL:{from:[CX+16*KX,CY,1.08],to:[CX-16*KX,CY,1.08]}, panR:{from:[CX-16*KX,CY,1.08],to:[CX+16*KX,CY,1.08]},
-    up:{from:[CX,CY+20*KY,1.06],to:[CX,CY-10*KY,1.06]}, down:{from:[CX,CY-20*KY,1.06],to:[CX,CY+10*KY,1.06]}, still:{from:[CX,CY,1.02],to:[CX,CY,1.02]} };
+    up:{from:[CX,CY+20*KY,1.06],to:[CX,CY-10*KY,1.06]}, down:{from:[CX,CY-20*KY,1.06],to:[CX,CY+10*KY,1.06]}, still:{from:[CX,CY,1.02],to:[CX,CY,1.02]}, fit:{from:[CX,CY,1],to:[CX,CY,1]} };
   const easeSnap=k=>{ k=clamp01(k); return k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2; };
   const HAND = cfg.handheld===undefined ? 0.6 : cfg.handheld;
   function camState(sc,lt,t){

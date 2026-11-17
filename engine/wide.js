@@ -104,12 +104,12 @@ function mahendra(o){ o=Object.assign({sunX:520,sunY:300,tone:'dawn',ledge:432,p
   const dawn=o.tone!=='night';
   return {
     sky:()=>wsky(T.sky)+(dawn?wglow(o.sunX,o.sunY,330,T.glow,.55)+(o.sun?wglow(o.sunX,o.sunY,150,'#fff0c0',.75)+`<circle cx="${o.sunX}" cy="${o.sunY}" r="${58*o.sun}" fill="#fff8de"/>`:''):wstars(70,330)+`<circle cx="760" cy="110" r="38" fill="#f3ecd2"/><circle cx="774" cy="104" r="34" fill="#18205a"/>`)+
-      lightShafts(o.sunX,o.sunY,T.glow,9,760,.1)+wclouds(110,dawn?'#ffd2b0':'#4a5a9a',6,40,.5)+wclouds(200,dawn?'#ffb28a':'#3a4a8a',5,52,.45),
+      lightShafts(o.sunX,o.sunY,T.glow,9,760,.1)+wclouds(110,dawn?'#ffd2b0':'#4a5a9a',6,40,.5)+(dawn?wbirds(150,5,24,'#3a2a4a'):'')+wclouds(200,dawn?'#ffb28a':'#3a4a8a',5,52,.45),
     far:()=>wridge(o.sunY+60,90,T.far[0],130)+wmist(o.sunY+30,120,'#ffd9b0',.28)+wridge(o.sunY+110,70,T.far[1],100),
     mid:()=>{ const ly=o.ledge; return wridge(ly-60,150,T.mid,200)+
       `<path d="M-160 ${ly+14} Q200 ${ly-8} 480 ${ly+2} T1120 ${ly-4} L1120 700 L-160 700Z" fill="#241a2e"/><path d="M-160 ${ly+14} Q200 ${ly-8} 480 ${ly+2} T1120 ${ly-4}" stroke="${T.glow}" stroke-width="3" fill="none" opacity=".8"/>`+
       [60,880,1010].map((x,i)=>`<g transform="translate(${x} ${ly+10}) scale(${.9+i*.2})"><path d="M0 0 L0 -120" stroke="#1a1220" stroke-width="7"/>${[-96,-70,-44,-18].map((y,k)=>`<path d="M${-34+k*5} ${y+24} L0 ${y-8} L${34-k*5} ${y+24}Z" fill="#17301f"/>`).join('')}</g>`).join(''); },
-    near:()=>`<path d="M-160 ${o.ledge+60} Q100 ${o.ledge+20} 260 ${o.ledge+70} T700 ${o.ledge+60} T1120 ${o.ledge+44} L1120 700 L-160 700Z" fill="#150f1e"/>`+wtufts(o.ledge+66,'#20382a',70)+wsparks(0,960,300,500,12,'#ffe2a0')
+    near:()=>`<path d="M-160 ${o.ledge+60} Q100 ${o.ledge+20} 260 ${o.ledge+70} T700 ${o.ledge+60} T1120 ${o.ledge+44} L1120 700 L-160 700Z" fill="#150f1e"/>`+wtufts(o.ledge+66,'#20382a',70)+wsparks(0,960,300,500,12,'#ffe2a0')+(dawn?wleaves(7,['#f2c85a','#e89a4a'],-10,280):'')
   }; }
 
 /* ---------- royal court of Mahishmati (gold + maroon + peacock teal) ---------- */
@@ -169,3 +169,48 @@ function mithilaRoad(){ const tree=(x,y,s)=>`<g transform="translate(${x} ${y}) 
   far:()=>wridge(330,70,'#8fb88a',150)+wmist(320,80,'#fff0d0',.4)+[120,300,520,740,900].map((x,i)=>tree(x,352,.5)).join(''),
   mid:()=>`<path d="M-160 400 Q300 380 1120 396 V700 H-160Z" fill="#b6935a"/><path d="M-160 400 Q300 380 1120 396" stroke="#e8c070" stroke-width="3" fill="none"/>`+[60,880].map(x=>tree(x,404,1)).join('')+[330,640].map((x,i)=>`<g transform="translate(${x} 404)"><line y1="0" y2="-120" stroke="#6a3a1a" stroke-width="4"/><path d="M0 -120 L56 -108 L0 -92Z" fill="${i?'#e8882a':'#d8403a'}"/></g>`).join(''),
   near:()=>wsparks(0,960,300,520,12,'#fff0c0')+wtufts(470,'#4a7a3a',60) }; }
+
+/* ---------- ambient life pieces ---------- */
+/* flock of birds crossing the sky: wbirds(y, n, period, col) */
+function wbirds(y,n,period,col){ let s=''; for(let i=0;i<n;i++){ const x=-80+i*60, yy=y+(i%3)*22-(i%2)*14, k=.7+(i%3)*.25;
+  s+=A(`drift:1200:${-(20+i*6)}:${((period||18)+i*.9).toFixed(1)}`,A(`bob:4:${(.5+i*.08).toFixed(2)}`,`<g transform="translate(${x} ${yy}) scale(${k})" fill="none" stroke="${col||'#2a1a3a'}" stroke-width="2.4" stroke-linecap="round"><path d="M-12 -3 Q-6 -10 0 0 Q6 -10 12 -3"/></g>`)); } return s; }
+/* falling leaves / petals: wleaves(n, colours[], y1, y2) */
+function wleaves(n,cols,y1,y2){ cols=cols||['#e8a23a','#c8642a','#8aa83a']; let s=''; for(let i=0;i<n;i++){ const x=rnd()*1000-20, y=(y1===undefined?-10:y1)+rnd()*((y2||300)-(y1===undefined?-10:y1));
+  s+=A(`drift:${(60+rnd()*90).toFixed(0)}:${(150+rnd()*100).toFixed(0)}:${(6+rnd()*5).toFixed(1)}`,A(`rock:${(30+rnd()*40).toFixed(0)}:${(.8+rnd()).toFixed(2)}:${r1(x)}:${r1(y)}`,`<path d="M${r1(x)} ${r1(y)} q5 -8 10 0 q-5 8 -10 0Z" fill="${cols[i%cols.length]}" opacity=".9"/>`)); } return s; }
+/* a hanging banner / flag that waves: wflag(x,y,h,col) */
+function wflag(x,y,h,col){ return `<g transform="translate(${x} ${y})"><line y1="0" y2="${-h}" stroke="#3a2418" stroke-width="4"/>`+A(`rock:5:1.3:0:${-h}`,`<path d="M0 ${-h} Q26 ${-h-8} 50 ${-h+2} Q30 ${-h+12} 52 ${-h+26} Q26 ${-h+18} 0 ${-h+28}Z" fill="${col||'#e8882a'}"/>`)+`</g>`; }
+/* a burning fire / yagna: wfire(x,y,s) */
+function wfire(x,y,s){ s=s||1; return `<g transform="translate(${x} ${y}) scale(${s})">`+A('pulse:3',wglow(0,-24,90,'#ff9a3a',.7))+`<path d="M-26 0 L26 0 L20 -8 L-20 -8Z" fill="#3a2418"/>`+
+  A('flick:7',`<path d="M-16 -8 Q-20 -34 -6 -48 Q-6 -30 2 -38 Q4 -58 14 -66 Q12 -42 20 -34 Q20 -16 14 -8Z" fill="#ff8a2a"/>`)+A('flick:10',`<path d="M-8 -8 Q-10 -26 0 -36 Q4 -22 8 -30 Q12 -18 8 -8Z" fill="#ffd25e"/>`)+A('drift:6:-60:3',`<circle cy="-50" r="2" fill="#ffd98a"/>`)+A('drift:-8:-70:4',`<circle cy="-46" r="1.8" fill="#ffd98a"/>`)+`</g>`; }
+/* forest tree, tall trunk + canopy: wtree(x,y,s,col,trunk) */
+function wtree(x,y,s,col,trunk){ return `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-9 0 L-6 -150 L6 -150 L9 0Z" fill="${trunk||'#3a2418'}"/><circle cx="-34" cy="-170" r="46" fill="${col}"/><circle cx="30" cy="-176" r="50" fill="${col}"/><circle cx="-2" cy="-214" r="48" fill="${col}"/><circle cx="-60" cy="-140" r="30" fill="${col}"/><circle cx="62" cy="-146" r="32" fill="${col}"/></g>`; }
+
+/* ---------- Tapovan: forest ashram (hut, sacred fire, tall trees, light shafts). o:{tone:'dawn'|'dusk', fireX, hutX} ---------- */
+function tapovan(o){ o=Object.assign({tone:'dawn',fireX:700,hutX:190,ground:430},o||{}); const D=o.tone==='dawn';
+  const sky=D?[[0,'#1f4a5a'],[.4,'#6aa88a'],[.75,'#f2d98a'],[1,'#ffe9b0']]:[[0,'#1a1a4a'],[.45,'#7a4a6a'],[.8,'#f0905a'],[1,'#ffc070']], tc=D?['#3c7a50','#2a5c3c']:['#4a3a5c','#2c2444'], tr=D?'#1f3a2a':'#1a1428';
+  return {
+  sky:()=>wsky(sky)+wglow(560,210,380,D?'#fff0b0':'#ffb060',.6)+lightShafts(560,-20,D?'#fff4c0':'#ffc890',9,760,.12)+wclouds(90,D?'#fff4d0':'#ffc0a0',4,48,.35)+wbirds(70,6,20,D?'#1f3a2a':'#2a1a3a'),
+  far:()=>wridge(300,60,D?'#6a9a7a':'#6a4a7a',120)+[40,150,280,420,560,690,820,930].map((x,i)=>wtree(x,330+(i%2)*14,.42+(i%3)*.05,tc[i%2],tr)).join('')+wmist(280,110,D?'#e8ffd8':'#ffd0b0',.4),
+  mid:()=>{ const g=o.ground; return `<path d="M-160 ${g} Q300 ${g-14} 700 ${g-4} T1120 ${g-8} V700 H-160Z" fill="${D?'#2c4a2a':'#2a2036'}"/><path d="M-160 ${g} Q300 ${g-14} 700 ${g-4} T1120 ${g-8}" stroke="${D?'#8ac86a':'#ffb060'}" stroke-width="2.4" fill="none" opacity=".7"/>`+
+    /* hut */ `<g transform="translate(${o.hutX} ${g+2})"><rect x="-70" y="-84" width="140" height="84" fill="#7a5230"/><path d="M-92 -80 L0 -168 L92 -80Z" fill="#b8903a"/><path d="M-80 -86 L0 -160 M-50 -84 L0 -140 M50 -84 L0 -140 M80 -86 L0 -160" stroke="#8a6a24" stroke-width="2.4"/><rect x="-18" y="-60" width="36" height="60" rx="4" fill="#2a1a10"/>${A('pulse:3',wglow(0,-30,40,'#ffb45a',.5))}</g>`+
+    wfire(o.fireX,g+14,1.2)+`<g transform="translate(${o.fireX-110} ${g+12})"><rect x="-10" y="-14" width="20" height="14" fill="#5a3a22"/><path d="M-10 -14 q10 -18 20 0" fill="#e8b83a"/></g>`+wtree(30,g+20,1.1,D?'#2f6a42':'#3a3050',tr)+wtree(930,g+20,1.2,D?'#2a5c3c':'#322a48',tr); },
+  near:()=>wleaves(14,D?['#e8c23a','#9ac84a','#d8883a']:['#e88a3a','#c8503a'],-10,260)+`<path d="M-160 ${o.ground+70} Q100 ${o.ground+40} 300 ${o.ground+76} T800 ${o.ground+64} T1120 ${o.ground+50} V700 H-160Z" fill="${D?'#142a1c':'#120e1c'}"/>`+wtufts(o.ground+78,D?'#3a7a3a':'#4a3a5a',60)+wsparks(0,960,300,500,12,D?'#fff0a0':'#ffd27a') }; }
+
+/* ---------- Lanka at dusk: golden city on a rock island, crimson sky, black sea. o:{sunX} ---------- */
+function lanka(o){ o=Object.assign({sunX:700,sunY:300},o||{});
+  const tower=(x,y,w,h,c)=>`<g fill="${c}"><rect x="${x-w/2}" y="${y-h}" width="${w}" height="${h}"/><path d="M${x-w/2-5} ${y-h} Q${x} ${y-h-w*1.1} ${x+w/2+5} ${y-h}Z"/><rect x="${x-1.5}" y="${y-h-w*1.1-20}" width="3" height="22"/></g>`;
+  const city=(c,lit)=>{ let s=''; [[-330,60,130],[-250,46,190],[-170,70,150],[-80,54,230],[0,100,290],[90,54,220],[170,70,160],[250,46,200],[330,60,130]].forEach(([dx,w,h])=>{ s+=tower(dx,0,w,h,c)+[0,1,2,3].map(k=>`<rect x="${dx-w/2+8+k*(w/4.2)}" y="${-h+30+(k%2)*30}" width="6" height="12" rx="3" fill="#ffd27a" opacity="${lit}"/>`).join(''); }); return s; };
+  return {
+  sky:()=>wsky([[0,'#2a0a2a'],[.35,'#7a1a3a'],[.7,'#e8643a'],[1,'#ffc060']])+wglow(o.sunX,o.sunY,360,'#ffb060',.6)+`<circle cx="${o.sunX}" cy="${o.sunY}" r="62" fill="#ffe8b0"/>`+lightShafts(o.sunX,o.sunY,'#ffc080',8,700,.1)+wclouds(110,'#ff9a7a',5,44,.4)+wbirds(120,5,22,'#2a0a1a'),
+  far:()=>`<path d="M-160 420 Q240 300 480 330 T1120 410 V700 H-160Z" fill="#3a1228"/><g transform="translate(480 372)">${city('#6a2a3a',.45)}</g>`+wmist(330,90,'#ffb080',.3),
+  mid:()=>`<g transform="translate(480 400) scale(1.1)">${city('#2a0e22',.9)}</g><rect x="-160" y="398" width="1280" height="300" fill="#12081c"/>`+wglow(480,404,320,'#ffb060',.3)+
+    [0,1,2,3].map(i=>A(`drift:${i%2?70:-70}:0:${10+i*2}`,`<path d="M-100 ${420+i*22} q60 -12 120 0 t120 0 t120 0 t120 0 t120 0 t120 0 t120 0 t120 0 t120 0 t120 0" stroke="#ff9a5a" stroke-opacity="${.5-i*.09}" stroke-width="2.4" fill="none"/>`)).join('')+`<path d="M-160 442 Q200 428 480 444 T1120 432 V700 H-160Z" fill="#14081e"/><path d="M-160 442 Q200 428 480 444 T1120 432" stroke="#ffb060" stroke-width="2.4" fill="none" opacity=".6"/>`,
+  near:()=>`<path d="M-160 540 L-160 470 Q60 440 140 500 L200 540Z M760 540 Q820 480 960 466 L1120 470 V540Z" fill="#0a0410"/>`+wsparks(0,960,200,500,18,'#ffb060') }; }
+
+/* ---------- Tyrant kings' battlefield: smoky red sky, broken forts, torn banners (no gore) ---------- */
+function warfield(o){ o=Object.assign({sunX:300},o||{});
+  return {
+  sky:()=>wsky([[0,'#1a0610'],[.4,'#5a1428'],[.75,'#c8402a'],[1,'#f0a050']])+wglow(o.sunX,330,400,'#ff8a3a',.55)+lightShafts(o.sunX,330,'#ffb070',8,720,.1)+A('drift:90:0:30',wmist(120,120,'#2a0a14',.5))+A('drift:-80:0:36',wmist(200,100,'#3a1018',.45)),
+  far:()=>wridge(340,70,'#3a1220',140)+`<g transform="translate(700 350)" fill="#26101c"><rect x="-120" y="-120" width="240" height="120"/>${[-110,-60,-10,40,90].map(x=>`<rect x="${x}" y="-140" width="26" height="22"/>`).join('')}<rect x="-30" y="-190" width="60" height="70"/><rect x="-36" y="-206" width="72" height="18"/></g>`+wmist(330,90,'#e87850',.3),
+  mid:()=>`<path d="M-160 430 Q300 410 700 424 T1120 418 V700 H-160Z" fill="#1a0a14"/>`+wflag(120,432,150,'#8a1a22')+wflag(840,430,180,'#8a1a22')+wfire(480,440,1.1)+wfire(280,438,.8)+`<g transform="translate(580 430) rotate(-14)"><line y1="0" y2="-90" stroke="#3a2418" stroke-width="5"/><path d="M0 -90 l20 8 l-20 8Z" fill="#4a1018"/></g>`,
+  near:()=>`<path d="M-160 500 Q200 470 500 504 T1120 490 V700 H-160Z" fill="#0c0510"/>`+A('drift:60:-120:7',wsparks(0,960,300,520,14,'#ffa050'))+wsparks(0,960,200,520,16,'#ff9a50') }; }

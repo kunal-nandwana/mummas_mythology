@@ -570,12 +570,12 @@ function mahendra(o){ o=Object.assign({sunX:520,sunY:300,tone:'dawn',ledge:432,p
   const dawn=o.tone!=='night';
   return {
     sky:()=>wsky(T.sky)+(dawn?wglow(o.sunX,o.sunY,330,T.glow,.55)+(o.sun?wglow(o.sunX,o.sunY,150,'#fff0c0',.75)+`<circle cx="${o.sunX}" cy="${o.sunY}" r="${58*o.sun}" fill="#fff8de"/>`:''):wstars(70,330)+`<circle cx="760" cy="110" r="38" fill="#f3ecd2"/><circle cx="774" cy="104" r="34" fill="#18205a"/>`)+
-      lightShafts(o.sunX,o.sunY,T.glow,9,760,.1)+wclouds(110,dawn?'#ffd2b0':'#4a5a9a',6,40,.5)+wclouds(200,dawn?'#ffb28a':'#3a4a8a',5,52,.45),
+      lightShafts(o.sunX,o.sunY,T.glow,9,760,.1)+wclouds(110,dawn?'#ffd2b0':'#4a5a9a',6,40,.5)+(dawn?wbirds(150,5,24,'#3a2a4a'):'')+wclouds(200,dawn?'#ffb28a':'#3a4a8a',5,52,.45),
     far:()=>wridge(o.sunY+60,90,T.far[0],130)+wmist(o.sunY+30,120,'#ffd9b0',.28)+wridge(o.sunY+110,70,T.far[1],100),
     mid:()=>{ const ly=o.ledge; return wridge(ly-60,150,T.mid,200)+
       `<path d="M-160 ${ly+14} Q200 ${ly-8} 480 ${ly+2} T1120 ${ly-4} L1120 700 L-160 700Z" fill="#241a2e"/><path d="M-160 ${ly+14} Q200 ${ly-8} 480 ${ly+2} T1120 ${ly-4}" stroke="${T.glow}" stroke-width="3" fill="none" opacity=".8"/>`+
       [60,880,1010].map((x,i)=>`<g transform="translate(${x} ${ly+10}) scale(${.9+i*.2})"><path d="M0 0 L0 -120" stroke="#1a1220" stroke-width="7"/>${[-96,-70,-44,-18].map((y,k)=>`<path d="M${-34+k*5} ${y+24} L0 ${y-8} L${34-k*5} ${y+24}Z" fill="#17301f"/>`).join('')}</g>`).join(''); },
-    near:()=>`<path d="M-160 ${o.ledge+60} Q100 ${o.ledge+20} 260 ${o.ledge+70} T700 ${o.ledge+60} T1120 ${o.ledge+44} L1120 700 L-160 700Z" fill="#150f1e"/>`+wtufts(o.ledge+66,'#20382a',70)+wsparks(0,960,300,500,12,'#ffe2a0')
+    near:()=>`<path d="M-160 ${o.ledge+60} Q100 ${o.ledge+20} 260 ${o.ledge+70} T700 ${o.ledge+60} T1120 ${o.ledge+44} L1120 700 L-160 700Z" fill="#150f1e"/>`+wtufts(o.ledge+66,'#20382a',70)+wsparks(0,960,300,500,12,'#ffe2a0')+(dawn?wleaves(7,['#f2c85a','#e89a4a'],-10,280):'')
   }; }
 
 /* ---------- royal court of Mahishmati (gold + maroon + peacock teal) ---------- */
@@ -635,6 +635,51 @@ function mithilaRoad(){ const tree=(x,y,s)=>`<g transform="translate(${x} ${y}) 
   far:()=>wridge(330,70,'#8fb88a',150)+wmist(320,80,'#fff0d0',.4)+[120,300,520,740,900].map((x,i)=>tree(x,352,.5)).join(''),
   mid:()=>`<path d="M-160 400 Q300 380 1120 396 V700 H-160Z" fill="#b6935a"/><path d="M-160 400 Q300 380 1120 396" stroke="#e8c070" stroke-width="3" fill="none"/>`+[60,880].map(x=>tree(x,404,1)).join('')+[330,640].map((x,i)=>`<g transform="translate(${x} 404)"><line y1="0" y2="-120" stroke="#6a3a1a" stroke-width="4"/><path d="M0 -120 L56 -108 L0 -92Z" fill="${i?'#e8882a':'#d8403a'}"/></g>`).join(''),
   near:()=>wsparks(0,960,300,520,12,'#fff0c0')+wtufts(470,'#4a7a3a',60) }; }
+
+/* ---------- ambient life pieces ---------- */
+/* flock of birds crossing the sky: wbirds(y, n, period, col) */
+function wbirds(y,n,period,col){ let s=''; for(let i=0;i<n;i++){ const x=-80+i*60, yy=y+(i%3)*22-(i%2)*14, k=.7+(i%3)*.25;
+  s+=A(`drift:1200:${-(20+i*6)}:${((period||18)+i*.9).toFixed(1)}`,A(`bob:4:${(.5+i*.08).toFixed(2)}`,`<g transform="translate(${x} ${yy}) scale(${k})" fill="none" stroke="${col||'#2a1a3a'}" stroke-width="2.4" stroke-linecap="round"><path d="M-12 -3 Q-6 -10 0 0 Q6 -10 12 -3"/></g>`)); } return s; }
+/* falling leaves / petals: wleaves(n, colours[], y1, y2) */
+function wleaves(n,cols,y1,y2){ cols=cols||['#e8a23a','#c8642a','#8aa83a']; let s=''; for(let i=0;i<n;i++){ const x=rnd()*1000-20, y=(y1===undefined?-10:y1)+rnd()*((y2||300)-(y1===undefined?-10:y1));
+  s+=A(`drift:${(60+rnd()*90).toFixed(0)}:${(150+rnd()*100).toFixed(0)}:${(6+rnd()*5).toFixed(1)}`,A(`rock:${(30+rnd()*40).toFixed(0)}:${(.8+rnd()).toFixed(2)}:${r1(x)}:${r1(y)}`,`<path d="M${r1(x)} ${r1(y)} q5 -8 10 0 q-5 8 -10 0Z" fill="${cols[i%cols.length]}" opacity=".9"/>`)); } return s; }
+/* a hanging banner / flag that waves: wflag(x,y,h,col) */
+function wflag(x,y,h,col){ return `<g transform="translate(${x} ${y})"><line y1="0" y2="${-h}" stroke="#3a2418" stroke-width="4"/>`+A(`rock:5:1.3:0:${-h}`,`<path d="M0 ${-h} Q26 ${-h-8} 50 ${-h+2} Q30 ${-h+12} 52 ${-h+26} Q26 ${-h+18} 0 ${-h+28}Z" fill="${col||'#e8882a'}"/>`)+`</g>`; }
+/* a burning fire / yagna: wfire(x,y,s) */
+function wfire(x,y,s){ s=s||1; return `<g transform="translate(${x} ${y}) scale(${s})">`+A('pulse:3',wglow(0,-24,90,'#ff9a3a',.7))+`<path d="M-26 0 L26 0 L20 -8 L-20 -8Z" fill="#3a2418"/>`+
+  A('flick:7',`<path d="M-16 -8 Q-20 -34 -6 -48 Q-6 -30 2 -38 Q4 -58 14 -66 Q12 -42 20 -34 Q20 -16 14 -8Z" fill="#ff8a2a"/>`)+A('flick:10',`<path d="M-8 -8 Q-10 -26 0 -36 Q4 -22 8 -30 Q12 -18 8 -8Z" fill="#ffd25e"/>`)+A('drift:6:-60:3',`<circle cy="-50" r="2" fill="#ffd98a"/>`)+A('drift:-8:-70:4',`<circle cy="-46" r="1.8" fill="#ffd98a"/>`)+`</g>`; }
+/* forest tree, tall trunk + canopy: wtree(x,y,s,col,trunk) */
+function wtree(x,y,s,col,trunk){ return `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-9 0 L-6 -150 L6 -150 L9 0Z" fill="${trunk||'#3a2418'}"/><circle cx="-34" cy="-170" r="46" fill="${col}"/><circle cx="30" cy="-176" r="50" fill="${col}"/><circle cx="-2" cy="-214" r="48" fill="${col}"/><circle cx="-60" cy="-140" r="30" fill="${col}"/><circle cx="62" cy="-146" r="32" fill="${col}"/></g>`; }
+
+/* ---------- Tapovan: forest ashram (hut, sacred fire, tall trees, light shafts). o:{tone:'dawn'|'dusk', fireX, hutX} ---------- */
+function tapovan(o){ o=Object.assign({tone:'dawn',fireX:700,hutX:190,ground:430},o||{}); const D=o.tone==='dawn';
+  const sky=D?[[0,'#1f4a5a'],[.4,'#6aa88a'],[.75,'#f2d98a'],[1,'#ffe9b0']]:[[0,'#1a1a4a'],[.45,'#7a4a6a'],[.8,'#f0905a'],[1,'#ffc070']], tc=D?['#3c7a50','#2a5c3c']:['#4a3a5c','#2c2444'], tr=D?'#1f3a2a':'#1a1428';
+  return {
+  sky:()=>wsky(sky)+wglow(560,210,380,D?'#fff0b0':'#ffb060',.6)+lightShafts(560,-20,D?'#fff4c0':'#ffc890',9,760,.12)+wclouds(90,D?'#fff4d0':'#ffc0a0',4,48,.35)+wbirds(70,6,20,D?'#1f3a2a':'#2a1a3a'),
+  far:()=>wridge(300,60,D?'#6a9a7a':'#6a4a7a',120)+[40,150,280,420,560,690,820,930].map((x,i)=>wtree(x,330+(i%2)*14,.42+(i%3)*.05,tc[i%2],tr)).join('')+wmist(280,110,D?'#e8ffd8':'#ffd0b0',.4),
+  mid:()=>{ const g=o.ground; return `<path d="M-160 ${g} Q300 ${g-14} 700 ${g-4} T1120 ${g-8} V700 H-160Z" fill="${D?'#2c4a2a':'#2a2036'}"/><path d="M-160 ${g} Q300 ${g-14} 700 ${g-4} T1120 ${g-8}" stroke="${D?'#8ac86a':'#ffb060'}" stroke-width="2.4" fill="none" opacity=".7"/>`+
+    /* hut */ `<g transform="translate(${o.hutX} ${g+2})"><rect x="-70" y="-84" width="140" height="84" fill="#7a5230"/><path d="M-92 -80 L0 -168 L92 -80Z" fill="#b8903a"/><path d="M-80 -86 L0 -160 M-50 -84 L0 -140 M50 -84 L0 -140 M80 -86 L0 -160" stroke="#8a6a24" stroke-width="2.4"/><rect x="-18" y="-60" width="36" height="60" rx="4" fill="#2a1a10"/>${A('pulse:3',wglow(0,-30,40,'#ffb45a',.5))}</g>`+
+    wfire(o.fireX,g+14,1.2)+`<g transform="translate(${o.fireX-110} ${g+12})"><rect x="-10" y="-14" width="20" height="14" fill="#5a3a22"/><path d="M-10 -14 q10 -18 20 0" fill="#e8b83a"/></g>`+wtree(30,g+20,1.1,D?'#2f6a42':'#3a3050',tr)+wtree(930,g+20,1.2,D?'#2a5c3c':'#322a48',tr); },
+  near:()=>wleaves(14,D?['#e8c23a','#9ac84a','#d8883a']:['#e88a3a','#c8503a'],-10,260)+`<path d="M-160 ${o.ground+70} Q100 ${o.ground+40} 300 ${o.ground+76} T800 ${o.ground+64} T1120 ${o.ground+50} V700 H-160Z" fill="${D?'#142a1c':'#120e1c'}"/>`+wtufts(o.ground+78,D?'#3a7a3a':'#4a3a5a',60)+wsparks(0,960,300,500,12,D?'#fff0a0':'#ffd27a') }; }
+
+/* ---------- Lanka at dusk: golden city on a rock island, crimson sky, black sea. o:{sunX} ---------- */
+function lanka(o){ o=Object.assign({sunX:700,sunY:300},o||{});
+  const tower=(x,y,w,h,c)=>`<g fill="${c}"><rect x="${x-w/2}" y="${y-h}" width="${w}" height="${h}"/><path d="M${x-w/2-5} ${y-h} Q${x} ${y-h-w*1.1} ${x+w/2+5} ${y-h}Z"/><rect x="${x-1.5}" y="${y-h-w*1.1-20}" width="3" height="22"/></g>`;
+  const city=(c,lit)=>{ let s=''; [[-330,60,130],[-250,46,190],[-170,70,150],[-80,54,230],[0,100,290],[90,54,220],[170,70,160],[250,46,200],[330,60,130]].forEach(([dx,w,h])=>{ s+=tower(dx,0,w,h,c)+[0,1,2,3].map(k=>`<rect x="${dx-w/2+8+k*(w/4.2)}" y="${-h+30+(k%2)*30}" width="6" height="12" rx="3" fill="#ffd27a" opacity="${lit}"/>`).join(''); }); return s; };
+  return {
+  sky:()=>wsky([[0,'#2a0a2a'],[.35,'#7a1a3a'],[.7,'#e8643a'],[1,'#ffc060']])+wglow(o.sunX,o.sunY,360,'#ffb060',.6)+`<circle cx="${o.sunX}" cy="${o.sunY}" r="62" fill="#ffe8b0"/>`+lightShafts(o.sunX,o.sunY,'#ffc080',8,700,.1)+wclouds(110,'#ff9a7a',5,44,.4)+wbirds(120,5,22,'#2a0a1a'),
+  far:()=>`<path d="M-160 420 Q240 300 480 330 T1120 410 V700 H-160Z" fill="#3a1228"/><g transform="translate(480 372)">${city('#6a2a3a',.45)}</g>`+wmist(330,90,'#ffb080',.3),
+  mid:()=>`<g transform="translate(480 400) scale(1.1)">${city('#2a0e22',.9)}</g><rect x="-160" y="398" width="1280" height="300" fill="#12081c"/>`+wglow(480,404,320,'#ffb060',.3)+
+    [0,1,2,3].map(i=>A(`drift:${i%2?70:-70}:0:${10+i*2}`,`<path d="M-100 ${420+i*22} q60 -12 120 0 t120 0 t120 0 t120 0 t120 0 t120 0 t120 0 t120 0 t120 0 t120 0" stroke="#ff9a5a" stroke-opacity="${.5-i*.09}" stroke-width="2.4" fill="none"/>`)).join('')+`<path d="M-160 442 Q200 428 480 444 T1120 432 V700 H-160Z" fill="#14081e"/><path d="M-160 442 Q200 428 480 444 T1120 432" stroke="#ffb060" stroke-width="2.4" fill="none" opacity=".6"/>`,
+  near:()=>`<path d="M-160 540 L-160 470 Q60 440 140 500 L200 540Z M760 540 Q820 480 960 466 L1120 470 V540Z" fill="#0a0410"/>`+wsparks(0,960,200,500,18,'#ffb060') }; }
+
+/* ---------- Tyrant kings' battlefield: smoky red sky, broken forts, torn banners (no gore) ---------- */
+function warfield(o){ o=Object.assign({sunX:300},o||{});
+  return {
+  sky:()=>wsky([[0,'#1a0610'],[.4,'#5a1428'],[.75,'#c8402a'],[1,'#f0a050']])+wglow(o.sunX,330,400,'#ff8a3a',.55)+lightShafts(o.sunX,330,'#ffb070',8,720,.1)+A('drift:90:0:30',wmist(120,120,'#2a0a14',.5))+A('drift:-80:0:36',wmist(200,100,'#3a1018',.45)),
+  far:()=>wridge(340,70,'#3a1220',140)+`<g transform="translate(700 350)" fill="#26101c"><rect x="-120" y="-120" width="240" height="120"/>${[-110,-60,-10,40,90].map(x=>`<rect x="${x}" y="-140" width="26" height="22"/>`).join('')}<rect x="-30" y="-190" width="60" height="70"/><rect x="-36" y="-206" width="72" height="18"/></g>`+wmist(330,90,'#e87850',.3),
+  mid:()=>`<path d="M-160 430 Q300 410 700 424 T1120 418 V700 H-160Z" fill="#1a0a14"/>`+wflag(120,432,150,'#8a1a22')+wflag(840,430,180,'#8a1a22')+wfire(480,440,1.1)+wfire(280,438,.8)+`<g transform="translate(580 430) rotate(-14)"><line y1="0" y2="-90" stroke="#3a2418" stroke-width="5"/><path d="M0 -90 l20 8 l-20 8Z" fill="#4a1018"/></g>`,
+  near:()=>`<path d="M-160 500 Q200 470 500 504 T1120 490 V700 H-160Z" fill="#0c0510"/>`+A('drift:60:-120:7',wsparks(0,960,300,520,14,'#ffa050'))+wsparks(0,960,200,520,16,'#ff9a50') }; }
 
 /* ---- engine/rig.js ---- */
 /* =====================================================================
@@ -717,7 +762,7 @@ function shade(hex,amt){ const n=parseInt(hex.slice(1),16); let r=n>>16, g=(n>>8
 const COSTUME0 = {skin:'#8c6248', top:'#1f2640', bottom:'#8e1d24', shin:null, foot:null, sleeve:null, skirt:false,
   trim:'url(#gold)', hair:'long', head:'crown', beard:null, mus:false, cape:null, quiver:false, garland:null, sash:null,
   veil:null, turban:'#ece5d4', tilak:false, earring:true, big:false, aura:null, jewel:true,
-  bare:false, ash:false, snake:false, tiger:false, rudra:false, third:false, tusks:false, spikes:false, eyeCol:null, fireHair:false, blindfold:false, faces:null, arms:0, armItems:null};
+  bare:false, ash:false, snake:false, tiger:false, rudra:false, third:false, tusks:false, spikes:false, eyeCol:null, fireHair:false, blindfold:false, faces:null, arms:0, armItems:null, beardLen:0};
 
 let RIG_ID=0;
 /* Build one character. cast = {c:COSTUME, x, y, s, flip, acts:[[t,pose,dur?],...], expr, eyes, talk,
@@ -789,13 +834,13 @@ function makeRig(cast){
 
   /* ---- head ---- */
   /* extra faces (c.faces:[[dx,dy,scale],...]): small profile faces fanned behind the main head (Ravan's ten heads, Brahma's four) */
-  const miniFace=(dx,dy,sc,k)=>`<g transform="translate(${dx} ${dy}) translate(0 -266) scale(${sc}) translate(0 266)"><path d="M-14 -262 C-16 -286 0 -294 14 -288 C22 -284 24 -276 24 -270 L32 -260 L24 -258 C24 -252 22 -248 16 -246 L-6 -244Z" fill="${shade(skin,-.06*(k%3))}"/><path d="M-16 -268 C-20 -292 0 -300 18 -290 L14 -280 C2 -284 -8 -282 -12 -262Z" fill="${dark}"/>`+
+  const miniFace=(dx,dy,sc,k,rot)=>`<g transform="${rot?`rotate(${rot} 0 -240) `:''}translate(${dx} ${dy}) translate(0 -266) scale(${sc}) translate(0 266)"><path d="M-14 -262 C-16 -286 0 -294 14 -288 C22 -284 24 -276 24 -270 L32 -260 L24 -258 C24 -252 22 -248 16 -246 L-6 -244Z" fill="${shade(skin,-.06*(k%3))}"/><path d="M-16 -268 C-20 -292 0 -300 18 -290 L14 -280 C2 -284 -8 -282 -12 -262Z" fill="${dark}"/>`+
     (c.beard?`<path d="M6 -248 Q26 -246 22 -222 Q12 -210 2 -222 Q-4 -236 -2 -246Z" fill="${c.beard==='white'?'#e7e1d4':dark}"/>`:'')+
     (c.head==='big'?`<path d="M-18 -284 L-16 -326 L-6 -308 L2 -340 L10 -308 L20 -324 L20 -284Z" fill="url(#gold)"/><circle cx="2" cy="-300" r="4" fill="#2ec28a"/>`:`<path d="M-16 -286 L-12 -318 L-4 -300 L2 -326 L8 -300 L16 -316 L18 -286Z" fill="url(#gold)"/>`)+
     `<path d="M8.5 -271 Q15 -276 21.5 -270" stroke="#140a06" stroke-width="1.7" fill="none"/><circle cx="16.5" cy="-270.4" r="1.8" fill="#140a06"/><path d="M8 -278 Q15 -281.5 22.5 -277.5" stroke="${dark}" stroke-width="2.4" fill="none"/>`+
     (c.mus?`<path d="M12 -254 q8 -4 15 1" stroke="${dark}" stroke-width="3" fill="none" stroke-linecap="round"/>`:'')+`</g>`;
   let head='';
-  if(c.faces) head+=c.faces.map((f,i)=>A(`bob:${(1+(i%3)*.5).toFixed(1)}:${(.16+i*.025).toFixed(3)}`,miniFace(f[0],f[1],f[2],i))).join('');
+  if(c.faces) head+=c.faces.map((f,i)=>A(`bob:${(1+(i%3)*.5).toFixed(1)}:${(.16+i*.025).toFixed(3)}`,miniFace(f[0],f[1],f[2],i,f[3]))).join('');
   if(c.veil) head+=`<g ${J('veilB')}><path d="M-18 -292 C-40 -270 -50 -220 -56 -150 L-30 -150 C-28 -210 -20 -250 -8 -276Z" fill="${c.veil}"/><path d="M-30 -150 C-28 -210 -20 -250 -8 -276 L-14 -280 C-22 -246 -26 -206 -28 -150Z" fill="#000" opacity=".16"/></g>`;
   if(c.hair==='long' && !c.veil) head+=`<g ${J('hair')}><path d="M-12 -272 C-30 -262 -34 -230 -40 -196 L-22 -204 C-20 -226 -14 -244 -6 -256Z" fill="${dark}"/></g>`;
   if(c.head==='mahadev') head+=`<g ${J('hair')}><path d="M-14 -278 C-50 -268 -66 -216 -74 -146 C-64 -158 -56 -168 -48 -178 C-46 -150 -42 -126 -34 -104 C-24 -138 -22 -190 -8 -252Z" fill="${dark}"/><path d="M-22 -262 C-40 -240 -50 -200 -54 -160 M-30 -236 C-40 -210 -42 -176 -38 -138" stroke="#322b44" stroke-width="2" fill="none"/>`+
@@ -814,7 +859,12 @@ function makeRig(cast){
         `<ellipse ${J('blush')} cx="12" cy="-259" rx="6" ry="3.6" fill="#e0556a" opacity="0"/>`+
         `<path d="M-2 -273 q-6 4 -3 14 q3 5 7 2" fill="${shade(skin,-.08)}" stroke="${shade(skin,-.3)}" stroke-width="1.3"/><path d="M-2 -268 q-2 5 1 8" stroke="${shade(skin,-.35)}" stroke-width="1" fill="none"/>`;
   if(c.head!=='turban' && !c.veil && c.head!=='jata' && c.head!=='mahadev' && c.head!=='demon' && c.hair!=='none') head+=`<path d="M-16 -268 C-20 -292 0 -300 18 -290 L14 -280 C2 -284 -8 -282 -12 -262Z" fill="${dark}"/>`;
-  if(c.beard) head+=`<path d="M6 -248 Q26 -246 22 -222 Q12 -210 2 -222 Q-4 -236 -2 -246Z" fill="${c.beard==='white'?'#e7e1d4':dark}"/>`;
+  if(c.beard && c.beardLen>0){ /* long thick sage beard: sideburn to chin, flowing down the chest to a point, grey streaks, sways */
+    const L=c.beardLen, bc=c.beard==='white'?'#e7e1d4':(c.beard==='grey'?'#a8a29a':'#2a1a12'), st=c.beard==='white'?'#bdb6a6':'#8a7a68', D=84*L, T=-246+D, Y=f=>r1(-246+D*f);
+    head+=`<g ${J('beard')}><path d="M-8 -262 C-4 -252 4 -246 14 -245 L26 -246 C44 -240 50 ${Y(.3)} 42 ${Y(.62)} C38 ${Y(.82)} 26 ${Y(.95)} 14 ${r1(T)} C2 ${Y(.92)} -10 ${Y(.7)} -14 ${Y(.4)} C-16 -236 -12 -252 -8 -262Z" fill="${bc}"/>`+
+      `<path d="M-8 -238 C-6 ${Y(.3)} 0 ${Y(.7)} 12 ${Y(.97)} M8 -240 C12 ${Y(.3)} 16 ${Y(.6)} 16 ${Y(.92)} M24 -240 C32 ${Y(.25)} 32 ${Y(.55)} 26 ${Y(.85)} M38 -236 C46 ${Y(.2)} 44 ${Y(.4)} 40 ${Y(.58)}" stroke="${st}" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".85"/>`+
+      `<path d="M-6 -248 C4 -243 18 -242 28 -246" stroke="#000" stroke-opacity=".3" stroke-width="3" fill="none"/></g>`; }
+  else if(c.beard) head+=`<path d="M6 -248 Q26 -246 22 -222 Q12 -210 2 -222 Q-4 -236 -2 -246Z" fill="${c.beard==='white'?'#e7e1d4':dark}"/>`;
   // eye (almond, kajal line) with blink
   head+=`<g ${J('eye')}><path ${J('sclera')} d="M9 -270.5 Q15 -275.5 21.5 -270 Q15 -267.4 9 -270.5Z" fill="#f3ead8"/><circle ${J('pupil')} cx="16.8" cy="-270.6" r="2.1" fill="#3b2415"/><circle cx="16.9" cy="-270.6" r="1.1" fill="#0d0705"/><circle cx="17.7" cy="-271.4" r=".75" fill="#fff"/><path d="M8.5 -271 Q15 -276.5 22 -270" stroke="#140a06" stroke-width="1.7" fill="none"/>`+
         (c.skirt?`<path d="M21.5 -270 l3.4 -2.6" stroke="#140a06" stroke-width="1.5" stroke-linecap="round"/>`:'')+`<path ${J('wet')} d="M10.5 -267.6 Q15 -266 20 -268" stroke="#fff" stroke-width="1" fill="none" opacity="0"/></g>`;
@@ -1016,6 +1066,7 @@ function updateRig(r, lt, t, talking){
   if(q.skirt){ q.skirt.setAttribute('opacity', (1-clamp01(P.drop/40)).toFixed(2));
     setT(q.skirt, `translate(0 -150) skewX(${r1(gk(wind*1.4+wind2*0.9 + dLean*0.4, 6))}) translate(0 150)`); }
   if(q.cape) setT(q.cape, `rotate(${r1(Math.sin(t*1.3+sd)*2.2 - P.lean*0.85 + gk(dLean*1.4,12))} -16 -230) translate(-16 -230) scale(1 ${(1-clamp01(P.drop/72)*0.32).toFixed(3)}) translate(16 230)`);
+  if(q.beard) setT(q.beard, `rotate(${r1(Math.sin(t*1.25+sd+1)*1.6 + gk(dHead*0.7 + dLean*0.4,10))} 4 -248)`);
   if(q.hair) setT(q.hair, `rotate(${r1(Math.sin(t*1.1+sd)*2 + gk(dHead*0.9 + dLean*0.5,14))} -8 -262)`);
   if(q.aura) q.aura.setAttribute('opacity', (0.75+0.25*Math.sin(t*1.6)).toFixed(3));
 
@@ -1091,10 +1142,10 @@ const NANDI     = {skin:'#a8754f', top:'#a8754f', bottom:'#f2ead6', shin:'#a8754
 const NANDI_SADHAK = Object.assign({}, NANDI, {sash:null, garland:'#f2b134'});   // same boy, marigold garland (used in his tapasya)
 
 /* ---- Parshuram Ravan video: new designs (see engine/API.md) ---- */
-const PARSHURAM = {skin:'#a05a34', top:'#a05a34', bottom:'#e07a1c', shin:'#a05a34', foot:'#6a3a20', head:'jata2', hair:'none', bare:true, ash:true, rudra:true, beard:'black', mus:true, big:true, sash:'#f09a2a', tilak:true, trim:null, jewel:false, earring:false, aura:'saf'};   // saffron-and-ash sage-warrior: jata top-knot, ash stripes, black beard, saffron dhoti + shoulder cloth. Give props:{front:'parashu'}
+const PARSHURAM = {skin:'#a05a34', top:'#a05a34', bottom:'#e07a1c', shin:'#a05a34', foot:'#6a3a20', head:'jata2', hair:'none', bare:true, ash:true, rudra:true, beard:'black', beardLen:1, mus:true, big:true, sash:'#f09a2a', tilak:true, trim:null, jewel:false, earring:false, aura:'saf'};   // saffron-and-ash sage-warrior: jata top-knot, ash stripes, long thick black beard (beardLen), saffron dhoti + shoulder cloth. Give props:{front:'parashu'}
 const KASHYAP   = {skin:'#9a6a44', top:'#9a6a44', bottom:'#f1ece0', shin:'#9a6a44', head:'jata2', hair:'none', bare:true, ash:true, rudra:true, beard:'white', sash:'#e8dcc0', tilak:true, trim:null, jewel:false, earring:false, aura:'gw'};   // elder sage: white beard, white dhoti, pale shoulder cloth
 const BRAHMA    = {skin:'#e2a45e', top:'#f4ead0', bottom:'#f4ead0', shin:'#f4ead0', head:'crown', hair:'none', beard:'white', garland:'#ffd25e', sash:'#c8442a', jewel:true, faces:[[-27,-2,.92],[-52,-4,.85],[-75,-7,.78]], aura:'gw'};   // creator: golden skin, white beard, four faces in a row (3 extra), crown
-const RAVAN     = {skin:'#7a4630', top:'#0f6a52', bottom:'#1c1430', shin:'#1c1430', foot:'#4a2a1c', head:'big', hair:'none', mus:true, big:true, cape:'#0b3b4a', garland:'#ffd25e', sash:'#d9a73a', tilak:true, faces:[[-26,-4,.9],[-52,-4,.86],[-52,-50,.84],[-26,-50,.84],[0,-50,.84],[26,-50,.84],[-40,-94,.78],[-14,-94,.78],[12,-94,.78]]};   // ten heads (main + 9 in a fan), emerald + gold, copper skin, deep-teal cape. Weapon: props:{front:'khadga'}
+const RAVAN     = {skin:'#6a3a2c', top:'#2a0e1e', bottom:'#7a1424', shin:'#7a1424', foot:'#2a1a10', head:'big', hair:'none', mus:true, big:true, beard:'black', cape:'#5a0c22', garland:'#ffd25e', sash:'#d9a73a', tilak:true, eyeCol:'#ffd9a0', arms:4, armItems:['sword','mace','bow','trishul'], faces:[[0,-74,.8,-92],[0,-74,.8,-66],[0,-74,.8,-40],[0,-74,.8,-14],[0,-74,.8,12],[0,-40,.88,-76],[0,-40,.88,-50],[0,-40,.88,-24],[0,-40,.88,2]]};   // ten heads in two fanned arcs (main + 9 tilted behind), crimson + black armour + gold, bronze skin, 4 extra arms. Weapon: props:{front:'khadga'}
 const SAHASTRABAHU = {skin:'#8f5a3a', top:'#e0b040', bottom:'#233a7a', shin:'#233a7a', head:'crown', hair:'none', beard:'black', mus:true, big:true, cape:'#3a1a5a', garland:'#ffd25e', sash:'#c8442a', tilak:true, arms:8};   // Kartavirya Arjuna: gold armour, royal blue, purple cape, 8 extra arms fanned behind (use `with:{arms:N, armItems:[..]}`)
 const VISHNU    = {skin:'#4a86d0', top:'#4a86d0', bottom:'#f2c230', shin:'#4a86d0', head:'big', hair:'none', bare:true, garland:'#f6e6c8', sash:'#f2c230', tilak:true, jewel:true, arms:2, armItems:['chakra','mace'], aura:'gw'};   // Shri Hari: sky-blue, pitambar yellow, tall gold crown, 2 extra arms with chakra + gada
 
@@ -1249,7 +1300,7 @@ function VIDEO(cfg){
   const CX=W/2, CY=H/2, KX=W/540, KY=H/960;
   const CAMS={ in:{from:[CX,CY,1],to:[CX,CY,1.08]}, out:{from:[CX,CY,1.1],to:[CX,CY,1]},
     panL:{from:[CX+16*KX,CY,1.08],to:[CX-16*KX,CY,1.08]}, panR:{from:[CX-16*KX,CY,1.08],to:[CX+16*KX,CY,1.08]},
-    up:{from:[CX,CY+20*KY,1.06],to:[CX,CY-10*KY,1.06]}, down:{from:[CX,CY-20*KY,1.06],to:[CX,CY+10*KY,1.06]}, still:{from:[CX,CY,1.02],to:[CX,CY,1.02]} };
+    up:{from:[CX,CY+20*KY,1.06],to:[CX,CY-10*KY,1.06]}, down:{from:[CX,CY-20*KY,1.06],to:[CX,CY+10*KY,1.06]}, still:{from:[CX,CY,1.02],to:[CX,CY,1.02]}, fit:{from:[CX,CY,1],to:[CX,CY,1]} };
   const easeSnap=k=>{ k=clamp01(k); return k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2; };
   const HAND = cfg.handheld===undefined ? 0.6 : cfg.handheld;
   function camState(sc,lt,t){
@@ -1525,8 +1576,8 @@ function VIDEO(cfg){
 const lay = mk => ({ sky:()=>mk().sky(), far:()=>mk().far(), mid:()=>mk().mid(), near:()=>mk().near() });   // layered scene, built lazily
 const FY = 432;                                                                                           // feet line for standing characters
 const SIL = {skin:'#1c1226', top:'#1c1226', bottom:'#1c1226', shin:'#1c1226', foot:'#1c1226', sash:'#1c1226', ash:false, rudra:false, tilak:false};   // pure silhouette
-const PR = o => Object.assign({c:PARSHURAM, y:FY, s:.68, props:{front:'parashu'}, expr:'calm', acts:[[0,'stand']]}, o);
-const RV = o => Object.assign({c:RAVAN, y:FY, s:.6, expr:'calm', acts:[[0,'stand']]}, o);
+const PR = o => Object.assign({c:PARSHURAM, y:FY, s:.78, props:{front:'parashu'}, expr:'calm', acts:[[0,'stand']]}, o);
+const RV = o => Object.assign({c:RAVAN, y:FY, s:.7, expr:'calm', acts:[[0,'stand']]}, o);
 const MAH = o => lay(()=>mahendra(o));
 const SCROLL = (a,b,glow,s) => ()=>wsky([[0,a],[1,b]])+wglow(480,270,430,glow,.35)+wmandala(480,270,300,glow,24,160)+wglow(480,250,230,'#ffd98a',.35)+A('bob:5:.2',pothi(480,250,s||1.55))+wsparks(60,900,100,480,22,'#ffe7a8');
 /* small round badge with a label (devata / gandharva ...) */
@@ -1537,243 +1588,405 @@ const LEAN_AXE = (x,y) => `<g transform="translate(${x} ${y}) rotate(14)"><line 
 const VISION = (x,y,r) => `<g transform="translate(${x} ${y})">${A('pulse:2.2',wglow(0,0,r*1.7,'#ffd98a',.5))}<circle r="${r}" fill="#2a1a52" stroke="url(#gold)" stroke-width="4"/><g clip-path="inset(0)">`+
   `<path d="M${-r*.78} ${r*.45} H${r*.78}" stroke="#ffb45a" stroke-width="3"/>`+[[-.45,.5,.26],[0,.9,.34],[.45,.5,.26]].map(([dx,h,w])=>`<g transform="translate(${dx*r} ${r*.45})"><rect x="${-w*r/2}" y="${-h*r*.8}" width="${w*r}" height="${h*r*.8}" fill="#f3b45a"/><path d="M${-w*r/2-3} ${-h*r*.8} Q0 ${-h*r*.8-w*r*1.1} ${w*r/2+3} ${-h*r*.8}Z" fill="#ffd27a"/></g>`).join('')+`</g></g>`;
 
+/* ---- v2 helpers: new locations, close-up camera, ambient life ---- */
+const TAP = o => lay(()=>tapovan(o));
+const LNK = o => lay(()=>lanka(o));
+const WAR = o => lay(()=>warfield(o));
+const HC = (hold,z,x,y) => ({keys:[[0,480,270,1],[hold,480,270,1],[hold+7,x||490,y||262,z||1.1]]});     // holds a full 1.0 frame while a lower-third / diagram is read, then pushes in slowly
+const FACE = (x,s,y) => [x+6*s/.8, (y||FY)-262*s];                                                     // face-centre of a standing PARSHURAM/RAVAN at (x,y) scale s, for close-up camera keys
+const RING = (hi) => A('spin:90:480:270',`<g transform="translate(480 270)">`+[0,1,2,3].map(i=>`<g transform="rotate(${i*90}) translate(0 -205)"><g transform="scale(.9)"><circle r="46" fill="#241446" stroke="url(#gold)" stroke-width="3"/><g transform="scale(.62)">${_emblem(i)}</g></g></g>`).join('')+`</g>`);
+/* split one long script line into several shots (cuts only at spaces after the given phrases), each part with its own picture */
+const SPLIT = (text, cuts, parts) => { const bits=[]; let rest=text; cuts.forEach(c=>{ const i=rest.indexOf(c); if(i<0) throw new Error('SPLIT cut not found: '+c); bits.push(rest.slice(0,i+c.length).trim()); rest=rest.slice(i+c.length).trim(); }); bits.push(rest); return parts.map((p,k)=>Object.assign({line:bits[k]},p)); };
+const LOCK = at => A(`fadeout:${at}:.8`,`<g transform="translate(480 130)"><path d="M-26 0 V-26 a26 26 0 0 1 52 0 V0" fill="none" stroke="#ffd98a" stroke-width="9"/><rect x="-42" y="0" width="84" height="64" rx="10" fill="#8a5a1c" stroke="#ffe7a8" stroke-width="3"/><circle cy="28" r="9" fill="#2a1608"/></g>`);
+const BARRIER = x => A('pulse:2.2',`<rect x="${x-8}" y="60" width="16" height="380" rx="8" fill="#ffe7a8" opacity=".5" filter="url(#b4)"/><rect x="${x-2}" y="60" width="4" height="380" fill="#fff3c4"/>`)+wsparks(x-60,x+60,80,430,16,'#fff3c4');
+const ORBS3 = () => [[300,'#8cd0ff'],[480,'#ffd98a'],[660,'#c49aff']].map(([x,c],i)=>A(`pop:${.4+i*.5}`,A(`bob:4:${.2+i*.05}`,`<g transform="translate(${x} 90)">${wglow(0,0,80,c,.5)}<circle r="30" fill="#241446" stroke="${c}" stroke-width="3"/><circle r="18" fill="${c}" opacity=".5"/></g>`))).join('');
+const CHECK = at => A(`pop:${at}`,`<g transform="translate(480 92)">${wglow(0,0,110,'#ffe7a8',.55)}<circle r="52" fill="#241446" stroke="url(#gold)" stroke-width="4"/><path d="M-24 2 L-6 22 L26 -18" stroke="#fff3c4" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g>`);
+const ORBPASS = (x1,x2,y,delay) => A(`fadein:${delay}:.4`,`<g>${A(`slide:${x2-x1}:0:2.4:${delay}`,A('pulse:1.4',wglow(x1,y,70,'#ffe7a8',.9)+`<circle cx="${x1}" cy="${y}" r="16" fill="#fff3c4"/>`))}</g>`);
+
 VIDEO({
   title: 'परशुराम जी ने रावण का वध क्यों नहीं किया?',
   format: 'long', target: 520,
   keywords: ['परशुराम','रावण','श्रीराम','सहस्त्रबाहु','विष्णु','ब्रह्मा','तपस्या','अवतार','मर्यादा','वाल्मीकि'],
-  music: 'scenes', sfx: true, ending: 3.6, handheld: .5, captionChars: 42, minShot: 2.4, pace: 13,
+  music: 'scenes', sfx: true, ending: 3.6, handheld: .6, captionChars: 42, minShot: 2.4, pace: 13,
   look: {rim:1, bokeh:.9, motes:1, warm:.1, vig:.12},
   shots: [
 
   /* ================= CHAPTER 1 ================= */
   { chapter:{no:1, name:'एक अनसुलझा सवाल'}, dur:5, tr:'dissolve', mood:'divine', scene:'ch1-sawal', sfx:[[.15,'bell',.6]] },
 
+  /* hero reveal: face close-up (long thick beard) pulls back to a wide mountain-top shot */
   { line:`भगवान परशुराम स्वयं श्री हरि विष्णु के अवतार थे।`, scene:'ch1-sawal', mood:'hope', tr:'dissolve', fx:'dust',
-    ...MAH({sunX:480, sunY:238, sun:1.35}), cast:[PR({x:480, s:.74, with:SIL, aura:'saf'})],
-    cam:{keys:[[0,480,150,1.55],[7,480,268,1.06]]} },
+    ...MAH({sunX:620, sunY:250, sun:1.3}), front:()=>A('drift:-260:0:12',wmist(300,110,'#ffe9d0',.35)),
+    cast:[PR({x:400, s:.86, expr:'serene', acts:[[0,'stand'],[3.2,'hold'],[5.6,'armUp'],[8,'stand']]})],
+    cam:{keys:[[0,412,178,2.7],[2.8,412,178,2.5],[5.4,520,272,1.05]]} },
 
-  { line:`वे अजेय थे, चिरंजीवी थे, और उन्होंने अपने फरसे से पूरी पृथ्वी के अत्याचारी राजाओं का अंत किया था।`, scene:'ch1-sawal', mood:'hope', tr:'dissolve', fx:'petals',
-    ...MAH({sunX:700, sunY:300}), front:()=>crownsRise(120,860,360,9), cast:[PR({x:420, s:.74, acts:[[0,'stand'],[4,'hold']]})],
-    cam:{keys:[[0,480,290,1],[10,430,250,1.32]]} },
+  ...SPLIT(`वे अजेय थे, चिरंजीवी थे, और उन्होंने अपने फरसे से पूरी पृथ्वी के अत्याचारी राजाओं का अंत किया था।`, ['चिरंजीवी थे,'], [
+    { scene:'ch1-sawal', mood:'divine', tr:'fade', fx:'embers',
+      ...MAH({sunX:300, sunY:330, tone:'dusk'}),
+      cast:[PR({x:560, y:500, s:1.0, aura:'saf', expr:'serene', acts:[[0,'stand'],[2.2,'hold']]})],
+      cam:{keys:[[0,560,420,1.1],[4.4,560,230,1.3]]} },
+    { scene:'ch1-sawal', mood:'hope', tr:'whip',
+      ...WAR({sunX:300}), front:()=>crownsRise(120,860,400,9)+wsparks(0,960,200,520,10,'#ffb060'),
+      cast:[PR({x:380, s:.82, expr:'angry', walk:{from:-380,dur:2.8,delay:0}, acts:[[0,'stand'],[3,'armUp'],[5,'rage'],[7,'stand']]})],
+      cam:{keys:[[0,260,300,1.0],[4,400,255,1.3],[8,560,262,1.08]]} } ]),
 
-  { line:`दूसरी तरफ, रावण को ब्रह्मा जी से जो वरदान मिला था, उसमें मनुष्यों से सुरक्षा नहीं थी।`, scene:'ch1-sawal', mood:'divine', tr:'glow',
-    ...lay(()=>brahmaloka()), art:()=>lotusPlatform(480,440,1.2),
-    front:()=>A('ripple:3.5:330:300',`<circle cx="330" cy="300" r="150" fill="none" stroke="#ffe7a8" stroke-width="3" stroke-dasharray="6 8"/>`)+`<g opacity=".95">${wglow(840,430,60,'#ffe7a8',.35)}</g>`,
-    cast:[{c:RAVAN,x:320,y:436,s:.62,acts:[[0,'kneelPray']],expr:'serene'}, {c:BRAHMA,x:590,y:436,s:.7,flip:true,acts:[[0,'stand'],[1.5,'bless']],expr:'serene'}, {c:VILLAGER,x:840,y:440,s:.3,acts:[[0,'stand']],expr:'calm',aura:'gw'}],
-    cam:{keys:[[0,480,300,1.05],[9,470,262,1.2]]} },
+  ...SPLIT(`दूसरी तरफ, रावण को ब्रह्मा जी से जो वरदान मिला था, उसमें मनुष्यों से सुरक्षा नहीं थी।`, ['नहीं थी।'].slice(0,0).concat(['वरदान मिला था,']), [
+    { scene:'ch1-sawal', mood:'divine', tr:'glow',
+      ...lay(()=>brahmaloka()), art:()=>lotusPlatform(480,442,1.3),
+      front:()=>A('ripple:3.5:330:300',`<circle cx="330" cy="300" r="150" fill="none" stroke="#ffe7a8" stroke-width="3" stroke-dasharray="6 8"/>`),
+      cast:[{c:RAVAN,x:300,y:436,s:.62,acts:[[0,'kneelPray'],[4.5,'kneelBow']],expr:'serene'}, {c:BRAHMA,x:600,y:436,s:.72,flip:true,walk:{from:260,dur:2.4,delay:0},acts:[[0,'stand'],[2.6,'bless']],expr:'serene'}],
+      cam:{keys:[[0,560,290,1.25],[5,420,285,1.3]]} },
+    { scene:'ch1-sawal', mood:'calm', tr:'fade',
+      ...lay(()=>cosmos({col:'#ffd98a'})),
+      front:()=>A('pulse:2.6',`<path d="M300 330 A190 190 0 1 1 660 330" fill="none" stroke="#ffe7a8" stroke-width="5" opacity=".7"/>`)+wglow(480,250,230,'#ffd98a',.25)+A('pop:1.6',A('pulse:2',wglow(480,430,70,'#fff0c0',.7))),
+      cast:[RV({x:480, s:.74, props:{front:'khadga'}, acts:[[0,'stand'],[2,'fist']]}), {c:VILLAGER,x:480,y:446,s:.26,acts:[[0,'stand']],aura:'gw',enter:{fade:1.2,delay:1.6}}],
+      cam:{keys:[[0,480,270,1.0],[6,480,330,1.7]]} } ]),
 
-  { line:`परशुराम जी भी धरती पर मनुष्य रूप में ही थे।`, scene:'ch1-sawal', mood:'hope', tr:'fade', fx:'dust',
-    ...MAH({sunX:300, sunY:260}), cast:[PR({x:480, y:480, s:.92, expr:'serene', acts:[[0,'relax']]})],
-    cam:{keys:[[0,480,300,1.05],[7,486,228,1.85]]} },
+  { line:`परशुराम जी भी धरती पर मनुष्य रूप में ही थे।`, scene:'ch1-sawal', mood:'hope', tr:'fade', fx:'petals',
+    ...TAP({tone:'dawn'}), cast:[PR({x:470, s:.9, expr:'serene', walk:{from:-330,dur:3,delay:0}, acts:[[0,'stand'],[3.4,'relax'],[4.4,'lookAway']]})],
+    cam:{keys:[[0,300,290,1.05],[3,470,262,1.2],[5.2,478,206,1.95]]} },
 
-  { line:`तो फिर सवाल यह है कि जब परशुराम जी धरती पर पहले से मौजूद थे, तो उन्होंने ही रावण का वध क्यों नहीं कर दिया?`, scene:'ch1-sawal', mood:'hope', tr:'iris', trAt:[480,230],
-    ...lay(()=>cosmos()), front:()=>wquestion(480,215,1.05),
-    cast:[PR({x:230, s:.72, acts:[[0,'stand'],[3,'lookAway']]}), RV({x:730, s:.64, flip:true, props:{front:'khadga'}, acts:[[0,'stand'],[3.5,'lookAway']]})],
-    cam:{keys:[[0,480,270,1],[11,480,255,1.16]]} },
+  ...SPLIT(`तो फिर सवाल यह है कि जब परशुराम जी धरती पर पहले से मौजूद थे, तो उन्होंने ही रावण का वध क्यों नहीं कर दिया?`, ['सवाल यह है कि','मौजूद थे,'], [
+    { scene:'ch1-sawal', mood:'hope', tr:'iris', trAt:[480,230],
+      ...lay(()=>cosmos()), front:()=>wquestion(480,235,1.5), cam:{keys:[[0,480,270,1.0],[3,480,250,1.25]]} },
+    { scene:'ch1-sawal', mood:'hope', tr:'wipe',
+      ...MAH({sunX:700, sunY:300, tone:'dawn'}), front:()=>A('bob:6:.2',earth(780,110,50)+wglow(780,110,120,'#bfe0ff',.4)),
+      cast:[PR({x:400, s:.84, acts:[[0,'stand'],[1.6,'lookUp'],[4,'stand']]})], cam:{keys:[[0,400,300,1.5],[5,520,250,1.1]]} },
+    { scene:'ch1-sawal', mood:'hope', tr:'fade',
+      ...lay(()=>cosmos()), front:()=>wquestion(480,215,1.0),
+      cast:[PR({x:250, s:.76, walk:{from:-300,dur:2.4,delay:0}, acts:[[0,'stand'],[3,'lookAway'],[5.4,'think']]}), RV({x:730, s:.72, flip:true, walk:{from:300,dur:2.4,delay:0}, props:{front:'khadga'}, acts:[[0,'stand'],[3.5,'lookAway']]})],
+      cam:{keys:[[0,330,260,1.3],[3.4,640,260,1.3],[7,480,255,1.05]]} } ]),
 
   { line:`भगवान विष्णु को श्रीराम के रूप में दोबारा जन्म लेने की आवश्यकता क्यों पड़ी?`, scene:'ch1-sawal', mood:'divine', tr:'glow',
     ...lay(()=>kshir()), front:()=>wquestion(480,130,.6,'#fff0b8'),
-    cast:[{c:VISHNU,x:330,y:436,s:.7,acts:[[0,'stand'],[1.2,'bless']],expr:'serene'}, {c:RAMA,x:660,y:436,s:.62,flip:true,props:{front:'bow'},enter:{fade:1.6,delay:1.5},acts:[[0,'stand']],expr:'serene',aura:'gw'}],
-    cam:'in' },
+    cast:[{c:VISHNU,x:330,y:436,s:.74,acts:[[0,'stand'],[1.2,'bless'],[5,'explain']],expr:'serene'}, {c:RAMA,x:670,y:436,s:.64,flip:true,props:{front:'bow'},enter:{fade:1.6,delay:2.2,rise:30},acts:[[0,'stand'],[5,'namaste']],expr:'serene',aura:'gw'}],
+    cam:{keys:[[0,330,290,1.4],[4,480,275,1.15],[8,640,280,1.3]]} },
 
-  { line:`आज हम किसी सुनी-सुनाई कहानी पर नहीं, बल्कि वाल्मीकि रामायण, भागवत पुराण और अध्यात्म रामायण के प्रमाणों के आधार पर इस रहस्य की तह तक जाएंगे।`, scene:'ch1-sawal', mood:'calm', tr:'fade',
-    art:()=>wsky([[0,'#2a1608'],[1,'#5a3418']])+wglow(480,260,460,'#ffb45a',.4)+wmandala(480,260,330,'#f1c04e',28,200)+
-      [[175,'वाल्मीकि रामायण',2.8],[480,'भागवत पुराण',5.0],[785,'अध्यात्म रामायण',6.9]].map(([x,t,d])=>A(`pop:${d-1}`,A('bob:3:.25',pothi(x,235,.78)+wglow(x,235,120,'#ffe7a8',.35)))+A(`pop:${d}`,`<text x="${x}" y="320" text-anchor="middle" font-size="33" fill="#ffe7a8" style="font-family:'Tiro','Mukta',serif;font-weight:400">${t}</text>`)).join('')+wsparks(60,900,100,480,24,'#ffe7a8'),
-    cam:'in' },
+  ...SPLIT(`आज हम किसी सुनी-सुनाई कहानी पर नहीं, बल्कि वाल्मीकि रामायण, भागवत पुराण और अध्यात्म रामायण के प्रमाणों के आधार पर इस रहस्य की तह तक जाएंगे।`, ['कहानी पर नहीं,','आधार पर'], [
+    { scene:'ch1-sawal', mood:'calm', tr:'fade',
+      ...lay(()=>ayodhya({tone:'dusk'})),
+      front:()=>A('pop:.8',`<g transform="translate(250 190)"><path d="M-70 -34 h140 a12 12 0 0 1 12 12 v36 a12 12 0 0 1 -12 12 h-70 l-20 22 v-22 h-50 a12 12 0 0 1 -12 -12 v-36 a12 12 0 0 1 12 -12Z" fill="#fff3d8" opacity=".92"/><text y="8" text-anchor="middle" font-size="26" fill="#6a3a18">...?</text></g>`)+A('pop:1.8',`<g transform="translate(690 180)"><path d="M-70 -34 h140 a12 12 0 0 1 12 12 v36 a12 12 0 0 1 -12 12 h-30 v22 l-20 -22 h-90 a12 12 0 0 1 -12 -12 v-36 a12 12 0 0 1 12 -12Z" fill="#fff3d8" opacity=".92"/><text y="8" text-anchor="middle" font-size="26" fill="#6a3a18">...!</text></g>`),
+      cast:[{c:VILLAGER,x:300,y:FY,s:.62,acts:[[0,'stand'],[1,'explain'],[3,'lookAway']]}, {c:DEVOTEE_F,x:640,y:FY,s:.62,flip:true,acts:[[0,'stand'],[2,'plead'],[4,'explain']]}],
+      cam:{keys:[[0,480,300,1.2],[5,500,285,1.0]]} },
+    { scene:'ch1-sawal', mood:'calm', tr:'fade',
+      art:()=>wsky([[0,'#2a1608'],[1,'#5a3418']])+wglow(480,260,460,'#ffb45a',.4)+wmandala(480,260,330,'#f1c04e',28,200)+wmandala(480,260,200,'#ffe7a8',14,-120)+
+        [[175,'वाल्मीकि रामायण',1.2],[480,'भागवत पुराण',3.2],[785,'अध्यात्म रामायण',5.2]].map(([x,t,d],i)=>A(`pop:${d-.6}`,A(`bob:${3+i}:.25`,pothi(x,235,.78)+wglow(x,235,120,'#ffe7a8',.35)))+A(`pop:${d}`,`<text x="${x}" y="320" text-anchor="middle" font-size="33" fill="#ffe7a8" style="font-family:'Tiro','Mukta',serif;font-weight:400">${t}</text>`)).join('')+wsparks(60,900,100,480,28,'#ffe7a8')+wbirds(70,4,16,'#6a4a2a'),
+      cam:'fit' },
+    { scene:'ch1-sawal', mood:'divine', tr:'dissolve',
+      ...lay(()=>kshir()), front:()=>A('drift:0:140:6',A('bob:3:.3',pothi(480,170,1.0)+wglow(480,170,150,'#ffe7a8',.5)))+[0,1,2,3,4,5,6].map(i=>A(`drift:${(i%3-1)*20}:-150:${4+i*.6}`,`<circle cx="${300+i*60}" cy="${420+(i%2)*30}" r="${3+i%3*2}" fill="none" stroke="#e8ffff" stroke-width="2"/>`)).join(''),
+      cam:{keys:[[0,480,200,1.3],[4,480,330,1.15]]} } ]),
 
   /* ================= CHAPTER 2 ================= */
   { chapter:{no:2, name:'रावण का वरदान और सहस्त्रबाहु का प्रसंग'}, dur:5, tr:'dissolve', mood:'divine', scene:'ch2-vardan-court', sfx:[[.15,'bell',.6]] },
 
   { line:`सबसे पहले इस भ्रम को दूर करते हैं कि परशुराम जी रावण को मार ही नहीं सकते थे।`, scene:'ch2-vardan-court', mood:'calm', tr:'dissolve', fx:'dust',
-    ...MAH({sunX:620, sunY:290, tone:'dawn'}), front:()=>A('drift:-300:0:14',wmist(250,170,'#ffe9d0',.55))+A('drift:-260:0:11',wmist(310,150,'#fff0dc',.5)),
-    cast:[PR({x:380, s:.8, acts:[[0,'stand'],[2.5,'explain']], talk:false})], cam:{keys:[[0,420,290,1.05],[8,400,262,1.3]]} },
+    ...TAP({tone:'dusk', fireX:760, hutX:150}), front:()=>A('drift:-300:0:14',wmist(250,150,'#ffe9d0',.4)),
+    cast:[PR({x:430, s:.82, acts:[[0,'stand'],[2.5,'explain'],[5,'accuse'],[7,'explain']], talk:false})],
+    cam:{keys:[[0,520,290,1.0],[4,450,262,1.3],[8,455,214,1.5]]} },
 
-  { line:`वाल्मीकि रामायण के बालकांड के पंद्रहवें सर्ग में ब्रह्मा जी स्वयं बताते हैं कि रावण ने देवताओं, गंधर्वों, यक्षों और असुरों से अमरता का वरदान माँगा था,`, scene:'ch2-vardan-court', mood:'divine', tr:'glow',
-    ...lay(()=>brahmaloka()), art:()=>lotusPlatform(480,442,1.25),
-    front:()=>wlower('वाल्मीकि रामायण','बालकांड · सर्ग 15',{at:.6,hold:4.8})+BADGE(250,130,'देवता','#ffd25e',5.2)+BADGE(430,130,'गंधर्व','#7fd6ff',6.2)+BADGE(610,130,'यक्ष','#8cf0b0',7.0)+BADGE(790,130,'असुर','#c49aff',7.8),
-    cast:[{c:BRAHMA,x:610,y:440,s:.72,flip:true,acts:[[0,'stand'],[1.2,'explain']],talk:false,expr:'serene'}, {c:RAVAN,x:300,y:440,s:.62,acts:[[0,'kneelPray']],expr:'serene'}],
-    cam:{keys:[[0,480,280,1],[10,500,285,1.12]]} },
+  ...SPLIT(`वाल्मीकि रामायण के बालकांड के पंद्रहवें सर्ग में ब्रह्मा जी स्वयं बताते हैं कि रावण ने देवताओं, गंधर्वों, यक्षों और असुरों से अमरता का वरदान माँगा था,`, ['सर्ग में','बताते हैं कि'], [
+    { scene:'ch2-vardan-court', mood:'divine', tr:'glow',
+      art:SCROLL('#3a1a2a','#7a3a4a','#ffb0c8',1.5), front:()=>wlower('वाल्मीकि रामायण','बालकांड · सर्ग 15',{at:.4,hold:3.6}), cam:'fit' },
+    { scene:'ch2-vardan-court', mood:'divine', tr:'fade',
+      ...lay(()=>brahmaloka()), art:()=>lotusPlatform(480,442,1.25),
+      cast:[{c:BRAHMA,x:520,y:440,s:.86,flip:true,acts:[[0,'stand'],[1.2,'explain']],talk:false,expr:'serene'}],
+      cam:{keys:[[0,420,290,1.1],[4,510,250,1.9]]} },
+    { scene:'ch2-vardan-court', mood:'divine', tr:'wipe',
+      ...lay(()=>brahmaloka()), art:()=>lotusPlatform(480,442,1.25),
+      front:()=>BADGE(250,120,'देवता','#ffd25e',1.6)+BADGE(430,120,'गंधर्व','#7fd6ff',2.6)+BADGE(610,120,'यक्ष','#8cf0b0',3.6)+BADGE(790,120,'असुर','#c49aff',4.6),
+      cast:[{c:BRAHMA,x:640,y:440,s:.72,flip:true,acts:[[0,'stand'],[1.2,'bless']],expr:'serene'}, {c:RAVAN,x:300,y:440,s:.64,acts:[[0,'kneelPray'],[6,'kneelBow']],expr:'serene'}],
+      cam:{keys:[[0,480,300,1.0],[8,420,300,1.15]]} } ]),
 
   { line:`लेकिन मनुष्यों को तुच्छ समझकर छोड़ दिया था।`, scene:'ch2-vardan-court', mood:'hope', tr:'fade',
-    ...lay(()=>brahmaloka()), art:()=>lotusPlatform(480,442,1.25),
-    front:()=>A('pulse:2',wglow(790,420,90,'#fff0c0',.5)),
-    cast:[{c:RAVAN,x:330,y:440,s:.68,acts:[[0,'relax'],[1.2,'lookAway']],expr:'smile'}, {c:VILLAGER,x:790,y:444,s:.34,flip:true,acts:[[0,'stand']],expr:'calm',aura:'gw'}],
-    cam:{keys:[[0,420,290,1.05],[5,520,300,1.35]]} },
+    ...LNK({sunX:660}), front:()=>A('pulse:2',wglow(150,380,110,'#fff0c0',.5)),
+    cast:[RV({x:600, s:.78, flip:true, expr:'smile', props:{front:'khadga'}, acts:[[0,'stand'],[2,'relax'],[4,'lookAway']]}), {c:VILLAGER,x:170,y:440,s:.34,acts:[[0,'stand']],expr:'calm',aura:'gw'}],
+    cam:{keys:[[0,640,300,1.4],[5,500,285,1.1]]} },
 
-  { line:`इस श्लोक में कहीं भी यह नहीं लिखा है कि रावण को केवल कोई क्षत्रिय ही मार सकता है या कोई ब्राह्मण उसका वध नहीं कर सकता।`, scene:'ch2-vardan-court', mood:'calm', tr:'fade',
-    art:()=>wsky([[0,'#150d36'],[1,'#37204e']])+wglow(480,260,430,'#ffb060',.3)+wmandala(480,270,300,'#f1c04e',24,160)+A('bob:4:.22',pothi(480,262,1.5)+A('glint:1.2:2.6:-230:230',`<g transform="translate(480 262)"><rect x="-26" y="-70" width="52" height="140" fill="#fff" opacity=".4" filter="url(#b10)" transform="skewX(-14)"/></g>`))+TAG(280,110,330,'केवल क्षत्रिय ही?',2.6,4.0)+TAG(690,110,330,'ब्राह्मण नहीं मार सकता?',5.2,6.8)+wsparks(60,900,100,480,22,'#ffe7a8'),
-    cam:'in' },
+  ...SPLIT(`इस श्लोक में कहीं भी यह नहीं लिखा है कि रावण को केवल कोई क्षत्रिय ही मार सकता है या कोई ब्राह्मण उसका वध नहीं कर सकता।`, ['लिखा है कि','मार सकता है'], [
+    { scene:'ch2-vardan-court', mood:'calm', tr:'fade',
+      art:()=>wsky([[0,'#150d36'],[1,'#37204e']])+wglow(480,260,430,'#ffb060',.3)+wmandala(480,270,300,'#f1c04e',24,160)+A('bob:4:.22',pothi(480,262,1.5)+A('glint:1.2:2.6:-230:230',`<g transform="translate(480 262)"><rect x="-26" y="-70" width="52" height="140" fill="#fff" opacity=".4" filter="url(#b10)" transform="skewX(-14)"/></g>`))+wquestion(480,90,.45)+wsparks(60,900,100,480,26,'#ffe7a8'),
+      cam:'fit' },
+    { scene:'ch2-vardan-court', mood:'calm', tr:'fade',
+      ...LNK({sunX:260, sunY:320}), front:()=>TAG(480,90,380,'केवल क्षत्रिय ही?',.5,3.0),
+      cast:[RV({x:660, s:.74, flip:true, props:{front:'khadga'}, acts:[[0,'stand'],[2,'fist']]}), {c:SOLDIER,x:260,y:FY,s:.6,props:{front:'staff'},walk:{from:-240,dur:2.4,delay:0},acts:[[0,'stand']]}],
+      cam:{keys:[[0,480,290,1.1],[5,480,270,1.05]]} },
+    { scene:'ch2-vardan-court', mood:'calm', tr:'wipe',
+      ...TAP({tone:'dusk', fireX:200, hutX:800}), front:()=>TAG(480,90,420,'ब्राह्मण नहीं मार सकता?',.5,3.2),
+      cast:[{c:BRAHMIN,x:640,y:FY,s:.72,flip:true,acts:[[0,'stand'],[2,'explain']]}, RV({x:300, s:.7, props:{front:'khadga'}, acts:[[0,'stand'],[3,'lookAway']]})],
+      cam:{keys:[[0,480,290,1.1],[5,520,270,1.05]]} } ]),
 
-  { line:`इसलिए यह कहना कि परशुराम जी ब्राह्मण होने के कारण रावण को नहीं मार सकते थे, शास्त्रीय रूप से सही नहीं है।`, scene:'ch2-vardan-court', mood:'hope', tr:'fade', fx:'dust',
-    ...MAH({sunX:300, sunY:285, tone:'dawn'}), cast:[PR({x:600, s:.78, flip:true, acts:[[0,'stand'],[1.5,'explain'],[6,'bless']]})],
-    cam:{keys:[[0,520,290,1],[9,560,262,1.28]]} },
+  ...SPLIT(`इसलिए यह कहना कि परशुराम जी ब्राह्मण होने के कारण रावण को नहीं मार सकते थे, शास्त्रीय रूप से सही नहीं है।`, ['कारण'], [
+    { scene:'ch2-vardan-court', mood:'hope', tr:'fade', fx:'dust',
+      ...MAH({sunX:260, sunY:285, tone:'dusk'}), cast:[PR({x:620, s:.9, flip:true, acts:[[0,'stand'],[1.5,'explain']]})],
+      cam:{keys:[[0,560,290,1.3],[3,556,208,2.1],[5.6,556,208,2.3]]} },
+    { scene:'ch2-vardan-court', mood:'hope', tr:'fade', fx:'dust',
+      ...MAH({sunX:700, sunY:300, tone:'dawn'}), front:()=>A('drift:-300:0:12',wmist(310,100,'#ffe9d0',.3)),
+      cast:[PR({x:300, s:.84, acts:[[0,'stand'],[1.4,'armUp'],[4,'bless'],[6.5,'stand']]})],
+      cam:{keys:[[0,420,290,1.0],[6,330,262,1.35]]} } ]),
 
-  { line:`इतना ही नहीं, श्रीमद्भागवत पुराण के अनुसार, महिष्मती के राजा कार्तवीर्य अर्जुन—जिन्हें हम सहस्त्रबाहु के नाम से जानते हैं—उन्होंने एक बार`, scene:'ch2-vardan-court', mood:'joy', tr:'iris', trAt:[700,250],
-    ...lay(()=>court({tx:700})), front:()=>wlower('श्रीमद्भागवत पुराण','महिष्मती · कार्तवीर्य अर्जुन',{at:.8,hold:5}), title:{text:'महिष्मती', y:96, size:44, delay:.4},
-    cast:[{c:SAHASTRABAHU,x:700,y:392,s:.6,flip:true,acts:[[0,'stand']],expr:'smile'}, {c:SOLDIER,x:120,y:436,s:.5,props:{front:'staff'},acts:[[0,'stand']]}, {c:SOLDIER,x:850,y:436,s:.5,flip:true,props:{front:'staff'},acts:[[0,'stand']]}],
-    cam:{keys:[[0,480,270,1],[10,640,265,1.25]]} },
+  ...SPLIT(`इतना ही नहीं, श्रीमद्भागवत पुराण के अनुसार, महिष्मती के राजा कार्तवीर्य अर्जुन—जिन्हें हम सहस्त्रबाहु के नाम से जानते हैं—उन्होंने एक बार`, ['के अनुसार,'], [
+    { scene:'ch2-vardan-court', mood:'joy', tr:'fade',
+      art:SCROLL('#3a1a08','#7a4a1c','#ffd25e',1.5), front:()=>wlower('श्रीमद्भागवत पुराण','महिष्मती · कार्तवीर्य अर्जुन',{at:.4,hold:3.6}), cam:'fit' },
+    { scene:'ch2-vardan-court', mood:'joy', tr:'iris', trAt:[700,250],
+      ...lay(()=>court({tx:700})), title:{text:'महिष्मती', y:112, size:44, delay:.4},
+      cast:[{c:SAHASTRABAHU,x:700,y:392,s:.64,flip:true,acts:[[0,'stand'],[3,'explain']],expr:'smile'}, {c:SOLDIER,x:120,y:436,s:.5,props:{front:'staff'},acts:[[0,'stand']]}, {c:SOLDIER,x:850,y:436,s:.5,flip:true,props:{front:'staff'},acts:[[0,'stand']]}],
+      cam:{keys:[[0,480,270,1.0],[4,640,262,1.25],[9,690,250,1.4]]} } ]),
 
   { line:`युद्ध में रावण को हराकर बंदी बना लिया था।`, scene:'ch2-vardan-court', mood:'calm', tr:'fade',
     ...lay(()=>court({tx:700})), front:()=>A('pulse:2.4',wglow(430,330,150,'#ffe0a0',.3)),
-    cast:[{c:SAHASTRABAHU,x:700,y:392,s:.6,flip:true,acts:[[0,'stand']],expr:'smile'}, {c:RAVAN,x:400,y:436,s:.6,acts:[[0,'lookDown']],expr:'sad'}],
-    cam:{keys:[[0,520,270,1.05],[5,480,290,1.3]]} },
+    cast:[{c:SAHASTRABAHU,x:700,y:392,s:.64,flip:true,acts:[[0,'stand'],[2,'point']],expr:'smile'}, {c:SOLDIER,x:230,y:436,s:.5,props:{front:'staff'},walk:{from:-300,dur:3,delay:0},acts:[[0,'stand']]}, {c:RAVAN,x:380,y:436,s:.64,walk:{from:-300,dur:3,delay:0},acts:[[0,'lookDown']],expr:'sad'}],
+    cam:{keys:[[0,380,290,1.3],[5,520,270,1.15]]} },
 
   { line:`और उस शक्तिशाली सहस्त्रबाहु का वध स्वयं भगवान परशुराम ने किया था।`, scene:'ch2-vardan-court', mood:'divine', tr:'glow', fx:'sparks',
     ...lay(()=>court({tx:700})),
     front:()=>A('fadein:4.1:.2',A('fadeout:5.2:1.4',A('ripple:1.8:700:300',`<circle cx="700" cy="300" r="160" fill="none" stroke="#fff3c4" stroke-width="5"/>`)+wglow(700,300,260,'#fff0c0',.8)))+A('fadein:4.2:.4',wsparks(560,840,200,420,26,'#ffe7a8')),
-    cast:[{c:SAHASTRABAHU,x:700,y:392,s:.62,flip:true,acts:[[0,'stand']],expr:'surprise',exit:{at:4.4,fade:.9}}, PR({x:330, s:.72, walk:{from:-300,dur:2.6,delay:0}, acts:[[0,'stand'],[3.2,'armUp'],[5.4,'stand']]})],
-    sfx:[[4.3,'shimmer',.7]], cam:{keys:[[0,420,280,1],[4,520,280,1.1],[8,560,285,1.25]]} },
+    cast:[{c:SAHASTRABAHU,x:700,y:392,s:.64,flip:true,acts:[[0,'stand']],expr:'surprise',exit:{at:4.4,fade:.9}}, PR({x:330, s:.76, walk:{from:-300,dur:2.6,delay:0}, acts:[[0,'stand'],[3.2,'armUp'],[5.4,'stand']]})],
+    sfx:[[4.3,'shimmer',.7]], cam:{keys:[[0,420,280,1],[4,520,280,1.15],[7,560,285,1.3]]} },
 
-  { line:`तो जब परशुराम जी उस योद्धा का अंत कर सकते थे जिसने रावण को बंदी बनाया था, तो उन्होंने सीधे रावण को चुनौती क्यों नहीं दी?`, scene:'ch2-vardan-court', mood:'calm', tr:'fade',
-    ...MAH({sunX:760, sunY:330, tone:'dusk'}),
-    front:()=>`<g transform="translate(790 392)" opacity=".85">${wglow(0,-30,120,'#ffb060',.5)}<path d="M-60 0 V-40 L-44 -52 L-28 -40 V-70 L-12 -86 L4 -70 V-40 L22 -54 L40 -40 V0Z" fill="#2a1a3a"/><path d="M-20 -76 L-12 -92 L-4 -76" fill="#ffd27a"/></g>`+wquestion(560,190,.55),
-    cast:[PR({x:290, s:.74, acts:[[0,'stand'],[2.2,'think']]})], cam:'panR' },
+  ...SPLIT(`तो जब परशुराम जी उस योद्धा का अंत कर सकते थे जिसने रावण को बंदी बनाया था, तो उन्होंने सीधे रावण को चुनौती क्यों नहीं दी?`, ['बनाया था,'], [
+    { scene:'ch2-vardan-court', mood:'calm', tr:'fade',
+      ...MAH({sunX:760, sunY:330, tone:'dusk'}),
+      front:()=>`<g transform="translate(790 392)" opacity=".85">${wglow(0,-30,120,'#ffb060',.5)}<path d="M-60 0 V-40 L-44 -52 L-28 -40 V-70 L-12 -86 L4 -70 V-40 L22 -54 L40 -40 V0Z" fill="#2a1a3a"/></g>`,
+      cast:[PR({x:290, s:.82, acts:[[0,'stand'],[2.2,'think'],[5,'lookAway']]})], cam:'panR' },
+    { scene:'ch2-vardan-court', mood:'calm', tr:'wipe',
+      ...LNK({sunX:760, sunY:300}), front:()=>wquestion(560,150,.55)+wbirds(90,4,16,'#1a0a1a'),
+      cast:[PR({x:250, s:.8, acts:[[0,'stand'],[2.2,'point'],[5,'stand']]})], cam:{keys:[[0,320,290,1.25],[6,520,275,1.05]]} } ]),
 
   /* ================= CHAPTER 3 ================= */
   { chapter:{no:3, name:'प्रचलित मान्यताएँ और उनका सच'}, dur:5, tr:'dissolve', mood:'divine', scene:'ch3-do-tark', sfx:[[.15,'bell',.6]] },
 
   { line:`इस प्रश्न के उत्तर में दो तर्क सबसे ज़्यादा दिए जाते हैं।`, scene:'ch3-do-tark', mood:'hope', tr:'dissolve',
-    art:()=>wsky([[0,'#0e0a2a'],[1,'#2a1850']])+wglow(480,270,480,'#ffb060',.25)+wmandala(480,270,340,'#f1c04e',28,220)+splitArgs({hi:-1,delay:.4})+wsparks(0,960,60,500,18,'#ffe7a8'), cam:'in' },
+    art:()=>wsky([[0,'#0e0a2a'],[1,'#2a1850']])+wglow(480,270,480,'#ffb060',.25)+wmandala(480,270,340,'#f1c04e',28,220)+splitArgs({hi:-1,delay:.4})+wsparks(0,960,60,500,22,'#ffe7a8'), cam:'fit' },
 
   { line:`पहला तर्क है पृथ्वी का दान और तपस्या।`, scene:'ch3-do-tark', mood:'hope', tr:'fade',
-    art:()=>wsky([[0,'#0e0a2a'],[1,'#2a1850']])+wglow(250,270,380,'#ff9a50',.3)+wmandala(480,270,340,'#f1c04e',28,220)+splitArgs({hi:0,delay:0})+wsparks(0,960,60,500,18,'#ffe7a8'), cam:{keys:[[0,480,270,1],[5,300,250,1.25]]} },
+    art:()=>wsky([[0,'#0e0a2a'],[1,'#2a1850']])+wglow(250,270,380,'#ff9a50',.3)+wmandala(480,270,340,'#f1c04e',28,220)+splitArgs({hi:0,delay:0})+wsparks(0,960,60,500,22,'#ffe7a8'), cam:'fit' },
 
-  { line:`वाल्मीकि रामायण के बालकांड में परशुराम जी स्वयं श्रीराम को बताते हैं कि क्षत्रियों से पृथ्वी जीतने के बाद उन्होंने पूरी धरती ऋषि कश्यप को दान कर दी थी।`, scene:'ch3-do-tark', mood:'divine', tr:'fade',
-    ...MAH({sunX:480, sunY:300, tone:'dawn'}), front:()=>wlower('वाल्मीकि रामायण','बालकांड',{at:.6,hold:5})+A('bob:5:.3',earth(480,196,46)+wglow(480,196,120,'#bfe0ff',.45)),
-    cast:[PR({x:300, s:.72, acts:[[0,'stand'],[2.5,'give']]}), {c:KASHYAP,x:660,y:FY,s:.7,flip:true,acts:[[0,'stand'],[3.5,'bless']],expr:'serene'}],
-    cam:{keys:[[0,480,280,1],[10,480,262,1.18]]} },
+  ...SPLIT(`वाल्मीकि रामायण के बालकांड में परशुराम जी स्वयं श्रीराम को बताते हैं कि क्षत्रियों से पृथ्वी जीतने के बाद उन्होंने पूरी धरती ऋषि कश्यप को दान कर दी थी।`, ['बताते हैं कि','जीतने के बाद'], [
+    { scene:'ch3-do-tark', mood:'divine', tr:'fade',
+      ...MAH({sunX:480, sunY:310, tone:'dawn'}), front:()=>wlower('वाल्मीकि रामायण','बालकांड',{at:.4,hold:3.8}),
+      cast:[PR({x:330, s:.78, acts:[[0,'stand'],[1.6,'explain']]}), {c:RAMA,x:650,y:FY,s:.7,flip:true,props:{front:'bow'},acts:[[0,'stand'],[2,'namaste']],expr:'serene'}],
+      cam:'fit' },
+    { scene:'ch3-do-tark', mood:'hope', tr:'whip',
+      ...WAR({sunX:640}), front:()=>crownsRise(160,800,400,7),
+      cast:[PR({x:480, s:.84, acts:[[0,'stand'],[1.4,'armUp'],[3.4,'stand']]})], cam:{keys:[[0,480,300,1.5],[4,480,262,1.1]]} },
+    { scene:'ch3-do-tark', mood:'divine', tr:'fade',
+      ...TAP({tone:'dawn', fireX:830, hutX:120}), front:()=>A('bob:5:.3',earth(480,196,46)+wglow(480,196,120,'#bfe0ff',.45)),
+      cast:[PR({x:310, s:.78, acts:[[0,'stand'],[2,'give'],[6,'stand']]}), {c:KASHYAP,x:650,y:FY,s:.74,flip:true,acts:[[0,'stand'],[3,'bless'],[7,'stand']],expr:'serene'}],
+      cam:{keys:[[0,480,280,1.0],[8,480,262,1.2]]} } ]),
 
   { line:`ऋषि कश्यप ने उनसे कहा था कि अब वे इस दान की गई भूमि पर रात्रि विश्राम न करें।`, scene:'ch3-do-tark', mood:'calm', tr:'fade',
-    ...MAH({sunX:480, sunY:330, tone:'dusk', sun:.0}), front:()=>`<circle cx="790" cy="120" r="32" fill="#f3ecd2"/>${wglow(790,120,110,'#e8f0ff',.45)}`,
-    cast:[{c:KASHYAP,x:610,y:FY,s:.74,flip:true,acts:[[0,'stand'],[1,'explain']],expr:'serene'}, PR({x:340, s:.7, props:{front:'parashu'}, acts:[[0,'stand'],[2.5,'pranam']]})],
-    cam:{keys:[[0,520,290,1.05],[7,470,270,1.3]]} },
+    ...TAP({tone:'dusk', fireX:260, hutX:820}), front:()=>`<circle cx="790" cy="100" r="30" fill="#f3ecd2"/>${wglow(790,100,110,'#e8f0ff',.45)}`,
+    cast:[{c:KASHYAP,x:600,y:FY,s:.78,flip:true,acts:[[0,'stand'],[1,'explain'],[5,'plead']],expr:'serene'}, PR({x:340, s:.74, acts:[[0,'stand'],[2.5,'pranam'],[6,'stand']]})],
+    cam:{keys:[[0,640,300,1.5],[4,500,280,1.15],[8,380,262,1.35]]} },
 
   { line:`इसके बाद परशुराम जी महेंद्र पर्वत पर तपस्या करने चले गए।`, scene:'ch3-do-tark', mood:'hope', tr:'fade', fx:'dust',
-    ...MAH({sunX:600, sunY:290, tone:'dawn'}), title:{text:'महेंद्र पर्वत', y:92, size:42, color:'#fff0cc', delay:1.2},
-    cast:[PR({x:600, s:.72, walk:{from:-520,dur:4.6,delay:0}, props:{front:'parashu'}, acts:[[0,'stand'],[5,'kneelPray']]})],
-    cam:{keys:[[0,320,285,1.05],[7,560,275,1.2]]} },
+    ...MAH({sunX:700, sunY:300, tone:'dawn'}), title:{text:'महेंद्र पर्वत', y:92, size:42, color:'#fff0cc', delay:1.2},
+    cast:[PR({x:640, s:.74, walk:{from:-640,dur:5.2,delay:0}, acts:[[0,'stand'],[5.6,'kneelPray']]})],
+    cam:{keys:[[0,260,285,1.15],[6,600,275,1.3],[8,640,230,1.55]]} },
 
-  { line:`कई लोग मानते हैं कि इस वचन के कारण वे धरती पर लौटकर रावण से युद्ध नहीं कर सकते थे।`, scene:'ch3-do-tark', mood:'calm', tr:'fade',
-    ...MAH({sunX:760, sunY:320, tone:'dusk'}),
-    front:()=>A('pulse:2.2',`<rect x="525" y="70" width="14" height="370" rx="7" fill="#ffe7a8" opacity=".5" filter="url(#b4)"/><rect x="530" y="70" width="4" height="370" fill="#fff3c4"/>`)+wglow(820,360,130,'#ffb060',.5),
-    cast:[PR({x:300, s:.74, props:{}, acts:[[0,'kneelPray']], eyes:'closed'})], cam:'panR' },
+  ...SPLIT(`कई लोग मानते हैं कि इस वचन के कारण वे धरती पर लौटकर रावण से युद्ध नहीं कर सकते थे।`, ['इस वचन के कारण'], [
+    { scene:'ch3-do-tark', mood:'calm', tr:'fade',
+      ...MAH({tone:'night', ledge:432}), front:()=>wsparks(280,780,100,430,24,'#cfe0ff'),
+      cast:[PR({x:300, s:.8, props:{}, acts:[[0,'kneelPray']], eyes:'closed', expr:'serene'})], cam:{keys:[[0,300,282,1.9],[4,360,280,1.4]]} },
+    { scene:'ch3-do-tark', mood:'calm', tr:'wipe',
+      ...MAH({tone:'night', ledge:432, sunX:760}), front:()=>BARRIER(560)+A('pulse:3',wglow(840,360,150,'#ff6a3a',.35)),
+      cast:[PR({x:380, s:.8, acts:[[0,'stand'],[2,'lookUp'],[4,'lookDown']]})], cam:{keys:[[0,420,290,1.2],[5,520,265,1.05]]} } ]),
 
-  { line:`लेकिन जिस समय परशुराम जी यह बात श्रीराम को बता रहे थे, उस समय वे स्वयं मिथिला से लौटते हुए श्रीराम के सामने खड़े थे।`, scene:'ch3-do-tark', mood:'joy', tr:'fade', fx:'petals',
-    ...lay(()=>mithilaRoad()), front:()=>wlower('वाल्मीकि रामायण','बालकांड',{at:.6,hold:4.8}),
-    cast:[PR({x:330, s:.78, acts:[[0,'stand'],[2,'explain']]}), {c:RAMA,x:650,y:FY,s:.7,flip:true,props:{front:'bow'},acts:[[0,'stand'],[2,'namaste']],expr:'serene'}],
-    cam:{keys:[[0,470,280,1],[11,490,262,1.25]]} },
+  ...SPLIT(`लेकिन जिस समय परशुराम जी यह बात श्रीराम को बता रहे थे, उस समय वे स्वयं मिथिला से लौटते हुए श्रीराम के सामने खड़े थे।`, ['बता रहे थे,'], [
+    { scene:'ch3-do-tark', mood:'joy', tr:'fade', fx:'petals',
+      ...MAH({sunX:300, sunY:290, tone:'dusk'}), cast:[PR({x:520, s:.88, flip:true, acts:[[0,'stand'],[1.2,'explain'],[4,'stand']]})],
+      cam:{keys:[[0,520,290,1.2],[3,526,206,1.9],[5.6,526,206,2.0]]} },
+    { scene:'ch3-do-tark', mood:'joy', tr:'wipe', fx:'petals',
+      ...lay(()=>mithilaRoad()), front:()=>wlower('वाल्मीकि रामायण','बालकांड',{at:.4,hold:4.2}),
+      cast:[PR({x:330, s:.8, walk:{from:-260,dur:3,delay:0}, acts:[[0,'stand'],[3.2,'explain']]}), {c:RAMA,x:650,y:FY,s:.7,flip:true,props:{front:'bow'},acts:[[0,'stand'],[3,'namaste']],expr:'serene'}],
+      cam:HC(5,1.15,490,262) } ]),
 
   { line:`इसका अर्थ यह है कि उन पर धरती पर आने का कोई पूर्ण प्रतिबंध नहीं था;`, scene:'ch3-do-tark', mood:'hope', tr:'fade',
     ...lay(()=>mithilaRoad()), front:()=>A('fadeout:1.2:2.4',`<rect x="205" y="70" width="14" height="370" rx="7" fill="#ffe7a8" opacity=".6" filter="url(#b4)"/>`)+A('fadein:1.2:.2',A('fadeout:1.3:3',wsparks(150,280,120,430,30,'#fff3c4'))),
-    cast:[PR({x:360, s:.78, walk:{from:-200,dur:3,delay:.6}, acts:[[0,'stand']]}), {c:RAMA,x:690,y:FY,s:.7,flip:true,props:{front:'bow'},acts:[[0,'stand']],expr:'serene'}],
-    cam:'in' },
+    cast:[PR({x:360, s:.86, acts:[[0,'stand'],[2.6,'explain'],[5,'lookAway']]}), {c:RAMA,x:700,y:FY,s:.76,flip:true,props:{front:'bow'},acts:[[0,'stand'],[4,'namaste']],expr:'serene'}],
+    cam:{keys:[[0,366,200,2.0],[3.0,420,230,1.7],[3.8,690,206,1.8,'snap'],[7,660,206,2.0]]} },
 
-  { line:`हाँ, यह ज़रूर था कि वे अपने विजय अभियानों से संन्यास लेकर तपस्या में लीन हो चुके थे।`, scene:'ch3-do-tark', mood:'calm', tr:'fade', fx:'petals',
-    ...MAH({sunX:480, sunY:300, tone:'dawn'}), art:()=>LEAN_AXE(640,440),
-    cast:[PR({x:430, s:.8, props:{}, acts:[[0,'stand'],[2.4,'kneelPray']], eyes:'closed', expr:'serene'})],
-    cam:{keys:[[0,480,290,1],[8,450,270,1.35]]} },
+  ...SPLIT(`हाँ, यह ज़रूर था कि वे अपने विजय अभियानों से संन्यास लेकर तपस्या में लीन हो चुके थे।`, ['संन्यास लेकर'], [
+    { scene:'ch3-do-tark', mood:'calm', tr:'fade', fx:'petals',
+      ...TAP({tone:'dawn', fireX:300, hutX:820}), art:()=>LEAN_AXE(640,440),
+      cast:[PR({x:480, s:.86, props:{}, acts:[[0,'stand'],[2,'namaste']], expr:'serene'})], cam:{keys:[[0,480,290,1.0],[5,490,262,1.35]]} },
+    { scene:'ch3-do-tark', mood:'calm', tr:'dissolve',
+      ...MAH({sunX:480, sunY:300, tone:'dawn'}), art:()=>LEAN_AXE(660,440),
+      cast:[PR({x:440, s:.86, props:{}, acts:[[0,'kneelPray']], eyes:'closed', expr:'serene'})], cam:{keys:[[0,480,270,1.1],[3,444,236,1.9]]} } ]),
 
   { line:`दूसरा तर्क है 'विष्णु तत्व' का श्रीराम में समाहित होना।`, scene:'ch3-do-tark', mood:'divine', tr:'fade',
-    art:()=>wsky([[0,'#0a0c30'],[1,'#1c1e56']])+wglow(710,270,380,'#7fa8ff',.3)+wmandala(480,270,340,'#f1c04e',28,220)+splitArgs({hi:1,delay:0})+wsparks(0,960,60,500,18,'#cfe0ff'), cam:{keys:[[0,480,270,1],[5,660,250,1.25]]} },
+    art:()=>wsky([[0,'#0a0c30'],[1,'#1c1e56']])+wglow(710,270,380,'#7fa8ff',.3)+wmandala(480,270,340,'#f1c04e',28,220)+splitArgs({hi:1,delay:0})+wsparks(0,960,60,500,22,'#cfe0ff'), cam:'fit' },
 
   { line:`अध्यात्म रामायण के बालकांड के सातवें सर्ग में एक बड़ा ही अद्भुत प्रसंग आता है।`, scene:'ch3-do-tark', mood:'divine', tr:'fade',
-    art:SCROLL('#06203a','#124a58','#7fe8ff'), front:()=>wlower('अध्यात्म रामायण','बालकांड · सर्ग 7',{at:.6,hold:5}), cam:'in' },
+    art:SCROLL('#06203a','#124a58','#7fe8ff'), front:()=>wlower('अध्यात्म रामायण','बालकांड · सर्ग 7',{at:.6,hold:5}), cam:'fit' },
 
-  { line:`परशुराम जी याद करते हैं कि भगवान विष्णु ने उन्हें वचन दिया था कि जब वे पूर्ण रूप में पुनः अवतार लेंगे, तो अपनी वैष्णवी शक्ति वापस ले लेंगे।`, scene:'ch3-do-tark', mood:'divine', tr:'iris', trAt:[660,230],
-    ...MAH({sunX:260, sunY:300, tone:'dawn'}),
-    front:()=>A('ripple:3.4:680:250',`<circle cx="680" cy="250" r="190" fill="none" stroke="#ffe7a8" stroke-width="3" stroke-dasharray="3 9"/>`)+A('pulse:2.4',wglow(680,250,210,'#9fc4ff',.4)),
-    cast:[PR({x:250, s:.72, acts:[[0,'stand'],[2,'think']]}), {c:VISHNU,x:680,y:410,s:.64,flip:true,enter:{fade:1.8,delay:1.6},acts:[[0,'stand'],[3,'bless']],expr:'serene'}],
-    cam:{keys:[[0,380,280,1],[11,470,270,1.15]]} },
+  ...SPLIT(`परशुराम जी याद करते हैं कि भगवान विष्णु ने उन्हें वचन दिया था कि जब वे पूर्ण रूप में पुनः अवतार लेंगे, तो अपनी वैष्णवी शक्ति वापस ले लेंगे।`, ['दिया था कि','अवतार लेंगे,'], [
+    { scene:'ch3-do-tark', mood:'divine', tr:'iris', trAt:[660,230],
+      ...MAH({sunX:260, sunY:300, tone:'dusk'}),
+      cast:[PR({x:300, s:.8, acts:[[0,'stand'],[2,'think'],[5,'lookUp']]})], cam:{keys:[[0,300,260,1.5],[6,380,262,1.15]]} },
+    { scene:'ch3-do-tark', mood:'divine', tr:'glow',
+      ...lay(()=>kshir()), front:()=>A('ripple:3.4:480:250',`<circle cx="480" cy="250" r="190" fill="none" stroke="#ffe7a8" stroke-width="3" stroke-dasharray="3 9"/>`),
+      cast:[{c:VISHNU,x:480,y:436,s:.84,acts:[[0,'stand'],[2,'bless']],expr:'serene'}], cam:{keys:[[0,480,290,1.0],[3.4,480,250,1.4]]} },
+    { scene:'ch3-do-tark', mood:'divine', tr:'wipe',
+      ...MAH({sunX:480, sunY:300, tone:'dusk'}), front:()=>ORBPASS(330,630,250,1.0),
+      cast:[PR({x:260, s:.78, acts:[[0,'stand'],[0.8,'offer'],[4,'namaste']]}), {c:VISHNU,x:700,y:410,s:.7,flip:true,enter:{fade:1.2,delay:.4,rise:24},acts:[[0,'stand'],[3,'bless']],expr:'serene'}],
+      cam:{keys:[[0,480,270,1.0],[5,470,262,1.2]]} } ]),
 
   { line:`परंतु यहाँ समय को समझना ज़रूरी है।`, scene:'ch3-do-tark', mood:'calm', tr:'fade',
-    art:()=>wsky([[0,'#0a0820'],[1,'#241448']])+wmandala(480,250,190,'#f1c04e',24,40)+A('spin:6:480:250',`<line x1="480" y1="250" x2="480" y2="130" stroke="#ffe7a8" stroke-width="5" stroke-linecap="round"/>`)+A('spin:72:480:250',`<line x1="480" y1="250" x2="560" y2="250" stroke="#f1c04e" stroke-width="7" stroke-linecap="round"/>`)+`<circle cx="480" cy="250" r="9" fill="#ffe7a8"/>`+A('draw:.5:2.4',`<path pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M60 430 L900 430" stroke="#f1c04e" stroke-width="3" fill="none"/>`)+wsparks(60,900,100,480,16,'#ffe7a8'), cam:'in' },
+    art:()=>wsky([[0,'#0a0820'],[1,'#241448']])+wmandala(480,250,190,'#f1c04e',24,40)+wmandala(480,250,260,'#ffe7a8',16,-80)+A('spin:6:480:250',`<line x1="480" y1="250" x2="480" y2="130" stroke="#ffe7a8" stroke-width="5" stroke-linecap="round"/>`)+A('spin:72:480:250',`<line x1="480" y1="250" x2="560" y2="250" stroke="#f1c04e" stroke-width="7" stroke-linecap="round"/>`)+`<circle cx="480" cy="250" r="9" fill="#ffe7a8"/>`+A('draw:.5:2.4',`<path pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M60 430 L900 430" stroke="#f1c04e" stroke-width="3" fill="none"/>`)+wsparks(60,900,100,480,22,'#ffe7a8'), cam:'fit' },
 
-  { line:`परशुराम जी ने अपनी दिव्य शक्ति श्रीराम को तब लौटाई, जब श्रीराम का जन्म हो चुका था, वे शिव धनुष तोड़ चुके थे और माता सीता से उनका विवाह हो चुका था।`, scene:'ch3-do-tark', mood:'hope', tr:'fade',
-    art:()=>wsky([[0,'#0a0820'],[1,'#241448']])+wglow(480,270,420,'#ffb060',.22)+chainW([{n:'श्रीराम का जन्म'},{n:'शिव धनुष भंग'},{n:'सीता से विवाह'},{n:'शक्ति वापसी',sub:'परशुराम → श्रीराम'}],{y:215,delay:1.2,step:2.4,hi:3})+wsparks(60,900,100,480,16,'#ffe7a8'), cam:'in' },
+  ...SPLIT(`परशुराम जी ने अपनी दिव्य शक्ति श्रीराम को तब लौटाई, जब श्रीराम का जन्म हो चुका था, वे शिव धनुष तोड़ चुके थे और माता सीता से उनका विवाह हो चुका था।`, ['लौटाई,'], [
+    { scene:'ch3-do-tark', mood:'hope', tr:'fade',
+      ...TAP({tone:'dawn', fireX:800, hutX:130}), front:()=>ORBPASS(330,630,250,1.2),
+      cast:[PR({x:300, s:.8, acts:[[0,'stand'],[1,'offer'],[4,'namaste']]}), {c:RAMA,x:660,y:FY,s:.7,flip:true,props:{front:'bow'},acts:[[0,'stand'],[4,'namaste']],expr:'serene',aura:'gw'}],
+      cam:{keys:[[0,480,290,1.2],[5,480,262,1.05]]} },
+    { scene:'ch3-do-tark', mood:'hope', tr:'fade',
+      art:()=>wsky([[0,'#0a0820'],[1,'#241448']])+wglow(480,270,420,'#ffb060',.22)+wmandala(480,270,330,'#f1c04e',28,200)+chainW([{n:'श्रीराम का जन्म'},{n:'शिव धनुष भंग'},{n:'सीता से विवाह'},{n:'शक्ति वापसी',sub:'परशुराम → श्रीराम'}],{y:215,delay:.6,step:3.0,hi:3})+wsparks(60,900,100,480,20,'#ffe7a8'), cam:'fit' } ]),
 
-  { line:`तो प्रश्न अब भी वही है—श्रीराम के जन्म से पहले, जब परशुराम जी के पास वह संपूर्ण दिव्य शक्ति थी, तब उन्होंने रावण का वध क्यों नहीं किया?`, scene:'ch3-do-tark', mood:'hope', tr:'fade',
-    art:()=>wsky([[0,'#0a0820'],[1,'#241448']])+wglow(300,400,320,'#ffb060',.3)+chainW([{n:'श्रीराम का जन्म'},{n:'शिव धनुष भंग'},{n:'सीता से विवाह'},{n:'शक्ति वापसी'}],{y:120,delay:.1,step:.2,hi:-1,before:true})+wquestion(700,340,.6),
-    cast:[PR({x:200, s:.68, with:{aura:'gw'}, acts:[[0,'stand'],[3,'lookAway']]})], cam:{keys:[[0,480,270,1],[11,400,300,1.15]]} },
+  ...SPLIT(`तो प्रश्न अब भी वही है—श्रीराम के जन्म से पहले, जब परशुराम जी के पास वह संपूर्ण दिव्य शक्ति थी, तब उन्होंने रावण का वध क्यों नहीं किया?`, ['जन्म से पहले,','शक्ति थी,'], [
+    { scene:'ch3-do-tark', mood:'hope', tr:'fade',
+      ...lay(()=>cosmos()), front:()=>wquestion(480,235,1.6), cam:{keys:[[0,480,270,1.0],[2.4,480,250,1.2]]} },
+    { scene:'ch3-do-tark', mood:'hope', tr:'fade',
+      art:()=>wsky([[0,'#0a0820'],[1,'#241448']])+wglow(300,400,320,'#ffb060',.3)+wmandala(480,270,330,'#f1c04e',28,200)+chainW([{n:'श्रीराम का जन्म'},{n:'शिव धनुष भंग'},{n:'सीता से विवाह'},{n:'शक्ति वापसी'}],{y:215,delay:.1,step:.2,hi:-1,before:true})+wsparks(60,900,100,480,20,'#ffe7a8'), cam:'fit' },
+    { scene:'ch3-do-tark', mood:'hope', tr:'wipe',
+      ...MAH({tone:'night', ledge:432, sunX:780}), front:()=>A('pulse:3',wglow(860,330,200,'#ff6a3a',.4))+wquestion(640,150,.6),
+      cast:[PR({x:300, s:.82, with:{aura:'gw'}, acts:[[0,'stand'],[2,'lookAway'],[5,'think']]})], cam:{keys:[[0,400,290,1.3],[6,520,262,1.1]]} } ]),
 
   /* ================= CHAPTER 4 ================= */
   { chapter:{no:4, name:'अवतार का निश्चित उद्देश्य'}, dur:5, tr:'dissolve', mood:'divine', scene:'ch4-avatar-uddeshya', sfx:[[.15,'bell',.6]] },
 
-  { line:`इस प्रश्न का सबसे सटीक उत्तर किसी गुप्त नियम में नहीं, बल्कि सृष्टि के विधान और अवतारों के उद्देश्य में छिपा है।`, scene:'ch4-avatar-uddeshya', mood:'divine', tr:'dissolve',
-    ...lay(()=>cosmos()), cam:{keys:[[0,480,270,1],[11,480,270,1.2]]} },
+  ...SPLIT(`इस प्रश्न का सबसे सटीक उत्तर किसी गुप्त नियम में नहीं, बल्कि सृष्टि के विधान और अवतारों के उद्देश्य में छिपा है।`, ['नियम में नहीं,'], [
+    { scene:'ch4-avatar-uddeshya', mood:'divine', tr:'dissolve',
+      ...lay(()=>cosmos()), front:()=>A('bob:4:.25',pothi(480,260,1.5)+wglow(480,260,200,'#ffe7a8',.4))+LOCK(3.0), cam:{keys:[[0,480,270,1.0],[5,480,262,1.1]]} },
+    { scene:'ch4-avatar-uddeshya', mood:'divine', tr:'glow',
+      ...lay(()=>cosmos({col:'#7fe0ff'})), front:()=>RING(), cam:{keys:[[0,480,270,1.0],[6,480,270,1.1]]} } ]),
 
   { line:`भगवान विष्णु का हर अवतार एक विशेष कार्य और एक निश्चित मर्यादा के साथ प्रकट होता है।`, scene:'ch4-avatar-uddeshya', mood:'divine', tr:'fade',
-    ...lay(()=>cosmos({col:'#7fe0ff'})), front:()=>avatarMontage({hi:-1,delay:.8,step:1.1}), cam:'in' },
+    ...lay(()=>cosmos({col:'#7fe0ff'})), front:()=>avatarMontage({hi:-1,delay:.8,step:1.1}), cam:'fit' },
 
   { line:`जैसे नृसिंह अवतार केवल हिरण्यकशिपु का वध करने और भक्त प्रह्लाद की रक्षा के लिए हुआ था।`, scene:'ch4-avatar-uddeshya', mood:'hope', tr:'fade', fx:'sparks',
     art:()=>wsky([[0,'#2a1208'],[.6,'#6a3414'],[1,'#c07a30']])+wglow(400,250,420,'#ffd27a',.55)+lightShafts(400,120,'#fff0c0',9,700,.12)+
       `<g transform="translate(400 0)"><rect x="-70" y="40" width="140" height="400" fill="#5a3418"/><rect x="-80" y="30" width="160" height="26" fill="url(#gold)"/><rect x="-80" y="424" width="160" height="26" fill="url(#gold)"/><path d="M-50 70 V420 M50 70 V420" stroke="#e8b83a" stroke-opacity=".5" stroke-width="3"/>${A('pulse:2.2',`<rect x="-6" y="40" width="12" height="400" fill="#fff3c4" filter="url(#b4)"/>`)}</g>`+
-      A('pop:1.4',A('bob:4:.25',`<g transform="translate(400 235) scale(2.1)">${wglow(0,0,70,'#fff0c0',.6)}${_emblem(1)}</g>`)),
-    cast:[{c:NANDI,x:700,y:438,s:.62,acts:[[0,'kneelPray']],expr:'serene'}], cam:{keys:[[0,480,270,1],[8,430,250,1.2]]} },
+      A('pop:1.4',A('bob:4:.25',`<g transform="translate(400 235) scale(2.1)">${wglow(0,0,70,'#fff0c0',.6)}${_emblem(1)}</g>`))+wsparks(0,960,100,500,22,'#ffd27a'),
+    cast:[{c:NANDI,x:720,y:438,s:.62,acts:[[0,'kneelPray']],expr:'serene'}], cam:{keys:[[0,480,270,1],[8,430,250,1.2]]} },
 
   { line:`मत्स्य अवतार का उद्देश्य प्रलय काल में सृष्टि के बीजों और वेदों की रक्षा करना था।`, scene:'ch4-avatar-uddeshya', mood:'calm', tr:'fade',
     art:()=>wsky([[0,'#0a2a4a'],[.55,'#1f6a8a'],[1,'#9fe0d8']])+wstars(40,200)+wglow(480,200,400,'#bfffff',.35)+
       [0,1,2,3,4].map(i=>A(`drift:${i%2?120:-120}:0:${10+i*2}`,`<path d="M-100 ${330+i*32} q60 -18 120 0 t120 0 t120 0 t120 0 t120 0 t120 0 t120 0 t120 0 t120 0 t120 0" stroke="#d8ffff" stroke-opacity="${.6-i*.08}" stroke-width="3.4" fill="none"/>`)).join('')+
-      A('bob:8:.18',`<g transform="translate(480 330) scale(2.3)">${_emblem(0)}</g>`)+A('bob:6:.22',`<g transform="translate(610 262)"><path d="M-40 10 Q0 30 40 10 L30 -6 H-30Z" fill="#8a5a2a"/><rect x="-2" y="-70" width="4" height="64" fill="#6a4218"/><path d="M2 -66 L36 -48 L2 -30Z" fill="#fff0c0"/>${A('pulse:2',wglow(-14,-18,44,'#ffe7a8',.9))}<circle cx="-14" cy="-18" r="9" fill="#fff3c4"/><rect x="8" y="-14" width="22" height="9" rx="3" fill="#f1dfae"/></g>`)+wsparks(60,900,100,480,18,'#e8ffff'),
+      A('bob:8:.18',`<g transform="translate(480 330) scale(2.3)">${_emblem(0)}</g>`)+A('bob:6:.22',`<g transform="translate(610 262)"><path d="M-40 10 Q0 30 40 10 L30 -6 H-30Z" fill="#8a5a2a"/><rect x="-2" y="-70" width="4" height="64" fill="#6a4218"/><path d="M2 -66 L36 -48 L2 -30Z" fill="#fff0c0"/>${A('pulse:2',wglow(-14,-18,44,'#ffe7a8',.9))}<circle cx="-14" cy="-18" r="9" fill="#fff3c4"/><rect x="8" y="-14" width="22" height="9" rx="3" fill="#f1dfae"/></g>`)+wsparks(60,900,100,480,22,'#e8ffff'),
     cam:{keys:[[0,480,270,1],[8,520,290,1.2]]} },
 
-  { line:`ठीक इसी प्रकार, परशुराम अवतार का मुख्य उद्देश्य सहस्त्रबाहु और उन अहंकारी राजाओं का अंत करना था, जो धर्म की मर्यादा लांघ चुके थे।`, scene:'ch4-avatar-uddeshya', mood:'hope', tr:'fade',
-    ...lay(()=>cosmos({col:'#ff9a50'})), front:()=>avatarMontage({hi:2,delay:0,step:.15})+crownsRise(300,820,500,8), cam:{keys:[[0,480,270,1],[12,640,250,1.25]]} },
+  ...SPLIT(`ठीक इसी प्रकार, परशुराम अवतार का मुख्य उद्देश्य सहस्त्रबाहु और उन अहंकारी राजाओं का अंत करना था, जो धर्म की मर्यादा लांघ चुके थे।`, ['मुख्य उद्देश्य','अंत करना था,'], [
+    { scene:'ch4-avatar-uddeshya', mood:'hope', tr:'fade',
+      ...lay(()=>cosmos({col:'#ff9a50'})), front:()=>avatarMontage({hi:2,delay:0,step:.15}), cam:'fit' },
+    { scene:'ch4-avatar-uddeshya', mood:'hope', tr:'whip',
+      ...WAR({sunX:700}), front:()=>crownsRise(160,800,400,8),
+      cast:[PR({x:300, s:.82, expr:'angry', acts:[[0,'stand'],[1.4,'armUp'],[3.6,'rage'],[5.6,'stand']]})], cam:{keys:[[0,300,290,1.0],[6,520,262,1.2]]} },
+    { scene:'ch4-avatar-uddeshya', mood:'calm', tr:'fade',
+      ...lay(()=>court({tx:700})), front:()=>A('draw:.4:1.4',`<path pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M480 250 L480 440" stroke="#ffd98a" stroke-width="6" fill="none"/>`)+A('pulse:2',wglow(480,350,60,'#fff0c0',.5)),
+      cast:[{c:SAHASTRABAHU,x:330,y:392,s:.6,acts:[[0,'stand'],[2,'point']],expr:'smile',walk:{from:-120,dur:2.6,delay:.2}}, {c:SOLDIER,x:210,y:436,s:.5,props:{front:'staff'},acts:[[0,'stand']]}, {c:SOLDIER,x:130,y:436,s:.5,props:{front:'staff'},acts:[[0,'stand']]}],
+      cam:{keys:[[0,420,290,1.2],[6,500,270,1.05]]} } ]),
 
-  { line:`पृथ्वी का भार हल्का करने और ऋषि कश्यप को भूमि दान करने के साथ ही परशुराम अवतार का मुख्य प्रयोजन पूर्ण हो चुका था।`, scene:'ch4-avatar-uddeshya', mood:'divine', tr:'fade',
-    ...MAH({sunX:480, sunY:310, tone:'dawn'}),
-    front:()=>A('rise:-26:5:.3',earth(480,185,58)+wglow(480,185,150,'#bfe0ff',.4))+A('draw:3.0:1.8',`<path pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M480 105 A80 80 0 1 1 479.9 105" stroke="#ffd98a" stroke-width="5" fill="none"/>`)+A('draw:4.8:.8',`<path pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M446 182 L472 210 L520 150" stroke="#fff3c4" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`),
-    cast:[PR({x:220, s:.68, acts:[[0,'stand'],[3,'namaste']], props:{}}), {c:KASHYAP,x:760,y:FY,s:.68,flip:true,acts:[[0,'stand'],[2,'bless']],expr:'serene'}], cam:'in' },
+  ...SPLIT(`पृथ्वी का भार हल्का करने और ऋषि कश्यप को भूमि दान करने के साथ ही परशुराम अवतार का मुख्य प्रयोजन पूर्ण हो चुका था।`, ['दान करने के साथ ही'], [
+    { scene:'ch4-avatar-uddeshya', mood:'divine', tr:'fade',
+      ...TAP({tone:'dawn', fireX:720, hutX:150}), front:()=>A('rise:-26:5:.3',earth(480,185,58)+wglow(480,185,150,'#bfe0ff',.4)),
+      cast:[PR({x:260, s:.76, acts:[[0,'stand'],[3,'namaste']], props:{}}), {c:KASHYAP,x:700,y:FY,s:.72,flip:true,acts:[[0,'stand'],[2,'bless']],expr:'serene'}], cam:{keys:[[0,480,270,1],[7,480,262,1.12]]} },
+    { scene:'ch4-avatar-uddeshya', mood:'divine', tr:'glow',
+      ...MAH({sunX:480, sunY:310, tone:'dawn'}), front:()=>CHECK(1.2)+A('draw:.8:1.8',`<path pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M480 60 A80 80 0 1 1 479.9 60" stroke="#ffd98a" stroke-width="5" fill="none"/>`),
+      cast:[PR({x:480, s:.84, acts:[[0,'stand'],[2,'namaste']], props:{}, expr:'serene'})], cam:{keys:[[0,480,290,1.3],[6,480,250,1.0]]} } ]),
 
-  { line:`वहीं दूसरी ओर, वाल्मीकि रामायण के बालकांड में जब रावण के अत्याचार तीनों लोकों में बढ़ गए, तब सभी देवता ब्रह्मा जी के साथ भगवान विष्णु की शरण में गए।`, scene:'ch4-avatar-uddeshya', mood:'calm', tr:'fade',
-    ...lay(()=>kshir()), front:()=>wlower('वाल्मीकि रामायण','बालकांड',{at:.6,hold:5})+A('drift:260:0:16',wmist(190,140,'#9a8ab8',.5)),
-    cast:[{c:DEVA,x:200,y:FY,s:.6,walk:{from:-300,dur:5,delay:.2},acts:[[0,'stand']]}, {c:INDRA,x:310,y:FY,s:.64,walk:{from:-300,dur:5,delay:.1},acts:[[0,'stand']]}, {c:BRAHMA,x:440,y:FY,s:.7,walk:{from:-300,dur:5,delay:0},acts:[[0,'stand']],expr:'serene'}, {c:VISHNU,x:760,y:FY,s:.74,flip:true,acts:[[0,'stand'],[5,'bless']],expr:'serene'}],
-    cam:{keys:[[0,380,280,1],[12,560,270,1.1]]} },
+  ...SPLIT(`वहीं दूसरी ओर, वाल्मीकि रामायण के बालकांड में जब रावण के अत्याचार तीनों लोकों में बढ़ गए, तब सभी देवता ब्रह्मा जी के साथ भगवान विष्णु की शरण में गए।`, ['बालकांड में','बढ़ गए,'], [
+    { scene:'ch4-avatar-uddeshya', mood:'sad', tr:'fade',
+      art:SCROLL('#2a0a1a','#5a1a2a','#ff9a8a',1.5), front:()=>wlower('वाल्मीकि रामायण','बालकांड',{at:.4,hold:3.2}), cam:'fit' },
+    { scene:'ch4-avatar-uddeshya', mood:'anger', tr:'fade',
+      ...lay(()=>cosmos({col:'#ff5a3a'})), front:()=>ORBS3()+A('drift:0:-20:5',wmist(300,160,'#2a0a14',.55)),
+      cast:[RV({x:480, y:600, s:1.5, with:SIL, props:{front:'khadga'}, acts:[[0,'stand'],[2.5,'rage']]})],
+      cam:{keys:[[0,480,200,1.0],[6,480,250,1.2]]} },
+    { scene:'ch4-avatar-uddeshya', mood:'calm', tr:'wipe',
+      ...lay(()=>kshir()), front:()=>A('drift:260:0:16',wmist(190,140,'#9a8ab8',.5)),
+      cast:[{c:DEVA,x:200,y:FY,s:.6,walk:{from:-300,dur:5,delay:.2},acts:[[0,'stand']]}, {c:INDRA,x:310,y:FY,s:.64,walk:{from:-300,dur:5,delay:.1},acts:[[0,'stand']]}, {c:BRAHMA,x:440,y:FY,s:.7,walk:{from:-300,dur:5,delay:0},acts:[[0,'stand']],expr:'serene'}, {c:VISHNU,x:760,y:FY,s:.74,flip:true,acts:[[0,'stand'],[5,'bless']],expr:'serene'}],
+      cam:{keys:[[0,330,290,1.0],[8,560,270,1.15]]} } ]),
 
-  { line:`देवताओं ने उनसे विशेष प्रार्थना की कि वे राजा दशरथ के घर पुत्र रूप में जन्म लें और रावण का संहार करें।`, scene:'ch4-avatar-uddeshya', mood:'hope', tr:'fade',
-    ...lay(()=>kshir()), front:()=>VISION(690,130,70),
-    cast:[{c:DEVA,x:180,y:FY,s:.58,acts:[[0,'kneelPray']]}, {c:INDRA,x:290,y:FY,s:.62,acts:[[0,'kneelPray']]}, {c:BRAHMA,x:410,y:FY,s:.66,acts:[[0,'kneelPray']],expr:'serene'}, {c:VISHNU,x:700,y:FY,s:.74,flip:true,acts:[[0,'stand'],[2.5,'bless']],expr:'serene'}],
-    cam:{keys:[[0,480,270,1],[9,560,230,1.28]]} },
+  ...SPLIT(`देवताओं ने उनसे विशेष प्रार्थना की कि वे राजा दशरथ के घर पुत्र रूप में जन्म लें और रावण का संहार करें।`, ['प्रार्थना की कि'], [
+    { scene:'ch4-avatar-uddeshya', mood:'hope', tr:'fade',
+      ...lay(()=>kshir()),
+      cast:[{c:DEVA,x:180,y:FY,s:.58,acts:[[0,'kneelPray']]}, {c:INDRA,x:290,y:FY,s:.62,acts:[[0,'kneelPray']]}, {c:BRAHMA,x:410,y:FY,s:.66,acts:[[0,'kneelPray']],expr:'serene'}, {c:VISHNU,x:700,y:FY,s:.74,flip:true,acts:[[0,'stand'],[2.5,'bless']],expr:'serene'}],
+      cam:{keys:[[0,300,300,1.5],[4,480,270,1.1]]} },
+    { scene:'ch4-avatar-uddeshya', mood:'joy', tr:'glow',
+      ...lay(()=>ayodhya({tone:'dawn'})), front:()=>VISION(690,130,70)+A('fadein:2:.8',A('pulse:2',wglow(480,260,120,'#fff0c0',.5))),
+      cast:[{c:VISHNU,x:330,y:FY,s:.8,acts:[[0,'stand'],[1.6,'bless']],expr:'serene'}], cam:{keys:[[0,420,300,1.3],[7,520,262,1.0]]} } ]),
 
   { line:`अर्थात, रावण का वध केवल एक शक्तिशाली योद्धा को मारने की घटना नहीं थी।`, scene:'ch4-avatar-uddeshya', mood:'calm', tr:'fade',
-    ...lay(()=>cosmos({col:'#46e0a8'})), cast:[RV({x:480, s:.74, props:{front:'khadga'}, acts:[[0,'stand']], talk:false})], cam:{keys:[[0,480,300,1.05],[7,480,262,1.3]]} },
+    ...LNK({sunX:240, sunY:310}), front:()=>wbirds(110,5,18,'#1a0a1a'),
+    cast:[RV({x:600, s:.8, flip:true, props:{front:'khadga'}, acts:[[0,'stand'],[3,'explain'],[6,'rage']], talk:false})], cam:{keys:[[0,380,300,1.0],[5,560,250,1.45],[8,580,200,1.9]]} },
 
-  { line:`इसके लिए 'मर्यादा पुरुषोत्तम' के रूप में एक आदर्श जीवन जीने, धर्म की स्थापना करने और समाज को एक आदर्श चरित्र देने की आवश्यकता थी—जो श्रीराम अवतार का निर्धारित उद्देश्य था।`, scene:'ch4-avatar-uddeshya', mood:'joy', tr:'glow', fx:'petals',
-    ...lay(()=>ayodhya({tone:'dusk'})), front:()=>wmandala(480,130,70,'#fff0b8',16,30)+A('pulse:2.2',wglow(480,130,110,'#ffe7a8',.6)),
-    cast:[{c:RAMA,x:480,y:FY,s:.76,props:{front:'bow'},acts:[[0,'stand']],expr:'serene',aura:'gw'}, {c:VILLAGER,x:250,y:FY,s:.5,acts:[[0,'namaste']]}, {c:DEVOTEE_F,x:330,y:FY,s:.5,acts:[[0,'namaste']]}, {c:VILLAGER,x:700,y:FY,s:.5,flip:true,acts:[[0,'namaste']]}, {c:DEVOTEE_F,x:790,y:FY,s:.5,flip:true,acts:[[0,'namaste']]}],
-    cam:{keys:[[0,480,330,1.05],[13,480,240,1.12]]} },
+  ...SPLIT(`इसके लिए 'मर्यादा पुरुषोत्तम' के रूप में एक आदर्श जीवन जीने, धर्म की स्थापना करने और समाज को एक आदर्श चरित्र देने की आवश्यकता थी—जो श्रीराम अवतार का निर्धारित उद्देश्य था।`, ['जीने,','चरित्र'], [
+    { scene:'ch4-avatar-uddeshya', mood:'joy', tr:'glow', fx:'petals',
+      ...lay(()=>ayodhya({tone:'dusk'})), front:()=>wmandala(480,130,70,'#fff0b8',16,30)+A('pulse:2.2',wglow(480,130,110,'#ffe7a8',.6)),
+      cast:[{c:RAMA,x:480,y:FY,s:.8,props:{front:'bow'},acts:[[0,'stand'],[4,'namaste']],expr:'serene',aura:'gw'}], cam:{keys:[[0,480,330,1.05],[6,480,250,1.4]]} },
+    { scene:'ch4-avatar-uddeshya', mood:'joy', tr:'wipe', fx:'petals',
+      ...lay(()=>ayodhya({tone:'dawn'})), front:()=>wmandala(480,120,80,'#fff0b8',24,40)+A('pulse:2.2',wglow(480,120,120,'#ffe7a8',.5)),
+      cast:[{c:RAMA,x:480,y:FY,s:.74,props:{front:'bow'},acts:[[0,'stand']],expr:'serene',aura:'gw'}, {c:VILLAGER,x:250,y:FY,s:.5,walk:{from:-200,dur:3,delay:0},acts:[[0,'namaste']]}, {c:DEVOTEE_F,x:330,y:FY,s:.5,walk:{from:-200,dur:3.4,delay:0},acts:[[0,'namaste']]}, {c:VILLAGER,x:700,y:FY,s:.5,flip:true,walk:{from:200,dur:3,delay:0},acts:[[0,'namaste']]}, {c:DEVOTEE_F,x:790,y:FY,s:.5,flip:true,walk:{from:200,dur:3.4,delay:0},acts:[[0,'namaste']]}],
+      cam:{keys:[[0,480,330,1.05],[6,480,250,1.2]]} },
+    { scene:'ch4-avatar-uddeshya', mood:'divine', tr:'fade',
+      ...lay(()=>cosmos({col:'#ffd98a'})), front:()=>avatarMontage({hi:3,delay:0,step:.12}), cam:'fit' } ]),
 
-  { line:`हालाँकि ब्रह्मांड पुराण में परशुराम जी द्वारा दैत्यों से युद्ध करने का उल्लेख मिलता है,`, scene:'ch4-avatar-uddeshya', mood:'calm', tr:'fade',
-    art:SCROLL('#1a0a3a','#3a1a6a','#c49aff',1.4), front:()=>wlower('ब्रह्मांड पुराण','परशुराम · दैत्यों से युद्ध',{at:.6,hold:4.5}), cast:[PR({x:130, s:.6, acts:[[0,'stand'],[2,'explain']]})], cam:'in' },
+  ...SPLIT(`हालाँकि ब्रह्मांड पुराण में परशुराम जी द्वारा दैत्यों से युद्ध करने का उल्लेख मिलता है,`, ['पुराण में'], [
+    { scene:'ch4-avatar-uddeshya', mood:'calm', tr:'fade',
+      art:SCROLL('#1a0a3a','#3a1a6a','#c49aff',1.4), front:()=>wlower('ब्रह्मांड पुराण','परशुराम · दैत्यों से युद्ध',{at:.3,hold:2.4}), cam:'fit' },
+    { scene:'ch4-avatar-uddeshya', mood:'calm', tr:'wipe',
+      ...WAR({sunX:260}), front:()=>wsparks(0,960,200,520,12,'#ffa050'),
+      cast:[PR({x:300, s:.82, expr:'angry', acts:[[0,'stand'],[1.8,'armUp'],[4,'rage'],[6.4,'stand']]}), {c:DUSHAN,x:700,y:FY,s:.7,flip:true,props:{front:'axe'},walk:{from:240,dur:2.4,delay:0},acts:[[0,'stand'],[3,'recoil']]}],
+      cam:{keys:[[0,480,290,1.0],[6,420,262,1.25]]} } ]),
 
-  { line:`और महाकवि भवभूति के नाटक 'महावीरचरित' में राक्षसों के संहार का दायित्व श्रीराम को सौंपे जाने का काव्यात्मक वर्णन है,`, scene:'ch4-avatar-uddeshya', mood:'joy', tr:'fade',
-    art:()=>wsky([[0,'#3a0c1c'],[1,'#7a2a30']])+wglow(480,240,420,'#ffcf90',.45)+`<path d="M-40 -20 Q70 140 40 560 L-40 560Z" fill="#8a1a2a" stroke="url(#gold)" stroke-width="4"/><path d="M1000 -20 Q890 140 920 560 L1000 560Z" fill="#8a1a2a" stroke="url(#gold)" stroke-width="4"/>`+lightShafts(480,0,'#fff0c0',7,620,.1)+`<rect x="-40" y="${FY}" width="1040" height="130" fill="#3a1218"/><path d="M-40 ${FY} H1000" stroke="url(#gold)" stroke-width="3"/>`+wsparks(100,860,120,430,18,'#ffe7a8'),
-    front:()=>wlower('महावीरचरित','महाकवि भवभूति · नाटक',{at:.6,hold:5}),
-    cast:[{c:RISHI,x:320,y:FY,s:.68,acts:[[0,'stand'],[1.5,'offer']],props:{front:'bow'},expr:'serene'}, {c:RAMA,x:650,y:FY,s:.68,flip:true,acts:[[0,'stand'],[3,'namaste']],expr:'serene',aura:'gw'}], cam:'in' },
+  ...SPLIT(`और महाकवि भवभूति के नाटक 'महावीरचरित' में राक्षसों के संहार का दायित्व श्रीराम को सौंपे जाने का काव्यात्मक वर्णन है,`, ['में'], [
+    { scene:'ch4-avatar-uddeshya', mood:'joy', tr:'fade',
+      art:()=>wsky([[0,'#3a0c1c'],[1,'#7a2a30']])+wglow(480,240,420,'#ffcf90',.45)+`<path d="M-40 -20 Q70 140 40 560 L-40 560Z" fill="#8a1a2a" stroke="url(#gold)" stroke-width="4"/><path d="M1000 -20 Q890 140 920 560 L1000 560Z" fill="#8a1a2a" stroke="url(#gold)" stroke-width="4"/>`+lightShafts(480,0,'#fff0c0',7,620,.1)+`<rect x="-40" y="${FY}" width="1040" height="130" fill="#3a1218"/><path d="M-40 ${FY} H1000" stroke="url(#gold)" stroke-width="3"/>`+wsparks(100,860,120,430,22,'#ffe7a8'),
+      front:()=>wlower('महावीरचरित','महाकवि भवभूति · नाटक',{at:.4,hold:3}),
+      cast:[{c:RISHI,x:320,y:FY,s:.7,acts:[[0,'stand']],expr:'serene'}, {c:RAMA,x:650,y:FY,s:.7,flip:true,acts:[[0,'stand']],expr:'serene',aura:'gw'}], cam:'fit' },
+    { scene:'ch4-avatar-uddeshya', mood:'joy', tr:'fade',
+      art:()=>wsky([[0,'#3a0c1c'],[1,'#7a2a30']])+wglow(480,240,420,'#ffcf90',.45)+`<path d="M-40 -20 Q70 140 40 560 L-40 560Z" fill="#8a1a2a" stroke="url(#gold)" stroke-width="4"/><path d="M1000 -20 Q890 140 920 560 L1000 560Z" fill="#8a1a2a" stroke="url(#gold)" stroke-width="4"/>`+lightShafts(480,0,'#fff0c0',7,620,.1)+`<rect x="-40" y="${FY}" width="1040" height="130" fill="#3a1218"/><path d="M-40 ${FY} H1000" stroke="url(#gold)" stroke-width="3"/>`+wsparks(100,860,120,430,22,'#ffe7a8'),
+      cast:[{c:RISHI,x:320,y:FY,s:.78,acts:[[0,'stand'],[1.5,'offer']],props:{front:'bow'},expr:'serene'}, {c:RAMA,x:650,y:FY,s:.78,flip:true,acts:[[0,'stand'],[3,'namaste']],expr:'serene',aura:'gw'}], cam:{keys:[[0,480,300,1.2],[6,480,250,1.6]]} } ]),
 
   { line:`लेकिन मूल वाल्मीकि रामायण अवतारों के इसी अलग-अलग प्रयोजन को दर्शाता है।`, scene:'ch4-avatar-uddeshya', mood:'divine', tr:'glow',
-    ...lay(()=>cosmos()), front:()=>avatarMontage({hi:-1,delay:.4,step:.4})+wlower('वाल्मीकि रामायण','अवतारों के अलग-अलग प्रयोजन',{at:1.2,hold:4,y:30}), cam:{keys:[[0,480,270,1],[7,480,250,1.1]]} },
+    ...lay(()=>cosmos()), front:()=>avatarMontage({hi:-1,delay:.4,step:.4})+wlower('वाल्मीकि रामायण','अवतारों के अलग-अलग प्रयोजन',{at:1.2,hold:4,y:30}), cam:'fit' },
 
   /* ================= CHAPTER 5 ================= */
   { chapter:{no:5, name:'निष्कर्ष'}, dur:5, tr:'dissolve', mood:'divine', scene:'ch5-shanti', sfx:[[.15,'bell',.6]] },
 
-  { line:`संक्षेप में कहें तो—शास्त्रों में ऐसा कहीं नहीं लिखा कि परशुराम जी रावण को मारने में असमर्थ थे या उन्हें ऐसा करने से रोका गया था।`, scene:'ch5-shanti', mood:'hope', tr:'dissolve', fx:'dust',
-    ...MAH({sunX:480, sunY:300, tone:'dawn'}), front:()=>A('bob:4:.22',pothi(650,190,.75)+wglow(650,190,150,'#ffe7a8',.45)),
-    cast:[PR({x:290, s:.78, expr:'serene', acts:[[0,'stand'],[3,'explain']]})], cam:{keys:[[0,420,290,1],[11,440,262,1.25]]} },
+  ...SPLIT(`संक्षेप में कहें तो—शास्त्रों में ऐसा कहीं नहीं लिखा कि परशुराम जी रावण को मारने में असमर्थ थे या उन्हें ऐसा करने से रोका गया था।`, ['नहीं लिखा कि','असमर्थ थे'], [
+    { scene:'ch5-shanti', mood:'hope', tr:'dissolve', fx:'dust',
+      ...TAP({tone:'dawn', fireX:760, hutX:140}), front:()=>A('bob:4:.22',pothi(580,180,.7)+wglow(580,180,140,'#ffe7a8',.45)),
+      cast:[PR({x:330, s:.84, expr:'serene', acts:[[0,'stand'],[3,'explain']]})], cam:{keys:[[0,420,290,1],[6,400,250,1.25]]} },
+    { scene:'ch5-shanti', mood:'hope', tr:'fade',
+      ...MAH({sunX:520, sunY:300, tone:'dawn'}), front:()=>wsparks(300,700,100,400,16,'#fff0c0'),
+      cast:[PR({x:480, s:.9, expr:'serene', acts:[[0,'stand'],[1.4,'armUp'],[3.6,'hold']]})], cam:{keys:[[0,480,300,1.2],[4,486,206,2.0]]} },
+    { scene:'ch5-shanti', mood:'hope', tr:'wipe', fx:'petals',
+      ...lay(()=>mithilaRoad()),
+      cast:[PR({x:600, s:.8, walk:{from:-560,dur:5.4,delay:0}, acts:[[0,'stand']]})], cam:{keys:[[0,320,290,1.2],[6,620,275,1.2]]} } ]),
 
-  { line:`बात केवल इतनी थी कि परशुराम जी का अवतार कार्य पूर्ण हो चुका था और वे तपस्या में लीन थे,`, scene:'ch5-shanti', mood:'divine', tr:'fade', fx:'petals',
-    ...MAH({sunX:250, sunY:292, tone:'dawn'}),
-    art:()=>`<g transform="translate(740 410)">${Array.from({length:5},(_,i)=>`<g transform="translate(${-110+i*55} 0)"><rect x="-15" y="-${46+(i%3)*14}" width="30" height="${46+(i%3)*14}" fill="#3a2250"/><path d="M-18 -${46+(i%3)*14} Q0 -${80+(i%3)*14} 18 -${46+(i%3)*14}Z" fill="#6a3a78"/></g>`).join('')}</g>`+
-      A('fadein:2.2:1.6',wglow(730,250,230,'#ffd98a',.7)+A('ripple:3.2:730:300',`<circle cx="730" cy="300" r="120" fill="none" stroke="#ffe7a8" stroke-width="3"/>`)+infantRam(730,340,.8)+
-        A('draw:3.0:2.8',`<path pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M715 270 C620 160 450 160 300 235" stroke="#ffe7a8" stroke-width="3" fill="none" opacity=".9"/>`)+A('drift:-380:-40:6',`<circle cx="790" cy="290" r="4" fill="#fff3c4"/>`)+A('drift:-380:-40:7',`<circle cx="790" cy="290" r="3" fill="#fff3c4"/>`)),
-    cast:[PR({x:260, s:.82, props:{}, acts:[[0,'kneelPray']], eyes:'closed', expr:'serene'})],
-    focus:{at:3.0, sound:'revive', dur:4.2, duck:.28},
-    cam:{keys:[[0,260,300,1.7],[2.6,320,285,1.35],[6.5,480,268,1.0]]} },
+  ...SPLIT(`बात केवल इतनी थी कि परशुराम जी का अवतार कार्य पूर्ण हो चुका था और वे तपस्या में लीन थे,`, ['हो चुका था'], [
+    { scene:'ch5-shanti', mood:'divine', tr:'fade', fx:'petals',
+      ...MAH({sunX:250, sunY:292, tone:'dusk'}), art:()=>LEAN_AXE(640,440), front:()=>CHECK(1.4),
+      cast:[PR({x:420, s:.84, props:{}, acts:[[0,'stand'],[2,'namaste']], expr:'serene'})], cam:{keys:[[0,420,290,1.3],[5,460,262,1.05]]} },
+    { scene:'ch5-shanti', mood:'divine', tr:'fade', fx:'petals',
+      ...MAH({sunX:250, sunY:292, tone:'dawn'}),
+      art:()=>`<g transform="translate(740 410)">${Array.from({length:5},(_,i)=>`<g transform="translate(${-110+i*55} 0)"><rect x="-15" y="-${46+(i%3)*14}" width="30" height="${46+(i%3)*14}" fill="#3a2250"/><path d="M-18 -${46+(i%3)*14} Q0 -${80+(i%3)*14} 18 -${46+(i%3)*14}Z" fill="#6a3a78"/></g>`).join('')}</g>`+
+        A('fadein:1.6:1.6',wglow(730,250,230,'#ffd98a',.7)+A('ripple:3.2:730:300',`<circle cx="730" cy="300" r="120" fill="none" stroke="#ffe7a8" stroke-width="3"/>`)+infantRam(730,340,.8)+
+          A('draw:2.4:2.8',`<path pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M715 270 C620 160 450 160 300 235" stroke="#ffe7a8" stroke-width="3" fill="none" opacity=".9"/>`)),
+      cast:[PR({x:260, s:.86, props:{}, acts:[[0,'kneelPray']], eyes:'closed', expr:'serene'})],
+      focus:{at:2.4, sound:'revive', dur:4.2, duck:.28},
+      cam:{keys:[[0,262,238,2.1],[2.2,320,270,1.4],[5.5,480,268,1.0]]} } ]),
 
-  { line:`जबकि रावण के अंत और धर्म की मर्यादा स्थापित करने का कार्य स्वयं भगवान विष्णु ने अपने श्रीराम अवतार के लिए चुना था।`, scene:'ch5-shanti', mood:'divine', tr:'glow', fx:'petals',
-    ...lay(()=>ayodhya({tone:'dawn'})),
-    art:()=>infantRam(660,430,1.25)+whisperTrail(310,230,650,320,.5,18),
-    cast:[{c:VISHNU,x:250,y:FY,s:.8,acts:[[0,'stand'],[2,'bless']],expr:'serene'}],
-    cam:{keys:[[0,420,290,1.05],[10,500,265,1.0],[13,480,262,.98]]} },
+  ...SPLIT(`जबकि रावण के अंत और धर्म की मर्यादा स्थापित करने का कार्य स्वयं भगवान विष्णु ने अपने श्रीराम अवतार के लिए चुना था।`, ['कार्य'], [
+    { scene:'ch5-shanti', mood:'divine', tr:'glow',
+      ...LNK({sunX:480, sunY:250}), front:()=>A('fadein:1:2.5',wglow(480,250,420,'#fff0c0',.55)+lightShafts(480,250,'#fff3c4',9,700,.14)),
+      cast:[RV({x:480, s:.7, with:SIL, props:{front:'khadga'}, acts:[[0,'stand']]})], cam:{keys:[[0,480,300,1.4],[5,480,270,1.0]]} },
+    { scene:'ch5-shanti', mood:'divine', tr:'glow', fx:'petals',
+      ...lay(()=>ayodhya({tone:'dawn'})),
+      art:()=>infantRam(660,430,1.25)+whisperTrail(310,230,650,320,.5,18),
+      cast:[{c:VISHNU,x:250,y:FY,s:.82,acts:[[0,'stand'],[2,'bless']],expr:'serene'}],
+      cam:{keys:[[0,420,290,1.05],[7,500,265,1.0],[10,480,262,.98]]} } ]),
 
   ]
 });
