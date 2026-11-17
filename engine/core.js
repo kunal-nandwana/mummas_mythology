@@ -42,7 +42,7 @@ function VIDEO(cfg){
     <svg width="0" height="0" style="position:absolute" id="defs"></svg>
     <div id="scenes"></div><canvas id="fx" width="${W}" height="${H}"></canvas>
     <div id="mood"><i></i><i></i><i></i><i></i></div>
-    <svg id="over" viewBox="0 0 ${W} ${H}"></svg><svg id="trfx" viewBox="0 0 ${W} ${H}"></svg><div id="flash"></div>
+    <svg id="over" viewBox="0 0 ${W} ${H}"></svg><svg id="ctag" viewBox="0 0 ${W} ${H}"></svg><svg id="trfx" viewBox="0 0 ${W} ${H}"></svg><div id="flash"></div>
     <div id="shade"></div><div id="cap"></div>
     <svg id="card" viewBox="0 0 ${W} ${H}"></svg><svg id="sting" viewBox="0 0 ${W} ${H}"></svg><svg id="hook" viewBox="0 0 ${W} ${H}"></svg><div id="bar"></div>
   </div></div>
@@ -97,6 +97,7 @@ function VIDEO(cfg){
       `<g class="L" data-f="${LAYER_F.sky}" data-dof="1.6">${sc.sky?sc.sky():''}</g><g class="L" data-f="${LAYER_F.far}" data-dof="1">${sc.far?sc.far():''}</g><g class="L" data-f="${LAYER_F.mid}" data-dof="0.5">${sc.mid?sc.mid():''}</g>`+
       `<g class="L" data-f="1">${stage0}</g><g class="L" data-f="${LAYER_F.near}" data-dof="-1.2">${sc.near?sc.near():''}</g>` : stage0)+`</svg>`;
     scenesEl.appendChild(d); sc.el=d;
+    if(sc.chapterTag){ sc.ctEl=document.createElementNS('http://www.w3.org/2000/svg','g'); sc.ctEl.setAttribute('opacity','0'); sc.ctEl.innerHTML=chapterTag(W,H,sc.chapterTag); $('ctag').appendChild(sc.ctEl); }
     sc.layers=[...d.querySelectorAll('g.L')].map(e=>({e,f:+e.dataset.f,dof:+(e.dataset.dof||0)}));
     rigs.forEach(r=>bindRig(r,d)); sc.rigs=rigs;
     sc.anims=[...d.querySelectorAll('[data-a]')].map(e=>{ const p=e.dataset.a.split(':'); return {e,type:p[0],a:p.slice(1).map(Number),ph:rnd()*6.28}; });
@@ -124,6 +125,8 @@ function VIDEO(cfg){
         case 'walk': { const k=clamp01((lt-a[2])/a[1]), kk=1-Math.pow(1-k,1.6); tr=`translate(${r1((1-kk)*a[0])} ${k<1?r1(-Math.abs(Math.sin(lt*4.2))*4):0})`; break; }
         case 'reveal':{ const k=easeIO(clamp01((lt-a[0])/a[1])); e.setAttribute('width',((a[3]-a[2])*k).toFixed(1)); break; }
         case 'glint':{ const u=(lt-a[0])/a[1], k=easeIO(clamp01(u)); e.setAttribute('transform',`translate(${(a[2]+(a[3]-a[2])*k).toFixed(1)} 0)`); op=(u<0||u>=1)?0:Math.min(1,Math.min(u,1-u)*8); break; }
+        /* bolt:period:offset  lightning: a quick double flash once per `period` s (bolts, sky flashes) */
+        case 'bolt':{ const u=(((lt+(a[1]||0))/a[0])%1+1)%1; op=u<.035?1:u<.06?.1:u<.1?.9:u<.2?.55*(1-(u-.1)/.1):0; break; }
         case 'fadeout':{ op=1-clamp01((lt-a[0])/a[1]); break; }
         /* draw:at:dur  lines inside (paths with pathLength="1" stroke-dasharray="1") are drawn in; used by famTree/timeline/mapRoute */
         case 'draw':{ const k=easeIO(clamp01((lt-a[0])/a[1])); e.querySelectorAll('[pathLength]').forEach(q=>q.style.strokeDashoffset=(1-k).toFixed(4)); op=k>0?1:0; break; }
@@ -362,6 +365,8 @@ function VIDEO(cfg){
       sc.chunks.forEach((c,ci)=>{ const on=ci===ag; c.el.style.display=on?'block':'none';
         if(on){ const k=clamp01((t-c.t)/0.22), e=1-Math.pow(1-k,3); c.el.style.opacity=(0.2+0.8*e).toFixed(2); c.el.style.transform=`translateY(${((1-e)*16).toFixed(1)}px) scale(${(0.94+0.06*e).toFixed(3)})`; }
         if(on) c.words.forEach(w=>{ w.el.classList.toggle('on', t>=w.t && t<w.e); w.el.classList.toggle('said', t>=w.e); }); }); });
+    SH.forEach(sc=>{ if(!sc.ctEl) return; const lt=t-sc.start, hold=Math.min(4.6,Math.max(1.5,sc.dur-1.4)), kin=clamp01((lt-.3)/.8), kout=clamp01(1-(lt-(1.1+hold))/.8), on=lt>=0&&t<sc.end;
+      sc.ctEl.setAttribute('opacity',on?(kin*kout).toFixed(3):'0'); sc.ctEl.setAttribute('transform',`translate(0 ${r1((1-easeOut(kin))*-18)})`); });
     updateHook(t); updateSting(t); updateCard(t);
     bar.style.width=(100*t/DURATION)+'%';
     if(PROMPT) prompter(t, active);

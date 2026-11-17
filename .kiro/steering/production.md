@@ -31,6 +31,8 @@ Targets: 30 Shorts + 4 long videos a month, with his own voice. **Credits matter
 - Voice sync is **sentence-aligned** (DONE, Nov 2026, `tools/voicesync.js` alignSentences): every pause is matched to a sentence/clause end in the script or treated as a breath, picking the steadiest pace; cuts without their own pause are placed by that pace. This fixed the Mahakal drift (shots 4-14 early) with zero `rec:` pins. Don't add `rec:` pins pre-emptively; they are tied to one recording and break if he re-records.
 - Voice sync issue? Ask for `<topic>/voice-report.md` and solve it in ONE pass, offline: rebuild the report's pause list in a script, run planSync with `words`, check the pace per shot. Fix the cause in the tool (engine default) if it is general; only use `rec:'m:ss.s'` for a single genuinely odd shot. After any voicesync change run `node tools/test-voicesync.js` (real Mahakal regression case) and `node tools/voicesync.js`. Don't re-render or screenshot to debug sync.
 
+- **Chapter names** in long videos: never a separate chapter screen. Use `chapterTag` on the chapter's first shot (see API.md). Characters PARSHURAM / BRAHMA / VISHNU were redesigned (Nov 2026): reuse them, don't redraw them per video.
+
 ## Credit saving (important)
 - One new chat session per video. Long sessions resend all history and cost much more.
 - Rendering, preview and voice report all run free on the Mac (`make-video.command`, `preview.command`). Never ask for screenshots the owner can see himself in `preview.command`.
