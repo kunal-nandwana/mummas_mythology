@@ -78,7 +78,7 @@ function shade(hex,amt){ const n=parseInt(hex.slice(1),16); let r=n>>16, g=(n>>8
 const COSTUME0 = {skin:'#8c6248', top:'#1f2640', bottom:'#8e1d24', shin:null, foot:null, sleeve:null, skirt:false,
   trim:'url(#gold)', hair:'long', head:'crown', beard:null, mus:false, cape:null, quiver:false, garland:null, sash:null,
   veil:null, turban:'#ece5d4', tilak:false, earring:true, big:false, aura:null, jewel:true,
-  bare:false, ash:false, snake:false, tiger:false, rudra:false, third:false, tusks:false, spikes:false, eyeCol:null, fireHair:false, blindfold:false};
+  bare:false, ash:false, snake:false, tiger:false, rudra:false, third:false, tusks:false, spikes:false, eyeCol:null, fireHair:false, blindfold:false, faces:null, arms:0, armItems:null, beardLen:0};
 
 let RIG_ID=0;
 /* Build one character. cast = {c:COSTUME, x, y, s, flip, acts:[[t,pose,dur?],...], expr, eyes, talk,
@@ -139,18 +139,31 @@ function makeRig(cast){
       case 'chakra': { let t=''; for(let i=0;i<16;i++) t+=`<path d="M0 -30 L4 -36 L-4 -36Z" transform="rotate(${i*22.5})" fill="#ffd25e"/>`;
         return `<g transform="translate(0 -40)">${A('spin:1.2:0:0',`<circle r="40" fill="url(#gw)" opacity=".7"/><circle r="28" fill="none" stroke="#ffd25e" stroke-width="4"/>${t}<circle r="6" fill="#ffd25e"/>`)}</g>`; }
       case 'flute': return `<g transform="rotate(-80)"><rect x="-3" y="-60" width="6" height="110" rx="3" fill="#a8742a"/><circle cx="0" cy="-30" r="1.6" fill="#3a2010"/><circle cx="0" cy="-15" r="1.6" fill="#3a2010"/><circle cx="0" cy="0" r="1.6" fill="#3a2010"/></g>`;
+      /* parashu: Parshuram's single-bladed axe (curved steel blade, gold-bound saffron-brown haft, faint warm glow) */
+      case 'parashu': return `<line x1="-4" y1="52" x2="6" y2="-160" stroke="#6a3a1a" stroke-width="8" stroke-linecap="round"/><line x1="-3" y1="34" x2="3" y2="8" stroke="url(#gold)" stroke-width="10"/><g transform="translate(6 -134)">`+A('pulse:2','<ellipse cx="34" cy="10" rx="46" ry="46" fill="url(#saf)" opacity=".55"/>')+`<path d="M0 -28 C44 -42 74 -6 60 46 C46 24 22 18 0 22Z" fill="#c9ced6" stroke="#f1f4f8" stroke-width="2"/><path d="M4 -24 C32 -30 52 -14 57 6" stroke="#fff" stroke-width="2" fill="none" opacity=".75"/><path d="M-6 -30 L0 -54 L6 -30Z" fill="url(#gold)"/><rect x="-7" y="-26" width="14" height="50" rx="3" fill="url(#gold)"/></g>`;
+      /* khadga: curved royal sword with emerald hilt (Ravan) */
+      case 'khadga': return `<g transform="rotate(-90)"><rect x="-3.5" y="-10" width="7" height="18" rx="2" fill="#0f5a46"/><rect x="-12" y="6" width="24" height="5" rx="2" fill="url(#gold)"/><path d="M-3.5 11 L4.5 11 C11 42 11 80 1 108 L-3 100 C-7 72 -6 42 -3.5 11Z" fill="#e3e8ee" stroke="#9fb0c0" stroke-width=".8"/></g>`;
       case 'axe': return `<line x1="-4" y1="46" x2="6" y2="-150" stroke="#3a2a22" stroke-width="9" stroke-linecap="round"/><g transform="translate(6 -128)"><path d="M0 -8 C-34 -26 -62 -4 -56 40 C-38 20 -16 14 0 18Z" fill="#6a7078" stroke="#d4d8de" stroke-width="2"/><path d="M0 -8 C34 -26 62 -4 56 40 C38 20 16 14 0 18Z" fill="#585e66" stroke="#d4d8de" stroke-width="2"/><path d="M-4 -8 L0 -34 L4 -8Z" fill="#d4d8de"/><path d="M-50 30 C-34 14 -16 8 -2 12 M50 30 C34 14 16 8 2 12" stroke="#ff5a2a" stroke-width="2" fill="none" opacity=".8"/>${A('pulse:3','<circle cy="14" r="46" fill="url(#gr)" opacity=".5"/>')}</g>`;
       default: return '';
     } }
-  const UPRIGHT={axe:1,bow:1,mace:1,staff:1,lantern:1,diya:1,lotus:1,trishul:1,orb:1,chakra:1,arrows3:1,heartCloth:1,cloth:1,mallet:1};
+  const UPRIGHT={parashu:1,axe:1,bow:1,mace:1,staff:1,lantern:1,diya:1,lotus:1,trishul:1,orb:1,chakra:1,arrows3:1,heartCloth:1,cloth:1,mallet:1};
 
   /* ---- head ---- */
+  /* extra faces (c.faces:[[dx,dy,scale],...]): small profile faces fanned behind the main head (Ravan's ten heads, Brahma's four) */
+  const miniFace=(dx,dy,sc,k,rot)=>`<g transform="${rot?`rotate(${rot} 0 -240) `:''}translate(${dx} ${dy}) translate(0 -266) scale(${sc}) translate(0 266)"><path d="M-14 -262 C-16 -286 0 -294 14 -288 C22 -284 24 -276 24 -270 L32 -260 L24 -258 C24 -252 22 -248 16 -246 L-6 -244Z" fill="${shade(skin,-.06*(k%3))}"/><path d="M-16 -268 C-20 -292 0 -300 18 -290 L14 -280 C2 -284 -8 -282 -12 -262Z" fill="${dark}"/>`+
+    (c.beard?`<path d="M6 -248 Q26 -246 22 -222 Q12 -210 2 -222 Q-4 -236 -2 -246Z" fill="${c.beard==='white'?'#e7e1d4':dark}"/>`:'')+
+    (c.head==='big'?`<path d="M-18 -284 L-16 -326 L-6 -308 L2 -340 L10 -308 L20 -324 L20 -284Z" fill="url(#gold)"/><circle cx="2" cy="-300" r="4" fill="#2ec28a"/>`:`<path d="M-16 -286 L-12 -318 L-4 -300 L2 -326 L8 -300 L16 -316 L18 -286Z" fill="url(#gold)"/>`)+
+    `<path d="M8.5 -271 Q15 -276 21.5 -270" stroke="#140a06" stroke-width="1.7" fill="none"/><circle cx="16.5" cy="-270.4" r="1.8" fill="#140a06"/><path d="M8 -278 Q15 -281.5 22.5 -277.5" stroke="${dark}" stroke-width="2.4" fill="none"/>`+
+    (c.mus?`<path d="M12 -254 q8 -4 15 1" stroke="${dark}" stroke-width="3" fill="none" stroke-linecap="round"/>`:'')+`</g>`;
   let head='';
+  if(c.faces) head+=c.faces.map((f,i)=>A(`bob:${(1+(i%3)*.5).toFixed(1)}:${(.16+i*.025).toFixed(3)}`,miniFace(f[0],f[1],f[2],i,f[3]))).join('');
   if(c.veil) head+=`<g ${J('veilB')}><path d="M-18 -292 C-40 -270 -50 -220 -56 -150 L-30 -150 C-28 -210 -20 -250 -8 -276Z" fill="${c.veil}"/><path d="M-30 -150 C-28 -210 -20 -250 -8 -276 L-14 -280 C-22 -246 -26 -206 -28 -150Z" fill="#000" opacity=".16"/></g>`;
   if(c.hair==='long' && !c.veil) head+=`<g ${J('hair')}><path d="M-12 -272 C-30 -262 -34 -230 -40 -196 L-22 -204 C-20 -226 -14 -244 -6 -256Z" fill="${dark}"/></g>`;
   if(c.head==='mahadev') head+=`<g ${J('hair')}><path d="M-14 -278 C-50 -268 -66 -216 -74 -146 C-64 -158 -56 -168 -48 -178 C-46 -150 -42 -126 -34 -104 C-24 -138 -22 -190 -8 -252Z" fill="${dark}"/><path d="M-22 -262 C-40 -240 -50 -200 -54 -160 M-30 -236 C-40 -210 -42 -176 -38 -138" stroke="#322b44" stroke-width="2" fill="none"/>`+
     `<path d="M-6 -296 C-36 -290 -52 -246 -58 -196 C-52 -176 -50 -160 -44 -142" stroke="#bfe8ff" stroke-width="6" fill="none" stroke-linecap="round" opacity=".92"/><path d="M-6 -296 C-36 -290 -52 -246 -58 -196 C-52 -176 -50 -160 -44 -142" stroke="#ffffff" stroke-width="2" fill="none" stroke-dasharray="3 7" stroke-linecap="round" opacity=".9"/></g>`;
   if(c.head==='demon') head+=`<g ${J('hair')}><path d="M-14 -276 L-40 -300 L-34 -276 L-62 -280 L-40 -258 L-58 -244 L-34 -240 L-44 -218 L-20 -236 L-10 -250Z" fill="#2a0c10"/><path d="M-30 -270 L-50 -262 M-30 -250 L-46 -238" stroke="#5a1a1a" stroke-width="2" fill="none"/></g><path d="M-8 -288 C-14 -314 -30 -330 -42 -326 C-34 -316 -28 -302 -22 -284Z" fill="#bfb298"/>`;
+  /* jata2: matted-hair sage (Parshuram, Kashyap): jata falling behind the shoulder, top-knot with a rudraksha band, no crescent */
+  if(c.head==='jata2') head+=`<g ${J('hair')}><path d="M-16 -272 C-48 -262 -56 -216 -64 -156 L-44 -170 C-40 -214 -30 -244 -8 -258Z" fill="${dark}"/><path d="M-26 -250 C-38 -226 -42 -196 -44 -168 M-34 -236 C-46 -214 -50 -186 -54 -160" stroke="#3a3350" stroke-width="2" fill="none"/></g><path d="M-16 -284 C-22 -322 12 -334 20 -302 L18 -286Z" fill="${dark}"/><path d="M-6 -300 C-12 -318 4 -326 12 -312" stroke="#3a3350" stroke-width="2" fill="none"/><path d="M-16 -292 Q2 -283 20 -293" stroke="#7a4a22" stroke-width="5" fill="none" stroke-dasharray="3 3" stroke-linecap="round"/>`;
   if(c.hair==='bun') head+=`<circle cx="-16" cy="-280" r="11" fill="${dark}"/>`;
   if(c.head==='jata') head+=`<g ${J('hair')}><path d="M-16 -272 C-46 -262 -52 -220 -58 -170 L-40 -180 C-36 -220 -28 -246 -8 -258Z" fill="${dark}"/></g><path d="M-14 -284 C-18 -320 10 -330 18 -300 L16 -286Z" fill="${dark}"/><path d="M2 -318 a12 12 0 1 0 10 -10 a9 9 0 1 1 -10 10Z" fill="#f3ecd2"/>`;
   head+=`<rect x="-6" y="-254" width="14" height="20" fill="${skin}"/><path d="M-6 -254 L8 -254 L8 -234 L-6 -234Z" fill="#000" opacity=".15"/>`;
@@ -162,7 +175,12 @@ function makeRig(cast){
         `<ellipse ${J('blush')} cx="12" cy="-259" rx="6" ry="3.6" fill="#e0556a" opacity="0"/>`+
         `<path d="M-2 -273 q-6 4 -3 14 q3 5 7 2" fill="${shade(skin,-.08)}" stroke="${shade(skin,-.3)}" stroke-width="1.3"/><path d="M-2 -268 q-2 5 1 8" stroke="${shade(skin,-.35)}" stroke-width="1" fill="none"/>`;
   if(c.head!=='turban' && !c.veil && c.head!=='jata' && c.head!=='mahadev' && c.head!=='demon' && c.hair!=='none') head+=`<path d="M-16 -268 C-20 -292 0 -300 18 -290 L14 -280 C2 -284 -8 -282 -12 -262Z" fill="${dark}"/>`;
-  if(c.beard) head+=`<path d="M6 -248 Q26 -246 22 -222 Q12 -210 2 -222 Q-4 -236 -2 -246Z" fill="${c.beard==='white'?'#e7e1d4':dark}"/>`;
+  if(c.beard && c.beardLen>0){ /* long thick sage beard: sideburn to chin, flowing down the chest to a point, grey streaks, sways */
+    const L=c.beardLen, bc=c.beard==='white'?'#e7e1d4':(c.beard==='grey'?'#a8a29a':'#2a1a12'), st=c.beard==='white'?'#bdb6a6':'#8a7a68', D=84*L, T=-246+D, Y=f=>r1(-246+D*f);
+    head+=`<g ${J('beard')}><path d="M-8 -262 C-4 -252 4 -246 14 -245 L26 -246 C44 -240 50 ${Y(.3)} 42 ${Y(.62)} C38 ${Y(.82)} 26 ${Y(.95)} 14 ${r1(T)} C2 ${Y(.92)} -10 ${Y(.7)} -14 ${Y(.4)} C-16 -236 -12 -252 -8 -262Z" fill="${bc}"/>`+
+      `<path d="M-8 -238 C-6 ${Y(.3)} 0 ${Y(.7)} 12 ${Y(.97)} M8 -240 C12 ${Y(.3)} 16 ${Y(.6)} 16 ${Y(.92)} M24 -240 C32 ${Y(.25)} 32 ${Y(.55)} 26 ${Y(.85)} M38 -236 C46 ${Y(.2)} 44 ${Y(.4)} 40 ${Y(.58)}" stroke="${st}" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".85"/>`+
+      `<path d="M-6 -248 C4 -243 18 -242 28 -246" stroke="#000" stroke-opacity=".3" stroke-width="3" fill="none"/></g>`; }
+  else if(c.beard) head+=`<path d="M6 -248 Q26 -246 22 -222 Q12 -210 2 -222 Q-4 -236 -2 -246Z" fill="${c.beard==='white'?'#e7e1d4':dark}"/>`;
   // eye (almond, kajal line) with blink
   head+=`<g ${J('eye')}><path ${J('sclera')} d="M9 -270.5 Q15 -275.5 21.5 -270 Q15 -267.4 9 -270.5Z" fill="#f3ead8"/><circle ${J('pupil')} cx="16.8" cy="-270.6" r="2.1" fill="#3b2415"/><circle cx="16.9" cy="-270.6" r="1.1" fill="#0d0705"/><circle cx="17.7" cy="-271.4" r=".75" fill="#fff"/><path d="M8.5 -271 Q15 -276.5 22 -270" stroke="#140a06" stroke-width="1.7" fill="none"/>`+
         (c.skirt?`<path d="M21.5 -270 l3.4 -2.6" stroke="#140a06" stroke-width="1.5" stroke-linecap="round"/>`:'')+`<path ${J('wet')} d="M10.5 -267.6 Q15 -266 20 -268" stroke="#fff" stroke-width="1" fill="none" opacity="0"/></g>`;
@@ -231,6 +249,21 @@ function makeRig(cast){
   let back='';
   if(c.cape) back+=`<g ${J('cape')}><path d="M-20 -232 C-56 -200 -78 -110 -96 -4 L-30 -4 C-36 -80 -30 -160 -10 -226Z" fill="${c.cape}"/><path d="M-20 -232 C-56 -200 -78 -110 -96 -4 L-80 -4 C-62 -100 -44 -180 -16 -228Z" fill="#000" opacity=".25"/></g>`;
   if(c.quiver) back+=`<g transform="rotate(-18 -18 -200)"><rect x="-34" y="-260" width="18" height="110" rx="5" fill="#4a2c18" stroke="#c99a3a" stroke-width="2"/><path d="M-31 -260 l3 -18 l3 18Z" fill="#ff4a3c"/><path d="M-26 -260 l3 -24 l3 24Z" fill="#4ee08a"/><path d="M-21 -260 l3 -18 l3 18Z" fill="#ffd25e"/></g>`;
+  /* extra arms (c.arms:N): N more arms fanned up behind the shoulders, each holding a small emblem (c.armItems = list of 'sword'|'lotus'|'mace'|'chakra'|'bow'|'trident'|'flag') */
+  if(c.arms>0){ const items=c.armItems||['sword','lotus','mace','bow','trishul','flag','chakra','sword'], n=c.arms;
+    const glyph=k=>{ switch(k){
+      case 'sword': return `<path d="M0 -4 L2 -56 L-2 -56Z" fill="#dfe3ea" transform="translate(0 0)"/><rect x="-7" y="-6" width="14" height="3" fill="url(#gold)"/>`;
+      case 'lotus': return [-40,-20,0,20,40].map(r=>`<ellipse rx="4" ry="11" transform="rotate(${r}) translate(0 -14)" fill="#f7b2c8"/>`).join('');
+      case 'mace': return `<line x1="0" y1="0" x2="0" y2="-40" stroke="#6a4218" stroke-width="4"/><ellipse cy="-48" rx="9" ry="14" fill="url(#gold)"/>`;
+      case 'bow': return `<path d="M0 -50 Q22 -12 0 26" stroke="#7a4a1a" stroke-width="4" fill="none"/><line x1="0" y1="-50" x2="0" y2="26" stroke="#efe6cc" stroke-width="1"/>`;
+      case 'trishul': return `<line x1="0" y1="8" x2="0" y2="-58" stroke="#c9c2b0" stroke-width="3"/><path d="M-9 -52 Q-9 -42 0 -42 Q9 -42 9 -52 M0 -42 L0 -66" stroke="#e2dccb" stroke-width="3" fill="none"/>`;
+      case 'flag': return `<line x1="0" y1="8" x2="0" y2="-56" stroke="#6a4218" stroke-width="3"/><path d="M0 -56 L24 -48 L0 -38Z" fill="#e8882a"/>`;
+      case 'chakra': return `<circle cy="-20" r="15" fill="none" stroke="#ffd25e" stroke-width="3.5"/><circle cy="-20" r="4" fill="#ffd25e"/><path d="M0 -37 v6 M0 -9 v-6 M-17 -20 h6 M17 -20 h-6" stroke="#ffd25e" stroke-width="2.5"/>`;
+      default: return ''; } };
+    for(let k=0;k<n;k++){ const a=n===1?180:(n===2?[150,210][k]:112+k*(136/(n-1))), bend=(k%2?-1:1)*22;
+      back+=`<g transform="translate(-4 -212) rotate(${a.toFixed(1)})">`+A(`rock:${(4+k%3*2)}:${(1+k*.17).toFixed(2)}:0:0`,
+        `<line x1="0" y1="0" x2="0" y2="50" stroke="${skinB}" stroke-width="${12*wide}" stroke-linecap="round"/><line x1="-6" y1="14" x2="6" y2="14" stroke="#e8b83a" stroke-width="3"/>`+
+        `<g transform="translate(0 50) rotate(${bend})"><line x1="0" y1="0" x2="0" y2="44" stroke="${skin}" stroke-width="${10.5*wide}" stroke-linecap="round" opacity=".96"/><line x1="-5" y1="34" x2="5" y2="34" stroke="#e8b83a" stroke-width="2.4"/><circle cy="46" r="7" fill="${skin}"/><g transform="translate(0 46) rotate(180)">${glyph(items[k%items.length])}</g></g>`)+`</g>`; } }
   const skirtFlare = c.skirt ? `<path ${J('skirt')} d="M-30 -150 C-38 -100 -46 -50 -52 -2 L48 -2 C42 -50 36 -100 28 -150Z" fill="${c.bottom}"/><path d="M-52 -10 L48 -10 L48 -2 L-52 -2Z" fill="url(#gold)"/>` : '';
 
   const aura = (cast.aura||c.aura) ? `<g ${J('aura')}><circle cx="0" cy="-170" r="200" fill="url(#${cast.aura||c.aura})" opacity=".6"/></g>` : '';
@@ -349,6 +382,7 @@ function updateRig(r, lt, t, talking){
   if(q.skirt){ q.skirt.setAttribute('opacity', (1-clamp01(P.drop/40)).toFixed(2));
     setT(q.skirt, `translate(0 -150) skewX(${r1(gk(wind*1.4+wind2*0.9 + dLean*0.4, 6))}) translate(0 150)`); }
   if(q.cape) setT(q.cape, `rotate(${r1(Math.sin(t*1.3+sd)*2.2 - P.lean*0.85 + gk(dLean*1.4,12))} -16 -230) translate(-16 -230) scale(1 ${(1-clamp01(P.drop/72)*0.32).toFixed(3)}) translate(16 230)`);
+  if(q.beard) setT(q.beard, `rotate(${r1(Math.sin(t*1.25+sd+1)*1.6 + gk(dHead*0.7 + dLean*0.4,10))} 4 -248)`);
   if(q.hair) setT(q.hair, `rotate(${r1(Math.sin(t*1.1+sd)*2 + gk(dHead*0.9 + dLean*0.5,14))} -8 -262)`);
   if(q.aura) q.aura.setAttribute('opacity', (0.75+0.25*Math.sin(t*1.6)).toFixed(3));
 

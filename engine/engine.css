@@ -1,8 +1,8 @@
 html,body{margin:0;height:100%;background:#000;overflow:hidden}
 #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-#stage{position:relative;width:540px;height:960px;overflow:hidden;transform-origin:center;background:#07081a;flex:none}
+#stage{position:relative;width:var(--W,540px);height:var(--H,960px);overflow:hidden;transform-origin:center;background:#07081a;flex:none}
 .scene{position:absolute;inset:0;opacity:0;display:none;transform-origin:0 0;will-change:transform,opacity}
-.scene svg,#over{position:absolute;inset:0;width:540px;height:960px}
+.scene svg,#over{position:absolute;inset:0;width:var(--W,540px);height:var(--H,960px)}
 canvas{position:absolute;inset:0;pointer-events:none;z-index:5}
 #scenes{position:absolute;inset:0;z-index:1}
 #over{z-index:6;pointer-events:none}
@@ -12,7 +12,7 @@ canvas{position:absolute;inset:0;pointer-events:none;z-index:5}
 #mood i:nth-child(2),#mood i:nth-child(4){mix-blend-mode:screen}
 /* look:'mumma': thin light along the edge of every character (colour + strength follow the mood) */
 .rimfx{filter:drop-shadow(1.3px -1.1px 0 color-mix(in srgb,var(--rimc,#fff) calc(var(--rimo,0)*100%),transparent)) drop-shadow(0 0 3px color-mix(in srgb,var(--rimc,#fff) calc(var(--rimo,0)*45%),transparent))}
-#trfx,#hook,#sting,#card{position:absolute;inset:0;width:540px;height:960px;pointer-events:none}
+#trfx,#hook,#sting,#card{position:absolute;inset:0;width:var(--W,540px);height:var(--H,960px);pointer-events:none}
 #trfx{z-index:7}
 #card{z-index:9;display:none}
 #sting{z-index:10}
@@ -21,8 +21,8 @@ canvas{position:absolute;inset:0;pointer-events:none;z-index:5}
 #shade{position:absolute;left:0;right:0;top:320px;height:270px;z-index:7;pointer-events:none;
   background:linear-gradient(transparent,rgba(5,3,12,.55) 35%,rgba(5,3,12,.55) 65%,transparent)}
 /* Captions sit in the upper-middle band: above character heads and clear of YouTube Shorts' bottom UI. */
-#cap{position:absolute;left:28px;right:28px;top:400px;z-index:8;text-align:center;min-height:100px;
-  font-family:'Mukta','Kohinoor Devanagari','Noto Sans Devanagari','Nirmala UI',sans-serif;font-weight:800;font-size:31px;line-height:1.3;color:#f6ecd2;
+#cap{position:absolute;left:var(--capx,28px);right:var(--capx,28px);top:400px;z-index:8;text-align:center;min-height:100px;
+  font-family:'Mukta','Kohinoor Devanagari','Noto Sans Devanagari','Nirmala UI',sans-serif;font-weight:800;font-size:var(--capfs,31px);line-height:1.3;color:#f6ecd2;
   text-shadow:0 3px 0 #1a0d05,0 0 14px rgba(0,0,0,.9)}
 #cap .chunk{display:none}
 #cap .w{display:inline-block;opacity:.55;transition:color .08s,transform .08s}

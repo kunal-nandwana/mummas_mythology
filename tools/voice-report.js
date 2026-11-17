@@ -33,7 +33,8 @@ function findVoice(topic,given){
 const CHANT=1.7;
 function textWeights(cfg,nar){
   const strip=w=>w.replace(/[.,!?'"‘’“”—\-–…:;।॥()]/g,'');
-  return nar.map(s=>{ const sh=cfg.shots[s.i]||{}, w=s.words.reduce((a,x)=>a+strip(x.text).length+2,0)/(cfg.pace||13);
+  return nar.map(s=>{ const sh=cfg.shots[s.i]||{}; if(sh.chapter) return sh.dur||5;   // chapter card = a silent gap of that length
+    const w=s.words.reduce((a,x)=>a+strip(x.text).length+2,0)/(cfg.pace||13);
     const verse=!!sh.calli || /॥/.test(sh.line||'');
     const k=sh.chant!==undefined ? sh.chant : (verse ? (cfg.chant||CHANT) : 1);
     return k===1 ? w : Math.max(w*k, sh.dur||0); }); }

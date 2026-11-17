@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* =====================================================================
    RENDER: turns <topic>/index.html (+ your voice recording) into a
-   YouTube-ready MP4 (1080x1920 for Shorts, 30 fps, H.264 + AAC).
+   YouTube-ready MP4 (1080x1920 for Shorts, 1920x1080 for long videos, 30 fps, H.264 + AAC).
 
    Usage:  node tools/render.js <topic-folder> [--voice file] [--offset sec] [--fps 30] [--notext]
    Voice:  if --voice is not given, the first voice.* / *.m4a / *.mp3 / *.wav found in the topic folder is used.
@@ -11,6 +11,8 @@
    Voice clean-up: ON by default (made for a Boya BY-M1 lapel mic): rumble cut, hiss/noise reduction, mouth-click removal,
            warmth + presence EQ, de-esser, compressor, loudness -14 LUFS (YouTube), peak limiter.
            --raw = no clean-up.  --denoise 12 = noise reduction in dB (default 12; try 18 for a noisy room, 0 = off).
+   Cinema voice: long videos (format:'long') also get a cinematic grade on the voice: warmer chest, a touch of clarity and a very short room tail.
+           --nocinema = off, --cinema = on for a Short too.
    Music:  YOUR track from the music/ folder (first file, or story.js music:'part-of-file-name'). music:false = none.
            'score' = music composed scene by scene (changes with each mood, own volume per scene); 'calm'|'dark'|'bright' = generated loops. --music name / --nomusic / --musicvol 0.5 (default; 0.8 = louder, 0.3 = softer).
            It fades in and out and gets quieter whenever you speak.
@@ -36,6 +38,10 @@ if(spawnSync('ffmpeg',['-version']).status!==0){ console.error('✗ ffmpeg is no
 let chromium; try{ ({chromium}=require('playwright')); }catch(e){ console.error('✗ Playwright missing. Run: npm install && npx playwright install chromium'); process.exit(1); }
 
 const FPS=+opt('fps')||30, SCALE=2;
+// 16:9 long videos (story.js format:'long') render 1920x1080; Shorts 1080x1920
+const LONG=/format\s*:\s*['"]long['"]/.test(fs.readFileSync(path.join(DIR,'story.js'),'utf8')), VW=LONG?960:540, VH=LONG?540:960;
+// cinematic voice grade: ON for long videos (--nocinema = off, --cinema = on for a Short too)
+const CINEMA=opt('nocinema')?false:(opt('cinema')||LONG);
 // ---- find the voice file ----
 const VS=require('./voicesync'), VR=require('./voice-report');
 const voice=VR.findVoice(topic,opt('voice'));
@@ -55,7 +61,10 @@ function voiceChain(){ const dn=opt('denoise')===null?12:+opt('denoise');
     'equalizer=f=3500:t=q:w=1:g=3',                          // presence: clear words
     'highshelf=f=9000:g=2',                                  // air
     'deesser=i=0.4:m=0.5:f=0.5',                             // soften harsh "s" sounds
-    'acompressor=threshold=-20dB:ratio=3:attack=10:release=150:makeup=3'].join(','); }   // even volume
+    'acompressor=threshold=-20dB:ratio=3:attack=10:release=150:makeup=3',   // even volume
+    ...(CINEMA?['lowshelf=f=130:g=2.5',                      // cinematic: chest and warmth (documentary narrator)
+      'equalizer=f=5200:t=q:w=1.2:g=1.2',                    //   a little more clarity
+      'aecho=0.9:0.9:42|97|171:0.14|0.09|0.05']:[])].join(','); }   //   very short room tail: the voice sits in the picture, not on top of it
 function measureLoud(file,chain){ const r=spawnSync('ffmpeg',['-hide_banner','-i',file,'-af',chain+',loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json','-f','null','-'],{encoding:'utf8'});
   const m=/\{[^{}]*"input_i"[^{}]*\}/.exec(r.stderr||''); try{ return m?JSON.parse(m[0]):null; }catch(e){ return null; } }
 function voiceFilter(file){ if(opt('raw')) return null; let chain=voiceChain(); let L=measureLoud(file,chain);
@@ -70,7 +79,7 @@ function voiceFilter(file){ if(opt('raw')) return null; let chain=voiceChain(); 
 
 (async()=>{
   const browser=await chromium.launch();
-  const page=await browser.newPage({viewport:{width:540,height:960}, deviceScaleFactor:SCALE});
+  const page=await browser.newPage({viewport:{width:VW,height:VH}, deviceScaleFactor:SCALE});
   const errs=[]; page.on('pageerror',e=>errs.push(e.message));
   // ---- follow the speaker's real pace: shot changes on the real pauses, caption words follow the real speech ----
   let syncStart=null;
@@ -164,5 +173,5 @@ function voiceFilter(file){ if(opt('raw')) return null; let chain=voiceChain(); 
   if(scoreMade) try{ fs.unlinkSync(musicFile); }catch(e){}
   if(code){ console.error(`\n✗ ffmpeg failed (code ${code}). Check that the voice file plays, or try again without it.`); process.exit(1); }
   if(A && A.ok){ const f=VR.writeReport(topic,A,`| Music | ${musicFile?musicName+', volume '+vol+' (dips gently while you speak)':'none (put a track in music/)'} |\n`); console.log(`\n✓ voice report: ${path.relative(ROOT,f)}`); }
-  console.log(`\n✓ ${path.relative(ROOT,out)}  (${(duration).toFixed(1)}s, ${shots.length} shots, ${540*SCALE}x${960*SCALE})`);
+  console.log(`\n✓ ${path.relative(ROOT,out)}  (${(duration).toFixed(1)}s, ${shots.length} shots, ${VW*SCALE}x${VH*SCALE})`);
 })().catch(e=>{ console.error('✗',e.message); process.exit(1); });

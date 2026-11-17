@@ -27,7 +27,12 @@
    ===================================================================== */
 const LAYER_F={sky:.3,far:.6,mid:.85,art:1,near:1.4};
 function VIDEO(cfg){
-  const W=540, H=960;                       // design space (9:16). Long-form scenes come in a later step.
+  const LONG=cfg.format==='long';            // 'long' = 16:9 design space 960x540; otherwise 9:16 = 540x960
+  const W=LONG?960:540, H=LONG?540:960;
+  document.documentElement.style.setProperty('--W',W+'px'); document.documentElement.style.setProperty('--H',H+'px');
+  if(LONG){ document.documentElement.style.setProperty('--capx','90px'); document.documentElement.style.setProperty('--capfs','30px'); document.body.classList.add('long'); }
+  /* chapter shot: chapter:{no,name} makes a 5 s chapter card (0.8 s fade in, hold, 0.8 s fade out) with its own art; silent, no captions */
+  cfg.shots.forEach(s=>{ if(s.chapter){ s.dur=s.dur||5; s.nocap=true; if(!s.art) s.art=()=>chapterCard(W,H,s.chapter,s.dur); } });
   const qs=new URLSearchParams(location.search);
   const RENDER=qs.has('render'), PROMPT=qs.has('prompter'), NOTEXT=qs.has('notext');
   document.title = cfg.title || 'Mumma\'s Mythology';
@@ -50,9 +55,9 @@ function VIDEO(cfg){
   $('defs').innerHTML=DEFS;
   $('over').innerHTML=`<rect width="${W}" height="${H}" filter="url(#blotch)" style="mix-blend-mode:multiply"/><rect width="${W}" height="${H}" filter="url(#paper)" style="mix-blend-mode:overlay" opacity=".5"/><rect width="${W}" height="${H}" fill="url(#vg)"/>`;
   // captions sit in the upper-middle band (above character heads, clear of the Shorts UI); per-shot override: shot.capTop
-  const CAPTOP=cfg.captionTop||400, shadeEl=$('shade');
+  const CAPTOP=cfg.captionTop||(LONG?446:400), shadeEl=$('shade');
   cap.style.top=CAPTOP+'px';
-  const placeCap=y=>{ cap.style.top=y+'px'; shadeEl.style.top=(y-80)+'px'; };
+  const placeCap=y=>{ cap.style.top=y+'px'; shadeEl.style.top=(y-(LONG?46:80))+'px'; if(LONG) shadeEl.style.height='150px'; };
   placeCap(CAPTOP);
 
   // Timing measured from the owner's real voice (set by tools/render.js before the page loads): window.__SYNC = {durs:[..], speech:[[[s,e],..],..]}
@@ -136,9 +141,10 @@ function VIDEO(cfg){
   }
 
   /* ---- camera: preset name, {from:[x,y,zoom], to:[x,y,zoom]} or {keys:[[t,x,y,zoom,'snap'?],...]} (x,y = point to centre on) ---- */
-  const CAMS={ in:{from:[270,480,1],to:[270,480,1.08]}, out:{from:[270,480,1.1],to:[270,480,1]},
-    panL:{from:[286,480,1.08],to:[254,480,1.08]}, panR:{from:[254,480,1.08],to:[286,480,1.08]},
-    up:{from:[270,500,1.06],to:[270,470,1.06]}, down:{from:[270,460,1.06],to:[270,490,1.06]}, still:{from:[270,480,1.02],to:[270,480,1.02]} };
+  const CX=W/2, CY=H/2, KX=W/540, KY=H/960;
+  const CAMS={ in:{from:[CX,CY,1],to:[CX,CY,1.08]}, out:{from:[CX,CY,1.1],to:[CX,CY,1]},
+    panL:{from:[CX+16*KX,CY,1.08],to:[CX-16*KX,CY,1.08]}, panR:{from:[CX-16*KX,CY,1.08],to:[CX+16*KX,CY,1.08]},
+    up:{from:[CX,CY+20*KY,1.06],to:[CX,CY-10*KY,1.06]}, down:{from:[CX,CY-20*KY,1.06],to:[CX,CY+10*KY,1.06]}, still:{from:[CX,CY,1.02],to:[CX,CY,1.02]}, fit:{from:[CX,CY,1],to:[CX,CY,1]} };
   const easeSnap=k=>{ k=clamp01(k); return k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2; };
   const HAND = cfg.handheld===undefined ? 0.6 : cfg.handheld;
   function camState(sc,lt,t){
@@ -189,7 +195,7 @@ function VIDEO(cfg){
     scenesBox.style.setProperty('--rimc',`rgb(${rgb(M.rim.slice(0,3))})`); scenesBox.style.setProperty('--rimo',M.rim[3].toFixed(2)); }
 
   /* ---- cinematic transitions INTO a shot (shot.tr). Overlap types play across the cut: half before, half after ---- */
-  const TRDUR={fade:.5,glow:.7,whip:.42,zoom:.5,iris:.75,wipe:.55};
+  const TRDUR={fade:.5,dissolve:1.1,glow:.7,whip:.42,zoom:.5,iris:.75,wipe:.55};
   const TRN=SH.map((sc,i)=> i>0 && TRDUR[sc.tr] ? {type:sc.tr, d:TRDUR[sc.tr]} : null);
   const trfx=$('trfx');
   trfx.innerHTML=`<defs><linearGradient id="wipeG" x1="0" x2="1"><stop offset="0" stop-color="#ffe7a8" stop-opacity="0"/><stop offset=".7" stop-color="#ffe7a8" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="1"/></linearGradient></defs>`+
@@ -201,7 +207,7 @@ function VIDEO(cfg){
   function trStyle(type,role,p,sc){ const e=easeIO(p), o={op:1,tf:'',blur:0,clip:'',bright:1}, cxy=[W/2,H/2];
     const scaleAbout=(s,x,y)=>`translate(${x}px,${y}px) scale(${s.toFixed(4)}) translate(${-x}px,${-y}px)`;
     switch(type){
-      case 'fade': if(role==='in') o.op=e; break;
+      case 'fade': case 'dissolve': if(role==='in') o.op=e; break;
       case 'glow': { const g=Math.sin(Math.PI*p); if(role==='in') o.op=e; o.bright=1+0.45*g; o.blur=g*2; break; }
       case 'whip': { const w=easeSnap(p); o.blur=Math.sin(Math.PI*w)*11; o.tf = role==='in' ? `translate(${r1((1-w)*W)}px,0)` : `translate(${r1(-w*W)}px,0)`; break; }
       case 'zoom': if(role==='out'){ o.tf=scaleAbout(1+e*1.1,cxy[0],cxy[1]); o.op=1-smooth((e-.25)/.75); o.blur=e*7; } else { o.tf=scaleAbout(1.45-0.45*e,cxy[0],cxy[1]); o.op=smooth(e*1.5); o.blur=(1-e)*6; } break;
@@ -365,7 +371,7 @@ function VIDEO(cfg){
   const pm=$('prompter'), fmt=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
   function prompter(t, a){ if(a<0) return; const sc=SH[a], nx=SH[a+1];
     pm.querySelector('.meta').textContent=`शॉट ${a+1}/${SH.length}   •   ${fmt(t)} / ${fmt(DURATION)}`;
-    pm.querySelector('.now').textContent=sc.line||'… (शुरुआती झलक: बस चुप रहें)'; pm.querySelector('.next').textContent=nx?('अगला: '+nx.line):'— समाप्त —';
+    pm.querySelector('.now').textContent=sc.chapter?`अध्याय ${sc.chapter.no}: ${sc.chapter.name}  — ${sc.dur.toFixed(0)} सेकंड चुप रहें`:(sc.line||'… (शुरुआती झलक: बस चुप रहें)'); pm.querySelector('.next').textContent=nx?('अगला: '+nx.line):'— समाप्त —';
     pm.querySelector('.pbar i').style.width=(100*clamp01((t-sc.start)/sc.dur))+'%'; }
 
   /* ---- player ---- */

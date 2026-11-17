@@ -9,7 +9,7 @@
 const fs=require('fs'), path=require('path'), vm=require('vm');
 const ROOT=path.join(__dirname,'..'), ENG=path.join(ROOT,'engine');
 const args=process.argv.slice(2), topic=(args.find(a=>!a.startsWith('--'))||'').replace(/\/$/,'');
-const colsArg=args.indexOf('--cols'); const COLS=colsArg>=0?+args[colsArg+1]:5;
+const colsArg=args.indexOf('--cols'); let COLS=colsArg>=0?+args[colsArg+1]:5;
 if(!topic){ console.error('usage: node tools/contact-sheet.js <topic-folder> [--cols 5]'); process.exit(1); }
 const dir=path.join(ROOT,topic), HTML=path.join(dir,'index.html');
 if(!fs.existsSync(HTML)){ console.error('missing index.html: run  node tools/build.js '+topic+'  first'); process.exit(1); }
@@ -22,11 +22,12 @@ vm.runInContext(read(path.join(ENG,'timing.js'))+'\n'+read(path.join(ENG,'charac
 let CFG=null; ctx.VIDEO=c=>{ CFG=c; };
 vm.runInContext(read(path.join(dir,'story.js')), ctx);
 const plan=ctx.planTiming(CFG);
+const LONG=CFG.format==='long', VW=LONG?960:540, VH=LONG?540:960;
 
 (async()=>{
-  const W=270, H=480;
+  const W=LONG?384:270, H=LONG?216:480;
   const browser=await chromium.launch();
-  const page=await browser.newPage({viewport:{width:540,height:960}});
+  const page=await browser.newPage({viewport:{width:VW,height:VH}});
   await page.goto('file://'+HTML+'?render=1');
   await page.waitForFunction(()=>window.__ENGINE&&window.__ENGINE.seek, null, {timeout:20000});
   const tiles=[];
@@ -41,7 +42,7 @@ const plan=ctx.planTiming(CFG);
   await sheet.setContent(`<body style="margin:0;background:#111;font-family:sans-serif;color:#eee;display:flex;flex-wrap:wrap;gap:8px;padding:8px">`+
     tiles.map(k=>`<div style="width:${W}px"><div style="position:relative"><img src="${k.img}" width="${W}" height="${H}" style="display:block">`+
       `<div style="position:absolute;left:0;top:0;background:#000b;padding:2px 8px;font-size:20px;font-weight:700">${k.n}</div></div>`+
-      `<div style="font-size:13px;padding:3px 2px;height:34px;overflow:hidden">${Math.floor(k.t/60)}:${(k.t%60).toFixed(1).padStart(4,'0')} · ${esc(k.line)}</div></div>`).join('')+`</body>`);
+      `<div style="font-size:13px;padding:3px 2px;height:${LONG?18:34}px;overflow:hidden">${Math.floor(k.t/60)}:${(k.t%60).toFixed(1).padStart(4,'0')} · ${esc(k.line)}</div></div>`).join('')+`</body>`);
   await sheet.waitForTimeout(300);
   fs.mkdirSync(path.join(dir,'preview'),{recursive:true});
   const out=path.join(dir,'preview','contact-sheet.png');
