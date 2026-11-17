@@ -214,3 +214,21 @@ function warfield(o){ o=Object.assign({sunX:300},o||{});
   far:()=>wridge(340,70,'#3a1220',140)+`<g transform="translate(700 350)" fill="#26101c"><rect x="-120" y="-120" width="240" height="120"/>${[-110,-60,-10,40,90].map(x=>`<rect x="${x}" y="-140" width="26" height="22"/>`).join('')}<rect x="-30" y="-190" width="60" height="70"/><rect x="-36" y="-206" width="72" height="18"/></g>`+wmist(330,90,'#e87850',.3),
   mid:()=>`<path d="M-160 430 Q300 410 700 424 T1120 418 V700 H-160Z" fill="#1a0a14"/>`+wflag(120,432,150,'#8a1a22')+wflag(840,430,180,'#8a1a22')+wfire(480,440,1.1)+wfire(280,438,.8)+`<g transform="translate(580 430) rotate(-14)"><line y1="0" y2="-90" stroke="#3a2418" stroke-width="5"/><path d="M0 -90 l20 8 l-20 8Z" fill="#4a1018"/></g>`,
   near:()=>`<path d="M-160 500 Q200 470 500 504 T1120 490 V700 H-160Z" fill="#0c0510"/>`+A('drift:60:-120:7',wsparks(0,960,300,520,14,'#ffa050'))+wsparks(0,960,200,520,16,'#ff9a50') }; }
+
+/* ---------- CHAPTER TAG (shot.chapterTag:{no,name}): small gold plate at the top centre, fades in/out over the RUNNING picture (no separate chapter screen). Screen-space, not affected by camera. ---------- */
+function chapterTag(W,H,ch){ const num=['०','१','२','३','४','५','६','७','८','९'], no=String(ch.no).split('').map(d=>num[+d]).join(''), w=Math.min(W-60,120+ch.name.length*14), x0=-w/2;
+  return `<g transform="translate(${W/2} 24)"><rect x="${x0}" y="-19" width="${w}" height="38" rx="19" fill="#150b2e" fill-opacity=".74" stroke="#f1c04e" stroke-width="2"/>`+
+    `<circle cx="${x0+23}" cy="0" r="14.5" fill="url(#gold)"/><text x="${x0+23}" y="8" text-anchor="middle" font-size="21" fill="#2a1608" ${_tiro}>${no}</text>`+
+    `<text x="${x0+46+(w-58)/2}" y="8" text-anchor="middle" font-size="21" fill="#fff0cc" ${_tiro}>${ch.name}</text></g>`; }
+
+/* ---------- LIGHTNING + STORM SKY (Brahma's boon to Ravan): dark violet storm, flashing bolts, golden glow where the god stands ---------- */
+function wbolt(x,y1,y2,per,off,col){ let d=`M${x} ${y1}`, cx=x; const n=7; for(let i=0;i<n;i++){ cx+=(rnd()-.5)*64; d+=` L${r1(cx)} ${r1(y1+(y2-y1)*(i+1)/n)}`; }
+  const br=`M${r1(x+(cx-x)*.4)} ${r1(y1+(y2-y1)*.4)} l${r1((rnd()-.3)*70)} 70 l${r1((rnd()-.5)*40)} 50`;
+  return A(`bolt:${per}:${off}`,`<path d="${d} ${br}" stroke="${col||'#c9b8ff'}" stroke-width="12" fill="none" stroke-linejoin="round" opacity=".45" filter="url(#b4)"/><path d="${d}" stroke="#fff" stroke-width="3.4" fill="none" stroke-linejoin="round"/><path d="${br}" stroke="#f1ecff" stroke-width="2" fill="none"/>`); }
+function vardanSky(o){ o=Object.assign({gx:480,gy:250},o||{}); return {
+  sky:()=>wsky([[0,'#04020c'],[.45,'#150b34'],[.8,'#2c1450'],[1,'#4a2058']])+wstars(18,160,'#d9ccff')+wglow(480,120,520,'#4a2a8a',.28)+
+    A('bolt:6.5:0',`<rect x="-160" y="-100" width="1280" height="760" fill="#cbb8ff" opacity=".5"/>`)+A('bolt:9:3.1',`<rect x="-160" y="-100" width="1280" height="760" fill="#e8dcff" opacity=".42"/>`)+
+    wbolt(300,-20,300,6.5,0)+wbolt(700,-20,330,9,3.1)+wbolt(520,-20,230,13,7.2,'#ffd98a'),
+  far:()=>wclouds(160,'#1b1038',6,60,.9)+wclouds(250,'#1c0f3a',7,48,.9)+wmist(200,160,'#8a6ad0',.08),
+  mid:()=>wglow(o.gx,o.gy,300,'#ffcf6a',.3)+A('pulse:2.2',wglow(o.gx,o.gy,200,'#fff0c0',.35))+wclouds(380,'#22143f',6,34,.88)+lightShafts(o.gx,20,'#ffe7a8',7,620,.06),
+  near:()=>wclouds(470,'#1c1034',6,26,.9)+wmist(400,140,'#4a2a80',.22)+wsparks(0,960,160,520,26,'#ffe7a8') }; }

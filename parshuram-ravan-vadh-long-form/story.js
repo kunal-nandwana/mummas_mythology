@@ -35,17 +35,16 @@ const ORBPASS = (x1,x2,y,delay) => A(`fadein:${delay}:.4`,`<g>${A(`slide:${x2-x1
 
 VIDEO({
   title: 'परशुराम जी ने रावण का वध क्यों नहीं किया?',
-  format: 'long', target: 520,
+  format: 'long', target: 495,
   keywords: ['परशुराम','रावण','श्रीराम','सहस्त्रबाहु','विष्णु','ब्रह्मा','तपस्या','अवतार','मर्यादा','वाल्मीकि'],
   music: 'scenes', sfx: true, ending: 3.6, handheld: .6, captionChars: 42, minShot: 2.4, pace: 13,
   look: {rim:1, bokeh:.9, motes:1, warm:.1, vig:.12},
   shots: [
 
   /* ================= CHAPTER 1 ================= */
-  { chapter:{no:1, name:'एक अनसुलझा सवाल'}, dur:5, tr:'dissolve', mood:'divine', scene:'ch1-sawal', sfx:[[.15,'bell',.6]] },
 
   /* hero reveal: face close-up (long thick beard) pulls back to a wide mountain-top shot */
-  { line:`भगवान परशुराम स्वयं श्री हरि विष्णु के अवतार थे।`, scene:'ch1-sawal', mood:'hope', tr:'dissolve', fx:'dust',
+  { line:`भगवान परशुराम स्वयं श्री हरि विष्णु के अवतार थे।`, scene:'ch1-sawal', mood:'hope', tr:'fade', chapterTag:{no:1, name:'एक अनसुलझा सवाल'}, sfx:[[.15,'bell',.6]], fx:'dust',
     ...MAH({sunX:620, sunY:250, sun:1.3}), front:()=>A('drift:-260:0:12',wmist(300,110,'#ffe9d0',.35)),
     cast:[PR({x:400, s:.86, expr:'serene', acts:[[0,'stand'],[3.2,'hold'],[5.6,'armUp'],[8,'stand']]})],
     cam:{keys:[[0,412,178,2.7],[2.8,412,178,2.5],[5.4,520,272,1.05]]} },
@@ -61,13 +60,13 @@ VIDEO({
       cam:{keys:[[0,260,300,1.0],[4,400,255,1.3],[8,560,262,1.08]]} } ]),
 
   ...SPLIT(`दूसरी तरफ, रावण को ब्रह्मा जी से जो वरदान मिला था, उसमें मनुष्यों से सुरक्षा नहीं थी।`, ['नहीं थी।'].slice(0,0).concat(['वरदान मिला था,']), [
-    { scene:'ch1-sawal', mood:'divine', tr:'glow',
-      ...lay(()=>brahmaloka()), art:()=>lotusPlatform(480,442,1.3),
+    { scene:'ch1-sawal', mood:'shock', tr:'glow',
+      ...lay(()=>vardanSky({gx:600,gy:250})), art:()=>lotusPlatform(480,442,1.3),
       front:()=>A('ripple:3.5:330:300',`<circle cx="330" cy="300" r="150" fill="none" stroke="#ffe7a8" stroke-width="3" stroke-dasharray="6 8"/>`),
       cast:[{c:RAVAN,x:300,y:436,s:.62,acts:[[0,'kneelPray'],[4.5,'kneelBow']],expr:'serene'}, {c:BRAHMA,x:600,y:436,s:.72,flip:true,walk:{from:260,dur:2.4,delay:0},acts:[[0,'stand'],[2.6,'bless']],expr:'serene'}],
       cam:{keys:[[0,560,290,1.25],[5,420,285,1.3]]} },
-    { scene:'ch1-sawal', mood:'calm', tr:'fade',
-      ...lay(()=>cosmos({col:'#ffd98a'})),
+    { scene:'ch1-sawal', mood:'shock', tr:'fade',
+      ...lay(()=>vardanSky({gx:480,gy:280})),
       front:()=>A('pulse:2.6',`<path d="M300 330 A190 190 0 1 1 660 330" fill="none" stroke="#ffe7a8" stroke-width="5" opacity=".7"/>`)+wglow(480,250,230,'#ffd98a',.25)+A('pop:1.6',A('pulse:2',wglow(480,430,70,'#fff0c0',.7))),
       cast:[RV({x:480, s:.74, props:{front:'khadga'}, acts:[[0,'stand'],[2,'fist']]}), {c:VILLAGER,x:480,y:446,s:.26,acts:[[0,'stand']],aura:'gw',enter:{fade:1.2,delay:1.6}}],
       cam:{keys:[[0,480,270,1.0],[6,480,330,1.7]]} } ]),
@@ -107,9 +106,8 @@ VIDEO({
       cam:{keys:[[0,480,200,1.3],[4,480,330,1.15]]} } ]),
 
   /* ================= CHAPTER 2 ================= */
-  { chapter:{no:2, name:'रावण का वरदान और सहस्त्रबाहु का प्रसंग'}, dur:5, tr:'dissolve', mood:'divine', scene:'ch2-vardan-court', sfx:[[.15,'bell',.6]] },
 
-  { line:`सबसे पहले इस भ्रम को दूर करते हैं कि परशुराम जी रावण को मार ही नहीं सकते थे।`, scene:'ch2-vardan-court', mood:'calm', tr:'dissolve', fx:'dust',
+  { line:`सबसे पहले इस भ्रम को दूर करते हैं कि परशुराम जी रावण को मार ही नहीं सकते थे।`, scene:'ch2-vardan-court', mood:'calm', tr:'fade', chapterTag:{no:2, name:'रावण का वरदान और सहस्त्रबाहु का प्रसंग'}, sfx:[[.15,'bell',.6]], fx:'dust',
     ...TAP({tone:'dusk', fireX:760, hutX:150}), front:()=>A('drift:-300:0:14',wmist(250,150,'#ffe9d0',.4)),
     cast:[PR({x:430, s:.82, acts:[[0,'stand'],[2.5,'explain'],[5,'accuse'],[7,'explain']], talk:false})],
     cam:{keys:[[0,520,290,1.0],[4,450,262,1.3],[8,455,214,1.5]]} },
@@ -117,12 +115,12 @@ VIDEO({
   ...SPLIT(`वाल्मीकि रामायण के बालकांड के पंद्रहवें सर्ग में ब्रह्मा जी स्वयं बताते हैं कि रावण ने देवताओं, गंधर्वों, यक्षों और असुरों से अमरता का वरदान माँगा था,`, ['सर्ग में','बताते हैं कि'], [
     { scene:'ch2-vardan-court', mood:'divine', tr:'glow',
       art:SCROLL('#3a1a2a','#7a3a4a','#ffb0c8',1.5), front:()=>wlower('वाल्मीकि रामायण','बालकांड · सर्ग 15',{at:.4,hold:3.6}), cam:'fit' },
-    { scene:'ch2-vardan-court', mood:'divine', tr:'fade',
-      ...lay(()=>brahmaloka()), art:()=>lotusPlatform(480,442,1.25),
+    { scene:'ch2-vardan-court', mood:'shock', tr:'fade',
+      ...lay(()=>vardanSky({gx:560,gy:250})), art:()=>lotusPlatform(480,442,1.25),
       cast:[{c:BRAHMA,x:520,y:440,s:.86,flip:true,acts:[[0,'stand'],[1.2,'explain']],talk:false,expr:'serene'}],
       cam:{keys:[[0,420,290,1.1],[4,510,250,1.9]]} },
-    { scene:'ch2-vardan-court', mood:'divine', tr:'wipe',
-      ...lay(()=>brahmaloka()), art:()=>lotusPlatform(480,442,1.25),
+    { scene:'ch2-vardan-court', mood:'shock', tr:'wipe',
+      ...lay(()=>vardanSky({gx:560,gy:250})), art:()=>lotusPlatform(480,442,1.25),
       front:()=>BADGE(250,120,'देवता','#ffd25e',1.6)+BADGE(430,120,'गंधर्व','#7fd6ff',2.6)+BADGE(610,120,'यक्ष','#8cf0b0',3.6)+BADGE(790,120,'असुर','#c49aff',4.6),
       cast:[{c:BRAHMA,x:640,y:440,s:.72,flip:true,acts:[[0,'stand'],[1.2,'bless']],expr:'serene'}, {c:RAVAN,x:300,y:440,s:.64,acts:[[0,'kneelPray'],[6,'kneelBow']],expr:'serene'}],
       cam:{keys:[[0,480,300,1.0],[8,420,300,1.15]]} } ]),
@@ -183,9 +181,8 @@ VIDEO({
       cast:[PR({x:250, s:.8, acts:[[0,'stand'],[2.2,'point'],[5,'stand']]})], cam:{keys:[[0,320,290,1.25],[6,520,275,1.05]]} } ]),
 
   /* ================= CHAPTER 3 ================= */
-  { chapter:{no:3, name:'प्रचलित मान्यताएँ और उनका सच'}, dur:5, tr:'dissolve', mood:'divine', scene:'ch3-do-tark', sfx:[[.15,'bell',.6]] },
 
-  { line:`इस प्रश्न के उत्तर में दो तर्क सबसे ज़्यादा दिए जाते हैं।`, scene:'ch3-do-tark', mood:'hope', tr:'dissolve',
+  { line:`इस प्रश्न के उत्तर में दो तर्क सबसे ज़्यादा दिए जाते हैं।`, scene:'ch3-do-tark', mood:'hope', tr:'fade', chapterTag:{no:3, name:'प्रचलित मान्यताएँ और उनका सच'}, sfx:[[.15,'bell',.6]],
     art:()=>wsky([[0,'#0e0a2a'],[1,'#2a1850']])+wglow(480,270,480,'#ffb060',.25)+wmandala(480,270,340,'#f1c04e',28,220)+splitArgs({hi:-1,delay:.4})+wsparks(0,960,60,500,22,'#ffe7a8'), cam:'fit' },
 
   { line:`पहला तर्क है पृथ्वी का दान और तपस्या।`, scene:'ch3-do-tark', mood:'hope', tr:'fade',
@@ -283,10 +280,9 @@ VIDEO({
       cast:[PR({x:300, s:.82, with:{aura:'gw'}, acts:[[0,'stand'],[2,'lookAway'],[5,'think']]})], cam:{keys:[[0,400,290,1.3],[6,520,262,1.1]]} } ]),
 
   /* ================= CHAPTER 4 ================= */
-  { chapter:{no:4, name:'अवतार का निश्चित उद्देश्य'}, dur:5, tr:'dissolve', mood:'divine', scene:'ch4-avatar-uddeshya', sfx:[[.15,'bell',.6]] },
 
   ...SPLIT(`इस प्रश्न का सबसे सटीक उत्तर किसी गुप्त नियम में नहीं, बल्कि सृष्टि के विधान और अवतारों के उद्देश्य में छिपा है।`, ['नियम में नहीं,'], [
-    { scene:'ch4-avatar-uddeshya', mood:'divine', tr:'dissolve',
+    { scene:'ch4-avatar-uddeshya', mood:'divine', tr:'fade', chapterTag:{no:4, name:'अवतार का निश्चित उद्देश्य'}, sfx:[[.15,'bell',.6]],
       ...lay(()=>cosmos()), front:()=>A('bob:4:.25',pothi(480,260,1.5)+wglow(480,260,200,'#ffe7a8',.4))+LOCK(3.0), cam:{keys:[[0,480,270,1.0],[5,480,262,1.1]]} },
     { scene:'ch4-avatar-uddeshya', mood:'divine', tr:'glow',
       ...lay(()=>cosmos({col:'#7fe0ff'})), front:()=>RING(), cam:{keys:[[0,480,270,1.0],[6,480,270,1.1]]} } ]),
@@ -382,10 +378,9 @@ VIDEO({
     ...lay(()=>cosmos()), front:()=>avatarMontage({hi:-1,delay:.4,step:.4})+wlower('वाल्मीकि रामायण','अवतारों के अलग-अलग प्रयोजन',{at:1.2,hold:4,y:30}), cam:'fit' },
 
   /* ================= CHAPTER 5 ================= */
-  { chapter:{no:5, name:'निष्कर्ष'}, dur:5, tr:'dissolve', mood:'divine', scene:'ch5-shanti', sfx:[[.15,'bell',.6]] },
 
   ...SPLIT(`संक्षेप में कहें तो—शास्त्रों में ऐसा कहीं नहीं लिखा कि परशुराम जी रावण को मारने में असमर्थ थे या उन्हें ऐसा करने से रोका गया था।`, ['नहीं लिखा कि','असमर्थ थे'], [
-    { scene:'ch5-shanti', mood:'hope', tr:'dissolve', fx:'dust',
+    { scene:'ch5-shanti', mood:'hope', tr:'fade', chapterTag:{no:5, name:'निष्कर्ष'}, sfx:[[.15,'bell',.6]], fx:'dust',
       ...TAP({tone:'dawn', fireX:760, hutX:140}), front:()=>A('bob:4:.22',pothi(580,180,.7)+wglow(580,180,140,'#ffe7a8',.45)),
       cast:[PR({x:330, s:.84, expr:'serene', acts:[[0,'stand'],[3,'explain']]})], cam:{keys:[[0,420,290,1],[6,400,250,1.25]]} },
     { scene:'ch5-shanti', mood:'hope', tr:'fade',
