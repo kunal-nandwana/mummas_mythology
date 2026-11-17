@@ -31,18 +31,21 @@ function wsparks(x1,x2,y1,y2,n,col){ let s=''; for(let i=0;i<n;i++) s+=A(`drift:
 function wtufts(y,col,n){ let s=''; for(let i=0;i<n;i++){ const x=rnd()*1000-20, yy=y+rnd()*60, h=6+rnd()*12; s+=`<path d="M${r1(x)} ${r1(yy)} l-3 -${r1(h)} M${r1(x)} ${r1(yy)} l0 -${r1(h*1.2)} M${r1(x)} ${r1(yy)} l3 -${r1(h)}" stroke="${col}" stroke-width="1.5" fill="none"/>`; } return s; }
 const _tiro=`style="font-family:'Tiro','Mukta',serif;font-weight:400"`;
 
-/* ---------- CHAPTER CARD (chapter:{no,name}) : 0.8 s fade in, hold, 0.8 s fade out; the picture behind dissolves via tr:'dissolve' ---------- */
-function chapterCard(W,H,ch,dur){ const num=['०','१','२','३','४','५','६','७','८','९'], no=String(ch.no).split('').map(d=>num[+d]).join(''), cx=W/2, out=Math.max(1,dur-.8);
+/* ---------- CHAPTER CARD (chapter:{no,name}) : centred, soft. Dark -> translucent mythological backdrop + number + name drift in (1.3 s), hold, drift out (1.3 s) -> dark -> next chapter.
+   Use tr:'dissolve' on the card AND on the first shot after it, so the picture melts into the dark and out of it. Silent gap for the voice. ---------- */
+function _lotusLine(cx,y,s,col,op){ let p=''; for(let i=0;i<11;i++){ const a=-100+i*20, k=i%2?.82:1; p+=`<path d="M0 0 C-22 -26 -17 -66 0 -92 C17 -66 22 -26 0 0Z" transform="rotate(${a}) scale(${k})" fill="none" stroke="${col}" stroke-width="2"/>`; }
+  return `<g transform="translate(${cx} ${y}) scale(${s})" opacity="${op}">${p}<path d="M-210 6 Q0 -16 210 6" stroke="${col}" stroke-width="2" fill="none"/></g>`; }
+function chapterCard(W,H,ch,dur){ const num=['०','१','२','३','४','५','६','७','८','९'], no=String(ch.no).split('').map(d=>num[+d]).join(''), cx=W/2, cy=H*.5, FI=1.3, out=Math.max(FI+1.5,dur-1.3);
   let name=ch.name, l1=name, l2=''; if(name.length>26){ const mid=name.length/2; let best=-1; for(let i=0;i<name.length;i++) if(name[i]===' ' && (best<0||Math.abs(i-mid)<Math.abs(best-mid))) best=i; if(best>0){ l1=name.slice(0,best); l2=name.slice(best+1); } }
-  const g=_wgrad(0,0,0,1,[[0,'#0c0a2a'],[.55,'#2a1650'],[1,'#5a2a42']]);
+  const g=_wgrad(0,0,0,1,[[0,'#07051a'],[.6,'#150c30'],[1,'#26102e']]);
+  const myth=wglow(cx,cy,360,'#ffb45a',.2)+wmandala(cx,cy,250,'#f1c04e',24,140)+wmandala(cx,cy,170,'#ffd98a',12,-90)+_lotusLine(cx,H-34,1.5,'#f1c04e',.5)+_lotusLine(cx,34,1.1,'#f1c04e',.28).replace('translate('+cx+' 34)','translate('+cx+' 34) scale(1 -1)')+wstars(34,H,'#ffe9b8')+wsparks(120,840,160,480,12);
   const body=`<g transform="translate(${cx} 0)">`+
-    `<text y="${H*.27}" text-anchor="middle" font-size="22" fill="#f1c04e" style="font-weight:800">अध्याय</text>`+
-    A('rise:16:1.3:.15',`<text y="${H*.5}" text-anchor="middle" font-size="150" fill="url(#gold)" ${_tiro}>${no}</text>`)+
-    A('draw:.6:1.0',`<path pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M-210 ${H*.56} L210 ${H*.56}" stroke="#f1c04e" stroke-width="2.4" fill="none"/>`)+
-    `<path d="M-6 ${H*.56} L0 ${H*.56-6} L6 ${H*.56} L0 ${H*.56+6}Z" fill="#f1c04e"/>`+
-    A('rise:12:1.2:.5',`<text y="${H*(l2?.665:.7)}" text-anchor="middle" font-size="${l2?38:44}" fill="#fff0cc" ${_tiro}>${l1}</text>`+(l2?`<text y="${H*.765}" text-anchor="middle" font-size="38" fill="#fff0cc" ${_tiro}>${l2}</text>`:''))+`</g>`;
-  return `<defs>${g.def}</defs><rect width="${W}" height="${H}" fill="url(#${g.id})"/>`+wglow(cx,H*.46,330,'#ffb45a',.38)+wmandala(cx,H*.46,235,'#f1c04e',16,90)+wmandala(cx,H*.46,150,'#ffd98a',10,-60)+wstars(40,H,'#ffe9b8')+wsparks(100,860,260,500,14)+
-    A('fadein:0:.8',A('fadeout:'+out.toFixed(2)+':.8',body)); }
+    `<text y="${cy-62}" text-anchor="middle" font-size="22" fill="#f1c04e" style="font-weight:800;letter-spacing:4px">अध्याय</text>`+
+    `<text y="${cy+34}" text-anchor="middle" font-size="108" fill="url(#gold)" ${_tiro}>${no}</text>`+
+    `<path d="M-170 ${cy+62} L-12 ${cy+62} M12 ${cy+62} L170 ${cy+62}" stroke="#f1c04e" stroke-width="2" fill="none" opacity=".85"/><path d="M-7 ${cy+62} L0 ${cy+55} L7 ${cy+62} L0 ${cy+69}Z" fill="#f1c04e"/>`+
+    `<text y="${cy+(l2?112:118)}" text-anchor="middle" font-size="${l2?34:40}" fill="#fff0cc" ${_tiro}>${l1}</text>`+(l2?`<text y="${cy+156}" text-anchor="middle" font-size="34" fill="#fff0cc" ${_tiro}>${l2}</text>`:'')+`</g>`;
+  return `<defs>${g.def}</defs><rect x="-10" y="-10" width="${W+20}" height="${H+20}" fill="url(#${g.id})"/>`+
+    A('fadein:.2:'+FI,A('fadeout:'+out.toFixed(2)+':1.3',`<g opacity=".55">${myth}</g>`+body))+''; }
 
 /* ---------- SCRIPTURE LOWER-THIRD (top-left plate, glowing palm leaf). Put in `front`. wlower('वाल्मीकि रामायण','बालकांड · सर्ग 15',{at:.8,hold:4.5}) ---------- */
 function wlower(title,sub,o){ o=Object.assign({at:.8,hold:4.6,x:34,y:30,w:380},o||{}); const g=_wgrad(0,0,1,0,[[0,'#2a1608',.94],[1,'#4a2c10',.82]]);
@@ -90,6 +93,21 @@ function chainW(items,o){ o=Object.assign({y:215,delay:.4,step:1.1,hi:-1,before:
 /* ---------- glowing question mark with orbiting lights ---------- */
 function wquestion(x,y,s,col){ col=col||'#ffd98a'; return `<g transform="translate(${x} ${y}) scale(${s||1})">`+A('pulse:2',wglow(0,-20,120,col,.35))+A('bob:6:.25',`<text y="40" text-anchor="middle" font-size="150" fill="${col}" ${_tiro} stroke="#3a1a08" stroke-width="3" paint-order="stroke">?</text>`)+
   [0,1,2].map(i=>A(`orbit:90:34:0:-20:${6+i*2}`,`<circle r="3.4" fill="#fff3c4"/>`)).join('')+`</g>`; }
+
+/* ---------- riddle emblem (replaces the "?" mark): glowing ring + ring of light around a symbol that MATCHES the scene.
+   kind: 'axe' (parashu) | 'chakra' (Vishnu) | 'crown' (Ravan's ten-point crown) | 'both' (axe + crown) | 'diya' (waiting lamp). wriddle('axe',480,235,1.5) ---------- */
+function wriddle(kind,x,y,s,col){ col=col||'#ffd98a'; const axe=`<g transform="rotate(-22)"><line x1="-4" y1="52" x2="6" y2="-48" stroke="#8a4a1c" stroke-width="9" stroke-linecap="round"/><path d="M6 -50 C46 -62 70 -22 56 20 C46 -6 28 -12 6 -8Z" fill="#dfe3ea" stroke="#fff" stroke-width="2"/></g>`,
+    crown=`<path d="M-56 30 L-56 -6 L-40 -34 L-26 -4 L-14 -44 L0 -8 L14 -44 L26 -4 L40 -34 L56 -6 L56 30Z" fill="url(#gold)" stroke="#4a2800" stroke-width="2.4"/><rect x="-56" y="18" width="112" height="14" fill="#c8402c" stroke="#4a2800" stroke-width="2"/>`+[-34,0,34].map(d=>`<circle cx="${d}" cy="25" r="4" fill="#fff0b0"/>`).join(''),
+    chakra=A('spin:8:0:0',`<g><circle r="54" fill="none" stroke="url(#gold)" stroke-width="6"/><circle r="12" fill="#fff3c4"/>${Array.from({length:12},(_,i)=>`<path d="M0 -14 L0 -54" stroke="#ffd25e" stroke-width="3.4" transform="rotate(${i*30})"/><path d="M0 -54 L6 -66 L-6 -66Z" fill="#ffe7a8" transform="rotate(${i*30})"/>`).join('')}</g>`),
+    diya=`<path d="M-48 10 Q0 66 48 10Z" fill="#c8742a" stroke="#ffe7a8" stroke-width="3"/>`+A('flick:5',`<path d="M0 6 Q24 -22 0 -64 Q-24 -22 0 6Z" fill="#ffd27a"/><path d="M0 2 Q12 -16 0 -38 Q-12 -16 0 2Z" fill="#fff6d8"/>`)+wglow(0,-28,70,'#ffcf6a',.6);
+  const sym= kind==='crown'?crown : kind==='chakra'?chakra : kind==='diya'?diya : kind==='both'?`<g transform="translate(-52 0) scale(.78)">${axe}</g><g transform="translate(52 6) scale(.62)">${crown}</g>` : axe;
+  return `<g transform="translate(${x} ${y}) scale(${s||1})">`+A('pulse:2.4',wglow(0,0,170,col,.4))+A('spin:40:0:0','<circle r="104" fill="none" stroke="#f1c04e" stroke-width="2" stroke-dasharray="3 12" opacity=".8"/>')+
+    `<circle r="86" fill="#1a0f36" fill-opacity=".72" stroke="url(#gold)" stroke-width="3.5"/>`+A('bob:5:.25',`<g transform="translate(0 -4)">${sym}</g>`)+
+    [0,1,2].map(i=>A(`orbit:104:104:0:0:${7+i*2}`,`<circle r="3.6" fill="#fff3c4"/>`)).join('')+`</g>`; }
+
+/* ---------- lotus in bloom with rising light (replaces the old tick/check mark: "purpose complete") ---------- */
+function wbloom(x,y,s){ let p=''; for(let i=0;i<9;i++){ const a=-80+i*20, k=i%2?.84:1; p+=`<path d="M0 0 C-24 -28 -18 -72 0 -98 C18 -72 24 -28 0 0Z" transform="rotate(${a}) scale(${k})" fill="${i%2?'#f6a6c6':'#ffd2e0'}" stroke="#fff0f4" stroke-width="2"/>`; }
+  return `<g transform="translate(${x} ${y}) scale(${s||1})">`+A('pulse:2.4',wglow(0,-40,150,'#ffe7a8',.55))+A('pop:.8',A('bob:4:.22',`<g>${p}<circle cy="-14" r="14" fill="#ffd25e"/></g>`))+wsparks(-70,70,-110,0,10,'#fff3c4')+`</g>`; }
 
 /* ---------- Brahma-loka lotus platform (characters stand on it) ---------- */
 function lotusPlatform(x,y,s){ s=s||1; let p='';

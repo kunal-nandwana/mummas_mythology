@@ -30,7 +30,6 @@ const SPLIT = (text, cuts, parts) => { const bits=[]; let rest=text; cuts.forEac
 const LOCK = at => A(`fadeout:${at}:.8`,`<g transform="translate(480 130)"><path d="M-26 0 V-26 a26 26 0 0 1 52 0 V0" fill="none" stroke="#ffd98a" stroke-width="9"/><rect x="-42" y="0" width="84" height="64" rx="10" fill="#8a5a1c" stroke="#ffe7a8" stroke-width="3"/><circle cy="28" r="9" fill="#2a1608"/></g>`);
 const BARRIER = x => A('pulse:2.2',`<rect x="${x-8}" y="60" width="16" height="380" rx="8" fill="#ffe7a8" opacity=".5" filter="url(#b4)"/><rect x="${x-2}" y="60" width="4" height="380" fill="#fff3c4"/>`)+wsparks(x-60,x+60,80,430,16,'#fff3c4');
 const ORBS3 = () => [[300,'#8cd0ff'],[480,'#ffd98a'],[660,'#c49aff']].map(([x,c],i)=>A(`pop:${.4+i*.5}`,A(`bob:4:${.2+i*.05}`,`<g transform="translate(${x} 90)">${wglow(0,0,80,c,.5)}<circle r="30" fill="#241446" stroke="${c}" stroke-width="3"/><circle r="18" fill="${c}" opacity=".5"/></g>`))).join('');
-const CHECK = at => A(`pop:${at}`,`<g transform="translate(480 92)">${wglow(0,0,110,'#ffe7a8',.55)}<circle r="52" fill="#241446" stroke="url(#gold)" stroke-width="4"/><path d="M-24 2 L-6 22 L26 -18" stroke="#fff3c4" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g>`);
 const ORBPASS = (x1,x2,y,delay) => A(`fadein:${delay}:.4`,`<g>${A(`slide:${x2-x1}:0:2.4:${delay}`,A('pulse:1.4',wglow(x1,y,70,'#ffe7a8',.9)+`<circle cx="${x1}" cy="${y}" r="16" fill="#fff3c4"/>`))}</g>`);
 
 VIDEO({
@@ -43,8 +42,10 @@ VIDEO({
 
   /* ================= CHAPTER 1 ================= */
 
+  { chapter:{no:1, name:'एक अनसुलझा सवाल'}, dur:6, tr:'dissolve', mood:'divine', scene:'ch1-sawal', sfx:[[1.3,'bell',.5]] },
+
   /* hero reveal: face close-up (long thick beard) pulls back to a wide mountain-top shot */
-  { line:`भगवान परशुराम स्वयं श्री हरि विष्णु के अवतार थे।`, scene:'ch1-sawal', mood:'hope', tr:'fade', chapterTag:{no:1, name:'एक अनसुलझा सवाल'}, sfx:[[.15,'bell',.6]], fx:'dust',
+  { line:`भगवान परशुराम स्वयं श्री हरि विष्णु के अवतार थे।`, scene:'ch1-sawal', mood:'hope', tr:'dissolve', fx:'dust',
     ...MAH({sunX:620, sunY:250, sun:1.3}), front:()=>A('drift:-260:0:12',wmist(300,110,'#ffe9d0',.35)),
     cast:[PR({x:400, s:.86, expr:'serene', acts:[[0,'stand'],[3.2,'hold'],[5.6,'armUp'],[8,'stand']]})],
     cam:{keys:[[0,412,178,2.7],[2.8,412,178,2.5],[5.4,520,272,1.05]]} },
@@ -77,24 +78,24 @@ VIDEO({
 
   ...SPLIT(`तो फिर सवाल यह है कि जब परशुराम जी धरती पर पहले से मौजूद थे, तो उन्होंने ही रावण का वध क्यों नहीं कर दिया?`, ['सवाल यह है कि','मौजूद थे,'], [
     { scene:'ch1-sawal', mood:'hope', tr:'iris', trAt:[480,230],
-      ...lay(()=>cosmos()), front:()=>wquestion(480,235,1.5), cam:{keys:[[0,480,270,1.0],[3,480,250,1.25]]} },
+      ...lay(()=>cosmos()), front:()=>wriddle('both',480,235,1.5), cam:{keys:[[0,480,270,1.0],[3,480,250,1.25]]} },
     { scene:'ch1-sawal', mood:'hope', tr:'wipe',
       ...MAH({sunX:700, sunY:300, tone:'dawn'}), front:()=>A('bob:6:.2',earth(780,110,50)+wglow(780,110,120,'#bfe0ff',.4)),
       cast:[PR({x:400, s:.84, acts:[[0,'stand'],[1.6,'lookUp'],[4,'stand']]})], cam:{keys:[[0,400,300,1.5],[5,520,250,1.1]]} },
     { scene:'ch1-sawal', mood:'hope', tr:'fade',
-      ...lay(()=>cosmos()), front:()=>wquestion(480,215,1.0),
+      ...lay(()=>cosmos()), front:()=>wriddle('crown',480,150,.8),
       cast:[PR({x:250, s:.76, walk:{from:-300,dur:2.4,delay:0}, acts:[[0,'stand'],[3,'lookAway'],[5.4,'think']]}), RV({x:730, s:.72, flip:true, walk:{from:300,dur:2.4,delay:0}, props:{front:'khadga'}, acts:[[0,'stand'],[3.5,'lookAway']]})],
       cam:{keys:[[0,330,260,1.3],[3.4,640,260,1.3],[7,480,255,1.05]]} } ]),
 
   { line:`भगवान विष्णु को श्रीराम के रूप में दोबारा जन्म लेने की आवश्यकता क्यों पड़ी?`, scene:'ch1-sawal', mood:'divine', tr:'glow',
-    ...lay(()=>kshir()), front:()=>wquestion(480,130,.6,'#fff0b8'),
+    ...lay(()=>kshir()), front:()=>wriddle('chakra',480,110,.62,'#fff0b8'),
     cast:[{c:VISHNU,x:330,y:436,s:.74,acts:[[0,'stand'],[1.2,'bless'],[5,'explain']],expr:'serene'}, {c:RAMA,x:670,y:436,s:.64,flip:true,props:{front:'bow'},enter:{fade:1.6,delay:2.2,rise:30},acts:[[0,'stand'],[5,'namaste']],expr:'serene',aura:'gw'}],
     cam:{keys:[[0,330,290,1.4],[4,480,275,1.15],[8,640,280,1.3]]} },
 
   ...SPLIT(`आज हम किसी सुनी-सुनाई कहानी पर नहीं, बल्कि वाल्मीकि रामायण, भागवत पुराण और अध्यात्म रामायण के प्रमाणों के आधार पर इस रहस्य की तह तक जाएंगे।`, ['कहानी पर नहीं,','आधार पर'], [
     { scene:'ch1-sawal', mood:'calm', tr:'fade',
       ...lay(()=>ayodhya({tone:'dusk'})),
-      front:()=>A('pop:.8',`<g transform="translate(250 190)"><path d="M-70 -34 h140 a12 12 0 0 1 12 12 v36 a12 12 0 0 1 -12 12 h-70 l-20 22 v-22 h-50 a12 12 0 0 1 -12 -12 v-36 a12 12 0 0 1 12 -12Z" fill="#fff3d8" opacity=".92"/><text y="8" text-anchor="middle" font-size="26" fill="#6a3a18">...?</text></g>`)+A('pop:1.8',`<g transform="translate(690 180)"><path d="M-70 -34 h140 a12 12 0 0 1 12 12 v36 a12 12 0 0 1 -12 12 h-30 v22 l-20 -22 h-90 a12 12 0 0 1 -12 -12 v-36 a12 12 0 0 1 12 -12Z" fill="#fff3d8" opacity=".92"/><text y="8" text-anchor="middle" font-size="26" fill="#6a3a18">...!</text></g>`),
+      front:()=>A('pop:.8',`<g transform="translate(250 190)"><path d="M-70 -34 h140 a12 12 0 0 1 12 12 v36 a12 12 0 0 1 -12 12 h-70 l-20 22 v-22 h-50 a12 12 0 0 1 -12 -12 v-36 a12 12 0 0 1 12 -12Z" fill="#fff3d8" opacity=".92"/><g transform="translate(0 2) scale(.42)">${_emblem(2)}</g></g>`)+A('pop:1.8',`<g transform="translate(690 180)"><path d="M-70 -34 h140 a12 12 0 0 1 12 12 v36 a12 12 0 0 1 -12 12 h-30 v22 l-20 -22 h-90 a12 12 0 0 1 -12 -12 v-36 a12 12 0 0 1 12 -12Z" fill="#fff3d8" opacity=".92"/><g transform="translate(0 2) scale(.42)">${_emblem(3)}</g></g>`),
       cast:[{c:VILLAGER,x:300,y:FY,s:.62,acts:[[0,'stand'],[1,'explain'],[3,'lookAway']]}, {c:DEVOTEE_F,x:640,y:FY,s:.62,flip:true,acts:[[0,'stand'],[2,'plead'],[4,'explain']]}],
       cam:{keys:[[0,480,300,1.2],[5,500,285,1.0]]} },
     { scene:'ch1-sawal', mood:'calm', tr:'fade',
@@ -107,7 +108,9 @@ VIDEO({
 
   /* ================= CHAPTER 2 ================= */
 
-  { line:`सबसे पहले इस भ्रम को दूर करते हैं कि परशुराम जी रावण को मार ही नहीं सकते थे।`, scene:'ch2-vardan-court', mood:'calm', tr:'fade', chapterTag:{no:2, name:'रावण का वरदान और सहस्त्रबाहु का प्रसंग'}, sfx:[[.15,'bell',.6]], fx:'dust',
+  { chapter:{no:2, name:'रावण का वरदान और सहस्त्रबाहु का प्रसंग'}, dur:6, tr:'dissolve', mood:'divine', scene:'ch2-vardan-court', sfx:[[1.3,'bell',.5]] },
+
+  { line:`सबसे पहले इस भ्रम को दूर करते हैं कि परशुराम जी रावण को मार ही नहीं सकते थे।`, scene:'ch2-vardan-court', mood:'calm', tr:'dissolve', fx:'dust',
     ...TAP({tone:'dusk', fireX:760, hutX:150}), front:()=>A('drift:-300:0:14',wmist(250,150,'#ffe9d0',.4)),
     cast:[PR({x:430, s:.82, acts:[[0,'stand'],[2.5,'explain'],[5,'accuse'],[7,'explain']], talk:false})],
     cam:{keys:[[0,520,290,1.0],[4,450,262,1.3],[8,455,214,1.5]]} },
@@ -132,14 +135,14 @@ VIDEO({
 
   ...SPLIT(`इस श्लोक में कहीं भी यह नहीं लिखा है कि रावण को केवल कोई क्षत्रिय ही मार सकता है या कोई ब्राह्मण उसका वध नहीं कर सकता।`, ['लिखा है कि','मार सकता है'], [
     { scene:'ch2-vardan-court', mood:'calm', tr:'fade',
-      art:()=>wsky([[0,'#150d36'],[1,'#37204e']])+wglow(480,260,430,'#ffb060',.3)+wmandala(480,270,300,'#f1c04e',24,160)+A('bob:4:.22',pothi(480,262,1.5)+A('glint:1.2:2.6:-230:230',`<g transform="translate(480 262)"><rect x="-26" y="-70" width="52" height="140" fill="#fff" opacity=".4" filter="url(#b10)" transform="skewX(-14)"/></g>`))+wquestion(480,90,.45)+wsparks(60,900,100,480,26,'#ffe7a8'),
+      art:()=>wsky([[0,'#150d36'],[1,'#37204e']])+wglow(480,260,430,'#ffb060',.3)+wmandala(480,270,300,'#f1c04e',24,160)+A('bob:4:.22',pothi(480,262,1.5)+A('glint:1.2:2.6:-230:230',`<g transform="translate(480 262)"><rect x="-26" y="-70" width="52" height="140" fill="#fff" opacity=".4" filter="url(#b10)" transform="skewX(-14)"/></g>`))+wglow(480,90,70,'#ffe7a8',.4)+wsparks(60,900,100,480,26,'#ffe7a8'),
       cam:'fit' },
     { scene:'ch2-vardan-court', mood:'calm', tr:'fade',
-      ...LNK({sunX:260, sunY:320}), front:()=>TAG(480,90,380,'केवल क्षत्रिय ही?',.5,3.0),
+      ...LNK({sunX:260, sunY:320}), front:()=>TAG(480,90,380,'केवल क्षत्रिय ही',.5,3.0),
       cast:[RV({x:660, s:.74, flip:true, props:{front:'khadga'}, acts:[[0,'stand'],[2,'fist']]}), {c:SOLDIER,x:260,y:FY,s:.6,props:{front:'staff'},walk:{from:-240,dur:2.4,delay:0},acts:[[0,'stand']]}],
       cam:{keys:[[0,480,290,1.1],[5,480,270,1.05]]} },
     { scene:'ch2-vardan-court', mood:'calm', tr:'wipe',
-      ...TAP({tone:'dusk', fireX:200, hutX:800}), front:()=>TAG(480,90,420,'ब्राह्मण नहीं मार सकता?',.5,3.2),
+      ...TAP({tone:'dusk', fireX:200, hutX:800}), front:()=>TAG(480,90,420,'ब्राह्मण नहीं मार सकता',.5,3.2),
       cast:[{c:BRAHMIN,x:640,y:FY,s:.72,flip:true,acts:[[0,'stand'],[2,'explain']]}, RV({x:300, s:.7, props:{front:'khadga'}, acts:[[0,'stand'],[3,'lookAway']]})],
       cam:{keys:[[0,480,290,1.1],[5,520,270,1.05]]} } ]),
 
@@ -177,12 +180,14 @@ VIDEO({
       front:()=>`<g transform="translate(790 392)" opacity=".85">${wglow(0,-30,120,'#ffb060',.5)}<path d="M-60 0 V-40 L-44 -52 L-28 -40 V-70 L-12 -86 L4 -70 V-40 L22 -54 L40 -40 V0Z" fill="#2a1a3a"/></g>`,
       cast:[PR({x:290, s:.82, acts:[[0,'stand'],[2.2,'think'],[5,'lookAway']]})], cam:'panR' },
     { scene:'ch2-vardan-court', mood:'calm', tr:'wipe',
-      ...LNK({sunX:760, sunY:300}), front:()=>wquestion(560,150,.55)+wbirds(90,4,16,'#1a0a1a'),
+      ...LNK({sunX:760, sunY:300}), front:()=>wriddle('crown',560,140,.5)+wbirds(90,4,16,'#1a0a1a'),
       cast:[PR({x:250, s:.8, acts:[[0,'stand'],[2.2,'point'],[5,'stand']]})], cam:{keys:[[0,320,290,1.25],[6,520,275,1.05]]} } ]),
 
   /* ================= CHAPTER 3 ================= */
 
-  { line:`इस प्रश्न के उत्तर में दो तर्क सबसे ज़्यादा दिए जाते हैं।`, scene:'ch3-do-tark', mood:'hope', tr:'fade', chapterTag:{no:3, name:'प्रचलित मान्यताएँ और उनका सच'}, sfx:[[.15,'bell',.6]],
+  { chapter:{no:3, name:'प्रचलित मान्यताएँ और उनका सच'}, dur:6, tr:'dissolve', mood:'divine', scene:'ch3-do-tark', sfx:[[1.3,'bell',.5]] },
+
+  { line:`इस प्रश्न के उत्तर में दो तर्क सबसे ज़्यादा दिए जाते हैं।`, scene:'ch3-do-tark', mood:'hope', tr:'dissolve',
     art:()=>wsky([[0,'#0e0a2a'],[1,'#2a1850']])+wglow(480,270,480,'#ffb060',.25)+wmandala(480,270,340,'#f1c04e',28,220)+splitArgs({hi:-1,delay:.4})+wsparks(0,960,60,500,22,'#ffe7a8'), cam:'fit' },
 
   { line:`पहला तर्क है पृथ्वी का दान और तपस्या।`, scene:'ch3-do-tark', mood:'hope', tr:'fade',
@@ -272,17 +277,19 @@ VIDEO({
 
   ...SPLIT(`तो प्रश्न अब भी वही है—श्रीराम के जन्म से पहले, जब परशुराम जी के पास वह संपूर्ण दिव्य शक्ति थी, तब उन्होंने रावण का वध क्यों नहीं किया?`, ['जन्म से पहले,','शक्ति थी,'], [
     { scene:'ch3-do-tark', mood:'hope', tr:'fade',
-      ...lay(()=>cosmos()), front:()=>wquestion(480,235,1.6), cam:{keys:[[0,480,270,1.0],[2.4,480,250,1.2]]} },
+      ...lay(()=>cosmos()), front:()=>wriddle('both',480,235,1.6), cam:{keys:[[0,480,270,1.0],[2.4,480,250,1.2]]} },
     { scene:'ch3-do-tark', mood:'hope', tr:'fade',
       art:()=>wsky([[0,'#0a0820'],[1,'#241448']])+wglow(300,400,320,'#ffb060',.3)+wmandala(480,270,330,'#f1c04e',28,200)+chainW([{n:'श्रीराम का जन्म'},{n:'शिव धनुष भंग'},{n:'सीता से विवाह'},{n:'शक्ति वापसी'}],{y:215,delay:.1,step:.2,hi:-1,before:true})+wsparks(60,900,100,480,20,'#ffe7a8'), cam:'fit' },
     { scene:'ch3-do-tark', mood:'hope', tr:'wipe',
-      ...MAH({tone:'night', ledge:432, sunX:780}), front:()=>A('pulse:3',wglow(860,330,200,'#ff6a3a',.4))+wquestion(640,150,.6),
+      ...MAH({tone:'night', ledge:432, sunX:780}), front:()=>A('pulse:3',wglow(860,330,200,'#ff6a3a',.4))+wriddle('diya',640,150,.55),
       cast:[PR({x:300, s:.82, with:{aura:'gw'}, acts:[[0,'stand'],[2,'lookAway'],[5,'think']]})], cam:{keys:[[0,400,290,1.3],[6,520,262,1.1]]} } ]),
 
   /* ================= CHAPTER 4 ================= */
 
+  { chapter:{no:4, name:'अवतार का निश्चित उद्देश्य'}, dur:6, tr:'dissolve', mood:'divine', scene:'ch4-avatar-uddeshya', sfx:[[1.3,'bell',.5]] },
+
   ...SPLIT(`इस प्रश्न का सबसे सटीक उत्तर किसी गुप्त नियम में नहीं, बल्कि सृष्टि के विधान और अवतारों के उद्देश्य में छिपा है।`, ['नियम में नहीं,'], [
-    { scene:'ch4-avatar-uddeshya', mood:'divine', tr:'fade', chapterTag:{no:4, name:'अवतार का निश्चित उद्देश्य'}, sfx:[[.15,'bell',.6]],
+    { scene:'ch4-avatar-uddeshya', mood:'divine', tr:'dissolve',
       ...lay(()=>cosmos()), front:()=>A('bob:4:.25',pothi(480,260,1.5)+wglow(480,260,200,'#ffe7a8',.4))+LOCK(3.0), cam:{keys:[[0,480,270,1.0],[5,480,262,1.1]]} },
     { scene:'ch4-avatar-uddeshya', mood:'divine', tr:'glow',
       ...lay(()=>cosmos({col:'#7fe0ff'})), front:()=>RING(), cam:{keys:[[0,480,270,1.0],[6,480,270,1.1]]} } ]),
@@ -318,7 +325,7 @@ VIDEO({
       ...TAP({tone:'dawn', fireX:720, hutX:150}), front:()=>A('rise:-26:5:.3',earth(480,185,58)+wglow(480,185,150,'#bfe0ff',.4)),
       cast:[PR({x:260, s:.76, acts:[[0,'stand'],[3,'namaste']], props:{}}), {c:KASHYAP,x:700,y:FY,s:.72,flip:true,acts:[[0,'stand'],[2,'bless']],expr:'serene'}], cam:{keys:[[0,480,270,1],[7,480,262,1.12]]} },
     { scene:'ch4-avatar-uddeshya', mood:'divine', tr:'glow',
-      ...MAH({sunX:480, sunY:310, tone:'dawn'}), front:()=>CHECK(1.2)+A('draw:.8:1.8',`<path pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M480 60 A80 80 0 1 1 479.9 60" stroke="#ffd98a" stroke-width="5" fill="none"/>`),
+      ...MAH({sunX:480, sunY:310, tone:'dawn'}), front:()=>wbloom(480,150,.9)+A('draw:.8:1.8',`<path pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M480 60 A80 80 0 1 1 479.9 60" stroke="#ffd98a" stroke-width="5" fill="none"/>`),
       cast:[PR({x:480, s:.84, acts:[[0,'stand'],[2,'namaste']], props:{}, expr:'serene'})], cam:{keys:[[0,480,290,1.3],[6,480,250,1.0]]} } ]),
 
   ...SPLIT(`वहीं दूसरी ओर, वाल्मीकि रामायण के बालकांड में जब रावण के अत्याचार तीनों लोकों में बढ़ गए, तब सभी देवता ब्रह्मा जी के साथ भगवान विष्णु की शरण में गए।`, ['बालकांड में','बढ़ गए,'], [
@@ -379,8 +386,10 @@ VIDEO({
 
   /* ================= CHAPTER 5 ================= */
 
+  { chapter:{no:5, name:'निष्कर्ष'}, dur:6, tr:'dissolve', mood:'divine', scene:'ch5-shanti', sfx:[[1.3,'bell',.5]] },
+
   ...SPLIT(`संक्षेप में कहें तो—शास्त्रों में ऐसा कहीं नहीं लिखा कि परशुराम जी रावण को मारने में असमर्थ थे या उन्हें ऐसा करने से रोका गया था।`, ['नहीं लिखा कि','असमर्थ थे'], [
-    { scene:'ch5-shanti', mood:'hope', tr:'fade', chapterTag:{no:5, name:'निष्कर्ष'}, sfx:[[.15,'bell',.6]], fx:'dust',
+    { scene:'ch5-shanti', mood:'hope', tr:'dissolve', fx:'dust',
       ...TAP({tone:'dawn', fireX:760, hutX:140}), front:()=>A('bob:4:.22',pothi(580,180,.7)+wglow(580,180,140,'#ffe7a8',.45)),
       cast:[PR({x:330, s:.84, expr:'serene', acts:[[0,'stand'],[3,'explain']]})], cam:{keys:[[0,420,290,1],[6,400,250,1.25]]} },
     { scene:'ch5-shanti', mood:'hope', tr:'fade',
@@ -392,7 +401,7 @@ VIDEO({
 
   ...SPLIT(`बात केवल इतनी थी कि परशुराम जी का अवतार कार्य पूर्ण हो चुका था और वे तपस्या में लीन थे,`, ['हो चुका था'], [
     { scene:'ch5-shanti', mood:'divine', tr:'fade', fx:'petals',
-      ...MAH({sunX:250, sunY:292, tone:'dusk'}), art:()=>LEAN_AXE(640,440), front:()=>CHECK(1.4),
+      ...MAH({sunX:250, sunY:292, tone:'dusk'}), art:()=>LEAN_AXE(640,440), front:()=>wriddle('diya',480,110,.55,'#ffe7a8'),
       cast:[PR({x:420, s:.84, props:{}, acts:[[0,'stand'],[2,'namaste']], expr:'serene'})], cam:{keys:[[0,420,290,1.3],[5,460,262,1.05]]} },
     { scene:'ch5-shanti', mood:'divine', tr:'fade', fx:'petals',
       ...MAH({sunX:250, sunY:292, tone:'dawn'}),
