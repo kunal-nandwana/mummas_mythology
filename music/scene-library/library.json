@@ -2393,6 +2393,28 @@
         "lead": 0.6
       },
       "auto": true
+    },
+    "ravan-chamber": {
+      "mood": "sad",
+      "desc": "Auto-created for scene \"ravan-chamber\" (sad): तो उन्होंने ऐसे कक्ष देखे. Edit this recipe in library.json to change it.",
+      "level": [0.519, 0.364],
+      "pad": {
+        "chords": "min",
+        "seg": 10,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "bow",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.075,
+        "note": [2.695, 4.366],
+        "rest": [1.615, 2.863],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      },
+      "auto": true
     }
   }
 }

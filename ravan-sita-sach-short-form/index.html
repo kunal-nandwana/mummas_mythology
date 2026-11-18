@@ -799,7 +799,8 @@ function shade(hex,amt){ const n=parseInt(hex.slice(1),16); let r=n>>16, g=(n>>8
 const COSTUME0 = {skin:'#8c6248', top:'#1f2640', bottom:'#8e1d24', shin:null, foot:null, sleeve:null, skirt:false,
   trim:'url(#gold)', hair:'long', head:'crown', beard:null, mus:false, cape:null, quiver:false, garland:null, sash:null,
   veil:null, turban:'#ece5d4', tilak:false, earring:true, big:false, aura:null, jewel:true,
-  bare:false, ash:false, snake:false, tiger:false, rudra:false, third:false, tusks:false, spikes:false, eyeCol:null, fireHair:false, blindfold:false, faces:null, arms:0, armItems:null, beardLen:0, halo:null, mala:null, pads:null, belt:null, studs:null, holds:null};
+  bare:false, ash:false, snake:false, tiger:false, rudra:false, third:false, tusks:false, spikes:false, eyeCol:null, fireHair:false, blindfold:false, faces:null, arms:0, armItems:null, beardLen:0, halo:null, mala:null, pads:null, belt:null, studs:null, holds:null,
+  fem:false, pallu:null, braid:null, bangles:null, bindi:false, nose:false, scarf:null, flowers:false, vanara:false, face:null, furDark:null, tail:false, armor:false, bracer:false, fierce:false, kundal:false, kilt:null, lips:null};
 
 let RIG_ID=0;
 /* Build one character. cast = {c:COSTUME, x, y, s, flip, acts:[[t,pose,dur?],...], expr, eyes, talk,
@@ -828,7 +829,10 @@ function makeRig(cast){
       (c.pads?`<rect x="${-9.5*wide}" y="-3" width="${19*wide}" height="23" rx="6" fill="${c.pads}" stroke="#e8b83a" stroke-width="1.6"/><path d="M${-6*wide} 2 h${12*wide}" stroke="#fff" stroke-opacity=".25" stroke-width="1.6"/>`:'')+
       (c.jewel?`<line x1="${-6.5*wide}" y1="16" x2="${6.5*wide}" y2="16" stroke="#d9a73a" stroke-width="3"/>`:'')+
       (c.rudra?`<line x1="${-7*wide}" y1="15" x2="${7*wide}" y2="15" stroke="${c.rudra===true?'#6a3a18':c.rudra}" stroke-width="5" stroke-dasharray="3 2"/>`:'')+
+      (c.fem?`<rect x="-7.4" y="9" width="14.8" height="7" rx="3" fill="url(#gold)" stroke="#8a5a14" stroke-width=".8"/><circle cx="0" cy="12.5" r="2.2" fill="#d63a2a"/>`:'')+
       `<g ${J(n+'E')}><line x1="0" y1="0" x2="0" y2="46" stroke="${col}" stroke-width="${11*wide}" stroke-linecap="round"/>`+
+      (c.bangles?c.bangles.map((bc,bi)=>`<line x1="-5.8" y1="${30+bi*3.6}" x2="5.8" y2="${30+bi*3.6}" stroke="${bc}" stroke-width="2.6" stroke-linecap="round"/>`).join('')+`<line x1="-5.6" y1="${30+c.bangles.length*3.6}" x2="5.6" y2="${30+c.bangles.length*3.6}" stroke="#ffd25e" stroke-width="1.2" opacity=".8"/>`:'')+
+      (c.bracer?`<rect x="${-7.6*wide}" y="14" width="${15.2*wide}" height="26" rx="4" fill="url(#gold)" stroke="#8a5a14" stroke-width="1.3"/><path d="M${-7*wide} 22 h${14*wide} M${-7*wide} 31 h${14*wide}" stroke="#8a5a14" stroke-width="1.2"/><circle cx="0" cy="27" r="2.6" fill="#d63a2a" stroke="#ffd25e" stroke-width=".8"/>`:'')+
       (c.jewel?`<line x1="-5.5" y1="38" x2="5.5" y2="38" stroke="#e8b83a" stroke-width="2.5"/>`:'')+
       (c.rudra?`<line x1="-6" y1="37" x2="6" y2="37" stroke="${c.rudra===true?'#6a3a18':c.rudra}" stroke-width="4" stroke-dasharray="3 2"/>`:'')+
       `<g ${J(n+'H')}>${hand(n,col)}<g ${J(n+'P')}>${prop(back?props.back:props.front, n)}</g></g></g></g>`; };
@@ -839,6 +843,8 @@ function makeRig(cast){
         `<polyline ${J('string')} points="-6,-162 -6,-17 -6,128" stroke="#efe6cc" stroke-width="1.3" fill="none"/>`+
         `<g ${J('arrow')} style="display:none"><line x1="0" y1="0" x2="150" y2="0" stroke="#d9c08a" stroke-width="2.6"/><polygon points="150,-5 164,0 150,5" fill="#e9e1c8"/><path d="M0 0 l-10 -6 M0 0 l-10 6" stroke="#ff4a3c" stroke-width="2.4"/></g>`;
       case 'mace': return `<line x1="-2" y1="22" x2="6" y2="-96" stroke="#6a4218" stroke-width="7" stroke-linecap="round"/><ellipse cx="8" cy="-120" rx="21" ry="33" fill="url(#gold)"/><path d="M-12 -120 h40 M-6 -142 h28 M-6 -98 h28" stroke="#8a5a1a" stroke-width="2"/><circle cx="8" cy="-156" r="5" fill="url(#gold)"/>`;
+      /* gada: Hanuman's mace: gold-bound haft, big round head with vertical ribs and a spike */
+      case 'gada': return `<line x1="-3" y1="30" x2="5" y2="-92" stroke="#7a4a1c" stroke-width="8" stroke-linecap="round"/><line x1="-2" y1="20" x2="1" y2="-8" stroke="url(#gold)" stroke-width="10"/><line x1="2" y1="-60" x2="4" y2="-86" stroke="url(#gold)" stroke-width="10"/><g transform="translate(7 -128)"><circle r="38" fill="url(#gold)" stroke="#8a5a14" stroke-width="2"/>`+[-28,-14,0,14,28].map(x=>`<path d="M${x} ${-Math.sqrt(1444-x*x)+2} Q${x*1.35} 0 ${x} ${Math.sqrt(1444-x*x)-2}" fill="none" stroke="#8a5a14" stroke-width="2.2"/>`).join('')+`<path d="M-30 -14 Q0 -22 30 -14 M-34 8 Q0 0 34 8" stroke="#8a5a14" stroke-width="1.8" fill="none" opacity=".7"/><ellipse cx="-12" cy="-16" rx="9" ry="14" fill="#fff" opacity=".28" transform="rotate(25 -12 -16)"/><path d="M-6 -36 L0 -56 L6 -36Z" fill="url(#gold)" stroke="#8a5a14" stroke-width="1.4"/><circle cy="0" r="6" fill="#d63a2a" stroke="#ffd25e" stroke-width="1.4"/></g>`;
       case 'staff': return `<line x1="0" y1="-120" x2="0" y2="150" stroke="#5a3c1c" stroke-width="5" stroke-linecap="round"/>`;
       case 'lantern': return `<g transform="translate(0 16)"><line x1="0" y1="-14" x2="0" y2="0" stroke="#6a4a22" stroke-width="2"/>${A('flick:9','<circle r="90" fill="url(#saf)"/>')}<path d="M-8 0 h16 l-2 20 h-12Z" fill="#7a5420"/><rect x="-5" y="3" width="10" height="13" fill="#ffd27a"/><path d="M-9 0 L0 -8 L9 0Z" fill="#5a3a14"/></g>`;
       case 'diya': return `<g transform="translate(0 -8)">${A('flick:7','<circle cy="-14" r="46" fill="url(#saf)"/>')}<path d="M-14 0 Q0 12 14 0 L10 -6 L-10 -6Z" fill="#a8582a"/><path d="M4 -6 Q8 -18 2 -26 Q-2 -16 4 -6Z" fill="#ffd27a"/></g>`;
@@ -871,20 +877,24 @@ function makeRig(cast){
       case 'axe': return `<line x1="-4" y1="46" x2="6" y2="-150" stroke="#3a2a22" stroke-width="9" stroke-linecap="round"/><g transform="translate(6 -128)"><path d="M0 -8 C-34 -26 -62 -4 -56 40 C-38 20 -16 14 0 18Z" fill="#6a7078" stroke="#d4d8de" stroke-width="2"/><path d="M0 -8 C34 -26 62 -4 56 40 C38 20 16 14 0 18Z" fill="#585e66" stroke="#d4d8de" stroke-width="2"/><path d="M-4 -8 L0 -34 L4 -8Z" fill="#d4d8de"/><path d="M-50 30 C-34 14 -16 8 -2 12 M50 30 C34 14 16 8 2 12" stroke="#ff5a2a" stroke-width="2" fill="none" opacity=".8"/>${A('pulse:3','<circle cy="14" r="46" fill="url(#gr)" opacity=".5"/>')}</g>`;
       default: return '';
     } }
-  const UPRIGHT={shankh:1,kamandalu:1,veda:1,parashu:1,axe:1,bow:1,mace:1,staff:1,lantern:1,diya:1,lotus:1,trishul:1,orb:1,chakra:1,arrows3:1,heartCloth:1,cloth:1,mallet:1};
+  const UPRIGHT={gada:1,shankh:1,kamandalu:1,veda:1,parashu:1,axe:1,bow:1,mace:1,staff:1,lantern:1,diya:1,lotus:1,trishul:1,orb:1,chakra:1,arrows3:1,heartCloth:1,cloth:1,mallet:1};
 
   /* ---- head ---- */
+  /* ravan crown: tall gold band with five jewelled spires, red centre stone, emeralds (c.head==='ravan') */
+  const RCROWN=`<path d="M-20 -285 L-23 -314 L-13 -303 L-9 -334 L-1 -308 L3 -348 L8 -308 L16 -334 L19 -303 L28 -314 L25 -285Z" fill="url(#gold)" stroke="#8a5a14" stroke-width=".9"/><path d="M-21 -289 Q2 -280 26 -289 L26 -282 Q2 -273 -21 -282Z" fill="url(#gold)" stroke="#8a5a14" stroke-width=".8"/><circle cx="3" cy="-298" r="4.2" fill="#d63a2a" stroke="#ffd25e" stroke-width="1.2"/><circle cx="-10" cy="-296" r="2.3" fill="#2ec28a"/><circle cx="17" cy="-296" r="2.3" fill="#2ec28a"/><circle cx="3" cy="-349" r="2.4" fill="#ffd25e"/><circle cx="-9" cy="-335" r="2" fill="#ffd25e"/><circle cx="16" cy="-335" r="2" fill="#ffd25e"/>`;
   /* extra faces (c.faces:[[dx,dy,scale],...]): small profile faces fanned behind the main head (Ravan's ten heads, Brahma's four) */
   const miniFace=(dx,dy,sc,k,rot)=>`<g transform="${rot?`rotate(${rot} 0 -240) `:''}translate(${dx} ${dy}) translate(0 -266) scale(${sc}) translate(0 266)"><path d="M-14 -262 C-16 -286 0 -294 14 -288 C22 -284 24 -276 24 -270 L32 -260 L24 -258 C24 -252 22 -248 16 -246 L-6 -244Z" fill="${shade(skin,-.06*(k%3))}"/><path d="M-16 -268 C-20 -292 0 -300 18 -290 L14 -280 C2 -284 -8 -282 -12 -262Z" fill="${dark}"/>`+
     (c.beard?`<path d="M3 -252 Q28 -250 25 -212 Q13 -198 0 -214 Q-7 -234 -3 -250Z" fill="${c.beard==='white'?'#e7e1d4':dark}"/><path d="M6 -246 Q12 -228 10 -216 M16 -246 Q20 -230 18 -214" stroke="#bdb6a6" stroke-width="1.4" fill="none"/>`:'')+
     (c.head==='kirita'?`<path d="M-16 -283 C-15 -300 -9 -322 2 -346 C12 -322 18 -300 19 -284Z" fill="url(#gold)" stroke="#a8741a" stroke-width=".8"/><path d="M-10 -298 Q2 -292 14 -298 M-7 -316 Q2 -311 11 -316" stroke="#a8741a" stroke-width="1.3" fill="none"/><circle cx="2" cy="-296" r="3" fill="#d63a2a"/>`:'')+
-    (c.head==='kirita'?'':c.head==='big'?`<path d="M-18 -284 L-16 -326 L-6 -308 L2 -340 L10 -308 L20 -324 L20 -284Z" fill="url(#gold)"/><circle cx="2" cy="-300" r="4" fill="#2ec28a"/>`:`<path d="M-16 -286 L-12 -318 L-4 -300 L2 -326 L8 -300 L16 -316 L18 -286Z" fill="url(#gold)"/>`)+
+    (c.head==='kirita'?'':c.head==='ravan'?RCROWN:c.head==='big'?`<path d="M-18 -284 L-16 -326 L-6 -308 L2 -340 L10 -308 L20 -324 L20 -284Z" fill="url(#gold)"/><circle cx="2" cy="-300" r="4" fill="#2ec28a"/>`:`<path d="M-16 -286 L-12 -318 L-4 -300 L2 -326 L8 -300 L16 -316 L18 -286Z" fill="url(#gold)"/>`)+
     `<path d="M8.5 -271 Q15 -276 21.5 -270" stroke="#140a06" stroke-width="1.7" fill="none"/><circle cx="16.5" cy="-270.4" r="1.8" fill="#140a06"/><path d="M8 -278 Q15 -281.5 22.5 -277.5" stroke="${dark}" stroke-width="2.4" fill="none"/>`+
     (c.mus?`<path d="M12 -254 q8 -4 15 1" stroke="${dark}" stroke-width="3" fill="none" stroke-linecap="round"/>`:'')+`</g>`;
   let head='';
   if(c.halo){ const [hx,hy,hr]=c.halo; let rays=''; for(let i=0;i<20;i++) rays+=`<line x1="0" y1="${-hr-5}" x2="0" y2="${-hr-(i%2?13:21)}" transform="rotate(${i*18})" stroke="#ffe7a8" stroke-width="2.4" stroke-linecap="round"/>`;
     head+=`<g transform="translate(${hx} ${hy})">`+A('pulse:1.8',`<circle r="${hr+8}" fill="#fff3c4" opacity=".22"/>`)+`<circle r="${hr}" fill="#ffe9a8" opacity=".2"/><circle r="${hr}" fill="none" stroke="#ffe7a8" stroke-width="3"/>`+A(`spin:50:0:0`,rays)+`</g>`; }
   if(c.faces) head+=c.faces.map((f,i)=>A(`bob:${(1+(i%3)*.5).toFixed(1)}:${(.16+i*.025).toFixed(3)}`,miniFace(f[0],f[1],f[2],i,f[3]))).join('');
+  if(c.braid){ const bc=c.braid; let pl=''; for(let i=0;i<7;i++) pl+=`<path d="M${-30-i*1.2} ${-250+i*17} q8 5 16 0" stroke="#000" stroke-opacity=".35" stroke-width="1.6" fill="none"/>`;
+    head+=`<g ${J('hair')}><path d="M-12 -276 C-34 -268 -42 -230 -40 -196 C-38 -170 -40 -150 -36 -128 L-24 -130 C-28 -152 -26 -172 -26 -198 C-24 -232 -18 -254 -6 -262Z" fill="${bc}"/>${pl}<path d="M-34 -250 C-38 -226 -37 -196 -35 -170" stroke="#fff" stroke-opacity=".14" stroke-width="2" fill="none"/><path d="M-37 -134 l6 0 l-3 9Z" fill="url(#gold)"/><circle cx="-30" cy="-124" r="3.2" fill="#d63a2a"/><path d="M-33 -122 l-3 14 M-30 -121 l0 16 M-27 -122 l3 14" stroke="#ffd25e" stroke-width="1.6" stroke-linecap="round"/></g>`; }
   if(c.veil) head+=`<g ${J('veilB')}><path d="M-18 -292 C-40 -270 -50 -220 -56 -150 L-30 -150 C-28 -210 -20 -250 -8 -276Z" fill="${c.veil}"/><path d="M-30 -150 C-28 -210 -20 -250 -8 -276 L-14 -280 C-22 -246 -26 -206 -28 -150Z" fill="#000" opacity=".16"/></g>`;
   if(c.hair==='long' && !c.veil) head+=`<g ${J('hair')}><path d="M-12 -272 C-30 -262 -34 -230 -40 -196 L-22 -204 C-20 -226 -14 -244 -6 -256Z" fill="${dark}"/></g>`;
   if(c.head==='mahadev') head+=`<g ${J('hair')}><path d="M-14 -278 C-50 -268 -66 -216 -74 -146 C-64 -158 -56 -168 -48 -178 C-46 -150 -42 -126 -34 -104 C-24 -138 -22 -190 -8 -252Z" fill="${dark}"/><path d="M-22 -262 C-40 -240 -50 -200 -54 -160 M-30 -236 C-40 -210 -42 -176 -38 -138" stroke="#322b44" stroke-width="2" fill="none"/>`+
@@ -904,6 +914,14 @@ function makeRig(cast){
         `<path d="M24 -258 q3 1.5 0 3" stroke="#000" stroke-opacity=".28" stroke-width="1.2" fill="none"/>`+
         `<ellipse ${J('blush')} cx="12" cy="-259" rx="6" ry="3.6" fill="#e0556a" opacity="0"/>`+
         `<path d="M-2 -273 q-6 4 -3 14 q3 5 7 2" fill="${shade(skin,-.08)}" stroke="${shade(skin,-.3)}" stroke-width="1.3"/><path d="M-2 -268 q-2 5 1 8" stroke="${shade(skin,-.35)}" stroke-width="1" fill="none"/>`;
+  if(c.vanara){ const fc=c.face||shade(skin,.28), fd=c.furDark||shade(skin,-.32);
+    head+=`<path d="M-6 -276 C-10 -292 -8 -310 2 -316 C6 -302 6 -288 4 -276Z" fill="${skin}" stroke="${fd}" stroke-width="1"/><path d="M-3 -279 C-5 -292 -3 -304 1 -310 C3 -300 3 -290 2 -279Z" fill="#e8a88a"/>`+
+      `<path d="M-8 -256 L-17 -251 L-9 -250 L-16 -241 L-8 -243 L-10 -233 L0 -241 L8 -246Z" fill="${fd}"/>`+
+      `<path d="M8 -280 C18 -284 25 -280 28 -273 C36 -270 42 -264 41 -256 C39 -248 33 -245 28 -245 C21 -241 12 -242 6 -246 L5 -262Z" fill="${fc}"/>`+
+      `<path d="M30 -250 C34 -250 38 -252 40 -256" stroke="${fd}" stroke-opacity=".5" stroke-width="1.2" fill="none"/>`+
+      `<path d="M3 -281 C11 -289 24 -287 29 -277 L25 -273 C19 -279 10 -279 5 -274Z" fill="${fd}"/>`+
+      `<ellipse cx="38.6" cy="-261.5" rx="3.6" ry="2.8" fill="#2a1410"/><circle cx="37.6" cy="-262.4" r="1" fill="#fff" opacity=".45"/><path d="M33 -258 q2 2 4 0" stroke="#2a1410" stroke-width="1" fill="none" opacity=".7"/>`+
+      `<path d="M2 -246 l-6 8 l8 -3 l-3 8 l8 -6Z" fill="${fd}" opacity=".9"/>`; }
   if(c.head!=='turban' && !c.veil && c.head!=='jata' && c.head!=='mahadev' && c.head!=='demon' && c.hair!=='none') head+=`<path d="M-16 -268 C-20 -292 0 -300 18 -290 L14 -280 C2 -284 -8 -282 -12 -262Z" fill="${dark}"/>`;
   if(c.beard && c.beardLen>0){ /* FULL sage beard: covers the whole lower face (ear to nose, mouth hidden), thick moustache, flows down the chest to a point, strands, sways */
     const L=c.beardLen, white=c.beard==='white', bc=white?'#e7e1d4':(c.beard==='grey'?'#a8a29a':'#2a1a12'), st=white?'#bdb6a6':'#5e4634', hi=white?'#fffaf0':'#4a3526', D=84*L, T=-246+D, Y=f=>r1(-246+D*f);
@@ -923,15 +941,16 @@ function makeRig(cast){
       `<circle cx="-16" cy="-273" r="4.5" fill="${bf}"/><g ${J('hair')}><path d="M-17 -272 Q-30 -262 -32 -246 L-27 -246 Q-25 -260 -15 -269Z M-17 -274 Q-34 -270 -40 -256 L-35 -254 Q-30 -265 -15 -271Z" fill="${bf}"/></g>`; }
   head+=`<g ${J('furrow')} style="display:none"><path d="M10 -283 q2 -2 1 -5" stroke="#000" stroke-opacity=".38" stroke-width="1.3" fill="none" stroke-linecap="round"/><path d="M14 -284 q2 -2 1.4 -5" stroke="#000" stroke-opacity=".32" stroke-width="1.1" fill="none" stroke-linecap="round"/></g>`;
   // mouth variants
-  const mcol=c.beardLen>0?'#e8a890':'#3a1a10', mop=c.beardLen>0?' stroke-opacity=".0"':'';
-  head+=`<path ${J('m_neutral')} d="M17 -251 q4 0 7 -1" stroke="#3a1a10" stroke-width="2" fill="none"${mop}/>`+
-        `<path ${J('m_smile')} d="M16.5 -252.5 q4 3.5 8.5 -1" stroke="#3a1a10" stroke-width="2" fill="none"${mop} style="display:none"/>`+
-        `<path ${J('m_sad')} d="M17 -250 q4 -2.5 7.5 0" stroke="#3a1a10" stroke-width="2" fill="none"${mop} style="display:none"/>`+
+  const mcol=c.beardLen>0?'#e8a890':'#3a1a10', mop=c.beardLen>0?' stroke-opacity=".0"':'', LIP=c.lips||(c.fem?'#a8282e':'#3a1a10');
+  head+=`<path ${J('m_neutral')} d="M17 -251 q4 0 7 -1" stroke="${LIP}" stroke-width="2" fill="none"${mop}/>`+
+        `<path ${J('m_smile')} d="M16.5 -252.5 q4 3.5 8.5 -1" stroke="${LIP}" stroke-width="2" fill="none"${mop} style="display:none"/>`+
+        `<path ${J('m_sad')} d="M17 -250 q4 -2.5 7.5 0" stroke="${LIP}" stroke-width="2" fill="none"${mop} style="display:none"/>`+
         `<ellipse ${J('m_open')} cx="21" cy="-251" rx="3" ry="1.5" fill="${c.beardLen>0?'#8a2e26':'#3a1010'}" style="display:none"/>`+
         `<path ${J('m_teeth')} d="M18.4 -252.4 h5.4" stroke="#f6f0e0" stroke-width="1.5" stroke-linecap="round" style="display:none"/>`+
         `<g ${J('tear')} style="display:none"><path d="M0 0 q-2.2 3.6 0 5.2 q2.2 -1.6 0 -5.2Z" fill="#cfe8ff" stroke="#fff" stroke-opacity=".6" stroke-width=".5"/></g>`+
         `<g ${J('tear2')} style="display:none"><path d="M0 0 q-2 3.2 0 4.6 q2 -1.4 0 -4.6Z" fill="#cfe8ff" stroke="#fff" stroke-opacity=".6" stroke-width=".5"/></g>`;
   if(c.mus) head+=`<path d="M12 -254 q8 -4 15 1" stroke="${dark}" stroke-width="3.2" fill="none" stroke-linecap="round"/>`;
+  if(c.fierce) head+=`<path d="M13 -254 C22 -250 32 -252 40 -264" stroke="${dark}" stroke-width="4.4" fill="none" stroke-linecap="round"/><path d="M13 -254 C20 -256 28 -258 34 -258" stroke="${dark}" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M5 -280 L24 -275" stroke="${dark}" stroke-width="4.2" stroke-linecap="round"/><path d="M8 -265 Q15 -262 23 -265" stroke="#000" stroke-opacity=".3" stroke-width="2" fill="none"/>`;
   head+=`<path d="M18 -289 C22 -285 24 -278 24 -270 L32 -260 L24 -258 C24 -252 22 -248 16 -246" fill="none" style="stroke:var(--rimc,#fff);stroke-opacity:var(--rimo,0);stroke-width:1.6" stroke-linecap="round"/>`;
   if(c.tilak==='namam') head+=`<path d="M17 -290 v10 M24 -290 v9" stroke="#fff6e0" stroke-width="2.2" stroke-linecap="round"/><path d="M20.5 -289 v9" stroke="#d63a2a" stroke-width="2"/>`;
   else if(c.tilak) head+=`<path d="M20 -287 l1 7" stroke="#d63a2a" stroke-width="2.2"/>`;
@@ -956,14 +975,40 @@ function makeRig(cast){
   if(c.head==='feather') head+=`<g transform="translate(0 -322) rotate(-14)"><path d="M0 0 Q-6 -24 0 -46" stroke="#3a7a4f" stroke-width="2.5" fill="none"/><ellipse cx="0" cy="-48" rx="9" ry="15" fill="#2e9a86"/><ellipse cx="0" cy="-48" rx="5.5" ry="9" fill="#1f5fb0"/><ellipse cx="0" cy="-48" rx="2.5" ry="4.5" fill="#e8c24a"/></g>`;
   if(c.head==='band') head+=`<path d="M-16 -282 Q2 -292 20 -284 L20 -277 Q2 -285 -16 -275Z" fill="url(#gold)"/><circle cx="4" cy="-286" r="2.6" fill="#d63a2a"/>`;
   if(c.head==='kirita') head+=`<path d="M-20 -283 C-19 -300 -12 -326 2 -352 C16 -326 23 -300 24 -284Z" fill="url(#gold)" stroke="#a8741a" stroke-width="1"/><path d="M-15 -298 Q2 -291 20 -298 M-10 -314 Q2 -308 15 -314 M-5 -332 Q2 -327 10 -332" stroke="#a8741a" stroke-width="1.7" fill="none"/><path d="M2 -352 V-362" stroke="#ffd25e" stroke-width="2"/><circle cx="2" cy="-363" r="2.6" fill="#ffd25e"/><path d="M-19 -285 Q2 -277 23 -286 L23 -280 Q2 -272 -19 -279Z" fill="url(#gold)"/><circle cx="3" cy="-297" r="3.8" fill="#d63a2a" stroke="#ffd25e" stroke-width="1"/><path d="M-9 -303 l3.2 4.4 l-3.2 4.4 l-3.2 -4.4Z M15 -303 l3.2 4.4 l-3.2 4.4 l-3.2 -4.4Z" fill="#2ec28a"/>`;
+  if(c.head==='ravan') head+=RCROWN;
   if(c.head==='big') head+=`<path d="M-18 -284 L-16 -326 L-6 -308 L2 -340 L10 -308 L20 -324 L20 -284Z" fill="url(#gold)"/><circle cx="2" cy="-300" r="4" fill="#d63a2a"/><circle cx="-8" cy="-292" r="2" fill="#2ec28a"/><circle cx="12" cy="-292" r="2" fill="#2ec28a"/>`;
   if(c.veil) head+=`<path d="M-20 -290 C0 -306 22 -300 24 -284 C14 -290 0 -290 -12 -278 C-16 -270 -18 -262 -16 -250 L-24 -250 C-26 -270 -26 -284 -20 -290Z" fill="${c.veil}"/><path d="M-20 -290 C0 -306 22 -300 24 -284" stroke="url(#gold)" stroke-width="2.4" fill="none"/>`;
   if(c.earring && c.head!=='turban') head+=`<g ${J('ear')}><circle cx="-4" cy="-256" r="3" fill="none" stroke="#e8b83a" stroke-width="1.6"/>`+
     (c.skirt||c.jewel ? `<line x1="-4" y1="-253" x2="-4" y2="-248" stroke="#e8b83a" stroke-width="1.2"/><path d="M-7.5 -248 Q-4 -241 -0.5 -248Z" fill="url(#gold)"/><circle cx="-4" cy="-241.6" r="1.4" fill="#d63a2a"/>` : '')+`</g>`;
 
+  if(c.kundal) head+=`<g ${J('kund')}><circle cx="-4" cy="-253" r="7" fill="url(#gold)" stroke="#8a5a14" stroke-width="1.2"/><circle cx="-4" cy="-253" r="2.6" fill="#d63a2a"/><path d="M-9 -246 Q-4 -234 1 -246Z" fill="url(#gold)"/></g>`;
+  if(c.fem){
+    if(c.veil) head+=`<path d="M-10 -296 C4 -300 18 -296 24 -287" stroke="#fff" stroke-width="2.4" fill="none" stroke-dasharray="1.2 3.6" stroke-linecap="round"/>`+
+      `<path d="M0 -293 C6 -289 12 -287 17 -284" stroke="#e8b83a" stroke-width="1.2" fill="none"/><circle cx="17.5" cy="-283" r="2.7" fill="url(#gold)" stroke="#8a5a14" stroke-width=".7"/><circle cx="17.5" cy="-283" r="1.1" fill="#d63a2a"/>`;
+    if(c.bindi) head+=`<circle cx="21.6" cy="-281" r="1.9" fill="#c8202a"/>`;
+    if(c.nose) head+=`<circle cx="26.6" cy="-256.4" r="1.3" fill="#ffd25e"/><path d="M27 -255 q3 2 1 5" stroke="#e8b83a" stroke-width=".9" fill="none"/>`;
+    if(c.flowers) head+=`<g transform="translate(-10 -296)">`+[[0,0,'#fff'],[9,-5,'#ffd0f0'],[-8,5,'#ffd0f0'],[16,-1,'#fff'],[-14,13,'#fff']].map(([fx,fy,fc])=>`<g transform="translate(${fx} ${fy})">`+[0,72,144,216,288].map(r=>`<ellipse rx="2.6" ry="4.4" transform="rotate(${r}) translate(0 -3.6)" fill="${fc}"/>`).join('')+`<circle r="2" fill="#ffc83c"/></g>`).join('')+`</g>`; }
+
   /* ---- torso ---- */
-  let torso=`<g transform="scale(${wide} 1)"><path d="M-8 -238 C-28 -234 -34 -214 -34 -192 L-28 -148 L26 -148 L28 -194 C28 -222 18 -236 8 -238Z" fill="${c.top}"/>`;
-  if(c.skirt) torso+=`<path d="M-30 -150 C-30 -170 -28 -190 -26 -200 L28 -160 L26 -150Z" fill="${c.bottom}"/>`;
+  const SG=shade(c.bottom||'#8e1d24',-.3);
+  let torso=`<g transform="scale(${wide} 1)">`+(c.fem?
+    /* feminine build: slim waist, bare midriff, short blouse with a bust line, pallu draped from the left shoulder across to the right hip */
+    `<path d="M-7 -238 C-24 -234 -27 -214 -25 -194 C-23 -178 -21 -162 -21 -146 L21 -146 C21 -162 24 -178 26 -194 C27 -222 17 -236 7 -238Z" fill="${skin}"/>`+
+    `<path d="M-24 -176 C-10 -170 8 -170 22 -176" stroke="#000" stroke-opacity=".14" stroke-width="1.6" fill="none"/><circle cx="2" cy="-164" r="1.3" fill="#000" opacity=".25"/>`+
+    `<path d="M-7 -238 C-24 -234 -28 -214 -26 -192 L-24 -185 C-6 -181 10 -183 25 -189 C29 -200 29 -216 25 -226 C19 -236 13 -238 7 -238Z" fill="${c.top}"/>`+
+    `<path d="M19 -222 C33 -214 35 -198 28 -188 L17 -188Z" fill="${shade(c.top,.12)}"/>`+
+    `<path d="M-24 -186 C-6 -182 10 -184 25 -190" stroke="url(#gold)" stroke-width="2.4" fill="none"/>`+
+    `<path d="M-8 -238 C-1 -224 11 -224 16 -238Z" fill="${skin}"/><path d="M-8 -238 C-1 -224 11 -224 16 -238" stroke="#e8b83a" stroke-width="1.2" fill="none"/>`
+    :`<path d="M-8 -238 C-28 -234 -34 -214 -34 -192 L-28 -148 L26 -148 L28 -194 C28 -222 18 -236 8 -238Z" fill="${c.top}"/>`);
+  if(c.fem && c.pallu) torso+=`<g ${J('sashT')}><path d="M-30 -232 C-28 -241 -16 -243 -8 -238 C10 -212 24 -180 32 -148 L8 -148 C-2 -176 -16 -200 -34 -214Z" fill="${c.pallu}"/><path d="M-10 -239 C10 -212 24 -180 32 -148" stroke="url(#gold)" stroke-width="3.4" fill="none"/><path d="M-34 -214 L-30 -232" stroke="url(#gold)" stroke-width="3" fill="none"/><path d="M-6 -226 C6 -204 16 -182 22 -160" stroke="#000" stroke-opacity=".2" stroke-width="2" fill="none"/>${[0,1,2].map(i=>`<circle cx="${r1(2+i*9)}" cy="${r1(-206+i*17)}" r="1.5" fill="#ffd25e"/>`).join('')}</g>`;
+  if(c.fem) torso+=`<path d="M-22 -156 Q0 -149 22 -156" stroke="url(#gold)" stroke-width="4.5" fill="none" stroke-linecap="round"/>${[-14,-5,4,13].map(x=>`<circle cx="${x}" cy="${r1(-151+Math.abs(x)*.05)}" r="2.1" fill="#d63a2a"/>`).join('')}`;
+  if(c.armor){ torso+=`<path d="M-31 -236 C-18 -247 14 -247 29 -236 L27 -190 C10 -178 -10 -178 -29 -190Z" fill="url(#gold)" stroke="#7a5010" stroke-width="1.5"/>`+
+      `<path d="M0 -242 V-181 M-22 -226 Q-10 -206 -2 -203 M22 -226 Q10 -206 2 -203 M-26 -206 Q-12 -194 -2 -192 M26 -206 Q12 -194 2 -192" stroke="#7a5010" stroke-width="1.8" fill="none"/>`+
+      `<circle cx="0" cy="-212" r="7" fill="#d63a2a" stroke="#ffe08a" stroke-width="1.6"/><circle cx="-2" cy="-214" r="2" fill="#fff" opacity=".5"/>`+
+      `<path d="M-36 -240 C-45 -230 -43 -214 -33 -208 L-17 -222 L-17 -240Z M32 -240 C41 -230 39 -214 29 -208 L16 -222 L16 -240Z" fill="url(#gold)" stroke="#7a5010" stroke-width="1.4"/>`+
+      `<path d="M-36 -240 l-4 -14 l12 10Z M32 -240 l4 -14 l-12 10Z" fill="url(#gold)" stroke="#7a5010" stroke-width="1"/>`;
+    if(c.kilt) torso+=[0,1,2,3,4,5].map(i=>`<path d="M${-31+i*10.4} -149 h9.6 v30 q-4.8 9 -9.6 0Z" fill="${c.kilt}" stroke="#d9a73a" stroke-width="1.3"/>`).join(''); }
+  if(c.skirt && !c.fem) torso+=`<path d="M-30 -150 C-30 -170 -28 -190 -26 -200 L28 -160 L26 -150Z" fill="${c.bottom}"/>`;
   else if(c.trim) torso+=`<path d="M-30 -156 L28 -156 L28 -146 L-30 -146Z" fill="${c.trim}"/>`;
   if(c.sash) torso+=`<g ${J('sashT')}><path d="M-34 -220 C-10 -200 10 -170 26 -150 L10 -150 C-6 -176 -22 -196 -36 -206Z" fill="${c.sash}"/>${c.studs?[0,1,2,3,4].map(i=>`<circle cx="${r1(-27+i*11.2)}" cy="${r1(-206+i*12)}" r="2.3" fill="${c.studs}" stroke="#00000055" stroke-width=".6"/>`).join(''):''}</g>`;
   if(c.jewel) torso+=`<g ${J('pend')}><path d="M-22 -230 Q2 -196 22 -228" stroke="url(#gold)" stroke-width="3" fill="none"/><line x1="2" y1="-205" x2="2" y2="-196" stroke="#e8b83a" stroke-width="1.4"/><path d="M-3 -196 L2 -186 L7 -196Z" fill="url(#gold)"/><circle cx="2" cy="-195" r="2" fill="#d63a2a"/></g>`;
@@ -986,6 +1031,10 @@ function makeRig(cast){
 
   let back='';
   if(c.cape) back+=`<g ${J('cape')}><path d="M-20 -232 C-56 -200 -78 -110 -96 -4 L-30 -4 C-36 -80 -30 -160 -10 -226Z" fill="${c.cape}"/><path d="M-20 -232 C-56 -200 -78 -110 -96 -4 L-80 -4 C-62 -100 -44 -180 -16 -228Z" fill="#000" opacity=".25"/></g>`;
+  if(c.tail){ const tc=skin, td=shade(skin,-.3);
+    back+=`<g ${J('tail')}><path d="M-22 -160 C-92 -150 -132 -226 -112 -306 C-100 -358 -52 -372 -34 -334 C-26 -318 -36 -300 -50 -304" stroke="${td}" stroke-width="15" fill="none" stroke-linecap="round"/><path d="M-22 -160 C-92 -150 -132 -226 -112 -306 C-100 -358 -52 -372 -34 -334 C-26 -318 -36 -300 -50 -304" stroke="${tc}" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M-30 -163 C-86 -154 -124 -222 -105 -300" stroke="#fff" stroke-opacity=".14" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M-72 -176 l-8 6 M-102 -226 l-10 2 M-112 -262 l-10 -2 M-100 -322 l-8 -6" stroke="${td}" stroke-width="2.2" stroke-linecap="round"/><path d="M-50 -304 C-58 -312 -52 -324 -44 -318 C-40 -312 -44 -306 -50 -304Z" fill="${td}"/></g>`; }
+  if(c.fem && c.pallu) back+=`<g ${J('cape')}><path d="M-24 -230 C-50 -200 -62 -140 -66 -78 C-67 -48 -64 -30 -62 -18 L-24 -22 C-26 -70 -22 -150 -12 -224Z" fill="${c.pallu}"/><path d="M-24 -230 C-50 -200 -62 -140 -66 -78 C-67 -48 -64 -30 -62 -18" stroke="url(#gold)" stroke-width="3" fill="none"/><path d="M-62 -18 l4 -10 M-56 -20 l3 -10 M-50 -21 l2 -10" stroke="#ffd25e" stroke-width="1.6" stroke-linecap="round"/></g>`;
+  if(c.scarf) back+=`<g ${J('scarf')}><path d="M-14 -232 C-58 -250 -96 -204 -76 -150 C-104 -118 -66 -86 -96 -46 C-104 -30 -108 -14 -104 4 C-84 -22 -50 -60 -50 -96 C-44 -132 -66 -166 -48 -196 C-40 -212 -28 -224 -14 -232Z" fill="${c.scarf}" opacity=".72"/><path d="M-22 -226 C-60 -236 -86 -200 -68 -152 M-50 -96 C-56 -62 -78 -34 -98 -8" stroke="#fff" stroke-width="1.6" fill="none" opacity=".7"/></g>`;
   if(c.quiver) back+=`<g transform="rotate(-18 -18 -200)"><rect x="-34" y="-260" width="18" height="110" rx="5" fill="#4a2c18" stroke="#c99a3a" stroke-width="2"/><path d="M-31 -260 l3 -18 l3 18Z" fill="#ff4a3c"/><path d="M-26 -260 l3 -24 l3 24Z" fill="#4ee08a"/><path d="M-21 -260 l3 -18 l3 18Z" fill="#ffd25e"/></g>`;
   /* extra arms (c.arms:N): N more arms fanned up behind the shoulders, each holding a small emblem (c.armItems = list of 'sword'|'lotus'|'mace'|'chakra'|'bow'|'trident'|'flag') */
   if(c.arms>0){ const items=c.armItems||['sword','lotus','mace','bow','trishul','flag','chakra','sword'], n=c.arms;
@@ -1005,7 +1054,7 @@ function makeRig(cast){
       back+=`<g transform="translate(-4 -212) rotate(${a.toFixed(1)})">`+A(`rock:${(4+k%3*2)}:${(1+k*.17).toFixed(2)}:0:0`,
         `<line x1="0" y1="0" x2="0" y2="50" stroke="${skinB}" stroke-width="${12*wide}" stroke-linecap="round"/>${c.pads?`<rect x="-8.5" y="-2" width="17" height="21" rx="5" fill="${c.pads}" stroke="#e8b83a" stroke-width="1.4"/>`:''}<line x1="-6" y1="14" x2="6" y2="14" stroke="#e8b83a" stroke-width="3"/>`+
         `<g transform="translate(0 50) rotate(${bend})"><line x1="0" y1="0" x2="0" y2="44" stroke="${skin}" stroke-width="${10.5*wide}" stroke-linecap="round" opacity=".96"/><line x1="-5" y1="34" x2="5" y2="34" stroke="#e8b83a" stroke-width="2.4"/><circle cy="46" r="7" fill="${skin}"/><g transform="translate(0 46) rotate(180)">${glyph(items[k%items.length])}</g></g>`)+`</g>`; } }
-  const skirtFlare = c.skirt ? `<path ${J('skirt')} d="M-30 -150 C-38 -100 -46 -50 -52 -2 L48 -2 C42 -50 36 -100 28 -150Z" fill="${c.bottom}"/><path d="M-52 -10 L48 -10 L48 -2 L-52 -2Z" fill="url(#gold)"/>` : '';
+  const skirtFlare = c.skirt ? `<path ${J('skirt')} d="M-30 -150 C-38 -100 -46 -50 -52 -2 L48 -2 C42 -50 36 -100 28 -150Z" fill="${c.bottom}"/><path d="M-52 -10 L48 -10 L48 -2 L-52 -2Z" fill="url(#gold)"/>`+(c.fem?`<path d="M2 -148 L-4 -12 M10 -148 L8 -12 M18 -148 L20 -12 M26 -148 L32 -12 M-8 -148 L-18 -12" stroke="${SG}" stroke-width="2.2" opacity=".55" fill="none"/><path d="M-52 -26 L48 -26" stroke="url(#gold)" stroke-width="2" opacity=".8"/><path d="M-52 -16 L48 -16" stroke="#d63a2a" stroke-width="1.4" opacity=".8"/>`:'') : '';
 
   const aura = (cast.aura||c.aura) ? `<g ${J('aura')}><circle cx="0" cy="-170" r="200" fill="url(#${cast.aura||c.aura})" opacity=".6"/></g>` : '';
   const svg = `<g ${J('root')}>${aura}<ellipse ${J('shadow')} cx="4" cy="0" rx="56" ry="9" fill="#000" opacity=".35"/>`+
@@ -1126,6 +1175,9 @@ function updateRig(r, lt, t, talking){
   if(q.cape) setT(q.cape, `rotate(${r1(Math.sin(t*1.3+sd)*2.2 - P.lean*0.85 + gk(dLean*1.4,12))} -16 -230) translate(-16 -230) scale(1 ${(1-clamp01(P.drop/72)*0.32).toFixed(3)}) translate(16 230)`);
   if(q.beard) setT(q.beard, `rotate(${r1(Math.sin(t*1.25+sd+1)*1.6 + gk(dHead*0.7 + dLean*0.4,10))} 4 -248)`);
   if(q.hair) setT(q.hair, `rotate(${r1(Math.sin(t*1.1+sd)*2 + gk(dHead*0.9 + dLean*0.5,14))} -8 -262)`);
+  if(q.tail) setT(q.tail, `rotate(${r1(Math.sin(t*1.5+sd)*3.4 + Math.sin(t*2.7+sd)*1.4 + gk(-dLean*0.9,10))} -22 -160)`);
+  if(q.scarf) setT(q.scarf, `rotate(${r1(Math.sin(t*1.1+sd)*3.2 + Math.sin(t*2.1+sd)*1.6 + gk(-dLean*0.8,10))} -14 -230) translate(${r1(Math.sin(t*1.7+sd)*3)} 0)`);
+  if(q.kund) setT(q.kund, `rotate(${r1(gk(dHead*1.5 + talkShake*2 + wind2*3,30))} -4 -256)`);
   if(q.aura) q.aura.setAttribute('opacity', (0.75+0.25*Math.sin(t*1.6)).toFixed(3));
 
   if(q.thirdE){ const o = cast.thirdAt!==undefined ? smooth01((lt-cast.thirdAt)/0.5) : (ex==='angry'?smooth01(lt/0.6):0);
@@ -1177,7 +1229,7 @@ const SAHADEVA  = {skin:'#9a6a4a', top:'#6a2a6a', bottom:'#d9d1bf', head:'band'}
 const GHATOTKACH= {skin:'#4a3a3a', top:'#2a1a1a', bottom:'#5a1a1a', head:'band', hair:'long', mus:true, big:true, cape:'#1a0a0a'};
 const MOTHER    = {skin:'#8a5a3c', top:'#c8641e', bottom:'#c8641e', skirt:true, veil:'#e08a2a', hair:'long', jewel:true};   // Barbarik's mother
 const DEVI      = {skin:'#c98a6a', top:'#c0202a', bottom:'#c0202a', skirt:true, veil:'#d63a2a', head:'crown', aura:'gr', jewel:true};
-const SITA      = {skin:'#c98a6a', top:'#d6a22a', bottom:'#d6a22a', skirt:true, veil:'#f0c040', jewel:true};
+const SITA      = {skin:'#c98a6a', top:'#7e1620', bottom:'#b3202c', skirt:true, fem:true, trim:null, head:'none', veil:'#c4262e', pallu:'#c4262e', braid:'#140a0c', bangles:['#d63a2a','#ffd25e','#d63a2a'], bindi:true, nose:true, jewel:true, earring:true};   // Sita (v2): red saree with gold border + pleats, pallu across the chest, red head-veil with pearl line, maang tikka, bindi, nose stud, gold armlets, bangles, long braid with gold tassel. Recolour with:{top,bottom,pallu,veil}
 const RAMA      = {skin:'#3a6a8a', top:'#c8a020', bottom:'#e5b324', head:'big', quiver:true, garland:'#f0e6d0', tilak:true};
 const SHIVA     = {skin:'#7f93c4', top:'#7f93c4', bottom:'#d08a2a', shin:'#7f93c4', head:'mahadev', hair:'none', bare:true, ash:true, snake:true, tiger:true, rudra:true, third:true, big:true, trim:null, jewel:false, garland:'#6a3c1a', aura:'gb'};   // Mahadev: matted-hair topknot with Ganga + crescent, third eye, ash stripes, Vasuki, tiger skin, rudraksha
 const MAHAKAL   = Object.assign({}, SHIVA, {skin:'#6a7db4', top:'#6a7db4', shin:'#6a7db4', fireHair:true, aura:'gr'});   // fierce form: flaming jata, third eye blazes when angry
@@ -1207,11 +1259,14 @@ const RAVAN     = {skin:'#6a3a2c', top:'#2a0e1e', bottom:'#7a1424', shin:'#7a142
 const SAHASTRABAHU = {skin:'#8f5a3a', top:'#e0b040', bottom:'#233a7a', shin:'#233a7a', head:'crown', hair:'none', beard:'black', mus:true, big:true, cape:'#3a1a5a', garland:'#ffd25e', sash:'#c8442a', tilak:true, arms:8};   // Kartavirya Arjuna: gold armour, royal blue, purple cape, 8 extra arms fanned behind (use `with:{arms:N, armItems:[..]}`)
 const VISHNU    = {skin:'#4a86d0', top:'#4a86d0', bottom:'#f2c230', shin:'#4a86d0', head:'kirita', hair:'long', bare:true, mala:['#fbf7ee','#fbf7ee','#f29a3a','#fbf7ee'], studs:'#fff0b0', sash:'#f2c230', belt:'#e8b83a', pads:'#e8b83a', cape:'#e8c04a', tilak:'namam', jewel:false, earring:true, halo:[3,-280,46], arms:2, armItems:['chakra','shankh'], holds:{back:'mace'}, aura:'gw', trim:null};   // Shri Hari: sky-blue, tall gold kirita + halo with rays, shoulder pads, pearl mala, pitambar yellow, 4 arms (chakra + shankh up, gada in the back hand)
 
-const HANUMAN   = {skin:'#c98a3a', top:'#c98a3a', bottom:'#c8402c', shin:'#c98a3a', foot:'#8a5a22', head:'crown', hair:'none', bare:true, mus:true, garland:'#f6efe0', sash:'#e8c04a', pads:'#d9a73a', belt:'#d9b24a', tilak:true, trim:null, jewel:false, earring:true, aura:'saf', holds:{back:'mace'}};   // Hanuman: golden-orange vanara, red dhoti, gold crown + arm pads, flower garland, gada on his back. Use small (s .5-.8) for the searching-in-Lanka scenes
+const HANUMAN   = {skin:'#a66a3c', top:'#a66a3c', bottom:'#d03a24', shin:'#a66a3c', foot:'#7a4a22', head:'kirita', hair:'none', vanara:true, face:'#d2a070', furDark:'#6a3a20', tail:true, bare:true, big:true, garland:'#f6efe0', sash:'#e8c04a', pads:'#d9a73a', belt:'#e8b83a', tilak:true, trim:null, jewel:false, earring:true, aura:'saf', holds:{back:'gada'}};   // Hanuman (v2): brown vanara with a real monkey face (muzzle, brow ridge, pointed ear, cheek fur), tiered gold crown, broad build, gold arm pads, belt, flower garland, long curling tail, gada (props:{front:'gada'} + pose 'shoulder' to rest it on the shoulder). Use s .5-.9
 
+/* ---- Ravan-Sita video (v2): new designs ---- */
+const RAVAN_KING = Object.assign({}, RAVAN, {head:'ravan', armor:true, bracer:true, fierce:true, kundal:true, kilt:'#6a0c22', pads:'#d9a73a', belt:'#d9b24a', mala:['#ffd25e','#2ec28a','#d63a2a','#ffd25e'], top:'#2a0e1e'});   // Ravan (v2): ten crowned heads with tall five-spire gold crowns, fierce brow + curled moustache, big kundal, gold breastplate with ruby + shoulder pauldrons, bracers, plated kilt, pearl/emerald mala. Weapon: props:{front:'khadga'}
+const PUNJIKASTHALA = {skin:'#dba382', top:'#e0407a', bottom:'#7a4ad8', skirt:true, fem:true, trim:null, head:'crown', hair:'long', braid:'#1c1024', pallu:'#f4a6d4', scarf:'#e6c0ff', flowers:true, bangles:['#ffd25e','#e0407a','#ffd25e'], bindi:true, nose:true, jewel:true, earring:true, aura:'gw'};   // apsara Punjikasthala: celestial dancer, gold tiara, flowers in hair, pink choli, violet saree, sheer floating scarf, soft glow
 const CHARACTER_LIST = {BARBARIK, KRISHNA, BRAHMIN, ARJUNA, BHIMA, YUDHISHTHIRA, NAKULA, SAHADEVA, GHATOTKACH, MOTHER, DEVI, SITA, RAMA, SHIVA, MAHAKAL, DUSHAN, ASURA, RISHI, SOLDIER, VILLAGER, DEVOTEE_F,
   CHANDRA, DAKSHA, ROHINI, NAKSHATRA, INDRA, DEVA, INDRADYUMNA, VISHWAKARMA, PUJARI, NANDI, NANDI_SADHAK,
-  PARSHURAM, KASHYAP, BRAHMA, RAVAN, SAHASTRABAHU, VISHNU, HANUMAN};
+  PARSHURAM, KASHYAP, BRAHMA, RAVAN, SAHASTRABAHU, VISHNU, HANUMAN, RAVAN_KING, PUNJIKASTHALA};
 
 /* ---- engine/core.js ---- */
 /* =====================================================================
@@ -1635,31 +1690,50 @@ function VIDEO(cfg){
 /* ---- ravan-sita-sach-short-form/story.js ---- */
 /* रावण और माँ सीता का सच — Short, about 75 s. Words come exactly from my-script.md (long lines are split over several shots).
    Build: node tools/build.js ravan-sita-sach-short-form
+   v2 (owner feedback): no intro / hook text; new characters (SITA, HANUMAN, RAVAN_KING, PUNJIKASTHALA in engine/characters.js);
+   Hanuman's search of Ravan's palace is now a proper antahpura chamber (arches, pillars, hanging lamps, couches with sleeping women);
+   richer Lanka (walls, domes, sea), Panchavati, Ashoka Vatika.
    Look: Lanka at night in torchlight (maroon + amber), Ashoka Vatika (cold teal), Panchavati at dusk (violet + ember), Brahma's gold-white light.
-   The assault scenes are never shown: only silhouettes, a dark tide that slides over the picture, a drifting veil, camera cuts and close-ups of faces.
-   The big hook text in the first 2 seconds was asked for by the owner for THIS video (normally hooks are off). */
+   The assault scenes are never shown: only silhouettes, a dark tide that slides over the picture, a drifting veil, camera cuts and close-ups of faces. */
 
 /* ---------- shared pieces (drawn new for this video) ---------- */
 const SIL = (extra)=>Object.assign({skin:'#0b0610', top:'#0b0610', bottom:'#0b0610', shin:'#0b0610', foot:'#0b0610', cape:'#0b0610',
-  ash:false, rudra:false, garland:null, sash:null, jewel:false, tilak:false, earring:false}, extra||{});          // pure silhouette costume (rim light still shows the outline)
-const RAVAN_G = Object.assign({}, RAVAN, {top:'#c99a2e', bottom:'#4a0c1c', shin:'#4a0c1c', cape:'#16060c', sash:'#e8c04a', garland:'#ffd25e'});   // gold armour, dark cape
-const SITA_G  = {c:SITA, with:{top:'#2c7a4a', bottom:'#2c7a4a', veil:'#8fd0a0'}};                                                        // calm green saree
-const WOMAN_S = (veil)=>({c:NAKSHATRA, with:SIL({veil:veil||'#2a1830', skirt:true})});                                                    // veiled woman silhouette
+  ash:false, rudra:false, garland:null, sash:null, jewel:false, tilak:false, earring:false,
+  armor:false, bracer:false, kilt:null, kundal:false, pads:null, belt:null, mala:null, studs:null, bindi:false, nose:false, bangles:null, pallu:null, braid:null, scarf:null, flowers:false}, extra||{});   // pure silhouette costume (rim light still shows the outline)
+const RAVAN_G = Object.assign({}, RAVAN_KING, {bottom:'#4a0c1c', shin:'#4a0c1c', cape:'#16060c', kilt:'#5a0c22'});                                // Ravan in gold armour
+const SITA_G  = {c:SITA, with:{top:'#8a5a14', bottom:'#c8962c', pallu:'#d9ab3e', veil:'#d9ab3e'}};                                          // Sita in Ashoka Vatika: plain faded-gold silk
+const WOMAN   = (top,bottom,veil)=>({c:SITA, with:{top:top, bottom:bottom, pallu:veil, veil:veil, bangles:['#c9a24a','#8a6a2a']}});           // a captive woman: rich cloth, muted by night
+const HANU_G  = {c:HANUMAN, with:{holds:{}}};                                                                                              // Hanuman with the gada on his shoulder (give props:{front:'gada'} + pose 'shoulder')
 
 const NIGHT_RED = ()=>`<rect width="540" height="960" fill="url(#skyRed)"/>`+stars(60,520);
-const BIGMOON   = (x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r*1.7}" fill="url(#gr)" opacity=".55"/><circle cx="${x}" cy="${y}" r="${r}" fill="#e9a070"/><circle cx="${x-r*.3}" cy="${y-r*.2}" r="${r*.78}" fill="#f2b88a" opacity=".5"/>`;
-// Lanka: tall towers with domes, spires and lit windows (tops catch a little gold)
+const BIGMOON   = (x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r*1.7}" fill="url(#gr)" opacity=".55"/><circle cx="${x}" cy="${y}" r="${r}" fill="#e9a070"/><circle cx="${x-r*.3}" cy="${y-r*.2}" r="${r*.78}" fill="#f2b88a" opacity=".5"/><path d="M${x-r*.7} ${y+r*.2} q${r*.4} -${r*.18} ${r*.9} 0 M${x-r*.2} ${y-r*.5} q${r*.4} ${r*.12} ${r*.8} 0" stroke="#c97a52" stroke-width="3" fill="none" opacity=".35"/>`;
+const CLOUDS_DARK = (y)=>A('drift:90:0:40',`<ellipse cx="120" cy="${y}" rx="150" ry="22" fill="#12060e" opacity=".7"/><ellipse cx="420" cy="${y+40}" rx="170" ry="18" fill="#12060e" opacity=".6"/>`);
+const BATS = (y)=>[[60,0,6],[160,40,8],[300,-20,7]].map(([x,dy,p],i)=>A(`drift:${300+i*40}:${-30+i*10}:${p}`,`<path transform="translate(${x} ${y+dy})" d="M0 0 q-10 -9 -22 -2 q8 0 11 6 q4 -5 11 -4 q7 -1 11 4 q3 -6 11 -6 q-12 -7 -22 2Z" fill="#05020a"/>`)).join('');
+// Lanka v2: tall towers with gold domes, finials, flags, lit windows
 function LANKA(y,col){ const c=col||'#1a0a14'; let s='';
   [[14,96,58],[88,160,44],[150,118,56],[228,200,50],[300,126,64],[378,170,46],[436,104,58],[500,150,48]].forEach(([x,h,w],i)=>{
-    s+=`<rect x="${x}" y="${y-h}" width="${w}" height="${h}" fill="${c}"/><path d="M${x-4} ${y-h} Q${x+w/2} ${y-h-w*.95} ${x+w+4} ${y-h}Z" fill="${c}"/><rect x="${x+w/2-1}" y="${y-h-w*.95-14}" width="2" height="16" fill="${c}"/><path d="M${x-4} ${y-h} Q${x+w/2} ${y-h-w*.95} ${x+w+4} ${y-h}" fill="none" stroke="#d9a73a" stroke-width="1.6" opacity=".55"/>`;
-    for(let k=0;k<3;k++) s+=A(`flick:${(3+((i+k)%4)).toFixed(1)}`,`<rect x="${r1(x+8+k*(w/3.2))}" y="${y-h+18+k*20}" width="6" height="9" fill="#ffb44a"/>`); });
+    s+=`<rect x="${x}" y="${y-h}" width="${w}" height="${h}" fill="${c}"/><rect x="${x-3}" y="${y-h*.55}" width="${w+6}" height="5" fill="${c}"/><path d="M${x-4} ${y-h} Q${x+w/2} ${y-h-w*.95} ${x+w+4} ${y-h}Z" fill="${c}"/><rect x="${x+w/2-1}" y="${y-h-w*.95-16}" width="2" height="18" fill="${c}"/><path d="M${x+w/2+1} ${y-h-w*.95-16} l16 4 l-16 5Z" fill="#c44a1a" opacity=".8"/><circle cx="${x+w/2}" cy="${y-h-w*.95-18}" r="2.4" fill="#e8b83a"/><path d="M${x-4} ${y-h} Q${x+w/2} ${y-h-w*.95} ${x+w+4} ${y-h}" fill="none" stroke="#d9a73a" stroke-width="1.8" opacity=".6"/>`;
+    for(let k=0;k<3;k++) s+=A(`flick:${(3+((i+k)%4)).toFixed(1)}`,`<path d="M${r1(x+8+k*(w/3.2))} ${y-h+27+k*20} v-9 q3 -5 6 0 v9Z" fill="#ffb44a"/>`); });
+  return s; }
+// rampart wall with battlements, a gate and lit torches
+function LANKAWALL(y,col){ const c=col||'#1a0a14'; let s=`<rect x="-10" y="${y-70}" width="560" height="${1000-y+70}" fill="${c}"/>`;
+  for(let x=-6;x<546;x+=34) s+=`<rect x="${x}" y="${y-88}" width="22" height="22" fill="${c}"/>`;
+  s+=`<path d="M200 ${y} V${y-60} Q270 ${y-110} 340 ${y-60} V${y}Z" fill="#05020a"/><path d="M200 ${y} V${y-60} Q270 ${y-110} 340 ${y-60} V${y}" fill="none" stroke="#d9a73a" stroke-width="2.4" opacity=".7"/>`;
+  s+=A('flick:4','<path d="M214 '+y+' V'+(y-56)+' Q270 '+(y-96)+' 326 '+(y-56)+' V'+y+'Z" fill="#ff9a3a" opacity=".12"/>');
+  return s; }
+function SEA(y){ let s=`<rect x="0" y="${y}" width="540" height="${1000-y}" fill="#0c0610"/>`;
+  for(let i=0;i<14;i++) s+=A(`flick:${(2+i%4).toFixed(1)}`,`<path d="M${(i*53)%520} ${y+10+i*9} h${40+(i%3)*18}" stroke="#e9a070" stroke-width="2" opacity="${.12+(i%3)*.06}"/>`);
   return s; }
 function TORCH(x,y,s){ s=s||1; return `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-3" y="0" width="6" height="58" fill="#3a2410"/><path d="M-9 4 L9 4 L6 -6 L-6 -6Z" fill="#7a5a28"/></g>`+fire(x,y-18*s,1.15*s); }
 function ASHOKA(x,y,s){ let b=''; [[-38,-150,46],[8,-176,52],[44,-140,44],[-4,-120,48],[-52,-112,36]].forEach(([dx,dy,r],i)=>{ b+=`<circle cx="${dx}" cy="${dy}" r="${r}" fill="${i%2?'#0d2e2c':'#0a2624'}"/>`; });
-  for(let i=0;i<12;i++){ b+=`<circle cx="${r1(-70+((i*37)%140))}" cy="${r1(-205+((i*53)%120))}" r="3.4" fill="${i%3?'#ff7a3a':'#ffb060'}"/>`; }
+  for(let i=0;i<14;i++){ b+=`<circle cx="${r1(-70+((i*37)%140))}" cy="${r1(-205+((i*53)%120))}" r="3.6" fill="${i%3?'#ff7a3a':'#ffb060'}"/>`; }
   return `<g transform="translate(${x} ${y}) scale(${s||1})"><path d="M-9 0 Q-6 -70 -2 -120 L8 -120 Q10 -70 12 0Z" fill="#14100e"/>${b}</g>`; }
+// a pink-blossom tree of the apsara's moonlit garden
+function BLOSSOM(x,y,s){ let b=''; [[-40,-150,44],[10,-180,50],[46,-140,42],[-6,-122,46],[-56,-112,32]].forEach(([dx,dy,r],i)=>{ b+=`<circle cx="${dx}" cy="${dy}" r="${r}" fill="${i%2?'#6a3a7a':'#5a2e6c'}"/>`; });
+  for(let i=0;i<16;i++){ b+=`<circle cx="${r1(-80+((i*41)%150))}" cy="${r1(-215+((i*57)%130))}" r="3.4" fill="${i%3?'#ffc0e0':'#fff0f8'}"/>`; }
+  return `<g transform="translate(${x} ${y}) scale(${s||1})"><path d="M-9 0 Q-6 -70 -2 -120 L8 -120 Q10 -70 12 0Z" fill="#241430"/>${b}</g>`; }
 function TRUNK(x,y,w,h,col){ return `<path d="M${x-w/2} ${y} Q${x-w*.3} ${y-h/2} ${x-w*.2} ${y-h} L${x+w*.25} ${y-h} Q${x+w*.35} ${y-h/2} ${x+w/2} ${y}Z" fill="${col||'#0e0a14'}"/>`; }
-const PANCH_SKY = ()=>skyBand([[0,'#120c2a'],[.45,'#3a2250'],[.75,'#a8583a'],[1,'#e09a50']]);
+const PANCH_SKY = ()=>skyBand([[0,'#120c2a'],[.45,'#3a2250'],[.75,'#a8583a'],[1,'#e09a50']])+`<circle cx="400" cy="640" r="80" fill="#ffd9a0" opacity=".55"/><circle cx="400" cy="640" r="150" fill="url(#saf)" opacity=".35"/>`;
 const ASHOKA_SKY = ()=>skyBand([[0,'#020c14'],[.5,'#0a2a30'],[1,'#17463e']])+stars(50,400);
 function PANCH_FAR(y){ let s=hills(y-80,34,'#241636',120); [40,150,260,380,490].forEach((x,i)=>{ s+=TRUNK(x,y-40,34+i%3*8,380+i%2*80,'#150c1e'); }); return s; }
 function ASHOKA_FAR(y){ let s=hills(y-60,30,'#0a2226',110); [60,230,410,520].forEach((x,i)=>{ s+=ASHOKA(x,y-20,.8+i%2*.3); }); return s; }
@@ -1667,6 +1741,41 @@ function VATIKA_GND(y){ return ground(y,'#0a1c1c','#1d5a52')+tufts(y-8,'#1b5a48'
 function PANCH_GND(y){ return ground(y,'#1d1020','#5a3a4a')+tufts(y-8,'#3a2a3a',40); }
 function LANKA_GND(y){ return ground(y,'url(#gndW)','#6a2a1a')+tufts(y-10,'#4a2418',30); }
 const DIVINE_BG = (cx,cy)=>`<rect width="540" height="960" fill="url(#skyDiv)"/>`+divine(cx,cy,'gw')+A('spin:60:'+cx+':'+cy,`<circle cx="${cx}" cy="${cy}" r="240" fill="none" stroke="#fff3c4" stroke-width="2" stroke-dasharray="4 14" opacity=".5"/><circle cx="${cx}" cy="${cy}" r="170" fill="none" stroke="#ffe08a" stroke-width="1.5" stroke-dasharray="2 10" opacity=".5"/>`);
+
+/* ---------- the antahpura (women's chamber) of Ravan's palace ---------- */
+function PILLAR(x,y,h,w){ w=w||36; let f=''; for(let i=1;i<5;i++) f+=`<line x1="${x-w/2+i*w/5}" y1="${y-h}" x2="${x-w/2+i*w/5}" y2="${y}" stroke="#000" stroke-opacity=".28" stroke-width="2"/>`;
+  return `<rect x="${x-w/2}" y="${y-h}" width="${w}" height="${h}" fill="#3a1424"/>`+f+`<rect x="${x-w/2}" y="${y-h}" width="5" height="${h}" fill="#ffd9a0" opacity=".12"/>`+
+    `<rect x="${x-w/2-7}" y="${y-h-16}" width="${w+14}" height="18" rx="4" fill="url(#gold)"/><rect x="${x-w/2-4}" y="${y-8}" width="${w+8}" height="12" rx="3" fill="url(#gold)"/><path d="M${x-w/2} ${y-h*.6} h${w}" stroke="#d9a73a" stroke-width="3" opacity=".7"/>`; }
+function ARCHWIN(x,y,w,h){ const r=h*.62; let g='';
+  for(let i=1;i<6;i++) g+=`<line x1="${x+i*w/6}" y1="${y-r}" x2="${x+i*w/6}" y2="${y}" stroke="#d9a73a" stroke-width="1.6" opacity=".45"/>`;
+  for(let j=1;j<7;j++) g+=`<line x1="${x}" y1="${y-j*r/7}" x2="${x+w}" y2="${y-j*r/7}" stroke="#d9a73a" stroke-width="1.6" opacity=".45"/>`;
+  const d=`M${x} ${y} V${y-r} Q${x} ${y-h} ${x+w/2} ${y-h} Q${x+w} ${y-h} ${x+w} ${y-r} V${y}Z`;
+  return `<path d="${d}" fill="#0c0618"/><path d="${d}" fill="#7a8ad8" opacity=".2"/>`+g+`<path d="${d}" fill="none" stroke="url(#gold)" stroke-width="5"/>`; }
+function HANGLAMP(x,len,delay){ return A(`rock:3.5:${(.55+delay).toFixed(2)}:${x}:0`,`<line x1="${x}" y1="0" x2="${x}" y2="${len}" stroke="#d9a73a" stroke-width="2"/><path d="M${x-16} ${len} Q${x} ${len+22} ${x+16} ${len}Z" fill="url(#gold)"/>`+A('flick:6',`<circle cx="${x}" cy="${len-4}" r="46" fill="url(#saf)" opacity=".7"/>`)+`<path d="M${x-3} ${len} Q${x} ${len-16} ${x+3} ${len}Z" fill="#ffe29a"/>`); }
+function CURTAIN(x,w,flip){ const f=flip?-1:1; return A(`rock:1.6:.45:${x}:0`,`<path d="M${x} -20 L${x+f*w} -20 Q${x+f*w*.7} 300 ${x+f*w*.9} 760 L${x} 800Z" fill="#6a1226"/><path d="M${x+f*w*.3} -20 Q${x+f*w*.2} 300 ${x+f*w*.35} 780 M${x+f*w*.62} -20 Q${x+f*w*.5} 300 ${x+f*w*.62} 770" stroke="#000" stroke-opacity=".3" stroke-width="3" fill="none"/><path d="M${x} 780 L${x+f*w*.9} 750" stroke="url(#gold)" stroke-width="4"/>`); }
+const CH_SKY = ()=>`<rect width="540" height="960" fill="#1a0712"/><rect width="540" height="320" fill="#10040c"/><rect y="312" width="540" height="14" fill="url(#gold)" opacity=".6"/>`+
+  `<circle cx="270" cy="560" r="380" fill="url(#saf)" opacity=".28"/>`;
+const CH_FAR = ()=>[24,200,376].map(x=>ARCHWIN(x,790,140,340)).join('')+`<g opacity=".95">${moon(270,560,24)}</g>`+[8,182,358,532].map(x=>PILLAR(x,800,490,36)).join('');
+const CH_MID = ()=>HANGLAMP(110,230,0)+HANGLAMP(270,290,.3)+HANGLAMP(430,230,.6)+CURTAIN(-6,70,false)+CURTAIN(546,70,true);
+const CH_FLOOR = ()=>`<path d="M-20 790 L560 790 L560 1000 L-20 1000Z" fill="#240a16"/><path d="M130 790 L410 790 L640 1000 L-100 1000Z" fill="#7a1c2c"/><path d="M130 790 L-100 1000 M410 790 L640 1000" stroke="url(#gold)" stroke-width="5"/><path d="M175 790 L10 1000 M365 790 L530 1000" stroke="#d9a73a" stroke-width="2" opacity=".6"/>`+
+  [820,860,910,970].map(y=>`<path d="M0 ${y} H540" stroke="#000" stroke-opacity=".18" stroke-width="2"/>`).join('')+
+  `<ellipse cx="270" cy="820" rx="260" ry="40" fill="url(#saf)" opacity=".2"/>`;
+// a woman asleep on a carved couch (cloth, jewels, hair on the pillow); never anything more than sleep
+function SLEEPER(x,y,s,silk,skin,flip){ s=s||1; skin=skin||'#c98a6a'; silk=silk||'#8a1a3a';
+  const woman=`<path d="M-94 -20 C-88 -48 -52 -50 -42 -28 C-34 -10 -62 -6 -94 -10Z" fill="#150a10"/><circle cx="-60" cy="-34" r="14" fill="${skin}"/>`+
+    `<path d="M-52 -37 q4 3 8 0" stroke="#140a06" stroke-width="1.6" fill="none"/><path d="M-50 -27 q3 2 6 0" stroke="#a8282e" stroke-width="1.6" fill="none"/><path d="M-46 -34 l3 4 l-4 0" stroke="#7a4a30" stroke-width="1" fill="none"/><circle cx="-52" cy="-45" r="1.5" fill="#c8202a"/>`+
+    `<path d="M-76 -36 C-74 -52 -48 -54 -44 -40 C-54 -47 -66 -46 -76 -36Z" fill="#150a10"/><circle cx="-69" cy="-27" r="2.4" fill="#ffd25e"/><path d="M-66 -44 C-60 -48 -54 -47 -50 -44" stroke="#ffd25e" stroke-width="1.6" fill="none"/>`+
+    `<path d="M-44 -16 C-36 -40 -4 -42 22 -33 C48 -27 72 -25 90 -14 V-4 H-44Z" fill="${silk}"/><path d="M-44 -16 C-36 -40 -4 -42 22 -33 C48 -27 72 -25 90 -14" stroke="url(#gold)" stroke-width="3" fill="none"/>`+
+    `<path d="M-12 -35 C-8 -22 -10 -10 -14 -4 M28 -31 C30 -20 28 -10 26 -4 M60 -25 C61 -17 60 -10 58 -4" stroke="#000" stroke-opacity=".25" stroke-width="2" fill="none"/>`+
+    `<path d="M-42 -22 C-32 -29 -22 -29 -12 -24" stroke="${skin}" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M-22 -29 v7 M-18 -29 v7 M-14 -28 v7" stroke="#ffd25e" stroke-width="2.4"/>`+
+    `<path d="M88 -15 q10 1 12 8 l-12 1Z" fill="${skin}"/><path d="M90 -9 h8" stroke="#ffd25e" stroke-width="2"/>`+
+    A('flick:3',`<circle cx="-69" cy="-27" r="7" fill="#ffd25e" opacity=".3"/>`);
+  return `<g transform="translate(${x} ${y}) scale(${(flip?-1:1)*s} ${s})">`+
+    `<rect x="-88" y="14" width="9" height="30" rx="3" fill="#3a1a0e"/><rect x="79" y="14" width="9" height="30" rx="3" fill="#3a1a0e"/>`+
+    `<path d="M-102 18 V-42 Q-102 -56 -88 -56 H-80 V18Z" fill="#6a2c18" stroke="#d9a73a" stroke-width="2"/><circle cx="-91" cy="-49" r="3.6" fill="url(#gold)"/>`+
+    `<rect x="-96" y="0" width="192" height="16" rx="6" fill="#6a2c18" stroke="#d9a73a" stroke-width="2"/><rect x="-90" y="-12" width="180" height="14" rx="7" fill="#efdfbe"/>`+
+    `<ellipse cx="-62" cy="-20" rx="28" ry="12" fill="#f6ead0" stroke="#d9c49a" stroke-width="1.4"/><path d="M-92 -20 l-5 6 M-32 -20 l5 6" stroke="#ffd25e" stroke-width="2"/>`+
+    A('bob:1.2:.38',woman)+`</g>`; }
 
 /* the "dark tide": a black shape with ten crown-like spikes slides in from the right and covers the picture (the assault is never drawn) */
 function DARKTIDE(delay,dur){ let d='M700 -100 L0 -100'; for(let i=0;i<=20;i++){ d+=` L${i%2?-62:0} ${-100+i*58}`; } d+=' L0 1100 L700 1100Z';
@@ -1698,42 +1807,39 @@ VIDEO({
   music:'scenes',
   handheld:0.7,
   keywords:['रावण','सीता','हनुमान','ब्रह्मा','शाप','वाल्मीकि','पुंजिकस्थला','बलपूर्वक','जबरदस्ती','भय','सौ','टुकड़े'],
-  hook:{at:.3, hold:1.35, words:[
-    {text:'रावण',        size:150, y:350, delay:0,   shake:10},
-    {text:'सच में बुरा', size:96,  y:490, delay:.35, shake:8},
-    {text:'नहीं था?',    size:112, y:630, delay:.7,  shake:14, ring:true} ]},
   shots:[
-    /* 1a — hook: ten heads as one black silhouette against a huge dark moon; crane down */
+    /* 1a — opening (no hook text): ten crowned heads as one black silhouette against a huge dark moon over Lanka's sea; crane down */
     { line:'क्या रावण ने कभी माँ सीता को नहीं छुआ?', scene:'ravan-night', mood:'anger', fx:'embers', capTop:790,
-      cam:{from:[270,340,1.35],to:[270,560,1.0]},
-      sky:()=>NIGHT_RED()+BIGMOON(270,430,150), far:()=>LANKA(790,'#12060c'), art:()=>LANKA_GND(800),
-      cast:[{c:RAVAN, with:SIL(), x:270, y:905, s:1.1, expr:'calm', acts:[[0,'stand'],[1.6,'hold',1.0]]}] },
+      cam:{from:[270,330,1.45],to:[270,570,1.0]},
+      sky:()=>NIGHT_RED()+BIGMOON(270,430,160)+CLOUDS_DARK(330)+BATS(250), far:()=>LANKA(790,'#12060c')+SEA(790), mid:()=>LANKAWALL(870,'#0c0408')+TORCH(70,780,1.3)+TORCH(470,780,1.3), art:()=>LANKA_GND(900),
+      cast:[{c:RAVAN_KING, with:SIL(), x:270, y:905, s:1.12, expr:'calm', acts:[[0,'stand'],[1.6,'hold',1.0]]}] },
 
     /* 1b — face of Ravan lit by torchlight, the claim */
     { line:'क्या रावण सच में बुरा नहीं था? खैर, सच्चाई कुछ और ही है!', scene:'ravan-night', mood:'anger', fx:'embers', tr:'flash', capTop:130,
       cam:{keys:[[0,270,600,1.2],[1.6,330,590,1.5],[3.4,330,590,2.5]]},
-      far:()=>palaceBack(810,'#2a0e1a'), mid:()=>palaceMid(810)+TORCH(60,700,1.3)+TORCH(480,700,1.3), art:()=>palaceFloor(810),
+      far:()=>palaceBack(810,'#2a0e1a')+HANGLAMP(100,200,0)+HANGLAMP(440,240,.4), mid:()=>palaceMid(810)+TORCH(60,700,1.3)+TORCH(480,700,1.3), art:()=>palaceFloor(810),
       cast:[{c:RAVAN_G, x:330, y:880, s:1.15, flip:true, expr:'calm', props:{front:'khadga'}, acts:[[0,'stand'],[2.2,'explain',.8]], talk:true}] },
 
     /* 2a — Hanuman on Lanka's rampart at night, searching */
     { line:'जब हनुमान जी लंका में रावण के महल में गए,', scene:'hanuman-lanka', mood:'calm', fx:'dust', tr:'dip', capTop:210,
-      cam:{from:[170,540,1.1],to:[330,520,1.25]},
-      sky:()=>NIGHT_RED()+moon(110,190,34), far:()=>LANKA(740,'#1a0a14'), mid:()=>TORCH(80,700,1.2)+TORCH(450,700,1.2), art:()=>LANKA_GND(800),
-      cast:[{c:HANUMAN, x:230, y:860, s:.7, expr:'calm', walk:{from:-220,dur:2.4}, acts:[[0,'stand'],[2.5,{lean:12,head:-6,a:[30,70],b:[-6,8]},.8]]}] },
+      cam:{from:[170,560,1.1],to:[330,540,1.25]},
+      sky:()=>NIGHT_RED()+moon(110,190,34)+CLOUDS_DARK(300), far:()=>LANKA(740,'#1a0a14')+SEA(790), mid:()=>LANKAWALL(850,'#12060c')+TORCH(80,720,1.2)+TORCH(450,720,1.2), art:()=>LANKA_GND(880),
+      cast:[{...HANU_G, props:{front:'gada'}, x:230, y:890, s:.78, expr:'calm', walk:{from:-220,dur:2.4}, acts:[[0,'shoulder'],[2.5,{a:[24,128],lean:12,head:-6,b:[-6,8]},.8]]}] },
 
-    /* 2b — Hanuman peeps round the wall into the chamber: rows of veiled women, only as silhouettes */
-    { line:'तो उन्होंने ऐसे कक्ष देखे जो महिलाओं से भरे हुए थे।', scene:'hanuman-lanka', mood:'sad', fx:'dust', tr:'iris', trAt:[270,620], capTop:120,
-      cam:{from:[270,560,1.0],to:[250,600,1.22]},
-      sky:()=>`<rect width="540" height="960" fill="#2a0c16"/><circle cx="270" cy="560" r="340" fill="url(#saf)" opacity=".5"/>`,
-      mid:()=>fire(130,640,1)+fire(410,640,1)+TORCH(120,700,1)+TORCH(420,700,1),
-      art:()=>`<path d="M-20 850 L560 850 L560 1000 L-20 1000Z" fill="#14060e"/>`,
-      cast:[{...WOMAN_S('#3a2038'), x:190, y:800, s:.5, flip:true, expr:'sad', acts:[[0,'lookDown']]},
-            {...WOMAN_S('#3a2038'), x:270, y:830, s:.58, expr:'sad', acts:[[0,'grief']]},
-            {...WOMAN_S('#3a2038'), x:350, y:800, s:.5, flip:true, expr:'sad', acts:[[0,'weep']]},
-            {...WOMAN_S('#3a2038'), x:430, y:835, s:.58, expr:'sad', acts:[[0,'lookDown']]},
-            {...WOMAN_S('#3a2038'), x:230, y:880, s:.66, flip:true, expr:'sad', acts:[[0,'lookDown+lookAway']]},
-            {c:HANUMAN, x:96, y:905, s:.85, expr:'surprise', acts:[[0,{lean:16,head:-4,a:[10,30],b:[-6,8]}],[1.6,{lean:20,head:-6,a:[14,34],b:[-6,8]},1.2]]}],
-      near:()=>`<path fill-rule="evenodd" d="M-40 -40 H580 V1000 H-40Z M62 900 V430 Q270 230 478 430 V900Z" fill="#05020a"/><path d="M62 900 V430 Q270 230 478 430 V900" fill="none" stroke="#d9a73a" stroke-width="3" opacity=".6"/>` },
+    /* 2b — Hanuman peeps round the doorway: close-up of his wondering face, lit by the lamps of the chamber */
+    { line:'तो उन्होंने ऐसे कक्ष देखे', scene:'ravan-chamber', mood:'sad', fx:'dust', tr:'iris', trAt:[130,610], capTop:120,
+      cam:{keys:[[0,260,640,1.3],[1.8,190,615,2.4]]},
+      sky:CH_SKY, far:CH_FAR, mid:CH_MID, art:()=>CH_FLOOR(),
+      cast:[{c:HANUMAN, x:158, y:935, s:1.2, expr:'surprise', acts:[[0,{lean:14,head:-4,a:[10,30],b:[-6,8]}],[1.0,{lean:20,head:-8,a:[14,34],b:[-6,8]},1.0]]}],
+      near:()=>`<path d="M-40 -40 H104 V1000 H-40Z" fill="#05020a"/><path d="M104 -40 V1000" stroke="#d9a73a" stroke-width="3" opacity=".7"/><rect x="94" y="-40" width="14" height="1040" fill="#d9a73a" opacity=".14"/>` },
+
+    /* 2c — the chamber seen: rows of women asleep on couches (jewels, silks, lamps, moonlit jaali) */
+    { line:'जो महिलाओं से भरे हुए थे।', scene:'ravan-chamber', mood:'sad', fx:'dust', tr:'dissolve', capTop:120,
+      cam:{keys:[[0,170,590,1.12],[3.0,370,590,1.12]]},
+      sky:CH_SKY, far:CH_FAR, mid:CH_MID,
+      art:()=>CH_FLOOR()+SLEEPER(92,775,.78,'#8a1a3a','#b98060')+SLEEPER(270,775,.78,'#2a5a7a','#c98a6a')+SLEEPER(448,775,.78,'#6a2a7a','#b98060',true)+
+              SLEEPER(215,895,1.08,'#a02a3a','#c98a6a')+SLEEPER(455,895,1.08,'#2a6a5a','#b98060',true),
+      cast:[{c:HANUMAN, x:48, y:950, s:.9, expr:'sad', acts:[[0,{lean:12,head:-6,a:[10,30],b:[-6,8]}]]}] },
 
     /* 3 — the source card: Sundarkand */
     { line:'वाल्मीकि रामायण (सुंदरकांड, सर्ग 9, श्लोक 69) में इसका स्पष्ट उल्लेख है:', scene:'verse-source', mood:'divine', fx:'embers', tr:'iris', trAt:[270,680],
@@ -1747,28 +1853,29 @@ VIDEO({
       mid:()=>fire(80,860,1)+fire(460,860,1),
       calli:{lines:['युद्धकामेन ताः सर्वा','रावणेन हृताः स्त्रियः'], source:'सुंदरकांड 9 · श्लोक 69', y:400, size:40, col:'#ffe9a8', delay:.8, gap:1.6, write:1.3, glow:true, scrim:true} },
 
-    /* 5 — meaning: women taken by force in his conquests (a line of veiled silhouettes, roped) */
+    /* 5 — meaning: women taken by force in his conquests (a line of grieving women led by a black Ravan silhouette) */
     { line:'(अर्थात: रावण ने अपने विजयन अभियानों के दौरान इन सभी महिलाओं को बलपूर्वक बंदी बनाया था।)', scene:'ravan-conquest', mood:'anger', fx:'embers', tr:'whip', capTop:150,
-      cam:{from:[200,540,1.05],to:[350,540,1.15]},
-      sky:()=>`<rect width="540" height="960" fill="url(#skyRed)"/>`+BIGMOON(430,260,70)+`<circle cx="120" cy="650" r="260" fill="url(#gr)" opacity=".25"/>`,
-      far:()=>LANKA(780,'#12060c')+A('flick:5',`<rect x="0" y="560" width="540" height="240" fill="#ff3a1c" opacity=".08"/>`), art:()=>LANKA_GND(810),
-      cast:[{c:RAVAN, with:SIL(), x:90, y:880, s:1.0, expr:'angry', props:{front:'khadga'}, acts:[[0,'carry']], walk:{from:-120,dur:3}},
-            {...WOMAN_S('#3a2038'), x:220, y:860, s:.72, expr:'sad', acts:[[0,'lookDown']], walk:{from:-120,dur:3}},
-            {...WOMAN_S('#3a2038'), x:300, y:866, s:.72, expr:'sad', acts:[[0,'grief']], walk:{from:-120,dur:3}},
-            {...WOMAN_S('#3a2038'), x:380, y:862, s:.72, expr:'sad', acts:[[0,'lookDown']], walk:{from:-120,dur:3}},
-            {...WOMAN_S('#3a2038'), x:460, y:868, s:.72, expr:'sad', acts:[[0,'weep']], walk:{from:-120,dur:3}}] },
+      cam:{from:[200,560,1.05],to:[350,560,1.15]},
+      sky:()=>`<rect width="540" height="960" fill="url(#skyRed)"/>`+BIGMOON(430,260,70)+`<circle cx="120" cy="650" r="260" fill="url(#gr)" opacity=".25"/>`+CLOUDS_DARK(200),
+      far:()=>LANKA(780,'#12060c')+A('flick:5',`<rect x="0" y="560" width="540" height="240" fill="#ff3a1c" opacity=".08"/>`)+SEA(790), art:()=>LANKA_GND(820),
+      cast:[{c:RAVAN_KING, with:SIL(), x:90, y:885, s:1.0, expr:'angry', props:{front:'khadga'}, acts:[[0,'carry']], walk:{from:-120,dur:3}},
+            {...WOMAN('#4a2438','#5a2a3a','#6a3048'), x:220, y:865, s:.74, expr:'sad', acts:[[0,'lookDown']], walk:{from:-120,dur:3}},
+            {...WOMAN('#2a3a5a','#2a3a68','#3a4a78'), x:300, y:870, s:.74, expr:'sad', acts:[[0,'grief']], walk:{from:-120,dur:3}},
+            {...WOMAN('#3a5a3a','#2a5a46','#4a6a4a'), x:380, y:866, s:.74, expr:'sad', acts:[[0,'lookDown']], walk:{from:-120,dur:3}},
+            {...WOMAN('#5a3a1a','#7a4a1a','#8a5a2a'), x:460, y:872, s:.74, expr:'sad', acts:[[0,'weep']], walk:{from:-120,dur:3}}] },
 
     /* 6 — the dark deeds go on: Ravan's face, a turn to the camera */
     { line:'लेकिन रावण के काले कारनामों की दास्तान यहीं खत्म नहीं होती।', scene:'ravan-night', mood:'anger', fx:'embers', tr:'dip', capTop:140,
       cam:{keys:[[0,270,620,1.1],[2.2,230,590,2.0],[3.8,230,590,2.3]]},
-      sky:()=>NIGHT_RED()+BIGMOON(420,260,90), far:()=>LANKA(800,'#10060c'), mid:()=>TORCH(80,720,1.4), art:()=>LANKA_GND(810),
+      sky:()=>NIGHT_RED()+BIGMOON(420,260,90)+CLOUDS_DARK(300), far:()=>LANKA(800,'#10060c'), mid:()=>TORCH(80,720,1.4)+TORCH(480,740,1.2), art:()=>LANKA_GND(820),
       cast:[{c:RAVAN_G, x:230, y:890, s:1.15, expr:'angry', props:{front:'khadga'}, acts:[[0,'stand'],[1.6,'accuse',.6]], talk:true}] },
 
-    /* 7a — Punjikasthala: a veiled silhouette in the moonlit forest; the dark tide approaches */
+    /* 7a — Punjikasthala: the apsara in her moonlit blossom garden; the dark tide approaches */
     { line:'उसने पुंजिकस्थला नाम की एक अप्सरा के साथ दुराचार किया था,', scene:'punjikasthala', mood:'calm', fx:'petals', tr:'fade', capTop:150,
-      cam:{from:[270,560,1.1],to:[270,540,1.28]},
-      sky:()=>`<rect width="540" height="960" fill="url(#skyN)"/>`+stars(80,560)+moon(400,200,46), far:()=>hills(780,40,'#16163a',130), art:()=>VATIKA_GND(830),
-      cast:[{c:NAKSHATRA, with:SIL({veil:'#e6b0ff', skirt:true}), x:230, y:870, s:1.0, expr:'serene', acts:[[0,'stand'],[0.6,'lookUp',1.0]]}],
+      cam:{from:[270,580,1.1],to:[270,550,1.3]},
+      sky:()=>`<rect width="540" height="960" fill="url(#skyN)"/>`+stars(80,560)+moon(400,200,46)+`<circle cx="270" cy="640" r="260" fill="url(#gw)" opacity=".25"/>`,
+      far:()=>hills(780,40,'#16163a',130)+BLOSSOM(70,800,.9)+BLOSSOM(470,800,1.0)+BLOSSOM(380,790,.7), mid:()=>BLOSSOM(500,860,1.15)+BLOSSOM(30,860,1.1), art:()=>VATIKA_GND(840),
+      cast:[{c:PUNJIKASTHALA, x:240, y:890, s:1.05, expr:'serene', acts:[[0,'stand'],[0.6,'lookUp',1.0]]}],
       front:()=>DARKTIDE(3.2,1.8) },
 
     /* 7b — cut away: only the drifting veil and darkness (nothing is shown) */
@@ -1802,9 +1909,9 @@ VIDEO({
 
     /* 9 — the popular claim: Sita in Panchavati, calm and dignified */
     { line:'और अब उस लोकप्रिय दावे की सच्चाई जानिए कि "उसने कभी माँ सीता को नहीं छुआ"...', scene:'sita-panchavati', mood:'sad', fx:'petals', tr:'dip', capTop:140,
-      cam:{from:[270,560,1.1],to:[250,540,1.3]},
-      sky:()=>PANCH_SKY(), far:()=>PANCH_FAR(790), mid:()=>ashramHut(430,800,1.0), art:()=>PANCH_GND(820),
-      cast:[{...SITA_G, x:200, y:880, s:1.0, expr:'sad', acts:[[0,'stand'],[1.8,'lookAway',.8]]}] },
+      cam:{from:[270,580,1.1],to:[250,550,1.3]},
+      sky:()=>PANCH_SKY(), far:()=>PANCH_FAR(790), mid:()=>ashramHut(430,810,1.0)+fire(330,860,.6), art:()=>PANCH_GND(830),
+      cast:[{c:SITA, x:200, y:890, s:1.05, expr:'sad', acts:[[0,'stand'],[1.8,'lookAway',.8]]}] },
 
     /* 10 — source card: Aranyakand */
     { line:'वाल्मीकि रामायण (अरण्यकांड, सर्ग 49, श्लोक 17) के अनुसार:', scene:'verse-source', mood:'divine', fx:'embers', tr:'iris', trAt:[270,680],
@@ -1820,45 +1927,45 @@ VIDEO({
 
     /* 12a — Panchavati: Ravan's shadow-figure strides in towards Sita (nothing more is shown) */
     { line:'(अर्थात: अपहरण के समय क्रोधातुर् रावण ने एक हाथ से माँ सीता के बाल', scene:'sita-abduction', mood:'anger', fx:'dust', tr:'dip', capTop:140,
-      cam:{from:[200,540,1.1],to:[300,540,1.2]},
-      sky:()=>PANCH_SKY()+`<rect width="540" height="960" fill="#1a0408" opacity=".25"/>`, far:()=>PANCH_FAR(790), mid:()=>ashramHut(110,800,.9), art:()=>PANCH_GND(820),
-      cast:[{...SITA_G, x:190, y:880, s:1.0, expr:'surprise', acts:[[0,'stand'],[1.6,'recoil',.4]]},
-            {c:RAVAN, with:SIL(), x:420, y:890, s:1.15, flip:true, expr:'angry', acts:[[0,'carry'],[2.0,'rage',.4]], walk:{from:240,dur:2.6}}] },
+      cam:{from:[200,560,1.1],to:[300,550,1.2]},
+      sky:()=>PANCH_SKY()+`<rect width="540" height="960" fill="#1a0408" opacity=".25"/>`, far:()=>PANCH_FAR(790), mid:()=>ashramHut(110,810,.9), art:()=>PANCH_GND(830),
+      cast:[{c:SITA, x:190, y:890, s:1.05, expr:'surprise', acts:[[0,'stand'],[1.6,'recoil',.4]]},
+            {c:RAVAN_KING, with:SIL(), x:420, y:895, s:1.15, flip:true, expr:'angry', acts:[[0,'carry'],[2.0,'rage',.4]], walk:{from:240,dur:2.6}}] },
 
     /* 12b — cut to Sita's face; the dark tide closes over the picture */
     { line:'और दूसरे हाथ से उनकी जांघों को पकड़ा था।)', scene:'sita-abduction', mood:'sad', fx:'dust', tr:'whip', capTop:130,
-      cam:{keys:[[0,270,600,1.2],[1.4,270,590,2.4,'snap'],[4,270,590,2.7]]},
-      sky:()=>PANCH_SKY(), far:()=>PANCH_FAR(790), art:()=>PANCH_GND(820),
-      cast:[{...SITA_G, x:270, y:930, s:1.4, expr:'sad', tears:true, acts:[[0,'stand'],[0.8,'grief',.8]]}],
+      cam:{keys:[[0,270,610,1.2],[1.4,265,590,2.4,'snap'],[4,265,590,2.7]]},
+      sky:()=>PANCH_SKY(), far:()=>PANCH_FAR(790), art:()=>PANCH_GND(830),
+      cast:[{c:SITA, x:270, y:935, s:1.4, expr:'sad', tears:true, acts:[[0,'stand'],[0.8,'grief',.8]]}],
       front:()=>DARKTIDE(1.9,1.6), shake:[1.9,1.2,6] },
 
     /* 13a — Lanka court: Ravan himself admits it (Yuddhakand) */
     { line:'और तो और, युद्धकांड में रावण खुद स्वीकार करता है', scene:'ravan-admits', mood:'anger', fx:'embers', tr:'dip', capTop:140,
-      cam:{from:[280,560,1.1],to:[310,540,1.3]},
-      far:()=>palaceBack(810,'#2a0e1a'), mid:()=>palaceMid(810)+TORCH(60,700,1.3)+TORCH(480,700,1.3), art:()=>palaceFloor(810),
-      cast:[{c:RAVAN_G, x:320, y:880, s:1.05, flip:true, expr:'calm', talk:true, props:{front:'khadga'}, acts:[[0,'stand'],[1.8,'explain',.8]]}] },
+      cam:{from:[280,570,1.1],to:[310,550,1.3]},
+      far:()=>palaceBack(810,'#2a0e1a')+HANGLAMP(120,210,0)+HANGLAMP(420,250,.5), mid:()=>palaceMid(810)+TORCH(60,700,1.3)+TORCH(480,700,1.3), art:()=>palaceFloor(810),
+      cast:[{c:RAVAN_G, x:320, y:885, s:1.1, flip:true, expr:'calm', talk:true, props:{front:'khadga'}, acts:[[0,'stand'],[1.8,'explain',.8]]}] },
 
     /* 13b — Ashoka Vatika: Sita, far from his bed, dignified */
-    { line:'कि वह माँ सीता को अपनी शैया पर इसलिए नहीं ला सका', scene:'ashoka-vatika', mood:'sad', fx:'petals', tr:'dissolve', capTop:140,
-      cam:{from:[300,560,1.1],to:[300,540,1.15]},
-      sky:()=>ASHOKA_SKY()+moon(420,170,36), far:()=>ASHOKA_FAR(800), mid:()=>ASHOKA(70,830,1.0), art:()=>VATIKA_GND(830),
-      cast:[{...SITA_G, x:150, y:880, s:.9, expr:'sad', acts:[[0,'kneel'],[1.6,'kneel+lookAway',.8]]},
-            {c:RAVAN_G, x:430, y:885, s:.95, flip:true, expr:'angry', acts:[[0,'stand'],[1.2,'accuse',.5]]}] },
+    { line:'कि वह माँ सीता को अपनी शैया पर इसलिए नहीं ला सका', scene:'ashoka-vatika', mood:'sad', fx:'flies', tr:'dissolve', capTop:140,
+      cam:{from:[300,580,1.1],to:[300,550,1.15]},
+      sky:()=>ASHOKA_SKY()+moon(420,170,36), far:()=>ASHOKA_FAR(800), mid:()=>ASHOKA(70,840,1.05)+ASHOKA(500,850,.9), art:()=>VATIKA_GND(840),
+      cast:[{...SITA_G, x:150, y:890, s:.95, expr:'sad', acts:[[0,'kneel'],[1.6,'kneel+lookAway',.8]]},
+            {c:RAVAN_G, x:430, y:890, s:.98, flip:true, expr:'angry', acts:[[0,'stand'],[1.2,'accuse',.5]]}] },
 
     /* 13c — THE moment: Ravan's fear of Brahma's curse (face, with the golden hand behind him) */
     { line:'क्योंकि उसे ब्रह्मा जी के शाप का भय था —', scene:'ravan-fear', mood:'shock', fx:'sparks', tr:'flash', capTop:700, shake:[0.3,0.8,8],
-      cam:{keys:[[0,240,600,1.3],[1.0,185,600,2.2,'snap'],[4,185,600,2.5]]},
+      cam:{keys:[[0,240,610,1.3],[1.0,185,610,2.2,'snap'],[4,185,610,2.5]]},
       sky:()=>`<rect width="540" height="960" fill="url(#skyDiv)"/><circle cx="400" cy="420" r="260" fill="url(#gw)" opacity=".45"/>`, art:()=>`<path d="M-20 920 Q270 880 560 920 L560 1000 L-20 1000Z" fill="#20122a"/>`,
-      cast:[{c:RAVAN_G, x:250, y:930, s:1.2, expr:'surprise', acts:[[0,'stand'],[0.6,'recoil',.35]]}],
+      cast:[{c:RAVAN_G, x:250, y:935, s:1.2, expr:'surprise', acts:[[0,'stand'],[0.6,'recoil',.35]]}],
       front:()=>A('fadein:.3:.6',CURSEHAND(250,500,.5,0)),
       focus:{at:.5, sound:'kaal', dur:3.0, duck:.25} },
 
     /* 13d — closing: not respect for Sita but fear for his own life; Sita stays dignified, Ravan shrinks away */
-    { line:'सीता जी के प्रति सम्मान की वजह से नहीं, बल्कि सिर्फ अपने प्राणों और शाप के डर से!', scene:'sita-sorrow', mood:'sad', fx:'petals', tr:'dissolve', capTop:140,
-      cam:{from:[270,560,1.15],to:[250,540,1.45]},
-      sky:()=>ASHOKA_SKY()+moon(400,170,40), far:()=>ASHOKA_FAR(800), mid:()=>ASHOKA(460,830,1.1), art:()=>VATIKA_GND(830),
-      cast:[{...SITA_G, x:230, y:890, s:1.1, expr:'serene', acts:[[0,'stand'],[2.4,'lookUp',1.2]], aura:'gg'},
-            {c:RAVAN, with:SIL(), x:450, y:880, s:.6, flip:true, expr:'sad', acts:[[0,'stand'],[1.0,'lookDown',.8]], exit:{at:4.5,fade:1.2}}] }
+    { line:'सीता जी के प्रति सम्मान की वजह से नहीं, बल्कि सिर्फ अपने प्राणों और शाप के डर से!', scene:'sita-sorrow', mood:'sad', fx:'flies', tr:'dissolve', capTop:140,
+      cam:{from:[270,580,1.15],to:[250,550,1.45]},
+      sky:()=>ASHOKA_SKY()+moon(400,170,40), far:()=>ASHOKA_FAR(800), mid:()=>ASHOKA(460,840,1.1), art:()=>VATIKA_GND(840),
+      cast:[{...SITA_G, x:230, y:895, s:1.12, expr:'serene', acts:[[0,'stand'],[2.4,'lookUp',1.2]], aura:'gg'},
+            {c:RAVAN_KING, with:SIL(), x:450, y:885, s:.6, flip:true, expr:'sad', acts:[[0,'stand'],[1.0,'lookDown',.8]], exit:{at:4.5,fade:1.2}}] }
   ]
 });
 

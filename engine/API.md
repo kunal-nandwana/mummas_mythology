@@ -126,3 +126,11 @@ Verses: shots with `calli` (or a `॥` line) count as chanted, 1.7x slower than 
 - **New props / extra-arm items:** `shankh` (conch), `kamandalu`, `veda` (book), `mala` (bead ring, extra arm only).
 - **BRAHMA** now: golden-brown, red dhoti + red cloth, 3-4 faces with kirita + white beards, halo, veda + mala in extra hands, kamandalu. **VISHNU**: kirita + halo, pearl mala, pads, yellow cloth, chakra + shankh up, gada in back hand.
 - **Storm sky for Brahma's boon:** `lay(()=>vardanSky({gx,gy}))` = dark violet storm, flashing lightning bolts, golden glow at (gx,gy). Use with `mood:'shock'`. Animation `A('bolt:period:offset', svg)` = double lightning flash once per period; `wbolt(x,y1,y2,period,offset,col)` draws one bolt.
+
+
+## v4 characters (Ravan-Sita video, Nov 2026)
+- **SITA** (redesigned): red saree + gold border + pleats, pallu across the chest, red head-veil with pearl line, maang tikka, bindi, nose stud, armlets, bangles, long braid with gold tassel. Recolour `with:{top,bottom,pallu,veil}`.
+- **HANUMAN** (redesigned): brown vanara with a real monkey face (muzzle, brow ridge, pointed ear, cheek fur), tiered gold crown, broad build, long tail that sways. Gada on the shoulder: `with:{holds:{}}`, `props:{front:'gada'}`, pose `shoulder`. Default holds the gada on his back.
+- **RAVAN_KING** (new; old RAVAN unchanged for the Parshuram video): five-spire gold crowns on all ten heads, fierce brow + moustache, kundal, gold breastplate + pauldrons, bracers, plated kilt. Silhouette: use `with:SIL()` from the ravan-sita story (it switches the armour keys off).
+- **PUNJIKASTHALA** (new apsara): gold tiara, flowers in hair, pink choli, violet saree, sheer floating scarf, soft glow.
+- New costume keys: `fem` (slim build, bare midriff, blouse, pallu, saree pleats), `pallu braid bangles bindi nose flowers scarf lips`, `vanara face furDark tail`, `armor bracer kilt kundal fierce`, head type `ravan`. New prop `gada`.

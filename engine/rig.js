@@ -78,7 +78,8 @@ function shade(hex,amt){ const n=parseInt(hex.slice(1),16); let r=n>>16, g=(n>>8
 const COSTUME0 = {skin:'#8c6248', top:'#1f2640', bottom:'#8e1d24', shin:null, foot:null, sleeve:null, skirt:false,
   trim:'url(#gold)', hair:'long', head:'crown', beard:null, mus:false, cape:null, quiver:false, garland:null, sash:null,
   veil:null, turban:'#ece5d4', tilak:false, earring:true, big:false, aura:null, jewel:true,
-  bare:false, ash:false, snake:false, tiger:false, rudra:false, third:false, tusks:false, spikes:false, eyeCol:null, fireHair:false, blindfold:false, faces:null, arms:0, armItems:null, beardLen:0, halo:null, mala:null, pads:null, belt:null, studs:null, holds:null};
+  bare:false, ash:false, snake:false, tiger:false, rudra:false, third:false, tusks:false, spikes:false, eyeCol:null, fireHair:false, blindfold:false, faces:null, arms:0, armItems:null, beardLen:0, halo:null, mala:null, pads:null, belt:null, studs:null, holds:null,
+  fem:false, pallu:null, braid:null, bangles:null, bindi:false, nose:false, scarf:null, flowers:false, vanara:false, face:null, furDark:null, tail:false, armor:false, bracer:false, fierce:false, kundal:false, kilt:null, lips:null};
 
 let RIG_ID=0;
 /* Build one character. cast = {c:COSTUME, x, y, s, flip, acts:[[t,pose,dur?],...], expr, eyes, talk,
@@ -107,7 +108,10 @@ function makeRig(cast){
       (c.pads?`<rect x="${-9.5*wide}" y="-3" width="${19*wide}" height="23" rx="6" fill="${c.pads}" stroke="#e8b83a" stroke-width="1.6"/><path d="M${-6*wide} 2 h${12*wide}" stroke="#fff" stroke-opacity=".25" stroke-width="1.6"/>`:'')+
       (c.jewel?`<line x1="${-6.5*wide}" y1="16" x2="${6.5*wide}" y2="16" stroke="#d9a73a" stroke-width="3"/>`:'')+
       (c.rudra?`<line x1="${-7*wide}" y1="15" x2="${7*wide}" y2="15" stroke="${c.rudra===true?'#6a3a18':c.rudra}" stroke-width="5" stroke-dasharray="3 2"/>`:'')+
+      (c.fem?`<rect x="-7.4" y="9" width="14.8" height="7" rx="3" fill="url(#gold)" stroke="#8a5a14" stroke-width=".8"/><circle cx="0" cy="12.5" r="2.2" fill="#d63a2a"/>`:'')+
       `<g ${J(n+'E')}><line x1="0" y1="0" x2="0" y2="46" stroke="${col}" stroke-width="${11*wide}" stroke-linecap="round"/>`+
+      (c.bangles?c.bangles.map((bc,bi)=>`<line x1="-5.8" y1="${30+bi*3.6}" x2="5.8" y2="${30+bi*3.6}" stroke="${bc}" stroke-width="2.6" stroke-linecap="round"/>`).join('')+`<line x1="-5.6" y1="${30+c.bangles.length*3.6}" x2="5.6" y2="${30+c.bangles.length*3.6}" stroke="#ffd25e" stroke-width="1.2" opacity=".8"/>`:'')+
+      (c.bracer?`<rect x="${-7.6*wide}" y="14" width="${15.2*wide}" height="26" rx="4" fill="url(#gold)" stroke="#8a5a14" stroke-width="1.3"/><path d="M${-7*wide} 22 h${14*wide} M${-7*wide} 31 h${14*wide}" stroke="#8a5a14" stroke-width="1.2"/><circle cx="0" cy="27" r="2.6" fill="#d63a2a" stroke="#ffd25e" stroke-width=".8"/>`:'')+
       (c.jewel?`<line x1="-5.5" y1="38" x2="5.5" y2="38" stroke="#e8b83a" stroke-width="2.5"/>`:'')+
       (c.rudra?`<line x1="-6" y1="37" x2="6" y2="37" stroke="${c.rudra===true?'#6a3a18':c.rudra}" stroke-width="4" stroke-dasharray="3 2"/>`:'')+
       `<g ${J(n+'H')}>${hand(n,col)}<g ${J(n+'P')}>${prop(back?props.back:props.front, n)}</g></g></g></g>`; };
@@ -118,6 +122,8 @@ function makeRig(cast){
         `<polyline ${J('string')} points="-6,-162 -6,-17 -6,128" stroke="#efe6cc" stroke-width="1.3" fill="none"/>`+
         `<g ${J('arrow')} style="display:none"><line x1="0" y1="0" x2="150" y2="0" stroke="#d9c08a" stroke-width="2.6"/><polygon points="150,-5 164,0 150,5" fill="#e9e1c8"/><path d="M0 0 l-10 -6 M0 0 l-10 6" stroke="#ff4a3c" stroke-width="2.4"/></g>`;
       case 'mace': return `<line x1="-2" y1="22" x2="6" y2="-96" stroke="#6a4218" stroke-width="7" stroke-linecap="round"/><ellipse cx="8" cy="-120" rx="21" ry="33" fill="url(#gold)"/><path d="M-12 -120 h40 M-6 -142 h28 M-6 -98 h28" stroke="#8a5a1a" stroke-width="2"/><circle cx="8" cy="-156" r="5" fill="url(#gold)"/>`;
+      /* gada: Hanuman's mace: gold-bound haft, big round head with vertical ribs and a spike */
+      case 'gada': return `<line x1="-3" y1="30" x2="5" y2="-92" stroke="#7a4a1c" stroke-width="8" stroke-linecap="round"/><line x1="-2" y1="20" x2="1" y2="-8" stroke="url(#gold)" stroke-width="10"/><line x1="2" y1="-60" x2="4" y2="-86" stroke="url(#gold)" stroke-width="10"/><g transform="translate(7 -128)"><circle r="38" fill="url(#gold)" stroke="#8a5a14" stroke-width="2"/>`+[-28,-14,0,14,28].map(x=>`<path d="M${x} ${-Math.sqrt(1444-x*x)+2} Q${x*1.35} 0 ${x} ${Math.sqrt(1444-x*x)-2}" fill="none" stroke="#8a5a14" stroke-width="2.2"/>`).join('')+`<path d="M-30 -14 Q0 -22 30 -14 M-34 8 Q0 0 34 8" stroke="#8a5a14" stroke-width="1.8" fill="none" opacity=".7"/><ellipse cx="-12" cy="-16" rx="9" ry="14" fill="#fff" opacity=".28" transform="rotate(25 -12 -16)"/><path d="M-6 -36 L0 -56 L6 -36Z" fill="url(#gold)" stroke="#8a5a14" stroke-width="1.4"/><circle cy="0" r="6" fill="#d63a2a" stroke="#ffd25e" stroke-width="1.4"/></g>`;
       case 'staff': return `<line x1="0" y1="-120" x2="0" y2="150" stroke="#5a3c1c" stroke-width="5" stroke-linecap="round"/>`;
       case 'lantern': return `<g transform="translate(0 16)"><line x1="0" y1="-14" x2="0" y2="0" stroke="#6a4a22" stroke-width="2"/>${A('flick:9','<circle r="90" fill="url(#saf)"/>')}<path d="M-8 0 h16 l-2 20 h-12Z" fill="#7a5420"/><rect x="-5" y="3" width="10" height="13" fill="#ffd27a"/><path d="M-9 0 L0 -8 L9 0Z" fill="#5a3a14"/></g>`;
       case 'diya': return `<g transform="translate(0 -8)">${A('flick:7','<circle cy="-14" r="46" fill="url(#saf)"/>')}<path d="M-14 0 Q0 12 14 0 L10 -6 L-10 -6Z" fill="#a8582a"/><path d="M4 -6 Q8 -18 2 -26 Q-2 -16 4 -6Z" fill="#ffd27a"/></g>`;
@@ -150,20 +156,24 @@ function makeRig(cast){
       case 'axe': return `<line x1="-4" y1="46" x2="6" y2="-150" stroke="#3a2a22" stroke-width="9" stroke-linecap="round"/><g transform="translate(6 -128)"><path d="M0 -8 C-34 -26 -62 -4 -56 40 C-38 20 -16 14 0 18Z" fill="#6a7078" stroke="#d4d8de" stroke-width="2"/><path d="M0 -8 C34 -26 62 -4 56 40 C38 20 16 14 0 18Z" fill="#585e66" stroke="#d4d8de" stroke-width="2"/><path d="M-4 -8 L0 -34 L4 -8Z" fill="#d4d8de"/><path d="M-50 30 C-34 14 -16 8 -2 12 M50 30 C34 14 16 8 2 12" stroke="#ff5a2a" stroke-width="2" fill="none" opacity=".8"/>${A('pulse:3','<circle cy="14" r="46" fill="url(#gr)" opacity=".5"/>')}</g>`;
       default: return '';
     } }
-  const UPRIGHT={shankh:1,kamandalu:1,veda:1,parashu:1,axe:1,bow:1,mace:1,staff:1,lantern:1,diya:1,lotus:1,trishul:1,orb:1,chakra:1,arrows3:1,heartCloth:1,cloth:1,mallet:1};
+  const UPRIGHT={gada:1,shankh:1,kamandalu:1,veda:1,parashu:1,axe:1,bow:1,mace:1,staff:1,lantern:1,diya:1,lotus:1,trishul:1,orb:1,chakra:1,arrows3:1,heartCloth:1,cloth:1,mallet:1};
 
   /* ---- head ---- */
+  /* ravan crown: tall gold band with five jewelled spires, red centre stone, emeralds (c.head==='ravan') */
+  const RCROWN=`<path d="M-20 -285 L-23 -314 L-13 -303 L-9 -334 L-1 -308 L3 -348 L8 -308 L16 -334 L19 -303 L28 -314 L25 -285Z" fill="url(#gold)" stroke="#8a5a14" stroke-width=".9"/><path d="M-21 -289 Q2 -280 26 -289 L26 -282 Q2 -273 -21 -282Z" fill="url(#gold)" stroke="#8a5a14" stroke-width=".8"/><circle cx="3" cy="-298" r="4.2" fill="#d63a2a" stroke="#ffd25e" stroke-width="1.2"/><circle cx="-10" cy="-296" r="2.3" fill="#2ec28a"/><circle cx="17" cy="-296" r="2.3" fill="#2ec28a"/><circle cx="3" cy="-349" r="2.4" fill="#ffd25e"/><circle cx="-9" cy="-335" r="2" fill="#ffd25e"/><circle cx="16" cy="-335" r="2" fill="#ffd25e"/>`;
   /* extra faces (c.faces:[[dx,dy,scale],...]): small profile faces fanned behind the main head (Ravan's ten heads, Brahma's four) */
   const miniFace=(dx,dy,sc,k,rot)=>`<g transform="${rot?`rotate(${rot} 0 -240) `:''}translate(${dx} ${dy}) translate(0 -266) scale(${sc}) translate(0 266)"><path d="M-14 -262 C-16 -286 0 -294 14 -288 C22 -284 24 -276 24 -270 L32 -260 L24 -258 C24 -252 22 -248 16 -246 L-6 -244Z" fill="${shade(skin,-.06*(k%3))}"/><path d="M-16 -268 C-20 -292 0 -300 18 -290 L14 -280 C2 -284 -8 -282 -12 -262Z" fill="${dark}"/>`+
     (c.beard?`<path d="M3 -252 Q28 -250 25 -212 Q13 -198 0 -214 Q-7 -234 -3 -250Z" fill="${c.beard==='white'?'#e7e1d4':dark}"/><path d="M6 -246 Q12 -228 10 -216 M16 -246 Q20 -230 18 -214" stroke="#bdb6a6" stroke-width="1.4" fill="none"/>`:'')+
     (c.head==='kirita'?`<path d="M-16 -283 C-15 -300 -9 -322 2 -346 C12 -322 18 -300 19 -284Z" fill="url(#gold)" stroke="#a8741a" stroke-width=".8"/><path d="M-10 -298 Q2 -292 14 -298 M-7 -316 Q2 -311 11 -316" stroke="#a8741a" stroke-width="1.3" fill="none"/><circle cx="2" cy="-296" r="3" fill="#d63a2a"/>`:'')+
-    (c.head==='kirita'?'':c.head==='big'?`<path d="M-18 -284 L-16 -326 L-6 -308 L2 -340 L10 -308 L20 -324 L20 -284Z" fill="url(#gold)"/><circle cx="2" cy="-300" r="4" fill="#2ec28a"/>`:`<path d="M-16 -286 L-12 -318 L-4 -300 L2 -326 L8 -300 L16 -316 L18 -286Z" fill="url(#gold)"/>`)+
+    (c.head==='kirita'?'':c.head==='ravan'?RCROWN:c.head==='big'?`<path d="M-18 -284 L-16 -326 L-6 -308 L2 -340 L10 -308 L20 -324 L20 -284Z" fill="url(#gold)"/><circle cx="2" cy="-300" r="4" fill="#2ec28a"/>`:`<path d="M-16 -286 L-12 -318 L-4 -300 L2 -326 L8 -300 L16 -316 L18 -286Z" fill="url(#gold)"/>`)+
     `<path d="M8.5 -271 Q15 -276 21.5 -270" stroke="#140a06" stroke-width="1.7" fill="none"/><circle cx="16.5" cy="-270.4" r="1.8" fill="#140a06"/><path d="M8 -278 Q15 -281.5 22.5 -277.5" stroke="${dark}" stroke-width="2.4" fill="none"/>`+
     (c.mus?`<path d="M12 -254 q8 -4 15 1" stroke="${dark}" stroke-width="3" fill="none" stroke-linecap="round"/>`:'')+`</g>`;
   let head='';
   if(c.halo){ const [hx,hy,hr]=c.halo; let rays=''; for(let i=0;i<20;i++) rays+=`<line x1="0" y1="${-hr-5}" x2="0" y2="${-hr-(i%2?13:21)}" transform="rotate(${i*18})" stroke="#ffe7a8" stroke-width="2.4" stroke-linecap="round"/>`;
     head+=`<g transform="translate(${hx} ${hy})">`+A('pulse:1.8',`<circle r="${hr+8}" fill="#fff3c4" opacity=".22"/>`)+`<circle r="${hr}" fill="#ffe9a8" opacity=".2"/><circle r="${hr}" fill="none" stroke="#ffe7a8" stroke-width="3"/>`+A(`spin:50:0:0`,rays)+`</g>`; }
   if(c.faces) head+=c.faces.map((f,i)=>A(`bob:${(1+(i%3)*.5).toFixed(1)}:${(.16+i*.025).toFixed(3)}`,miniFace(f[0],f[1],f[2],i,f[3]))).join('');
+  if(c.braid){ const bc=c.braid; let pl=''; for(let i=0;i<7;i++) pl+=`<path d="M${-30-i*1.2} ${-250+i*17} q8 5 16 0" stroke="#000" stroke-opacity=".35" stroke-width="1.6" fill="none"/>`;
+    head+=`<g ${J('hair')}><path d="M-12 -276 C-34 -268 -42 -230 -40 -196 C-38 -170 -40 -150 -36 -128 L-24 -130 C-28 -152 -26 -172 -26 -198 C-24 -232 -18 -254 -6 -262Z" fill="${bc}"/>${pl}<path d="M-34 -250 C-38 -226 -37 -196 -35 -170" stroke="#fff" stroke-opacity=".14" stroke-width="2" fill="none"/><path d="M-37 -134 l6 0 l-3 9Z" fill="url(#gold)"/><circle cx="-30" cy="-124" r="3.2" fill="#d63a2a"/><path d="M-33 -122 l-3 14 M-30 -121 l0 16 M-27 -122 l3 14" stroke="#ffd25e" stroke-width="1.6" stroke-linecap="round"/></g>`; }
   if(c.veil) head+=`<g ${J('veilB')}><path d="M-18 -292 C-40 -270 -50 -220 -56 -150 L-30 -150 C-28 -210 -20 -250 -8 -276Z" fill="${c.veil}"/><path d="M-30 -150 C-28 -210 -20 -250 -8 -276 L-14 -280 C-22 -246 -26 -206 -28 -150Z" fill="#000" opacity=".16"/></g>`;
   if(c.hair==='long' && !c.veil) head+=`<g ${J('hair')}><path d="M-12 -272 C-30 -262 -34 -230 -40 -196 L-22 -204 C-20 -226 -14 -244 -6 -256Z" fill="${dark}"/></g>`;
   if(c.head==='mahadev') head+=`<g ${J('hair')}><path d="M-14 -278 C-50 -268 -66 -216 -74 -146 C-64 -158 -56 -168 -48 -178 C-46 -150 -42 -126 -34 -104 C-24 -138 -22 -190 -8 -252Z" fill="${dark}"/><path d="M-22 -262 C-40 -240 -50 -200 -54 -160 M-30 -236 C-40 -210 -42 -176 -38 -138" stroke="#322b44" stroke-width="2" fill="none"/>`+
@@ -183,6 +193,14 @@ function makeRig(cast){
         `<path d="M24 -258 q3 1.5 0 3" stroke="#000" stroke-opacity=".28" stroke-width="1.2" fill="none"/>`+
         `<ellipse ${J('blush')} cx="12" cy="-259" rx="6" ry="3.6" fill="#e0556a" opacity="0"/>`+
         `<path d="M-2 -273 q-6 4 -3 14 q3 5 7 2" fill="${shade(skin,-.08)}" stroke="${shade(skin,-.3)}" stroke-width="1.3"/><path d="M-2 -268 q-2 5 1 8" stroke="${shade(skin,-.35)}" stroke-width="1" fill="none"/>`;
+  if(c.vanara){ const fc=c.face||shade(skin,.28), fd=c.furDark||shade(skin,-.32);
+    head+=`<path d="M-6 -276 C-10 -292 -8 -310 2 -316 C6 -302 6 -288 4 -276Z" fill="${skin}" stroke="${fd}" stroke-width="1"/><path d="M-3 -279 C-5 -292 -3 -304 1 -310 C3 -300 3 -290 2 -279Z" fill="#e8a88a"/>`+
+      `<path d="M-8 -256 L-17 -251 L-9 -250 L-16 -241 L-8 -243 L-10 -233 L0 -241 L8 -246Z" fill="${fd}"/>`+
+      `<path d="M8 -280 C18 -284 25 -280 28 -273 C36 -270 42 -264 41 -256 C39 -248 33 -245 28 -245 C21 -241 12 -242 6 -246 L5 -262Z" fill="${fc}"/>`+
+      `<path d="M30 -250 C34 -250 38 -252 40 -256" stroke="${fd}" stroke-opacity=".5" stroke-width="1.2" fill="none"/>`+
+      `<path d="M3 -281 C11 -289 24 -287 29 -277 L25 -273 C19 -279 10 -279 5 -274Z" fill="${fd}"/>`+
+      `<ellipse cx="38.6" cy="-261.5" rx="3.6" ry="2.8" fill="#2a1410"/><circle cx="37.6" cy="-262.4" r="1" fill="#fff" opacity=".45"/><path d="M33 -258 q2 2 4 0" stroke="#2a1410" stroke-width="1" fill="none" opacity=".7"/>`+
+      `<path d="M2 -246 l-6 8 l8 -3 l-3 8 l8 -6Z" fill="${fd}" opacity=".9"/>`; }
   if(c.head!=='turban' && !c.veil && c.head!=='jata' && c.head!=='mahadev' && c.head!=='demon' && c.hair!=='none') head+=`<path d="M-16 -268 C-20 -292 0 -300 18 -290 L14 -280 C2 -284 -8 -282 -12 -262Z" fill="${dark}"/>`;
   if(c.beard && c.beardLen>0){ /* FULL sage beard: covers the whole lower face (ear to nose, mouth hidden), thick moustache, flows down the chest to a point, strands, sways */
     const L=c.beardLen, white=c.beard==='white', bc=white?'#e7e1d4':(c.beard==='grey'?'#a8a29a':'#2a1a12'), st=white?'#bdb6a6':'#5e4634', hi=white?'#fffaf0':'#4a3526', D=84*L, T=-246+D, Y=f=>r1(-246+D*f);
@@ -202,15 +220,16 @@ function makeRig(cast){
       `<circle cx="-16" cy="-273" r="4.5" fill="${bf}"/><g ${J('hair')}><path d="M-17 -272 Q-30 -262 -32 -246 L-27 -246 Q-25 -260 -15 -269Z M-17 -274 Q-34 -270 -40 -256 L-35 -254 Q-30 -265 -15 -271Z" fill="${bf}"/></g>`; }
   head+=`<g ${J('furrow')} style="display:none"><path d="M10 -283 q2 -2 1 -5" stroke="#000" stroke-opacity=".38" stroke-width="1.3" fill="none" stroke-linecap="round"/><path d="M14 -284 q2 -2 1.4 -5" stroke="#000" stroke-opacity=".32" stroke-width="1.1" fill="none" stroke-linecap="round"/></g>`;
   // mouth variants
-  const mcol=c.beardLen>0?'#e8a890':'#3a1a10', mop=c.beardLen>0?' stroke-opacity=".0"':'';
-  head+=`<path ${J('m_neutral')} d="M17 -251 q4 0 7 -1" stroke="#3a1a10" stroke-width="2" fill="none"${mop}/>`+
-        `<path ${J('m_smile')} d="M16.5 -252.5 q4 3.5 8.5 -1" stroke="#3a1a10" stroke-width="2" fill="none"${mop} style="display:none"/>`+
-        `<path ${J('m_sad')} d="M17 -250 q4 -2.5 7.5 0" stroke="#3a1a10" stroke-width="2" fill="none"${mop} style="display:none"/>`+
+  const mcol=c.beardLen>0?'#e8a890':'#3a1a10', mop=c.beardLen>0?' stroke-opacity=".0"':'', LIP=c.lips||(c.fem?'#a8282e':'#3a1a10');
+  head+=`<path ${J('m_neutral')} d="M17 -251 q4 0 7 -1" stroke="${LIP}" stroke-width="2" fill="none"${mop}/>`+
+        `<path ${J('m_smile')} d="M16.5 -252.5 q4 3.5 8.5 -1" stroke="${LIP}" stroke-width="2" fill="none"${mop} style="display:none"/>`+
+        `<path ${J('m_sad')} d="M17 -250 q4 -2.5 7.5 0" stroke="${LIP}" stroke-width="2" fill="none"${mop} style="display:none"/>`+
         `<ellipse ${J('m_open')} cx="21" cy="-251" rx="3" ry="1.5" fill="${c.beardLen>0?'#8a2e26':'#3a1010'}" style="display:none"/>`+
         `<path ${J('m_teeth')} d="M18.4 -252.4 h5.4" stroke="#f6f0e0" stroke-width="1.5" stroke-linecap="round" style="display:none"/>`+
         `<g ${J('tear')} style="display:none"><path d="M0 0 q-2.2 3.6 0 5.2 q2.2 -1.6 0 -5.2Z" fill="#cfe8ff" stroke="#fff" stroke-opacity=".6" stroke-width=".5"/></g>`+
         `<g ${J('tear2')} style="display:none"><path d="M0 0 q-2 3.2 0 4.6 q2 -1.4 0 -4.6Z" fill="#cfe8ff" stroke="#fff" stroke-opacity=".6" stroke-width=".5"/></g>`;
   if(c.mus) head+=`<path d="M12 -254 q8 -4 15 1" stroke="${dark}" stroke-width="3.2" fill="none" stroke-linecap="round"/>`;
+  if(c.fierce) head+=`<path d="M13 -254 C22 -250 32 -252 40 -264" stroke="${dark}" stroke-width="4.4" fill="none" stroke-linecap="round"/><path d="M13 -254 C20 -256 28 -258 34 -258" stroke="${dark}" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M5 -280 L24 -275" stroke="${dark}" stroke-width="4.2" stroke-linecap="round"/><path d="M8 -265 Q15 -262 23 -265" stroke="#000" stroke-opacity=".3" stroke-width="2" fill="none"/>`;
   head+=`<path d="M18 -289 C22 -285 24 -278 24 -270 L32 -260 L24 -258 C24 -252 22 -248 16 -246" fill="none" style="stroke:var(--rimc,#fff);stroke-opacity:var(--rimo,0);stroke-width:1.6" stroke-linecap="round"/>`;
   if(c.tilak==='namam') head+=`<path d="M17 -290 v10 M24 -290 v9" stroke="#fff6e0" stroke-width="2.2" stroke-linecap="round"/><path d="M20.5 -289 v9" stroke="#d63a2a" stroke-width="2"/>`;
   else if(c.tilak) head+=`<path d="M20 -287 l1 7" stroke="#d63a2a" stroke-width="2.2"/>`;
@@ -235,14 +254,40 @@ function makeRig(cast){
   if(c.head==='feather') head+=`<g transform="translate(0 -322) rotate(-14)"><path d="M0 0 Q-6 -24 0 -46" stroke="#3a7a4f" stroke-width="2.5" fill="none"/><ellipse cx="0" cy="-48" rx="9" ry="15" fill="#2e9a86"/><ellipse cx="0" cy="-48" rx="5.5" ry="9" fill="#1f5fb0"/><ellipse cx="0" cy="-48" rx="2.5" ry="4.5" fill="#e8c24a"/></g>`;
   if(c.head==='band') head+=`<path d="M-16 -282 Q2 -292 20 -284 L20 -277 Q2 -285 -16 -275Z" fill="url(#gold)"/><circle cx="4" cy="-286" r="2.6" fill="#d63a2a"/>`;
   if(c.head==='kirita') head+=`<path d="M-20 -283 C-19 -300 -12 -326 2 -352 C16 -326 23 -300 24 -284Z" fill="url(#gold)" stroke="#a8741a" stroke-width="1"/><path d="M-15 -298 Q2 -291 20 -298 M-10 -314 Q2 -308 15 -314 M-5 -332 Q2 -327 10 -332" stroke="#a8741a" stroke-width="1.7" fill="none"/><path d="M2 -352 V-362" stroke="#ffd25e" stroke-width="2"/><circle cx="2" cy="-363" r="2.6" fill="#ffd25e"/><path d="M-19 -285 Q2 -277 23 -286 L23 -280 Q2 -272 -19 -279Z" fill="url(#gold)"/><circle cx="3" cy="-297" r="3.8" fill="#d63a2a" stroke="#ffd25e" stroke-width="1"/><path d="M-9 -303 l3.2 4.4 l-3.2 4.4 l-3.2 -4.4Z M15 -303 l3.2 4.4 l-3.2 4.4 l-3.2 -4.4Z" fill="#2ec28a"/>`;
+  if(c.head==='ravan') head+=RCROWN;
   if(c.head==='big') head+=`<path d="M-18 -284 L-16 -326 L-6 -308 L2 -340 L10 -308 L20 -324 L20 -284Z" fill="url(#gold)"/><circle cx="2" cy="-300" r="4" fill="#d63a2a"/><circle cx="-8" cy="-292" r="2" fill="#2ec28a"/><circle cx="12" cy="-292" r="2" fill="#2ec28a"/>`;
   if(c.veil) head+=`<path d="M-20 -290 C0 -306 22 -300 24 -284 C14 -290 0 -290 -12 -278 C-16 -270 -18 -262 -16 -250 L-24 -250 C-26 -270 -26 -284 -20 -290Z" fill="${c.veil}"/><path d="M-20 -290 C0 -306 22 -300 24 -284" stroke="url(#gold)" stroke-width="2.4" fill="none"/>`;
   if(c.earring && c.head!=='turban') head+=`<g ${J('ear')}><circle cx="-4" cy="-256" r="3" fill="none" stroke="#e8b83a" stroke-width="1.6"/>`+
     (c.skirt||c.jewel ? `<line x1="-4" y1="-253" x2="-4" y2="-248" stroke="#e8b83a" stroke-width="1.2"/><path d="M-7.5 -248 Q-4 -241 -0.5 -248Z" fill="url(#gold)"/><circle cx="-4" cy="-241.6" r="1.4" fill="#d63a2a"/>` : '')+`</g>`;
 
+  if(c.kundal) head+=`<g ${J('kund')}><circle cx="-4" cy="-253" r="7" fill="url(#gold)" stroke="#8a5a14" stroke-width="1.2"/><circle cx="-4" cy="-253" r="2.6" fill="#d63a2a"/><path d="M-9 -246 Q-4 -234 1 -246Z" fill="url(#gold)"/></g>`;
+  if(c.fem){
+    if(c.veil) head+=`<path d="M-10 -296 C4 -300 18 -296 24 -287" stroke="#fff" stroke-width="2.4" fill="none" stroke-dasharray="1.2 3.6" stroke-linecap="round"/>`+
+      `<path d="M0 -293 C6 -289 12 -287 17 -284" stroke="#e8b83a" stroke-width="1.2" fill="none"/><circle cx="17.5" cy="-283" r="2.7" fill="url(#gold)" stroke="#8a5a14" stroke-width=".7"/><circle cx="17.5" cy="-283" r="1.1" fill="#d63a2a"/>`;
+    if(c.bindi) head+=`<circle cx="21.6" cy="-281" r="1.9" fill="#c8202a"/>`;
+    if(c.nose) head+=`<circle cx="26.6" cy="-256.4" r="1.3" fill="#ffd25e"/><path d="M27 -255 q3 2 1 5" stroke="#e8b83a" stroke-width=".9" fill="none"/>`;
+    if(c.flowers) head+=`<g transform="translate(-10 -296)">`+[[0,0,'#fff'],[9,-5,'#ffd0f0'],[-8,5,'#ffd0f0'],[16,-1,'#fff'],[-14,13,'#fff']].map(([fx,fy,fc])=>`<g transform="translate(${fx} ${fy})">`+[0,72,144,216,288].map(r=>`<ellipse rx="2.6" ry="4.4" transform="rotate(${r}) translate(0 -3.6)" fill="${fc}"/>`).join('')+`<circle r="2" fill="#ffc83c"/></g>`).join('')+`</g>`; }
+
   /* ---- torso ---- */
-  let torso=`<g transform="scale(${wide} 1)"><path d="M-8 -238 C-28 -234 -34 -214 -34 -192 L-28 -148 L26 -148 L28 -194 C28 -222 18 -236 8 -238Z" fill="${c.top}"/>`;
-  if(c.skirt) torso+=`<path d="M-30 -150 C-30 -170 -28 -190 -26 -200 L28 -160 L26 -150Z" fill="${c.bottom}"/>`;
+  const SG=shade(c.bottom||'#8e1d24',-.3);
+  let torso=`<g transform="scale(${wide} 1)">`+(c.fem?
+    /* feminine build: slim waist, bare midriff, short blouse with a bust line, pallu draped from the left shoulder across to the right hip */
+    `<path d="M-7 -238 C-24 -234 -27 -214 -25 -194 C-23 -178 -21 -162 -21 -146 L21 -146 C21 -162 24 -178 26 -194 C27 -222 17 -236 7 -238Z" fill="${skin}"/>`+
+    `<path d="M-24 -176 C-10 -170 8 -170 22 -176" stroke="#000" stroke-opacity=".14" stroke-width="1.6" fill="none"/><circle cx="2" cy="-164" r="1.3" fill="#000" opacity=".25"/>`+
+    `<path d="M-7 -238 C-24 -234 -28 -214 -26 -192 L-24 -185 C-6 -181 10 -183 25 -189 C29 -200 29 -216 25 -226 C19 -236 13 -238 7 -238Z" fill="${c.top}"/>`+
+    `<path d="M19 -222 C33 -214 35 -198 28 -188 L17 -188Z" fill="${shade(c.top,.12)}"/>`+
+    `<path d="M-24 -186 C-6 -182 10 -184 25 -190" stroke="url(#gold)" stroke-width="2.4" fill="none"/>`+
+    `<path d="M-8 -238 C-1 -224 11 -224 16 -238Z" fill="${skin}"/><path d="M-8 -238 C-1 -224 11 -224 16 -238" stroke="#e8b83a" stroke-width="1.2" fill="none"/>`
+    :`<path d="M-8 -238 C-28 -234 -34 -214 -34 -192 L-28 -148 L26 -148 L28 -194 C28 -222 18 -236 8 -238Z" fill="${c.top}"/>`);
+  if(c.fem && c.pallu) torso+=`<g ${J('sashT')}><path d="M-30 -232 C-28 -241 -16 -243 -8 -238 C10 -212 24 -180 32 -148 L8 -148 C-2 -176 -16 -200 -34 -214Z" fill="${c.pallu}"/><path d="M-10 -239 C10 -212 24 -180 32 -148" stroke="url(#gold)" stroke-width="3.4" fill="none"/><path d="M-34 -214 L-30 -232" stroke="url(#gold)" stroke-width="3" fill="none"/><path d="M-6 -226 C6 -204 16 -182 22 -160" stroke="#000" stroke-opacity=".2" stroke-width="2" fill="none"/>${[0,1,2].map(i=>`<circle cx="${r1(2+i*9)}" cy="${r1(-206+i*17)}" r="1.5" fill="#ffd25e"/>`).join('')}</g>`;
+  if(c.fem) torso+=`<path d="M-22 -156 Q0 -149 22 -156" stroke="url(#gold)" stroke-width="4.5" fill="none" stroke-linecap="round"/>${[-14,-5,4,13].map(x=>`<circle cx="${x}" cy="${r1(-151+Math.abs(x)*.05)}" r="2.1" fill="#d63a2a"/>`).join('')}`;
+  if(c.armor){ torso+=`<path d="M-31 -236 C-18 -247 14 -247 29 -236 L27 -190 C10 -178 -10 -178 -29 -190Z" fill="url(#gold)" stroke="#7a5010" stroke-width="1.5"/>`+
+      `<path d="M0 -242 V-181 M-22 -226 Q-10 -206 -2 -203 M22 -226 Q10 -206 2 -203 M-26 -206 Q-12 -194 -2 -192 M26 -206 Q12 -194 2 -192" stroke="#7a5010" stroke-width="1.8" fill="none"/>`+
+      `<circle cx="0" cy="-212" r="7" fill="#d63a2a" stroke="#ffe08a" stroke-width="1.6"/><circle cx="-2" cy="-214" r="2" fill="#fff" opacity=".5"/>`+
+      `<path d="M-36 -240 C-45 -230 -43 -214 -33 -208 L-17 -222 L-17 -240Z M32 -240 C41 -230 39 -214 29 -208 L16 -222 L16 -240Z" fill="url(#gold)" stroke="#7a5010" stroke-width="1.4"/>`+
+      `<path d="M-36 -240 l-4 -14 l12 10Z M32 -240 l4 -14 l-12 10Z" fill="url(#gold)" stroke="#7a5010" stroke-width="1"/>`;
+    if(c.kilt) torso+=[0,1,2,3,4,5].map(i=>`<path d="M${-31+i*10.4} -149 h9.6 v30 q-4.8 9 -9.6 0Z" fill="${c.kilt}" stroke="#d9a73a" stroke-width="1.3"/>`).join(''); }
+  if(c.skirt && !c.fem) torso+=`<path d="M-30 -150 C-30 -170 -28 -190 -26 -200 L28 -160 L26 -150Z" fill="${c.bottom}"/>`;
   else if(c.trim) torso+=`<path d="M-30 -156 L28 -156 L28 -146 L-30 -146Z" fill="${c.trim}"/>`;
   if(c.sash) torso+=`<g ${J('sashT')}><path d="M-34 -220 C-10 -200 10 -170 26 -150 L10 -150 C-6 -176 -22 -196 -36 -206Z" fill="${c.sash}"/>${c.studs?[0,1,2,3,4].map(i=>`<circle cx="${r1(-27+i*11.2)}" cy="${r1(-206+i*12)}" r="2.3" fill="${c.studs}" stroke="#00000055" stroke-width=".6"/>`).join(''):''}</g>`;
   if(c.jewel) torso+=`<g ${J('pend')}><path d="M-22 -230 Q2 -196 22 -228" stroke="url(#gold)" stroke-width="3" fill="none"/><line x1="2" y1="-205" x2="2" y2="-196" stroke="#e8b83a" stroke-width="1.4"/><path d="M-3 -196 L2 -186 L7 -196Z" fill="url(#gold)"/><circle cx="2" cy="-195" r="2" fill="#d63a2a"/></g>`;
@@ -265,6 +310,10 @@ function makeRig(cast){
 
   let back='';
   if(c.cape) back+=`<g ${J('cape')}><path d="M-20 -232 C-56 -200 -78 -110 -96 -4 L-30 -4 C-36 -80 -30 -160 -10 -226Z" fill="${c.cape}"/><path d="M-20 -232 C-56 -200 -78 -110 -96 -4 L-80 -4 C-62 -100 -44 -180 -16 -228Z" fill="#000" opacity=".25"/></g>`;
+  if(c.tail){ const tc=skin, td=shade(skin,-.3);
+    back+=`<g ${J('tail')}><path d="M-22 -160 C-92 -150 -132 -226 -112 -306 C-100 -358 -52 -372 -34 -334 C-26 -318 -36 -300 -50 -304" stroke="${td}" stroke-width="15" fill="none" stroke-linecap="round"/><path d="M-22 -160 C-92 -150 -132 -226 -112 -306 C-100 -358 -52 -372 -34 -334 C-26 -318 -36 -300 -50 -304" stroke="${tc}" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M-30 -163 C-86 -154 -124 -222 -105 -300" stroke="#fff" stroke-opacity=".14" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M-72 -176 l-8 6 M-102 -226 l-10 2 M-112 -262 l-10 -2 M-100 -322 l-8 -6" stroke="${td}" stroke-width="2.2" stroke-linecap="round"/><path d="M-50 -304 C-58 -312 -52 -324 -44 -318 C-40 -312 -44 -306 -50 -304Z" fill="${td}"/></g>`; }
+  if(c.fem && c.pallu) back+=`<g ${J('cape')}><path d="M-24 -230 C-50 -200 -62 -140 -66 -78 C-67 -48 -64 -30 -62 -18 L-24 -22 C-26 -70 -22 -150 -12 -224Z" fill="${c.pallu}"/><path d="M-24 -230 C-50 -200 -62 -140 -66 -78 C-67 -48 -64 -30 -62 -18" stroke="url(#gold)" stroke-width="3" fill="none"/><path d="M-62 -18 l4 -10 M-56 -20 l3 -10 M-50 -21 l2 -10" stroke="#ffd25e" stroke-width="1.6" stroke-linecap="round"/></g>`;
+  if(c.scarf) back+=`<g ${J('scarf')}><path d="M-14 -232 C-58 -250 -96 -204 -76 -150 C-104 -118 -66 -86 -96 -46 C-104 -30 -108 -14 -104 4 C-84 -22 -50 -60 -50 -96 C-44 -132 -66 -166 -48 -196 C-40 -212 -28 -224 -14 -232Z" fill="${c.scarf}" opacity=".72"/><path d="M-22 -226 C-60 -236 -86 -200 -68 -152 M-50 -96 C-56 -62 -78 -34 -98 -8" stroke="#fff" stroke-width="1.6" fill="none" opacity=".7"/></g>`;
   if(c.quiver) back+=`<g transform="rotate(-18 -18 -200)"><rect x="-34" y="-260" width="18" height="110" rx="5" fill="#4a2c18" stroke="#c99a3a" stroke-width="2"/><path d="M-31 -260 l3 -18 l3 18Z" fill="#ff4a3c"/><path d="M-26 -260 l3 -24 l3 24Z" fill="#4ee08a"/><path d="M-21 -260 l3 -18 l3 18Z" fill="#ffd25e"/></g>`;
   /* extra arms (c.arms:N): N more arms fanned up behind the shoulders, each holding a small emblem (c.armItems = list of 'sword'|'lotus'|'mace'|'chakra'|'bow'|'trident'|'flag') */
   if(c.arms>0){ const items=c.armItems||['sword','lotus','mace','bow','trishul','flag','chakra','sword'], n=c.arms;
@@ -284,7 +333,7 @@ function makeRig(cast){
       back+=`<g transform="translate(-4 -212) rotate(${a.toFixed(1)})">`+A(`rock:${(4+k%3*2)}:${(1+k*.17).toFixed(2)}:0:0`,
         `<line x1="0" y1="0" x2="0" y2="50" stroke="${skinB}" stroke-width="${12*wide}" stroke-linecap="round"/>${c.pads?`<rect x="-8.5" y="-2" width="17" height="21" rx="5" fill="${c.pads}" stroke="#e8b83a" stroke-width="1.4"/>`:''}<line x1="-6" y1="14" x2="6" y2="14" stroke="#e8b83a" stroke-width="3"/>`+
         `<g transform="translate(0 50) rotate(${bend})"><line x1="0" y1="0" x2="0" y2="44" stroke="${skin}" stroke-width="${10.5*wide}" stroke-linecap="round" opacity=".96"/><line x1="-5" y1="34" x2="5" y2="34" stroke="#e8b83a" stroke-width="2.4"/><circle cy="46" r="7" fill="${skin}"/><g transform="translate(0 46) rotate(180)">${glyph(items[k%items.length])}</g></g>`)+`</g>`; } }
-  const skirtFlare = c.skirt ? `<path ${J('skirt')} d="M-30 -150 C-38 -100 -46 -50 -52 -2 L48 -2 C42 -50 36 -100 28 -150Z" fill="${c.bottom}"/><path d="M-52 -10 L48 -10 L48 -2 L-52 -2Z" fill="url(#gold)"/>` : '';
+  const skirtFlare = c.skirt ? `<path ${J('skirt')} d="M-30 -150 C-38 -100 -46 -50 -52 -2 L48 -2 C42 -50 36 -100 28 -150Z" fill="${c.bottom}"/><path d="M-52 -10 L48 -10 L48 -2 L-52 -2Z" fill="url(#gold)"/>`+(c.fem?`<path d="M2 -148 L-4 -12 M10 -148 L8 -12 M18 -148 L20 -12 M26 -148 L32 -12 M-8 -148 L-18 -12" stroke="${SG}" stroke-width="2.2" opacity=".55" fill="none"/><path d="M-52 -26 L48 -26" stroke="url(#gold)" stroke-width="2" opacity=".8"/><path d="M-52 -16 L48 -16" stroke="#d63a2a" stroke-width="1.4" opacity=".8"/>`:'') : '';
 
   const aura = (cast.aura||c.aura) ? `<g ${J('aura')}><circle cx="0" cy="-170" r="200" fill="url(#${cast.aura||c.aura})" opacity=".6"/></g>` : '';
   const svg = `<g ${J('root')}>${aura}<ellipse ${J('shadow')} cx="4" cy="0" rx="56" ry="9" fill="#000" opacity=".35"/>`+
@@ -405,6 +454,9 @@ function updateRig(r, lt, t, talking){
   if(q.cape) setT(q.cape, `rotate(${r1(Math.sin(t*1.3+sd)*2.2 - P.lean*0.85 + gk(dLean*1.4,12))} -16 -230) translate(-16 -230) scale(1 ${(1-clamp01(P.drop/72)*0.32).toFixed(3)}) translate(16 230)`);
   if(q.beard) setT(q.beard, `rotate(${r1(Math.sin(t*1.25+sd+1)*1.6 + gk(dHead*0.7 + dLean*0.4,10))} 4 -248)`);
   if(q.hair) setT(q.hair, `rotate(${r1(Math.sin(t*1.1+sd)*2 + gk(dHead*0.9 + dLean*0.5,14))} -8 -262)`);
+  if(q.tail) setT(q.tail, `rotate(${r1(Math.sin(t*1.5+sd)*3.4 + Math.sin(t*2.7+sd)*1.4 + gk(-dLean*0.9,10))} -22 -160)`);
+  if(q.scarf) setT(q.scarf, `rotate(${r1(Math.sin(t*1.1+sd)*3.2 + Math.sin(t*2.1+sd)*1.6 + gk(-dLean*0.8,10))} -14 -230) translate(${r1(Math.sin(t*1.7+sd)*3)} 0)`);
+  if(q.kund) setT(q.kund, `rotate(${r1(gk(dHead*1.5 + talkShake*2 + wind2*3,30))} -4 -256)`);
   if(q.aura) q.aura.setAttribute('opacity', (0.75+0.25*Math.sin(t*1.6)).toFixed(3));
 
   if(q.thirdE){ const o = cast.thirdAt!==undefined ? smooth01((lt-cast.thirdAt)/0.5) : (ex==='angry'?smooth01(lt/0.6):0);
