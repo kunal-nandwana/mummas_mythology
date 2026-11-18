@@ -46,6 +46,8 @@ const RAVAN     = {skin:'#6a3a2c', top:'#2a0e1e', bottom:'#7a1424', shin:'#7a142
 const SAHASTRABAHU = {skin:'#8f5a3a', top:'#e0b040', bottom:'#233a7a', shin:'#233a7a', head:'crown', hair:'none', beard:'black', mus:true, big:true, cape:'#3a1a5a', garland:'#ffd25e', sash:'#c8442a', tilak:true, arms:8};   // Kartavirya Arjuna: gold armour, royal blue, purple cape, 8 extra arms fanned behind (use `with:{arms:N, armItems:[..]}`)
 const VISHNU    = {skin:'#4a86d0', top:'#4a86d0', bottom:'#f2c230', shin:'#4a86d0', head:'kirita', hair:'long', bare:true, mala:['#fbf7ee','#fbf7ee','#f29a3a','#fbf7ee'], studs:'#fff0b0', sash:'#f2c230', belt:'#e8b83a', pads:'#e8b83a', cape:'#e8c04a', tilak:'namam', jewel:false, earring:true, halo:[3,-280,46], arms:2, armItems:['chakra','shankh'], holds:{back:'mace'}, aura:'gw', trim:null};   // Shri Hari: sky-blue, tall gold kirita + halo with rays, shoulder pads, pearl mala, pitambar yellow, 4 arms (chakra + shankh up, gada in the back hand)
 
+const HANUMAN   = {skin:'#c98a3a', top:'#c98a3a', bottom:'#c8402c', shin:'#c98a3a', foot:'#8a5a22', head:'crown', hair:'none', bare:true, mus:true, garland:'#f6efe0', sash:'#e8c04a', pads:'#d9a73a', belt:'#d9b24a', tilak:true, trim:null, jewel:false, earring:true, aura:'saf', holds:{back:'mace'}};   // Hanuman: golden-orange vanara, red dhoti, gold crown + arm pads, flower garland, gada on his back. Use small (s .5-.8) for the searching-in-Lanka scenes
+
 const CHARACTER_LIST = {BARBARIK, KRISHNA, BRAHMIN, ARJUNA, BHIMA, YUDHISHTHIRA, NAKULA, SAHADEVA, GHATOTKACH, MOTHER, DEVI, SITA, RAMA, SHIVA, MAHAKAL, DUSHAN, ASURA, RISHI, SOLDIER, VILLAGER, DEVOTEE_F,
   CHANDRA, DAKSHA, ROHINI, NAKSHATRA, INDRA, DEVA, INDRADYUMNA, VISHWAKARMA, PUJARI, NANDI, NANDI_SADHAK,
-  PARSHURAM, KASHYAP, BRAHMA, RAVAN, SAHASTRABAHU, VISHNU};
+  PARSHURAM, KASHYAP, BRAHMA, RAVAN, SAHASTRABAHU, VISHNU, HANUMAN};

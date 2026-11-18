@@ -2031,6 +2031,368 @@
         "ring": 2.4,
         "lead": 0.5
       }
+    },
+    "ravan-night": {
+      "mood": "anger",
+      "desc": "Auto-created for scene \"ravan-night\" (anger): क्या रावण ने कभी माँ सीता को नहीं छुआ?. Edit this recipe in library.json to change it.",
+      "level": [1.048, 1.246],
+      "pad": {
+        "chords": "min",
+        "seg": 5,
+        "amp": 0.42
+      },
+      "drums": {
+        "step": 0.32,
+        "pat": [1, 0, 0, 0.5, 0, 0.6, 0, 0.45],
+        "amp": 0.32,
+        "f": [-17, -14],
+        "len": 0.45
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MIN",
+        "oct": 12,
+        "amp": 0.095,
+        "note": [0.559, 1.165],
+        "rest": [0.237, 0.885],
+        "phrase": [3, 5],
+        "rise": 0.4,
+        "start": 3,
+        "lead": 0.2,
+        "gap": 1
+      },
+      "auto": true
+    },
+    "hanuman-lanka": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"hanuman-lanka\" (calm): जब हनुमान जी लंका में रावण के महल में गए,. Edit this recipe in library.json to change it.",
+      "level": [0.689, 0.761],
+      "pad": {
+        "chords": "open",
+        "seg": 9,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.38, 2.67],
+        "rest": [1.704, 4.186],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "verse-source": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"verse-source\" (divine): वाल्मीकि रामायण (सुंदरकांड, सर्ग 9, श्लोक 69) में . Edit this recipe in library.json to change it.",
+      "level": [0.736, 0.889],
+      "pad": {
+        "chords": "open",
+        "seg": 10,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [24],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 4, 2, 5, 4, 2],
+        "step": 0.827,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "ravan-conquest": {
+      "mood": "anger",
+      "desc": "Auto-created for scene \"ravan-conquest\" (anger): (अर्थात: रावण ने अपने विजयन अभियानों के दौरान इन स. Edit this recipe in library.json to change it.",
+      "level": [1.052, 1.139],
+      "pad": {
+        "chords": "min",
+        "seg": 6,
+        "amp": 0.42
+      },
+      "drums": {
+        "step": 0.307,
+        "pat": [1, 0, 0, 0.5, 0, 0.6, 0, 0.45],
+        "amp": 0.32,
+        "f": [-17, -14],
+        "len": 0.45
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MIN",
+        "oct": 12,
+        "amp": 0.095,
+        "note": [0.596, 0.96],
+        "rest": [0.187, 0.708],
+        "phrase": [3, 5],
+        "rise": 0.4,
+        "start": 3,
+        "lead": 0.2,
+        "gap": 1
+      },
+      "auto": true
+    },
+    "punjikasthala": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"punjikasthala\" (calm): उसने पुंजिकस्थला नाम की एक अप्सरा के साथ दुराचार क. Edit this recipe in library.json to change it.",
+      "level": [0.688, 0.818],
+      "pad": {
+        "chords": "open",
+        "seg": 8,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.753, 2.93],
+        "rest": [2.139, 4.235],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "punjikasthala-dark": {
+      "mood": "shock",
+      "desc": "Auto-created for scene \"punjikasthala-dark\" (shock): उसके वस्त्र उतारे और उस पर जबरदस्ती की थी।. Edit this recipe in library.json to change it.",
+      "level": [0.998, 0.382],
+      "pad": {
+        "chords": "fifth",
+        "seg": 5,
+        "amp": 0.22
+      },
+      "hit": {
+        "drum": {
+          "f": -24,
+          "amp": 0.7,
+          "len": 0.9
+        },
+        "bell": {
+          "f": -12,
+          "amp": 0.22,
+          "len": 4.5
+        }
+      },
+      "auto": true
+    },
+    "brahma-light": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"brahma-light\" (divine): जब ब्रह्मा जी को इस कुकृत्य का पता चला,. Edit this recipe in library.json to change it.",
+      "level": [0.762, 0.831],
+      "pad": {
+        "chords": "open",
+        "seg": 10,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [12, 19],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 4, 2, 5, 4, 2],
+        "step": 0.855,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "brahma-curse": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"brahma-curse\" (divine): तो उन्होंने रावण को शाप दिया —. Edit this recipe in library.json to change it.",
+      "level": [0.75, 0.84],
+      "pad": {
+        "chords": "open",
+        "seg": 9,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [24],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 1, 2, 3, 4, 2],
+        "step": 1.019,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "sita-panchavati": {
+      "mood": "sad",
+      "desc": "Auto-created for scene \"sita-panchavati\" (sad): और अब उस लोकप्रिय दावे की सच्चाई जानिए कि \"उसने कभ. Edit this recipe in library.json to change it.",
+      "level": [0.575, 0.359],
+      "pad": {
+        "chords": "min",
+        "seg": 9,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.075,
+        "note": [2.235, 3.632],
+        "rest": [2.145, 3.596],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "sita-abduction": {
+      "mood": "anger",
+      "desc": "Auto-created for scene \"sita-abduction\" (anger): (अर्थात: अपहरण के समय क्रोधातुर् रावण ने एक हाथ से. Edit this recipe in library.json to change it.",
+      "level": [1.08, 1.147],
+      "pad": {
+        "chords": "min",
+        "seg": 6,
+        "amp": 0.42
+      },
+      "drums": {
+        "step": 0.29,
+        "pat": [1, 0, 0, 0.5, 0, 0.6, 0, 0.45],
+        "amp": 0.32,
+        "f": [-17, -14],
+        "len": 0.45
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MIN",
+        "oct": 12,
+        "amp": 0.095,
+        "note": [0.583, 1.143],
+        "rest": [0.195, 0.687],
+        "phrase": [3, 5],
+        "rise": 0.4,
+        "start": 3,
+        "lead": 0.2,
+        "gap": 1
+      },
+      "auto": true
+    },
+    "ravan-admits": {
+      "mood": "anger",
+      "desc": "Auto-created for scene \"ravan-admits\" (anger): और तो और, युद्धकांड में रावण खुद स्वीकार करता है. Edit this recipe in library.json to change it.",
+      "level": [1.021, 1.221],
+      "pad": {
+        "chords": "min",
+        "seg": 5,
+        "amp": 0.42
+      },
+      "drums": {
+        "step": 0.322,
+        "pat": [1, 0, 0, 0.5, 0, 0.6, 0, 0.45],
+        "amp": 0.32,
+        "f": [-17, -14],
+        "len": 0.45
+      },
+      "melody": {
+        "kind": "bow",
+        "scale": "MIN",
+        "oct": 12,
+        "amp": 0.095,
+        "note": [0.577, 1.003],
+        "rest": [0.204, 0.788],
+        "phrase": [3, 5],
+        "rise": 0.4,
+        "start": 3,
+        "lead": 0.2,
+        "gap": 1
+      },
+      "auto": true
+    },
+    "ashoka-vatika": {
+      "mood": "sad",
+      "desc": "Auto-created for scene \"ashoka-vatika\" (sad): कि वह माँ सीता को अपनी शैया पर इसलिए नहीं ला सका. Edit this recipe in library.json to change it.",
+      "level": [0.536, 0.38],
+      "pad": {
+        "chords": "min",
+        "seg": 10,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "bow",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.075,
+        "note": [2.342, 3.527],
+        "rest": [2.069, 2.903],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "ravan-fear": {
+      "mood": "shock",
+      "desc": "Auto-created for scene \"ravan-fear\" (shock): क्योंकि उसे ब्रह्मा जी के शाप का भय था —. Edit this recipe in library.json to change it.",
+      "level": [0.921, 0.404],
+      "pad": {
+        "chords": "deep",
+        "seg": 6,
+        "amp": 0.22
+      },
+      "hit": {
+        "drum": {
+          "f": -24,
+          "amp": 0.7,
+          "len": 0.9
+        },
+        "bell": {
+          "f": -12,
+          "amp": 0.22,
+          "len": 4.5
+        }
+      },
+      "auto": true
+    },
+    "sita-sorrow": {
+      "mood": "sad",
+      "desc": "Auto-created for scene \"sita-sorrow\" (sad): सीता जी के प्रति सम्मान की वजह से नहीं, बल्कि सिर्. Edit this recipe in library.json to change it.",
+      "level": [0.556, 0.396],
+      "pad": {
+        "chords": "min",
+        "seg": 11,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.075,
+        "note": [2.714, 3.841],
+        "rest": [1.834, 3.244],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      },
+      "auto": true
     }
   }
 }
