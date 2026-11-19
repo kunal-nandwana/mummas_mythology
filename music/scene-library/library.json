@@ -2415,6 +2415,174 @@
         "lead": 0.6
       },
       "auto": true
+    },
+    "hanu-dusk-grief": {
+      "mood": "sad",
+      "desc": "Soft flute over an open drone: sorrowful but gentle, no dark tones",
+      "level": [0.547, 0.373],
+      "pad": {
+        "chords": "open",
+        "seg": 9,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 0,
+        "amp": 0.11,
+        "note": [2.715, 4.379],
+        "rest": [1.614, 4.172],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "hanu-dusk-search": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"hanu-dusk-search\" (calm): जब हनुमान जी लंका पहुँचे,. Edit this recipe in library.json to change it.",
+      "level": [0.71, 0.762],
+      "pad": {
+        "chords": "maj",
+        "seg": 8,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.574, 3.34],
+        "rest": [1.609, 3.379],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "hanu-lost": {
+      "mood": "sad",
+      "desc": "Soft flute over an open drone: sorrowful but gentle, no dark tones",
+      "level": [0.572, 0.368],
+      "pad": {
+        "chords": "open",
+        "seg": 10,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 0,
+        "amp": 0.11,
+        "note": [2.601, 3.851],
+        "rest": [1.606, 3.695],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "hanu-sea": {
+      "mood": "sad",
+      "desc": "Soft flute over an open drone: sorrowful but gentle, no dark tones",
+      "level": [0.538, 0.403],
+      "pad": {
+        "chords": "open",
+        "seg": 10,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 0,
+        "amp": 0.11,
+        "note": [2.37, 3.624],
+        "rest": [1.934, 4.126],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "hanu-breath": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"hanu-breath\" (calm): लेकिन तभी उन्हें एहसास हुआ. Edit this recipe in library.json to change it.",
+      "level": [0.681, 0.802],
+      "pad": {
+        "chords": "maj",
+        "seg": 8,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.516, 2.551],
+        "rest": [1.729, 4.489],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "hanu-dawn": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"hanu-dawn\" (calm): अर्थात, मृत्यु केवल हानियाँ लाती है,. Edit this recipe in library.json to change it.",
+      "level": [0.707, 0.815],
+      "pad": {
+        "chords": "maj",
+        "seg": 9,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.738, 3.374],
+        "rest": [2.065, 3.639],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "hanu-vatika": {
+      "mood": "hope",
+      "desc": "Auto-created for scene \"hanu-vatika\" (hope): और कुछ ही देर बाद उन्हें अशोक वाटिका दिखाई दी,. Edit this recipe in library.json to change it.",
+      "level": [0.804, 1.101],
+      "pad": {
+        "chords": "maj",
+        "seg": 7,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 99,
+        "notes": [24, 12, 19],
+        "amp": 0.07,
+        "len": 3,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 2],
+        "step": 0.529,
+        "amp": 0.13,
+        "ring": 1.4,
+        "lead": 0.4
+      },
+      "melody": {
+        "kind": "pluck",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.2,
+        "note": [1.054, 2.405],
+        "rest": [0.548, 1.89],
+        "phrase": [3, 4],
+        "rise": 0.7,
+        "lead": 0.9
+      },
+      "auto": true
     }
   }
 }
