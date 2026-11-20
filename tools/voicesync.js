@@ -131,11 +131,14 @@ function planSync({silences,total,nar,forced,weights,words}){   // words[i] = wo
    lines end with a pause.
    --------------------------------------------------------------------- */
 const BRK_SENT=/[।?!.॥]["'”’)]*$/, BRK_SOFT=/[,—;:–]["'”’)]*$|—/;
+/* How long a word is when SPOKEN, in letters. Digits are read out in full ("69" = उनहत्तर), so each digit counts 3.5 letters.
+   Without this the numbers in "(सर्ग 9, श्लोक 69)" made that line look 40% shorter than it sounds and the cut came 1.2 s early. */
+const spokenLen=w=>{ const t=w.replace(/[.,!?'"‘’“”—\-–…:;।॥()]/g,''); const d=(t.match(/[0-9०-९]/g)||[]).length; return t.length-d+d*3.5; };
 function scriptBreaks(words,weights){
   // words[i] = array of word strings of narration shot i; weights[i] = how much text shot i has (keeps chant slow-down)
-  const strip=w=>w.replace(/[.,!?'"‘’“”—\-–…:;।॥()]/g,'');
+  const strip=spokenLen;
   const br=[], shotAt=[]; let c=0;
-  words.forEach((ws,si)=>{ const raw=ws.map(w=>strip(w).length+2), tot=raw.reduce((a,b)=>a+b,0)||1, k=weights?(weights[si]/tot):1;
+  words.forEach((ws,si)=>{ const raw=ws.map(w=>strip(w)+2), tot=raw.reduce((a,b)=>a+b,0)||1, k=weights?(weights[si]/tot):1;
     shotAt.push(c);
     ws.forEach((w,wi)=>{ c+=raw[wi]*k; const end=wi===ws.length-1;
       if(end) br.push({c, kind:2, shot:si+1}); else if(BRK_SENT.test(w)) br.push({c,kind:2}); else if(BRK_SOFT.test(w)) br.push({c,kind:1}); }); });
@@ -176,7 +179,7 @@ function alignSentences({P,start,end,br,total}){
     return Math.min(b.t0,t+left); };
   return {anchors, timeAt, worst, K}; }
 
-module.exports={AUDIO_EXT, parseSilences, probe, planSync, scriptBreaks, alignSentences};
+module.exports={spokenLen, AUDIO_EXT, parseSilences, probe, planSync, scriptBreaks, alignSentences};
 
 /* self-test:  node tools/voicesync.js */
 if(require.main===module){
