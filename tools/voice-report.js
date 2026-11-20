@@ -47,7 +47,7 @@ function analyse(topic,voice){
   const forced=nar.map(s=>toSec(cfg.shots[s.i].rec));
   const weights=textWeights(cfg,nar);
   const words=nar.map(s=>s.words.map(w=>w.text));
-  const sync=VS.planSync({silences:info.silences,total:info.total,nar:nar.map(s=>s.dur),forced,weights,words});
+  const sync=VS.planSync({silences:info.silences,total:info.total,nar:nar.map(s=>s.dur),forced,weights,words,micro:info.micro});
   return {ok:true, cfg, plan, nar, info, sync, voice}; }
 
 const mmss=s=>{ s=Math.round(Math.max(0,s)*10)/10; return Math.floor(s/60)+':'+(s%60).toFixed(1).padStart(4,'0'); };
@@ -72,7 +72,7 @@ function writeReport(topic,A,extra){
   else if(sync.snapped < (nar.length-1)*0.6) warn.push('Only a few shot changes landed on a real pause. Leave a short pause (about half a second) at the end of every line.');
   if(warn.length) md+='## Things to check\n\n'+warn.map(w=>'- '+w).join('\n')+'\n\n';
   if(sync){
-    md+=`## Shots against your voice\n\n"Starts at" is the time in YOUR recording. "How": *at your pause* = the cut sits on your pause after that line; *by sentence pace* = no pause there, so the cut is placed from your steady pace between the nearest pauses that match sentence ends in the script (breaths inside a sentence are ignored).${sync.mode==='sentences'?` Pace steadiness: ${sync.steadiness<=0.2?'very steady':sync.steadiness<=0.35?'steady':'uneven'} (largest change ${Math.round((Math.exp(sync.steadiness)-1)*100)}%).`:''}\n\n| Shot | Starts at | Your length | Plan | How | Line begins |\n|---|---|---|---|---|---|\n`;
+    md+=`## Shots against your voice\n\n"Starts at" is the time in YOUR recording. "How": *at your pause* = the cut sits on your pause after that line; *by sentence pace* = no pause there, so the cut is placed from your steady pace between the nearest pauses that match sentence ends in the script (breaths inside a sentence are ignored); *by pace, on a gap* = the same, then moved onto the nearest tiny gap between two words so it never cuts through a word.${sync.mode==='sentences'?` Pace steadiness: ${sync.steadiness<=0.2?'very steady':sync.steadiness<=0.35?'steady':'uneven'} (largest change ${Math.round((Math.exp(sync.steadiness)-1)*100)}%).`:''}\n\n| Shot | Starts at | Your length | Plan | How | Line begins |\n|---|---|---|---|---|---|\n`;
     nar.forEach((s,i)=>{ const st=i===0?sync.start:sync.cuts[i]; md+=`| ${i+1+(cfg.opening||0)} | ${mmss(st)} | ${sync.durs[i].toFixed(1)} s | ${s.dur.toFixed(1)} s | ${i===0?'speech start':sync.report[i-1].how} | ${s.line.split(/\s+/).slice(0,5).join(' ')}… |\n`; });
     md+=`\nIf one shot starts at the wrong moment, tell Kiro e.g. "shot 7 should start at 0:31.8" (Kiro adds \`rec:'0:31.8'\` to that shot).\n\n## Your pauses\n\n${sync.pauses.slice(0,120).map(p=>`${mmss(p.s)} (${p.len.toFixed(2)} s)`).join(' · ')||'none'}\n`; }
   fs.writeFileSync(out,md); return out; }

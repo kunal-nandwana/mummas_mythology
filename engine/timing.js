@@ -17,6 +17,8 @@
      the music fades out and the picture fades to black. 0 = stop at once. Not counted in cfg.target.
    ===================================================================== */
 function tStrip(s){ return s.replace(/[.,!?'"‘’“”—\-–…:;।()]/g,''); }
+/* how long a word is when SPOKEN: digits are read out in full ("69" = उनहत्तर), so each one counts 3.5 letters (same rule as tools/voicesync.js) */
+function tSpoken(w){ const t=tStrip(w), d=(t.match(/[0-9०-९]/g)||[]).length; return t.length-d+d*3.5; }
 function tWords(line){ return (line||'').split(/\s+/).filter(w=>w && !/^[—\-–…]+$/.test(w)); }
 
 function planTiming(cfg){
@@ -42,15 +44,16 @@ function planTiming(cfg){
   P.forEach((p,i)=>{
     const dur = p.fixed || Math.max(minShot, p.raw*scale);
     const start=T, end=T+dur; T=end;
-    const total = p.wt.reduce((a,b)=>a+b,0)||1, lead=0.18, speak=Math.max(0.6, dur-0.5);
+    const ww = p.w.map(x=>tSpoken(x)+2), total = ww.reduce((a,b)=>a+b,0)||1, lead=0.18, speak=Math.max(0.6, dur-0.5);
     let acc=0;
     // shot.speech = [[s,e],...] real speech parts (from the owner's recording): words are spread over them and wait in the pauses
     const SP = cfg.shots[i].speech;
-    let at;
+    let at, atStart;   // at(f) = where the speech has reached f (0..1) / atStart(f) = the same, but a word that begins right after a pause starts when the voice RESUMES (not when the pause begins)
     if(SP && SP.length){ const segs=SP.map(([a,b])=>[Math.max(0,a),Math.min(dur,b)]).filter(([a,b])=>b>a), tot=segs.reduce((x,[a,b])=>x+b-a,0)||1;
-      at=f=>{ let rest=f*tot; for(const [a,b] of segs){ if(rest<=b-a+1e-9) return start+a+rest; rest-=b-a; } return start+segs[segs.length-1][1]; }; }
-    else at=f=>start+lead+f*speak;
-    const words = p.w.map((w,k)=>{ const o={text:w, t:at(acc/total), e:0}; acc+=p.wt[k]; o.e=at(acc/total); return o; });
+      at=f=>{ let rest=f*tot; for(const [a,b] of segs){ if(rest<=b-a+1e-9) return start+a+rest; rest-=b-a; } return start+segs[segs.length-1][1]; };
+      atStart=f=>{ let rest=f*tot; for(const [a,b] of segs){ if(rest<b-a-1e-9) return start+a+rest; rest-=b-a; } return start+segs[segs.length-1][1]; }; }
+    else atStart=at=f=>start+lead+f*speak;
+    const words = p.w.map((w,k)=>{ const o={text:w, t:atStart(acc/total), e:0}; acc+=ww[k]; o.e=at(acc/total); return o; });
     shots.push({i, start, end, dur, line: cfg.shots[i].line||'', words, speakEnd: start+lead+speak});
   });
   const ending = outro>0 ? 0 : (cfg.ending===undefined ? 3.2 : cfg.ending);
@@ -69,4 +72,4 @@ function captionChunks(words, maxChars){
   return out;
 }
 
-if(typeof module!=='undefined') module.exports={planTiming, captionChunks, tWords};
+if(typeof module!=='undefined') module.exports={planTiming, captionChunks, tWords, tSpoken};

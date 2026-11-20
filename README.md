@@ -76,6 +76,8 @@ URL options: `?shot=N` (jump to a shot), `?notext=1` (hide captions), `?clean=1`
 
 **For every video:** double-click **`make-video.command`**. It gets the latest videos from GitHub, asks which video, and makes the MP4 (about 3–6 minutes on an M1).
 
+**Rendering speed:** the picture is drawn by 3 browsers side by side (`--workers 4` for more, `--workers 1` if the Mac struggles), and ffmpeg uses a fast preset. Want a quick check first? `node tools/render.js <topic> --draft` makes a half-size `<topic>-draft.mp4` in a fraction of the time. Captions are now computed from the video time (smooth word glow, line cross-fade), and a word after a pause lights up when your voice resumes. Picture changes that fall between pauses are moved onto the nearest tiny gap between words.
+
 **Your voice is cleaned automatically** (made for the Boya M1): rumble and hiss removed, mouth clicks removed, warmer and clearer tone, harsh "s" softened, even volume, and loudness set to YouTube's level (-14 LUFS). To skip it add `--raw`; for a noisy room add `--denoise 18`.
 
 **Scene music (new, `music:'scenes'`):** every scene has its own music from the **scene sound library** (`music/scene-library/library.json`, saved in GitHub). A new scene name gets its sound created and saved automatically, and the same scene type always sounds the same. Scenes cross-fade smoothly, there is a soft beep / two-note tune at every scene change (no whoosh), and key moments (`focus:` in a shot) get a dominant sound while the music steps back. Your voice stays on top: the music sits about 10-12 dB below it and dips further while you speak. Listen to the library: `node tools/scene-audio.js preview`.

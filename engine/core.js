@@ -326,6 +326,25 @@ function VIDEO(cfg){
     if(LOOK.motes){ cx.fillStyle='#ffe2b0'; MOTE.forEach(m=>{ const y=(m.y-t*m.sp+H*20)%H, x=m.x+Math.sin(t*.4+m.ph)*10; cx.globalAlpha=.18+.3*Math.max(0,Math.sin(t*1.3+m.ph)); cx.beginPath(); cx.arc(x,y,m.r,0,6.283); cx.fill(); }); cx.globalAlpha=1; }
   }
 
+  /* ---- captions: every value is computed from the video time `t` (no CSS transitions, which run on the wall clock and made the
+     rendered words pop and lag by a random amount). A word glows in just before it is spoken, stays bright while it is spoken, then
+     settles to the "said" colour. A line (chunk) fades in as its first word starts and cross-fades into the next line. ---- */
+  const CAP_LEAD=0.05, CAP_BASE=[246,236,210], CAP_ON=[255,210,94], CAP_HL=[255,179,71], CAP_HLON=[255,138,42];
+  SH.forEach(sc=>sc.chunks.forEach(c=>c.words.forEach(w=>{ const hl=w.el.classList.contains('hl'); w.c0=hl?CAP_HL:CAP_BASE; w.c1=hl?CAP_HLON:CAP_ON; })));
+  const mixRGB=(a,b,k)=>`rgb(${Math.round(a[0]+(b[0]-a[0])*k)},${Math.round(a[1]+(b[1]-a[1])*k)},${Math.round(a[2]+(b[2]-a[2])*k)})`;
+  function styleWords(c,t){ const tc=t+CAP_LEAD;
+    c.words.forEach(w=>{ const said=smooth((tc-w.e)/0.28), a=smooth((tc-w.t+0.06)/0.16)*(1-said), st=w.el.style;
+      st.opacity=Math.min(1,0.55+0.4*said+0.45*a).toFixed(3); st.color=mixRGB(w.c0,w.c1,a);
+      st.transform=a>0.003?`translateY(${(-2*a).toFixed(2)}px) scale(${(1+0.1*a).toFixed(3)})`:'none';
+      st.textShadow=a>0.02?`0 3px 0 #3a1a05,0 0 ${(18*a).toFixed(1)}px rgba(255,180,60,${(0.75*a).toFixed(2)})`:''; }); }
+  function drawCaptions(t,active){
+    SH.forEach((sc,i)=>{ let ag=-1; if(i===active) sc.chunks.forEach((c,ci)=>{ if(t>=c.t-0.08) ag=ci; });
+      sc.chunks.forEach((c,ci)=>{ let op=0, tf='none';
+        if(ci===ag){ const e=easeOut((t-(c.t-0.08))/0.24); op=e; tf=`translateY(${((1-e)*14).toFixed(1)}px) scale(${(0.96+0.04*e).toFixed(3)})`; }
+        else if(ci===ag-1){ op=1-smooth((t-(sc.chunks[ag].t-0.08))/0.18); }       // the previous line fades out while the next fades in
+        if(op<0.01){ c.el.style.display='none'; return; }
+        c.el.style.display='block'; c.el.style.opacity=op.toFixed(3); c.el.style.transform=tf; styleWords(c,t); }); }); }
+
   /* ---- one frame ---- */
   const flash=$('flash'), bar=$('bar');
   function render(t){
@@ -361,10 +380,7 @@ function VIDEO(cfg){
     applyMood(t,cur);
     if(LOOK) drawLook(t);
     if(active>=0) placeCap(SH[active].capTop||CAPTOP);
-    SH.forEach((sc,i)=>{ let ag=-1; if(i===active) sc.chunks.forEach((c,ci)=>{ if(t>=c.t-0.05) ag=ci; });
-      sc.chunks.forEach((c,ci)=>{ const on=ci===ag; c.el.style.display=on?'block':'none';
-        if(on){ const k=clamp01((t-c.t)/0.22), e=1-Math.pow(1-k,3); c.el.style.opacity=(0.2+0.8*e).toFixed(2); c.el.style.transform=`translateY(${((1-e)*16).toFixed(1)}px) scale(${(0.94+0.06*e).toFixed(3)})`; }
-        if(on) c.words.forEach(w=>{ w.el.classList.toggle('on', t>=w.t && t<w.e); w.el.classList.toggle('said', t>=w.e); }); }); });
+    drawCaptions(t,active);
     SH.forEach(sc=>{ if(!sc.ctEl) return; const lt=t-sc.start, hold=Math.min(4.6,Math.max(1.5,sc.dur-1.4)), kin=clamp01((lt-.3)/.8), kout=clamp01(1-(lt-(1.1+hold))/.8), on=lt>=0&&t<sc.end;
       sc.ctEl.setAttribute('opacity',on?(kin*kout).toFixed(3):'0'); sc.ctEl.setAttribute('transform',`translate(0 ${r1((1-easeOut(kin))*-18)})`); });
     updateHook(t); updateSting(t); updateCard(t);

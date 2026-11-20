@@ -15,4 +15,13 @@ let bad=0;
 nar.forEach((s,i)=>{ if(!i) return; const d=r.cuts[i]-want[i], ok=Math.abs(d)<=TOL; if(!ok) bad++;
   console.log(`${ok?'✓':'✗'} shot ${String(i+1).padStart(2)}  ${r.cuts[i].toFixed(1).padStart(6)} s  (expected ${want[i]}, ${d>=0?'+':''}${d.toFixed(1)})  ${r.report[i-1].how}`); });
 console.log(`mode: ${r.mode}, steadiest-fit pace deviation ${r.steadiness.toFixed(2)}`);
-console.log(bad?`✗ ${bad} shot(s) more than ${TOL}s off`:'✓ voice sync regression test passed'); process.exit(bad?1:0);
+
+// Parshuram-Ravan (Nov 2026): real pause list from the owner's voice report. No hand-made answers, so check the plan is sane.
+const fs=require('fs'), P2=fs.readFileSync(path.join(__dirname,'fixtures','parshuram-pauses.txt'),'utf8').trim().split(' · ').map(x=>{ const m=/(\d+):([\d.]+) \(([\d.]+) s\)/.exec(x); const s=+m[1]*60+ +m[2]; return {s,e:s+ +m[3]}; });
+const T2='parshuram-ravan-vadh-long-form', L=VR.loadPlan(T2), nar2=L.plan.shots.slice(L.cfg.opening||0);
+const micro=[]; P2.forEach(p=>{ micro.push(p); micro.push({s:p.e+0.7,e:p.e+0.8}); });   // fake tiny gaps, to exercise the snapping
+const r2=VS.planSync({silences:[{s:0,e:0.4},...P2,{s:379.0,e:379.9}],total:379.9,nar:nar2.map(s=>s.dur),weights:VR.textWeights(L.cfg,nar2),words:nar2.map(s=>s.words.map(w=>w.text)),micro});
+let bad2=0; r2.cuts.forEach((c,i)=>{ if(i>0 && c<r2.cuts[i-1]+0.79) bad2++; });
+console.log(r2.mode==='sentences' && !bad2 && r2.durs.length===nar2.length ? '✓ parshuram plan is sane ('+r2.durs.length+' shots, '+r2.report.filter(x=>/gap/.test(x.how)).length+' cuts moved onto a gap)' : '✗ parshuram plan broken');
+if(r2.mode!=='sentences'||bad2) bad++;
+console.log(bad?`✗ ${bad} problem(s)`:'✓ voice sync regression test passed'); process.exit(bad?1:0);
