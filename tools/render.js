@@ -25,6 +25,8 @@
    Pace:   the shots follow YOUR speaking pace: pauses in the recording are found and every picture change is moved to
            the nearest pause (--nosync = use the planned pace instead). Music rises and falls with each scene's mood
            (--flatmusic = constant volume).
+   Speed:  frames are drawn by several browsers side by side (--workers 3 default, 1-6; lower it if the Mac gets hot or slow).
+           --draft = quick half-size preview (<topic>-draft.mp4), much faster. --gpu = try the Mac graphics chip (experimental).
    Output: <topic-folder>/<topic-folder>.mp4
    ===================================================================== */
 const fs=require('fs'), path=require('path'), {spawn, spawnSync}=require('child_process');
@@ -37,7 +39,10 @@ if(!fs.existsSync(HTML)){ console.error(`✗ ${topic}/index.html not found. Run:
 if(spawnSync('ffmpeg',['-version']).status!==0){ console.error('✗ ffmpeg is not installed. Run: brew install ffmpeg'); process.exit(1); }
 let chromium; try{ ({chromium}=require('playwright')); }catch(e){ console.error('✗ Playwright missing. Run: npm install && npx playwright install chromium'); process.exit(1); }
 
-const FPS=+opt('fps')||30, SCALE=2;
+const FPS=+opt('fps')||30, DRAFT=!!opt('draft'), SCALE=DRAFT?1:2;   // --draft = quick half-size preview render (about 4x faster)
+// parallel renderers: every one is its own browser, so frames are made side by side (the picture drawing is what takes the time)
+const os=require('os');
+const WORKERS=Math.max(1,Math.min(6,+opt('workers')||Math.min(3,Math.max(1,os.cpus().length-4)))), JQ=DRAFT?80:92;
 // 16:9 long videos (story.js format:'long') render 1920x1080; Shorts 1080x1920
 const LONG=/format\s*:\s*['"]long['"]/.test(fs.readFileSync(path.join(DIR,'story.js'),'utf8')), VW=LONG?960:540, VH=LONG?540:960;
 // cinematic voice grade: ON for long videos (--nocinema = off, --cinema = on for a Short too)
@@ -78,22 +83,27 @@ function voiceFilter(file){ if(opt('raw')) return null; let chain=voiceChain(); 
   return chain+','+ln+',alimiter=limit=0.89,aresample=48000'; }
 
 (async()=>{
-  const browser=await chromium.launch();
-  const page=await browser.newPage({viewport:{width:VW,height:VH}, deviceScaleFactor:SCALE});
-  const errs=[]; page.on('pageerror',e=>errs.push(e.message));
   // ---- follow the speaker's real pace: shot changes on the real pauses, caption words follow the real speech ----
-  let syncStart=null;
-  if(A && A.sync && !opt('nosync')){ syncStart=A.sync.start;
-    await page.addInitScript(sy=>{ window.__SYNC=sy; }, {durs:A.sync.durs, speech:A.sync.speech});
+  let syncStart=null, syncInit=null;
+  if(A && A.sync && !opt('nosync')){ syncStart=A.sync.start; syncInit={durs:A.sync.durs, speech:A.sync.speech};
     const planned=A.nar.reduce((a,s)=>a+s.dur,0);
     console.log(`♪ follows your pace: you speak for ${(A.sync.end-A.sync.start).toFixed(1)}s (plan was ${planned.toFixed(1)}s); ${A.sync.snapped} of ${A.nar.length-1} shot changes on your pauses`); }
   else if(A && !A.sync) console.log('♪ could not find clear speech in the recording: using the planned pace');
-  await page.goto('file://'+HTML+'?render=1'+(opt('notext')?'&notext=1':''));
-  await page.waitForFunction(()=>window.__ENGINE); await page.evaluate(()=>window.__ENGINE.ready); await page.waitForTimeout(400);
+  const errs=[], launchArgs=opt('gpu')?['--use-angle=metal','--enable-gpu-rasterization','--ignore-gpu-blocklist']:[];
+  async function openWorker(){
+    const browser=await chromium.launch({args:launchArgs});
+    const page=await browser.newPage({viewport:{width:VW,height:VH}, deviceScaleFactor:SCALE});
+    page.on('pageerror',e=>errs.push(e.message));
+    if(syncInit) await page.addInitScript(sy=>{ window.__SYNC=sy; }, syncInit);
+    await page.goto('file://'+HTML+'?render=1'+(opt('notext')?'&notext=1':''));
+    await page.waitForFunction(()=>window.__ENGINE); await page.evaluate(()=>window.__ENGINE.ready); await page.waitForTimeout(250);
+    return {browser,page}; }
+  console.log(`▶ starting ${WORKERS} renderer${WORKERS>1?'s':''}${DRAFT?' (draft quality)':''} ...`);
+  const pool=await Promise.all(Array.from({length:WORKERS},openWorker));
   if(errs.length){ console.error('✗ Page error:', errs[0]); process.exit(1); }
-  const R0=await page.evaluate(()=>({duration:window.__ENGINE.duration, shots:window.__ENGINE.shots, music:window.__ENGINE.music, voiceAt:window.__ENGINE.voiceAt, sfx:window.__ENGINE.sfx, levels:window.__ENGINE.musicLevels}));
+  const R0=await pool[0].page.evaluate(()=>({duration:window.__ENGINE.duration, shots:window.__ENGINE.shots, music:window.__ENGINE.music, voiceAt:window.__ENGINE.voiceAt, sfx:window.__ENGINE.sfx, levels:window.__ENGINE.musicLevels}));
   const {duration, shots, music, voiceAt, sfx, levels}=R0;
-  const N=Math.ceil(duration*FPS), out=path.join(DIR,topic+'.mp4');
+  const N=Math.ceil(duration*FPS), out=path.join(DIR,topic+(DRAFT?'-draft':'')+'.mp4');
 
   let shift=0, audioArgs=[], vf=null;
   if(A && A.ok){
@@ -159,19 +169,30 @@ function voiceFilter(file){ if(opt('raw')) return null; let chain=voiceChain(); 
   if(bedL||sfxFile) audioOut=['-filter_complex',fc.join(';'),'-map','0:v','-map','[a]','-c:a','aac','-b:a','192k'];
   const ff=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error',
     '-f','image2pipe','-framerate',String(FPS),'-c:v','mjpeg','-i','-', ...audioArgs, ...musicArgs, ...sfxArgs, ...audioOut,
-    '-c:v','libx264','-preset','medium','-crf','18','-pix_fmt','yuv420p','-r',String(FPS),'-t',D,'-movflags','+faststart', out],{stdio:['pipe','inherit','inherit']});
+    '-c:v','libx264','-preset',DRAFT?'ultrafast':'veryfast','-crf',DRAFT?'26':'18','-pix_fmt','yuv420p','-r',String(FPS),'-t',D,'-movflags','+faststart', out],{stdio:['pipe','inherit','inherit']});
+  ff.stdin.on('error',()=>{});
   const ffDone=new Promise(r=>ff.on('close',code=>r(code)));
   const t0=Date.now();
-  for(let i=0;i<N;i++){
-    await page.evaluate(t=>window.__ENGINE.seek(t), i/FPS);
-    const buf=await page.screenshot({type:'jpeg', quality:92});
-    if(!ff.stdin.write(buf)) await new Promise(r=>ff.stdin.once('drain',r));
-    if(i%FPS===0||i===N-1){ const p=(i+1)/N, el=(Date.now()-t0)/1000; process.stdout.write(`\r▶ frame ${i+1}/${N}  ${(p*100).toFixed(0)}%  ~${Math.max(0,el/p-el).toFixed(0)}s left   `); }
-  }
-  ff.stdin.end(); await browser.close();
+  // every renderer takes the next free frame; finished frames are handed to ffmpeg strictly in order
+  let next=0, written=0, failure=null; const done=new Map(), AHEAD=WORKERS*4;
+  let chain=Promise.resolve();
+  const flush=()=>chain=chain.then(async()=>{
+    while(done.has(written)){ const buf=done.get(written); done.delete(written); const i=written++;
+      if(!ff.stdin.write(buf)) await new Promise(r=>ff.stdin.once('drain',r));
+      if(i%FPS===0||i===N-1){ const p=(i+1)/N, el=(Date.now()-t0)/1000; process.stdout.write(`\r▶ frame ${i+1}/${N}  ${(p*100).toFixed(0)}%  ~${Math.max(0,el/p-el).toFixed(0)}s left   `); } } });
+  await Promise.all(pool.map(async w=>{
+    try{ for(;;){ const i=next++; if(i>=N||failure) break;
+        while(i-written>=AHEAD && !failure) await new Promise(r=>setTimeout(r,4));   // do not run far ahead of ffmpeg (memory)
+        await w.page.evaluate(t=>window.__ENGINE.seek(t), i/FPS);
+        done.set(i, await w.page.screenshot({type:'jpeg', quality:JQ}));
+        await flush(); }
+    }catch(e){ failure=failure||e; } }));
+  if(failure){ ff.stdin.end(); await Promise.all(pool.map(w=>w.browser.close().catch(()=>{}))); throw failure; }
+  await flush();
+  ff.stdin.end(); await Promise.all(pool.map(w=>w.browser.close().catch(()=>{})));
   const code=await ffDone; if(sfxFile) try{ fs.unlinkSync(sfxFile); }catch(e){}
   if(scoreMade) try{ fs.unlinkSync(musicFile); }catch(e){}
   if(code){ console.error(`\n✗ ffmpeg failed (code ${code}). Check that the voice file plays, or try again without it.`); process.exit(1); }
   if(A && A.ok){ const f=VR.writeReport(topic,A,`| Music | ${musicFile?musicName+', volume '+vol+' (dips gently while you speak)':'none (put a track in music/)'} |\n`); console.log(`\n✓ voice report: ${path.relative(ROOT,f)}`); }
-  console.log(`\n✓ ${path.relative(ROOT,out)}  (${(duration).toFixed(1)}s, ${shots.length} shots, ${VW*SCALE}x${VH*SCALE})`);
+  console.log(`\n✓ ${path.relative(ROOT,out)}  (${(duration).toFixed(1)}s, ${shots.length} shots, ${VW*SCALE}x${VH*SCALE}, rendered in ${((Date.now()-t0)/60000).toFixed(1)} min)`);
 })().catch(e=>{ console.error('✗',e.message); process.exit(1); });

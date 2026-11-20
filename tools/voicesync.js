@@ -50,11 +50,14 @@ function probe(file,nShots){
     tries.push(Object.assign({db, silences:sil}, scoreSet(sil,total,nShots))); });
   if(!tries.length) return {ok:false, error:'the recording looks silent'};
   tries.sort((a,b)=>b.sc-a.sc); const best=tries[0];
-  return {ok:true, total, mean, peak, threshold:best.db, silences:best.silences, speechFrac:best.speechFrac, tries:tries.map(t=>({db:t.db,pauses:t.pauses,sc:+t.sc.toFixed(2)}))}; }
+  // tiny dips (0.06 s+) at the same level = the gaps between words. Too short to count as pauses, but a picture change that has no pause
+  // of its own is moved onto the nearest one so it never lands in the middle of a word.
+  const micro=parseSilences(ff(['-i',file,'-af',`silencedetect=noise=${best.db}dB:d=0.06`]).stderr,total);
+  return {ok:true, total, mean, peak, threshold:best.db, silences:best.silences, micro, speechFrac:best.speechFrac, tries:tries.map(t=>({db:t.db,pauses:t.pauses,sc:+t.sc.toFixed(2)}))}; }
 
 /* nar = planned lengths (s) of the narration shots. Returns null if the recording has no clear speech.
    -> {durs[], speech[][] (speech parts inside each shot, relative to the shot start), cuts[], start, end, snapped, report[]} */
-function planSync({silences,total,nar,forced,weights,words}){   // words[i] = word strings of narration shot i (enables sentence alignment)
+function planSync({silences,total,nar,forced,weights,words,micro}){   // words[i] = word strings of narration shot i (enables sentence alignment)
    // weights[i] = how much text shot i has (seconds at the plan pace); default = nar   // forced[i] = time (s) in the recording where narration shot i must start
   const n=nar.length; if(!n) return null;
   const first=silences[0], last=silences[silences.length-1];
@@ -77,6 +80,7 @@ function planSync({silences,total,nar,forced,weights,words}){   // words[i] = wo
         if(a){ const len=a.t1-a.t0; cuts[i]=Math.max(a.t0+len*0.5, a.t1-0.25); how[i]='at your pause'; }
         else { cuts[i]=al.timeAt(S.shotAt[i+1]); how[i]='by sentence pace'; } }
       for(let i=1;i<n-1;i++) if(cuts[i]<cuts[i-1]+0.8) cuts[i]=cuts[i-1]+0.8;
+      snapToDips(cuts,how,micro,start,end);
       steadiness=al.worst;
       for(let i=0;i<n-1;i++){ const f=forced&&forced[i+1]; if(f!==undefined&&f!==null){ cuts[i]=f; how[i]='pinned (rec)'; } } } }
   if(n>1 && !aligned){
@@ -119,6 +123,22 @@ function planSync({silences,total,nar,forced,weights,words}){   // words[i] = wo
     speech.push(segs.length?segs:[[0.18,Math.max(0.6,b-a-0.3)]]);
     if(i>0){ if(how[i-1]==='at your pause') snapped++; report.push({shot:i+1, at:B[i], how:how[i-1]}); } }
   return {durs, speech, cuts:B, start, end, snapped, pauses:P, report, steadiness, mode:aligned?'sentences':'pauses'}; }
+
+/* A cut placed by pace (no pause of its own) can land in the middle of a word. Move it to the nearest tiny dip
+   (gap between words) within SNAP seconds, as long as it keeps 0.8 s from its neighbours. */
+const SNAP=0.5;
+function snapToDips(cuts,how,micro,start,end){
+  if(!micro||!micro.length) return 0;
+  const M=micro.filter(p=>p.s>start+0.3 && p.e<end-0.1).map(p=>({s:p.s,e:p.e,len:p.e-p.s,mid:(p.s+p.e)/2}));
+  let moved=0;
+  for(let i=0;i<cuts.length;i++){
+    if(how[i]!=='by sentence pace') continue;
+    const lo=(i>0?cuts[i-1]:start)+0.8, hi=(i<cuts.length-1?cuts[i+1]:end)-0.8;
+    let best=null, bv=1e9;
+    M.forEach(g=>{ const d=Math.abs(g.mid-cuts[i]); if(d>SNAP) return; const c=Math.max(g.s+g.len*0.5, g.e-0.12); if(c<lo||c>hi) return;
+      const v=d-1.5*Math.min(g.len,0.25); if(v<bv){ bv=v; best={c}; } });   // closer and longer gaps win
+    if(best){ cuts[i]=best.c; how[i]='by pace, on a gap'; moved++; } }
+  return moved; }
 
 /* ---------------------------------------------------------------------
    SENTENCE ALIGNMENT (used when the shots' words are known: planSync({..., words}))
@@ -179,7 +199,7 @@ function alignSentences({P,start,end,br,total}){
     return Math.min(b.t0,t+left); };
   return {anchors, timeAt, worst, K}; }
 
-module.exports={spokenLen, AUDIO_EXT, parseSilences, probe, planSync, scriptBreaks, alignSentences};
+module.exports={snapToDips, spokenLen, AUDIO_EXT, parseSilences, probe, planSync, scriptBreaks, alignSentences};
 
 /* self-test:  node tools/voicesync.js */
 if(require.main===module){
