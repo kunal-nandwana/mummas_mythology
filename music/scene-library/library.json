@@ -2583,6 +2583,98 @@
         "lead": 0.9
       },
       "auto": true
+    },
+    "vardan-boon": {
+      "mood": "shock",
+      "desc": "Auto-created for scene \"vardan-boon\" (shock): दूसरी तरफ, रावण को ब्रह्मा जी से जो वरदान मिला था,. Edit this recipe in library.json to change it.",
+      "level": [0.96, 0.42],
+      "pad": {
+        "chords": "fifth",
+        "seg": 4,
+        "amp": 0.22
+      },
+      "hit": {
+        "drum": {
+          "f": -24,
+          "amp": 0.7,
+          "len": 0.9
+        },
+        "bell": {
+          "f": -12,
+          "amp": 0.22,
+          "len": 4.5
+        }
+      },
+      "auto": true
+    },
+    "vishnu-kshir": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"vishnu-kshir\" (divine): भगवान विष्णु को श्रीराम के रूप में दोबारा जन्म लेन. Edit this recipe in library.json to change it.",
+      "level": [0.747, 0.824],
+      "pad": {
+        "chords": "divine",
+        "seg": 10,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [12, 19],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 4, 2, 5, 4, 2],
+        "step": 0.774,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "sahastrabahu-court": {
+      "mood": "joy",
+      "desc": "Auto-created for scene \"sahastrabahu-court\" (joy): महिष्मती के राजा कार्तवीर्य अर्जुन—जिन्हें हम सहस्. Edit this recipe in library.json to change it.",
+      "level": [0.987, 0.99],
+      "pad": {
+        "chords": "open",
+        "seg": 7,
+        "amp": 0.3
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 1, 2, 3, 4, 2],
+        "step": 0.331,
+        "amp": 0.14,
+        "ring": 0.7,
+        "lead": 0.2
+      },
+      "shaker": {
+        "step": 0.3,
+        "amp": 0.07
+      },
+      "drums": {
+        "step": 1.119,
+        "pat": [0.26, 0.16],
+        "amp": 1,
+        "f": [-12],
+        "len": 0.4
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 24,
+        "amp": 0.09,
+        "note": [0.462, 0.943],
+        "rest": [0.887, 2.253],
+        "phrase": [3, 4],
+        "lead": 1.2
+      },
+      "auto": true
     }
   }
 }

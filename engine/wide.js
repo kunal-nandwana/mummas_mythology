@@ -235,7 +235,7 @@ function warfield(o){ o=Object.assign({sunX:300},o||{});
 
 /* ---------- CHAPTER TAG (shot.chapterTag:{no,name}): small gold plate at the top centre, fades in/out over the RUNNING picture (no separate chapter screen). Screen-space, not affected by camera. ---------- */
 function chapterTag(W,H,ch){ const num=['०','१','२','३','४','५','६','७','८','९'], no=String(ch.no).split('').map(d=>num[+d]).join(''), w=Math.min(W-60,120+ch.name.length*14), x0=-w/2;
-  return `<g transform="translate(${W/2} 24)"><rect x="${x0}" y="-19" width="${w}" height="38" rx="19" fill="#150b2e" fill-opacity=".74" stroke="#f1c04e" stroke-width="2"/>`+
+  return `<g transform="translate(${W/2} 36) scale(1.18)"><rect x="${x0}" y="-19" width="${w}" height="38" rx="19" fill="#150b2e" fill-opacity=".74" stroke="#f1c04e" stroke-width="2"/>`+
     `<circle cx="${x0+23}" cy="0" r="14.5" fill="url(#gold)"/><text x="${x0+23}" y="8" text-anchor="middle" font-size="21" fill="#2a1608" ${_tiro}>${no}</text>`+
     `<text x="${x0+46+(w-58)/2}" y="8" text-anchor="middle" font-size="21" fill="#fff0cc" ${_tiro}>${ch.name}</text></g>`; }
 

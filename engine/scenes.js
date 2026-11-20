@@ -158,17 +158,18 @@ function verse(x,y,lines,size,col,delay,gap){ return lines.map((t,i)=>A(`pop:${(
    Use as shot field:  calli:{lines:['..','..'], source:'— महाभारत', y:300, size:34, delay:.6, gap:1.5, write:1.2, hold:0}
    (hold>0 = fade the verse out that many seconds after the last line is written). Or call calligraphy(lines,opts) inside art/front. */
 let _cgN=0;
-function calligraphy(lines,o){ o=Object.assign({y:300,size:34,delay:0.6,gap:1.5,write:1.2,col:'#ffe7a8',source:'',hold:0,scrim:true,glow:true},o||{});
+function calligraphy(lines,o){ o=Object.assign({y:300,size:34,delay:0.6,gap:1.5,write:1.2,col:'#ffe7a8',source:'',hold:0,scrim:true,glow:true,cx:270,sw:540},o||{});   // cx/sw = centre x and width of the picture (core.js passes 480/960 for 16:9)
+  const CX=o.cx, SW=o.sw;
   const n=_cgN++, S=o.size, lh=S*1.6; let out=`<defs><linearGradient id="cgS${n}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#05030c" stop-opacity="0"/><stop offset=".22" stop-color="#05030c" stop-opacity=".62"/><stop offset=".78" stop-color="#05030c" stop-opacity=".62"/><stop offset="1" stop-color="#05030c" stop-opacity="0"/></linearGradient></defs>`;
   const H=lines.length*lh+(o.source?lh*1.3:lh*.6)+S, top=o.y-S*2;
-  if(o.scrim) out+=A(`fadein:${Math.max(0,o.delay-.3).toFixed(2)}:.6`,`<rect x="0" y="${r1(top)}" width="540" height="${r1(H)}" fill="url(#cgS${n})"/>`);
-  lines.forEach((ln,i)=>{ const t0=o.delay+i*o.gap, ly=o.y+i*lh, w=Math.min(500,Array.from(ln).length*S*0.52+36), x0=r1(270-w/2), x1=r1(270+w/2);
+  if(o.scrim) out+=A(`fadein:${Math.max(0,o.delay-.3).toFixed(2)}:.6`,`<rect x="0" y="${r1(top)}" width="${SW}" height="${r1(H)}" fill="url(#cgS${n})"/>`);
+  lines.forEach((ln,i)=>{ const t0=o.delay+i*o.gap, ly=o.y+i*lh, w=Math.min(SW-40,Array.from(ln).length*S*0.52+36), x0=r1(CX-w/2), x1=r1(CX+w/2);
     out+=`<clipPath id="cg${n}_${i}"><rect data-a="reveal:${t0.toFixed(2)}:${o.write}:${x0}:${x1}" x="${x0}" y="${r1(ly-S*1.25)}" width="0" height="${r1(S*1.9)}"/></clipPath>`+
-      `<g clip-path="url(#cg${n}_${i})"><text x="270" y="${r1(ly)}" text-anchor="middle" font-size="${S}" fill="${o.col}" style="font-family:'Tiro','Mukta',serif;font-weight:400;${o.glow?'filter:drop-shadow(0 0 8px rgba(255,190,90,.75)) drop-shadow(0 2px 0 #2a1204)':''}">${ln}</text></g>`+
+      `<g clip-path="url(#cg${n}_${i})"><text x="${CX}" y="${r1(ly)}" text-anchor="middle" font-size="${S}" fill="${o.col}" style="font-family:'Tiro','Mukta',serif;font-weight:400;${o.glow?'filter:drop-shadow(0 0 8px rgba(255,190,90,.75)) drop-shadow(0 2px 0 #2a1204)':''}">${ln}</text></g>`+
       `<rect data-a="glint:${t0.toFixed(2)}:${o.write}:${x0}:${x1}" x="-3" y="${r1(ly-S*1.1)}" width="6" height="${r1(S*1.45)}" rx="3" fill="#fff3c4" filter="url(#b4)" opacity="0"/>`; });
   const tEnd=o.delay+lines.length*o.gap;
-  if(o.source) out+=A(`pop:${(tEnd-.2).toFixed(2)}`,`<path d="M170 ${r1(o.y+lines.length*lh-S*.6)} L370 ${r1(o.y+lines.length*lh-S*.6)}" stroke="#f1c04e" stroke-width="1.6" opacity=".8"/><path d="M264 ${r1(o.y+lines.length*lh-S*.6)} l6 -5 l6 5 l-6 5Z" fill="#f1c04e"/>`+
-    `<text x="270" y="${r1(o.y+lines.length*lh+S*.5)}" text-anchor="middle" font-size="${r1(S*.58)}" fill="#e6c98a" style="font-weight:700">${o.source}</text>`);
+  if(o.source) out+=A(`pop:${(tEnd-.2).toFixed(2)}`,`<path d="M${CX-100} ${r1(o.y+lines.length*lh-S*.6)} L${CX+100} ${r1(o.y+lines.length*lh-S*.6)}" stroke="#f1c04e" stroke-width="1.6" opacity=".8"/><path d="M${CX-6} ${r1(o.y+lines.length*lh-S*.6)} l6 -5 l6 5 l-6 5Z" fill="#f1c04e"/>`+
+    `<text x="${CX}" y="${r1(o.y+lines.length*lh+S*.5)}" text-anchor="middle" font-size="${r1(S*.58)}" fill="#e6c98a" style="font-weight:700">${o.source}</text>`);
   return o.hold>0 ? A(`fadeout:${(tEnd+o.hold).toFixed(2)}:.7`,out) : out; }
 
 /* =====================================================================
