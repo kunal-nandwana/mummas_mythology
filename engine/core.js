@@ -90,7 +90,7 @@ function VIDEO(cfg){
     const rigs=(sc.cast||[]).map(makeRig);
     const title = sc.title ? big(W/2, sc.title.y||150, (sc.title.size||50)*0.82, sc.title.color||'#ffd25e', sc.title.text, sc.title.delay||0.5) : '';
     const d=document.createElement('div'); d.className='scene';
-    const calli = sc.calli ? calligraphy(sc.calli.lines, fitCalli(sc)) : '';
+    const calli = sc.calli ? calligraphy(sc.calli.lines, Object.assign(fitCalli(sc),{cx:W/2,sw:W})) : '';
     const stage0=`${sc.art?sc.art():''}${rigs.map(r=>LOOK&&LOOK.rim?`<g class="rimfx">${r.svg}</g>`:r.svg).join('')}${sc.front?sc.front():''}${calli}${title}`;
     const layered=!!(sc.sky||sc.far||sc.mid||sc.near);
     d.innerHTML=`<svg viewBox="0 0 ${W} ${H}">`+(layered ?
