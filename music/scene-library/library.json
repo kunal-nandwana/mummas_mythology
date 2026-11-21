@@ -2675,6 +2675,312 @@
         "lead": 1.2
       },
       "auto": true
+    },
+    "pk-mountain-night": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"pk-mountain-night\" (calm): आखिर परशुराम जी ने रावण का वध क्यों नहीं किया? ज़र. Edit this recipe in library.json to change it.",
+      "level": [0.717, 0.785],
+      "pad": {
+        "chords": "open",
+        "seg": 9,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.721, 2.95],
+        "rest": [1.989, 4.784],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "pk-question": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"pk-question\" (calm): और रावण को मिले वरदान में मनुष्यों से कोई सुरक्षा . Edit this recipe in library.json to change it.",
+      "level": [0.733, 0.812],
+      "pad": {
+        "chords": "maj",
+        "seg": 8,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.585, 3.124],
+        "rest": [1.703, 4.231],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "pk-ayodhya-dusk": {
+      "mood": "hope",
+      "desc": "Auto-created for scene \"pk-ayodhya-dusk\" (hope): तो फिर श्रीराम को जन्म लेने की आवश्यकता क्यों पड़ी. Edit this recipe in library.json to change it.",
+      "level": [0.776, 1.093],
+      "pad": {
+        "chords": "maj",
+        "seg": 8,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 99,
+        "notes": [19, 24],
+        "amp": 0.07,
+        "len": 3,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 2],
+        "step": 0.495,
+        "amp": 0.13,
+        "ring": 1.4,
+        "lead": 0.4
+      },
+      "melody": {
+        "kind": "pluck",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.2,
+        "note": [1.198, 2.734],
+        "rest": [0.598, 1.464],
+        "phrase": [3, 4],
+        "rise": 0.7,
+        "lead": 0.9
+      },
+      "auto": true
+    },
+    "pk-pothi": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"pk-pothi\" (calm): वाल्मीकि रामायण से लेकर भागवत पुराण तक, किसी भी ग्. Edit this recipe in library.json to change it.",
+      "level": [0.682, 0.779],
+      "pad": {
+        "chords": "maj",
+        "seg": 9,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.53, 3.317],
+        "rest": [2.123, 3.428],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "pk-first-light": {
+      "mood": "hope",
+      "desc": "Auto-created for scene \"pk-first-light\" (hope): यह सच है कि पृथ्वी को अत्याचारी राजाओं से मुक्त कर. Edit this recipe in library.json to change it.",
+      "level": [0.791, 1.072],
+      "pad": {
+        "chords": "maj",
+        "seg": 7,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 99,
+        "notes": [19, 24],
+        "amp": 0.07,
+        "len": 3,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 5, 4, 2, 3, 1],
+        "step": 0.459,
+        "amp": 0.13,
+        "ring": 1.4,
+        "lead": 0.4
+      },
+      "melody": {
+        "kind": "pluck",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.2,
+        "note": [1.211, 2.297],
+        "rest": [0.601, 1.446],
+        "phrase": [3, 4],
+        "rise": 0.7,
+        "lead": 0.9
+      },
+      "auto": true
+    },
+    "pk-tapasya": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"pk-tapasya\" (calm): परशुराम जी तपस्या में लीन हो गए थे।. Edit this recipe in library.json to change it.",
+      "level": [0.669, 0.799],
+      "pad": {
+        "chords": "open",
+        "seg": 7,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.715, 3.241],
+        "rest": [1.588, 4.567],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "pk-light-thread": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"pk-light-thread\" (divine): उन्होंने अपनी वह दिव्य ऊर्जा श्रीराम को तब सौंपी थ. Edit this recipe in library.json to change it.",
+      "level": [0.692, 0.846],
+      "pad": {
+        "chords": "open",
+        "seg": 8,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [19, 24],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 5, 4, 2, 3, 1],
+        "step": 1.021,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "pk-silence": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"pk-silence\" (calm): तो फिर उससे पहले उन्हें किसने रोका था?. Edit this recipe in library.json to change it.",
+      "level": [0.733, 0.804],
+      "pad": {
+        "chords": "open",
+        "seg": 9,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.736, 2.886],
+        "rest": [1.84, 3.475],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "pk-diyas": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"pk-diyas\" (divine): इसका सबसे गहरा कारण सृष्टि के विधान में छिपा है—भग. Edit this recipe in library.json to change it.",
+      "level": [0.711, 0.843],
+      "pad": {
+        "chords": "open",
+        "seg": 11,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [24],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 2],
+        "step": 0.845,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "pk-third-diya": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"pk-third-diya\" (divine): और रावण के वध के साथ-साथ समाज में आदर्श स्थापित कर. Edit this recipe in library.json to change it.",
+      "level": [0.684, 0.823],
+      "pad": {
+        "chords": "divine",
+        "seg": 9,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [12, 19],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 1, 2, 3, 4, 2],
+        "step": 1.011,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "pk-ending": {
+      "mood": "hope",
+      "desc": "Auto-created for scene \"pk-ending\" (hope): क्या आप किसी अन्य प्रसंग के बारे में जानते हैं?. Edit this recipe in library.json to change it.",
+      "level": [0.803, 1.136],
+      "pad": {
+        "chords": "open",
+        "seg": 8,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 99,
+        "notes": [24],
+        "amp": 0.07,
+        "len": 3,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 5, 4, 2, 3, 1],
+        "step": 0.572,
+        "amp": 0.13,
+        "ring": 1.4,
+        "lead": 0.4
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.2,
+        "note": [1.025, 2.651],
+        "rest": [0.547, 1.365],
+        "phrase": [3, 4],
+        "rise": 0.7,
+        "lead": 0.9
+      },
+      "auto": true
     }
   }
 }
