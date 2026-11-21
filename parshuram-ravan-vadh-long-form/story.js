@@ -287,9 +287,9 @@ VIDEO({
       art:()=>wsky([[0,'#0a0820'],[1,'#241448']])+wglow(480,270,420,'#ffb060',.22)+wmandala(480,270,330,'#f1c04e',28,200)+chainW([{n:'श्रीराम का जन्म'},{n:'शिव धनुष भंग'},{n:'सीता से विवाह'},{n:'शक्ति वापसी',sub:'परशुराम → श्रीराम'}],{y:215,delay:.6,step:2.9,hi:3})+wsparks(60,900,100,480,20,'#ffe7a8'), cam:'fit' } ]),
 
   ...SPLIT(`तो प्रश्न अब भी वही है—श्रीराम के जन्म से पहले, जब परशुराम जी के पास वह संपूर्ण दिव्य शक्ति थी, तब उन्होंने रावण का वध क्यों नहीं किया?`, ['जन्म से पहले,','शक्ति थी,'], [
-    { scene:'ch3-do-tark', mood:'hope', tr:'fade',
+    { rec:'3:47.9', scene:'ch3-do-tark', mood:'hope', tr:'fade',
       ...lay(()=>cosmos()), front:()=>wriddle('both',480,235,1.6), cam:{keys:[[0,480,270,1.0],[2.4,480,250,1.2]]} },
-    { scene:'ch3-do-tark', mood:'hope', tr:'fade',
+    { rec:'3:52.4', scene:'ch3-do-tark', mood:'hope', tr:'fade',
       art:()=>wsky([[0,'#0a0820'],[1,'#241448']])+wglow(300,400,320,'#ffb060',.3)+wmandala(480,270,330,'#f1c04e',28,200)+chainW([{n:'श्रीराम का जन्म'},{n:'शिव धनुष भंग'},{n:'सीता से विवाह'},{n:'शक्ति वापसी'}],{y:215,delay:.1,step:.2,hi:-1,before:true})+wsparks(60,900,100,480,20,'#ffe7a8'), cam:'fit' },
     { scene:'ch3-do-tark', mood:'hope', tr:'wipe',
       ...MAH({tone:'night', ledge:432, sunX:780}), front:()=>A('pulse:3',wglow(860,330,200,'#ff6a3a',.4))+wriddle('diya',640,150,.55),
@@ -382,7 +382,7 @@ VIDEO({
       cam:{keys:[[0,480,290,1.0],[6,420,262,1.25]]} } ]),
 
   ...SPLIT(`और महाकवि भवभूति के नाटक 'महावीरचरित' में राक्षसों के संहार का दायित्व श्रीराम को सौंपे जाने का काव्यात्मक वर्णन है,`, ['में'], [
-    { scene:'ch4-avatar-uddeshya', mood:'joy', tr:'fade',
+    { rec:'5:34.8', scene:'ch4-avatar-uddeshya', mood:'joy', tr:'fade',
       art:()=>wsky([[0,'#3a0c1c'],[1,'#7a2a30']])+wglow(480,240,420,'#ffcf90',.45)+`<path d="M-40 -20 Q70 140 40 560 L-40 560Z" fill="#8a1a2a" stroke="url(#gold)" stroke-width="4"/><path d="M1000 -20 Q890 140 920 560 L1000 560Z" fill="#8a1a2a" stroke="url(#gold)" stroke-width="4"/>`+lightShafts(480,0,'#fff0c0',7,620,.1)+`<rect x="-40" y="${FY}" width="1040" height="130" fill="#3a1218"/><path d="M-40 ${FY} H1000" stroke="url(#gold)" stroke-width="3"/>`+wsparks(100,860,120,430,22,'#ffe7a8'),
       front:()=>wlower('महावीरचरित','महाकवि भवभूति · नाटक',{at:.4,hold:3}),
       cast:[{c:RISHI,x:320,y:FY,s:.7,acts:[[0,'stand']],expr:'serene'}, {c:RAMA,x:650,y:FY,s:.7,flip:true,acts:[[0,'stand']],expr:'serene',aura:'gw'}], cam:'fit' },
@@ -390,19 +390,19 @@ VIDEO({
       art:()=>wsky([[0,'#3a0c1c'],[1,'#7a2a30']])+wglow(480,240,420,'#ffcf90',.45)+`<path d="M-40 -20 Q70 140 40 560 L-40 560Z" fill="#8a1a2a" stroke="url(#gold)" stroke-width="4"/><path d="M1000 -20 Q890 140 920 560 L1000 560Z" fill="#8a1a2a" stroke="url(#gold)" stroke-width="4"/>`+lightShafts(480,0,'#fff0c0',7,620,.1)+`<rect x="-40" y="${FY}" width="1040" height="130" fill="#3a1218"/><path d="M-40 ${FY} H1000" stroke="url(#gold)" stroke-width="3"/>`+wsparks(100,860,120,430,22,'#ffe7a8'),
       cast:[{c:RISHI,x:320,y:FY,s:.78,acts:[[0,'stand'],[1.5,'offer']],props:{front:'bow'},expr:'serene'}, {c:RAMA,x:650,y:FY,s:.78,flip:true,acts:[[0,'stand'],[3,'namaste']],expr:'serene',aura:'gw'}], cam:{keys:[[0,480,300,1.2],[6,480,250,1.6]]} } ]),
 
-  { line:`लेकिन मूल वाल्मीकि रामायण अवतारों के इसी अलग-अलग प्रयोजन को दर्शाता है।`, scene:'ch4-avatar-uddeshya', mood:'divine', tr:'glow',
+  { rec:'5:43.2', line:`लेकिन मूल वाल्मीकि रामायण अवतारों के इसी अलग-अलग प्रयोजन को दर्शाता है।`, scene:'ch4-avatar-uddeshya', mood:'divine', tr:'glow',
     ...lay(()=>cosmos()), front:()=>avatarMontage({hi:-1,delay:.4,step:.4})+wlower('वाल्मीकि रामायण','अवतारों के अलग-अलग प्रयोजन',{at:1.2,hold:4,y:30}), cam:'fit' },
 
   /* ================= CHAPTER 5 ================= */
 
   ...SPLIT(`संक्षेप में कहें तो—शास्त्रों में ऐसा कहीं नहीं लिखा कि परशुराम जी रावण को मारने में असमर्थ थे या उन्हें ऐसा करने से रोका गया था।`, ['नहीं लिखा कि','असमर्थ थे'], [
-    { chapterTag:{no:5, name:'निष्कर्ष'}, scene:'ch5-shanti', mood:'hope', tr:'dissolve', fx:'dust',
+    { rec:'5:49.7', chapterTag:{no:5, name:'निष्कर्ष'}, scene:'ch5-shanti', mood:'hope', tr:'dissolve', fx:'dust',
       ...TAP({tone:'dawn', fireX:760, hutX:140}), front:()=>A('bob:4:.22',pothi(580,180,.7)+wglow(580,180,140,'#ffe7a8',.45)),
       cast:[PR({x:330, s:.84, expr:'serene', acts:[[0,'stand'],[3,'explain']]})], cam:{keys:[[0,420,290,1],[6,400,250,1.25]]} },
-    { scene:'ch5-shanti', mood:'hope', tr:'fade',
+    { rec:'5:54.1', scene:'ch5-shanti', mood:'hope', tr:'fade',
       ...MAH({sunX:520, sunY:300, tone:'dawn'}), front:()=>wsparks(300,700,100,400,16,'#fff0c0'),
       cast:[PR({x:480, s:.9, expr:'serene', acts:[[0,'stand'],[1.4,'armUp'],[3.6,'hold']]})], cam:{keys:[[0,480,300,1.2],[4,486,206,2.0]]} },
-    { scene:'ch5-shanti', mood:'hope', tr:'wipe', fx:'petals',
+    { rec:'5:58.3', scene:'ch5-shanti', mood:'hope', tr:'wipe', fx:'petals',
       ...lay(()=>mithilaRoad()),
       cast:[PR({x:600, s:.8, walk:{from:-560,dur:5.4,delay:0}, acts:[[0,'stand']]})], cam:{keys:[[0,320,290,1.2],[6,620,275,1.2]]} } ]),
 
