@@ -56,9 +56,13 @@ function analyse(topic,voice){
   // shot.rec:'0:31.8' in story.js pins that shot to a time in the recording (fix for a shot the automatic fit got wrong)
   const toSec=v=>{ if(v===undefined||v===null) return null; if(typeof v==='number') return v; const p=String(v).split(':').map(Number); return p.length===2?p[0]*60+p[1]:p[0]; };
   const forced=nar.map(s=>toSec(cfg.shots[s.i].rec));
+  // your taps (tools/tap-sync.js -> <topic>/voice-taps.json, only for this exact recording) win over rec: and the automatic fit
+  const TS=require('./tap-sync'), taps=TS.loadTaps(topic,voice)||{}, tapped=new Set();
+  Object.keys(taps).forEach(n=>{ const i=+n-1; if(i>=1&&i<nar.length){ forced[i]=TS.tapToCut(taps[n],info.silences); tapped.add(i); } });
   const {weights,words,chant}=syncInputs(cfg,nar);
   const sync=VS.planSync({silences:info.silences,total:info.total,nar:nar.map(s=>s.dur),forced,weights,words,chant,micro:info.micro});
-  return {ok:true, cfg, plan, nar, info, sync, voice}; }
+  if(sync) tapped.forEach(i=>{ if(sync.report[i-1]) sync.report[i-1].how='tapped by you'; });
+  return {ok:true, cfg, plan, nar, info, sync, voice, tapped:tapped.size}; }
 
 const mmss=s=>{ s=Math.round(Math.max(0,s)*10)/10; return Math.floor(s/60)+':'+(s%60).toFixed(1).padStart(4,'0'); };
 function writeReport(topic,A,extra){
@@ -70,6 +74,7 @@ function writeReport(topic,A,extra){
   md+=`| Pause detection | quieter than ${info.threshold} dB for 0.2 s+ (chosen automatically for your room) |\n`;
   if(sync){ const sp=sync.end-sync.start;
     md+=`| Speech starts / ends | ${mmss(sync.start)} / ${mmss(sync.end)} |\n| You speak for | ${sp.toFixed(1)} s (the script plan was ${plannedT.toFixed(1)} s, so you are ${sp>plannedT?((sp/plannedT-1)*100).toFixed(0)+'% slower':((1-sp/plannedT)*100).toFixed(0)+'% faster'}) |\n`;
+    if(A.tapped) md+=`| Your taps | ${A.tapped} shot changes set by you (tap-sync.command, voice-taps.json) |\n`;
     md+=`| Pace | about ${Math.round(words/(sp/60))} words a minute |\n| Pauses found | ${sync.pauses.length} |\n| Shot changes on your pauses | ${sync.snapped} of ${nar.length-1} |\n`;
     if(sync.chantSpeed) md+=`| Shloka chanting | ${sync.chantSpeed.toFixed(1)}x slower than your narration (measured from this recording) |\n`; }
   if(extra) md+=extra;
@@ -84,7 +89,7 @@ function writeReport(topic,A,extra){
   if(sync && sync.unused && sync.unused.length) warn.push(`Long pauses with no shot change on them: ${sync.unused.map(p=>`${mmss(p.s)} (${p.len.toFixed(2)} s)`).join(', ')}. Usually fine (a pause inside a line or a shloka); if the picture changes late or early near one of these, say e.g. "shot 15 should start at 0:52.1".`);
   if(warn.length) md+='## Things to check\n\n'+warn.map(w=>'- '+w).join('\n')+'\n\n';
   if(sync){
-    md+=`## Shots against your voice\n\n"Starts at" is the time in YOUR recording. "How": *at your pause* = the cut sits on your pause after that line; *by sentence pace* = no pause there, so the cut is placed from your steady pace between the nearest pauses that match sentence ends in the script (breaths inside a sentence are ignored); *by pace, on a gap* = the same, then moved onto the nearest tiny gap between two words so it never cuts through a word.${sync.mode==='sentences'?` Pace steadiness: ${sync.steadiness<=0.2?'very steady':sync.steadiness<=0.35?'steady':'uneven'} (largest change ${Math.round((Math.exp(sync.steadiness)-1)*100)}%).`:''}\n\n| Shot | Starts at | Your length | Plan | How | Line begins |\n|---|---|---|---|---|---|\n`;
+    md+=`## Shots against your voice\n\n"Starts at" is the time in YOUR recording. "How": *at your pause* = the cut sits on your pause after that line; *by sentence pace* = no pause there, so the cut is placed from your steady pace between the nearest pauses that match sentence ends in the script (breaths inside a sentence are ignored); *tapped by you* = from your taps in tap-sync.command (voice-taps.json); *by pace, on a gap* = the same, then moved onto the nearest tiny gap between two words so it never cuts through a word.${sync.mode==='sentences'?` Pace steadiness: ${sync.steadiness<=0.2?'very steady':sync.steadiness<=0.35?'steady':'uneven'} (largest change ${Math.round((Math.exp(sync.steadiness)-1)*100)}%).`:''}\n\n| Shot | Starts at | Your length | Plan | How | Line begins |\n|---|---|---|---|---|---|\n`;
     nar.forEach((s,i)=>{ const st=i===0?sync.start:sync.cuts[i]; md+=`| ${i+1+(cfg.opening||0)} | ${mmss(st)} | ${sync.durs[i].toFixed(1)} s | ${s.dur.toFixed(1)} s | ${i===0?'speech start':sync.report[i-1].how} | ${s.line.split(/\s+/).slice(0,5).join(' ')}… |\n`; });
     md+=`\nIf one shot starts at the wrong moment, tell Kiro e.g. "shot 7 should start at 0:31.8" (Kiro adds \`rec:'0:31.8'\` to that shot).\n\n## Your pauses\n\n${sync.pauses.slice(0,120).map(p=>`${mmss(p.s)} (${p.len.toFixed(2)} s)`).join(' · ')||'none'}\n`; }
   fs.writeFileSync(out,md); return out; }

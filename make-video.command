@@ -36,4 +36,5 @@ if [ -f "$t/voice-report.md" ]; then
   echo "Voice report: $t/voice-report.md  (it opens now; copy-paste it into the Kiro chat if the voice and pictures don't line up)"
   open -e "$t/voice-report.md"
 fi
+echo "If the pictures lag behind your voice: double-click tap-sync.command, tap along once, then make the video again (free)."
 read -n 1 -s -r -p "Done. The MP4 is in the folder that just opened. Press any key to close."
