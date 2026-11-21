@@ -36,4 +36,15 @@ console.log(`${csOk?'✓':'✗'} parshuram chant speed learned: ${cs}x (expected
  [31,121.9,'…क्यों नहीं दी? (end of chapter 2)'],[49,196.0,'…वचन दिया था:'],[50,206.7,'shloka 2 …मया पुरा ॥']].forEach(([shot,t,what])=>{
   const c=r2.cuts[shot-1], ok=c>=t && c<=t+0.9; if(!ok) bad++;
   console.log(`${ok?'✓':'✗'} parshuram shot ${shot} starts ${c.toFixed(1)} s (after the pause at ${t}: ${what})`); });
+/* Tap sync (tools/tap-sync.js): a tap is ~0.2 s after the voice resumes; it must move onto that pause, and a tapped cut must win
+   over the automatic fit while every other cut stays in order. */
+{ const TS=require('./tap-sync'), sil=[{s:0,e:0.4},...P2,{s:379.0,e:379.9}];
+  const c1=TS.tapToCut(122.95,sil), c2=TS.tapToCut(250.0,sil);   // 2:01.9-2:02.74 pause, then a tap with no pause near it
+  const ok1=c1>=122.3&&c1<=122.75, ok2=Math.abs(c2-249.8)<0.01; if(!ok1||!ok2) bad++;
+  console.log(`${ok1&&ok2?'✓':'✗'} tap -> cut: ${c1.toFixed(2)} (on the pause) and ${c2.toFixed(2)} (0.2 s before the tap)`);
+  const forced=nar2.map(()=>null); forced[54]=226.0; forced[60]=255.0;   // shots 55 and 61 tapped well away from the fit
+  const r3=VS.planSync(Object.assign({silences:sil,total:379.9,nar:nar2.map(s=>s.dur),forced},VR.syncInputs(L.cfg,nar2)));
+  let order=0; r3.cuts.forEach((c,i)=>{ if(i>0&&c<=r3.cuts[i-1]) order++; });
+  const ok3=Math.abs(r3.cuts[54]-226.0)<0.01 && Math.abs(r3.cuts[60]-255.0)<0.01 && !order; if(!ok3) bad++;
+  console.log(`${ok3?'✓':'✗'} tapped cuts are kept and all ${r3.cuts.length} cuts stay in order`); }
 console.log(bad?`✗ ${bad} problem(s)`:'✓ voice sync regression test passed'); process.exit(bad?1:0);

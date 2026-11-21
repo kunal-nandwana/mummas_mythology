@@ -83,7 +83,11 @@ function planSync({silences,total,nar,forced,weights,words,micro,chant}){   // w
       for(let i=1;i<n-1;i++) if(cuts[i]<cuts[i-1]+0.8) cuts[i]=cuts[i-1]+0.8;
       snapToDips(cuts,how,micro,start,end);
       steadiness=al.worst;
-      for(let i=0;i<n-1;i++){ const f=forced&&forced[i+1]; if(f!==undefined&&f!==null){ cuts[i]=f; how[i]='pinned (rec)'; } } } }
+      for(let i=0;i<n-1;i++){ const f=forced&&forced[i+1]; if(f!==undefined&&f!==null){ cuts[i]=f; how[i]='pinned (rec)'; } }
+      // pinned/tapped cuts can sit far from where the fit put their neighbours: keep every cut in order (0.8 s apart for free ones)
+      const isF=i=>!!forced && forced[i+1]!==undefined && forced[i+1]!==null;
+      for(let i=1;i<n-1;i++){ if(isF(i)) { if(cuts[i]<cuts[i-1]+0.3) cuts[i]=cuts[i-1]+0.3; } else if(cuts[i]<cuts[i-1]+0.8) cuts[i]=cuts[i-1]+0.8; }
+      for(let i=n-3;i>=0;i--){ if(!isF(i) && cuts[i]>cuts[i+1]-0.8) cuts[i]=Math.max(i>0?cuts[i-1]+0.3:start+0.3, cuts[i+1]-0.8); } } }
   if(n>1 && !aligned){
     // candidates: your real pauses + "no pause" points every 0.25 s (used when you read two lines without stopping)
     const C=P.map(p=>({mid:p.mid, cut:Math.max(p.s+p.len*0.5, p.e-0.25), len:p.len, real:true}));
