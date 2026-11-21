@@ -63,6 +63,7 @@ function VIDEO(cfg){
   // Timing measured from the owner's real voice (set by tools/render.js before the page loads): window.__SYNC = {durs:[..], speech:[[[s,e],..],..]}
   // for the narration shots. ?durs=a,b,c works too (lengths only).
   const SY = window.__SYNC || (qs.has('durs') ? {durs:qs.get('durs').split(',').map(Number)} : null);
+  const PLAN_DUR = SY && SY.durs ? planTiming(cfg).shots.map(s=>s.dur) : null;   // planned shot lengths, before the voice timing replaces them
   if(SY && SY.durs){ const o=cfg.opening||0;
     cfg.shots=cfg.shots.map((s,i)=> i>=o && SY.durs[i-o]>0 ? Object.assign({},s,{dur:SY.durs[i-o], speech:SY.speech?SY.speech[i-o]:undefined}) : s); }
   const plan=planTiming(cfg), ENDING=plan.ending||0, DURATION=plan.duration, INTRO=plan.intro, NARR_END=plan.narrEnd, OUTRO=plan.outro;
@@ -70,6 +71,11 @@ function VIDEO(cfg){
   /* ---- look: extra polish, ON by default (cfg.look:false turns it off; an object tunes it) ---- */
   const LOOK = cfg.look===false ? null : Object.assign({rim:1, bokeh:1, motes:1, warm:.08, vig:.1}, (cfg.look&&typeof cfg.look==='object')?cfg.look:{});
   const SH = cfg.shots.map((s,i)=>Object.assign({}, s, plan.shots[i]));
+  // speech clock (timing.js speechClock): story.js times inside a shot follow the real voice. Verse shots keep real time:
+  // their calligraphy is already fitted to the chanting (fitCalli). shot.clock:false turns it off for one shot.
+  SH.forEach((sc,i)=>{ const f=PLAN_DUR && sc.clock!==false && !(sc.calli && sc.calli.fit!==false) ? speechClock(sc,PLAN_DUR[i]) : null; sc.et=f||(lt=>lt);
+    // the other way round, for story.js times that are not drawn every frame (shot.sfx, focus.at): planned time -> real time in the shot
+    sc.rt = f ? (p=>{ let lo=0, hi=sc.dur+Math.max(0,p)+1; for(let k=0;k<40;k++){ const m=(lo+hi)/2; if(f(m)<p) lo=m; else hi=m; } return hi; }) : (p=>p); });
 
   /* Calligraphy follows the shot's REAL length: with the owner's voice, the lines are written across the time he actually chants
      (first to last speech part), so line 1 appears as he starts and the last line is done as he finishes. Either way the last line
@@ -111,8 +117,10 @@ function VIDEO(cfg){
 
   /* ---- per-element animations (data-a) ---- */
   const easeOut=k=>1-Math.pow(1-clamp01(k),3);
-  function animate(sc,lt,t){
-    sc.anims.forEach(({e,type,a,ph})=>{ let tr='', op=null;
+  // looping animations keep the steady clock; one-off events (pop, rise, slide, walk, reveal, glint, fades, draw) use the speech clock et
+  const LOOPS={spin:1, bolt:1, drift:1, ripple:1, orbit:1};
+  function animate(sc,rt,t,et){
+    sc.anims.forEach(({e,type,a,ph})=>{ let tr='', op=null; const lt=LOOPS[type]?rt:et;
       switch(type){
         case 'flick': op=0.55+0.45*(0.5+0.5*Math.sin(t*a[0]+ph)); break;
         case 'pulse': op=0.55+0.45*(0.5+0.5*Math.sin(t*a[0]+(a[1]!==undefined?a[1]:ph))); break;
@@ -150,13 +158,14 @@ function VIDEO(cfg){
     up:{from:[CX,CY+20*KY,1.06],to:[CX,CY-10*KY,1.06]}, down:{from:[CX,CY-20*KY,1.06],to:[CX,CY+10*KY,1.06]}, still:{from:[CX,CY,1.02],to:[CX,CY,1.02]}, fit:{from:[CX,CY,1],to:[CX,CY,1]} };
   const easeSnap=k=>{ k=clamp01(k); return k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2; };
   const HAND = cfg.handheld===undefined ? 0.6 : cfg.handheld;
-  function camState(sc,lt,t){
+  function camState(sc,lt,t,et){   // et = speech clock (keys and shake are timed in story.js); lt = real time in the shot
+    if(et===undefined) et=lt;
     const c=typeof sc.cam==='object'?sc.cam:(CAMS[sc.cam]||CAMS.in); let x,y,z;
-    if(c.keys){ const K=c.keys; let i=0; while(i+1<K.length && K[i+1][0]<=lt) i++;
-      if(i+1>=K.length||lt<=K[0][0]){ const k0=K[Math.min(i,K.length-1)]; [x,y,z]=[k0[1],k0[2],k0[3]]; }
-      else { const a=K[i], b=K[i+1], u=(lt-a[0])/(b[0]-a[0]), k=(b[4]==='snap'?easeSnap:easeIO)(u); x=lerp(a[1],b[1],k); y=lerp(a[2],b[2],k); z=lerp(a[3],b[3],k); } }
+    if(c.keys){ const K=c.keys; let i=0; while(i+1<K.length && K[i+1][0]<=et) i++;
+      if(i+1>=K.length||et<=K[0][0]){ const k0=K[Math.min(i,K.length-1)]; [x,y,z]=[k0[1],k0[2],k0[3]]; }
+      else { const a=K[i], b=K[i+1], u=(et-a[0])/(b[0]-a[0]), k=(b[4]==='snap'?easeSnap:easeIO)(u); x=lerp(a[1],b[1],k); y=lerp(a[2],b[2],k); z=lerp(a[3],b[3],k); } }
     else { const k=easeIO(clamp01(lt/sc.dur)); x=lerp(c.from[0],c.to[0],k); y=lerp(c.from[1],c.to[1],k); z=lerp(c.from[2],c.to[2],k); }
-    if(sc.shake){ const [st,du,amp]=sc.shake; const e=clamp01((lt-st)/du); if(e>0&&e<1){ const f=(1-e)*amp; x+=Math.sin(lt*70)*f; y+=Math.cos(lt*57)*f; } }
+    if(sc.shake){ const [st,du,amp]=sc.shake; const e=clamp01((et-st)/du); if(e>0&&e<1){ const f=(1-e)*amp; x+=Math.sin(lt*70)*f; y+=Math.cos(lt*57)*f; } }
     if(HAND){ x+=Math.sin(t*0.83)*HAND*1.4+Math.sin(t*2.1)*HAND*0.35; y+=Math.cos(t*0.67)*HAND*1.1+Math.sin(t*1.9)*HAND*0.3; }
     const hs=hookShake(t); x+=hs[0]; y+=hs[1];
     // keep the frame covered: centre point can't drift past the edge allowed by the zoom
@@ -362,15 +371,15 @@ function VIDEO(cfg){
       let o={op:1,tf:'',blur:0,clip:'',bright:1}, z=isA?2:1;
       if(inP!==null){ o=trStyle(tr.type,'in',inP,sc); trOv={type:tr.type,p:inP,sc}; z=tr.type==='zoom'?1:3; }
       else if(outP!==null){ o=trStyle(nx.type,'out',outP,SH[i+1]); trOv={type:nx.type,p:outP,sc:SH[i+1]}; z=nx.type==='zoom'?3:1; }
-      const lt=Math.max(0,t-sc.start), cs=camState(sc,lt,t);
+      const lt=Math.max(0,t-sc.start), et=sc.et(lt), cs=camState(sc,lt,t,et);
       const st=sc.el.style; st.zIndex=z; st.opacity=o.op.toFixed(3); st.transform=(o.tf?o.tf+' ':'')+camCss(cs);
       st.clipPath=o.clip||'none';
       st.filter=(o.blur>0.2?`blur(${o.blur.toFixed(1)}px) `:'')+(o.bright>1.01?`brightness(${o.bright.toFixed(2)})`:'')||'none';
       // parallax layers + depth of field in close-ups
       sc.layers.forEach(L=>{ if(L.f!==1) L.e.setAttribute('transform',layerTf(L.f,cs));
         if(L.dof){ const bl=Math.max(0,cs.z-1.5)*(L.dof>0?1.7:2.6)*Math.abs(L.dof); L.e.style.filter=bl>0.3?`blur(${bl.toFixed(1)}px)`:''; } });
-      animate(sc,lt,t); drawFx(sc.fx,t,o.op);
-      sc.rigs.forEach(r=>{ let talk=0; if(r.cast.talk && isA){ const w=sc.words.find(w=>t>=w.t&&t<w.e); if(w) talk=(t-w.t)<(w.e-w.t)-0.06?1:0; } updateRig(r,lt,t,talk); });
+      animate(sc,lt,t,et); drawFx(sc.fx,t,o.op);
+      sc.rigs.forEach(r=>{ let talk=0; if(r.cast.talk && isA){ const w=sc.words.find(w=>t>=w.t&&t<w.e); if(w) talk=(t-w.t)<(w.e-w.t)-0.06?1:0; } updateRig(r,et,t,talk); });
       if(isA && (sc.tr==='flash'||sc.tr==='dip')){ const k=lt/0.5; if(k<1) fl=Math.max(fl,1-k); flash.style.background=sc.tr==='flash'?'#fff4d6':'#000'; }
     });
     if(trOv && trOv.type==='glow'){ fl=Math.max(fl,0.28*Math.sin(Math.PI*trOv.p)); flash.style.background='radial-gradient(circle at 50% 45%,#fff0c0,#ffb45a)'; }
@@ -417,14 +426,14 @@ function VIDEO(cfg){
     SH.forEach((sc,i)=>{ const tr=TRN[i];
       if(i<OPEN){ add(sc.start,'tick',.7); }
       else if(i>0 && cfg.transitionSound!=='none'){ const m=moodOfShot(sc); add(sc.start-(tr?tr.d*.25:0), UP[m]?'beepUp':DOWN[m]?'beepDown':'beep', sc.tr==='cut'?.6:.85); }
-      (sc.sfx||[]).forEach(e=>add(sc.start+e[0],e[1],e[2]));
+      (sc.sfx||[]).forEach(e=>add(sc.start+sc.rt(e[0]),e[1],e[2]));
       /* focus = a dominant sound for the key moment of a shot; the music steps back while it plays (render.js + tools/scene-audio.js) */
-      (sc.focus?[].concat(sc.focus):[]).forEach(f=>add(sc.start+(f.at||0),f.sound||'slay',f.vol,true)); });
+      (sc.focus?[].concat(sc.focus):[]).forEach(f=>add(sc.start+sc.rt(f.at||0),f.sound||'slay',f.vol,true)); });
     if(HK) HK.words.forEach((w,k)=>{ if(k===0) add(hookImpact(w)-.02,'boom',.7); });
     return ev.sort((a,b)=>a.t-b.t); }
   /* background-music level per shot (the music swells and dips with the scene). shot.music = number overrides (1 = normal). */
   const MUSIC_G={calm:.9,joy:1.0,hope:1.15,anger:1.1,sad:.75,shock:.8,divine:1.0,neutral:.9};
-  const musicLevels=SH.map(s=>({start:s.start, end:s.end, mood:(typeof s.mood==='string'?s.mood:(s.mood&&s.mood.base)||'neutral'), m:(typeof s.music==='number'?s.music:null), scene:s.scene||null, focus:(s.focus?[].concat(s.focus):[]).map(f=>({t:+(s.start+(f.at||0)).toFixed(3),sound:f.sound||'slay',dur:f.dur||2.2,duck:f.duck===undefined?.3:f.duck})), g: typeof s.music==='number' ? s.music : (MUSIC_G[typeof s.mood==='string'?s.mood:(s.mood&&s.mood.base)||'neutral']||.85)}));
+  const musicLevels=SH.map(s=>({start:s.start, end:s.end, mood:(typeof s.mood==='string'?s.mood:(s.mood&&s.mood.base)||'neutral'), m:(typeof s.music==='number'?s.music:null), scene:s.scene||null, focus:(s.focus?[].concat(s.focus):[]).map(f=>({t:+(s.start+s.rt(f.at||0)).toFixed(3),sound:f.sound||'slay',dur:f.dur||2.2,duck:f.duck===undefined?.3:f.duck})), g: typeof s.music==='number' ? s.music : (MUSIC_G[typeof s.mood==='string'?s.mood:(s.mood&&s.mood.base)||'neutral']||.85)}));
   window.__ENGINE={ words:SH.map(s=>s.words.map(w=>({text:w.text,t:+w.t.toFixed(2)}))), musicLevels, voiceAt:plan.voiceAt, sfx:sfxEvents(), music:cfg.music, duration:DURATION, intro:INTRO, narrEnd:NARR_END, W, H, shots:SH.map(s=>({start:s.start,end:s.end,line:s.line})), seek:t=>render(t), ready:document.fonts?document.fonts.ready:Promise.resolve() };
   window.__DUR=DURATION;
   if(!RENDER){ (function loop(){ const t=now(); if(!PROMPT && fixed===null && !paused && t>=DURATION-0.002){ t0=performance.now(); if(audio){audio.currentTime=0;audio.play().catch(()=>{});} }
