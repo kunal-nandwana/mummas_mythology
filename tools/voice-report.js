@@ -29,14 +29,25 @@ function findVoice(topic,given){
 /* how long each narration shot should take in the voice, in seconds at the plan pace (the sync fit shares the real recording out by these).
    Normal lines: by the number of letters. Chanted verses (shot.calli, or a line containing ॥) are spoken much slower than
    narration, so they count CHANT times more, and never less than a fixed `dur:` given in story.js. Without this the verse shot was
-   given too little time and the next scene came in while the owner was still chanting. Per shot override: `chant:2` (or chant:1 = normal). */
+   given too little time and the next scene came in while the owner was still chanting. Per shot override: `chant:2` (or chant:1 = normal).
+   With a recording, verses without chant:/dur: get their speed MEASURED instead (see chantLearned); CHANT is then only the plan default. */
 const CHANT=1.7;
-function textWeights(cfg,nar){
-  return nar.map(s=>{ const sh=cfg.shots[s.i]||{}; if(sh.chapter) return sh.dur||5;   // chapter card = a silent gap of that length
+/* Which verse shots get their chanting speed LEARNED from the recording (voicesync alignWithChant): every verse,
+   unless story.js fixes it with shot.chant / shot.dur, or cfg.chant for the whole video. */
+const isVerse=sh=>!!sh.calli || /॥/.test(sh.line||'');
+function chantLearned(cfg,nar){
+  return nar.map(s=>{ const sh=cfg.shots[s.i]||{}; return !sh.chapter && isVerse(sh) && sh.chant===undefined && !sh.dur && cfg.chant===undefined; }); }
+/* opts.learn: learned verses keep their normal-pace weight (planSync multiplies it by the learned chant speed) */
+function textWeights(cfg,nar,opts){
+  const learn=opts&&opts.learn ? chantLearned(cfg,nar) : null;
+  return nar.map((s,i)=>{ const sh=cfg.shots[s.i]||{}; if(sh.chapter) return sh.dur||5;   // chapter card = a silent gap of that length
     const w=s.words.reduce((a,x)=>a+VS.spokenLen(x.text)+2,0)/(cfg.pace||13);
-    const verse=!!sh.calli || /॥/.test(sh.line||'');
-    const k=sh.chant!==undefined ? sh.chant : (verse ? (cfg.chant||CHANT) : 1);
+    if(learn&&learn[i]) return w;
+    const k=sh.chant!==undefined ? sh.chant : (isVerse(sh) ? (cfg.chant||CHANT) : 1);
     return k===1 ? w : Math.max(w*k, sh.dur||0); }); }
+/* everything planSync needs from the story, the same for render, report and tests */
+function syncInputs(cfg,nar){
+  return {weights:textWeights(cfg,nar,{learn:true}), chant:chantLearned(cfg,nar), words:nar.map(s=>s.words.map(w=>w.text))}; }
 
 /* probe + sync plan for a topic and a voice file */
 function analyse(topic,voice){
@@ -45,9 +56,8 @@ function analyse(topic,voice){
   // shot.rec:'0:31.8' in story.js pins that shot to a time in the recording (fix for a shot the automatic fit got wrong)
   const toSec=v=>{ if(v===undefined||v===null) return null; if(typeof v==='number') return v; const p=String(v).split(':').map(Number); return p.length===2?p[0]*60+p[1]:p[0]; };
   const forced=nar.map(s=>toSec(cfg.shots[s.i].rec));
-  const weights=textWeights(cfg,nar);
-  const words=nar.map(s=>s.words.map(w=>w.text));
-  const sync=VS.planSync({silences:info.silences,total:info.total,nar:nar.map(s=>s.dur),forced,weights,words,micro:info.micro});
+  const {weights,words,chant}=syncInputs(cfg,nar);
+  const sync=VS.planSync({silences:info.silences,total:info.total,nar:nar.map(s=>s.dur),forced,weights,words,chant,micro:info.micro});
   return {ok:true, cfg, plan, nar, info, sync, voice}; }
 
 const mmss=s=>{ s=Math.round(Math.max(0,s)*10)/10; return Math.floor(s/60)+':'+(s%60).toFixed(1).padStart(4,'0'); };
@@ -60,7 +70,8 @@ function writeReport(topic,A,extra){
   md+=`| Pause detection | quieter than ${info.threshold} dB for 0.2 s+ (chosen automatically for your room) |\n`;
   if(sync){ const sp=sync.end-sync.start;
     md+=`| Speech starts / ends | ${mmss(sync.start)} / ${mmss(sync.end)} |\n| You speak for | ${sp.toFixed(1)} s (the script plan was ${plannedT.toFixed(1)} s, so you are ${sp>plannedT?((sp/plannedT-1)*100).toFixed(0)+'% slower':((1-sp/plannedT)*100).toFixed(0)+'% faster'}) |\n`;
-    md+=`| Pace | about ${Math.round(words/(sp/60))} words a minute |\n| Pauses found | ${sync.pauses.length} |\n| Shot changes on your pauses | ${sync.snapped} of ${nar.length-1} |\n`; }
+    md+=`| Pace | about ${Math.round(words/(sp/60))} words a minute |\n| Pauses found | ${sync.pauses.length} |\n| Shot changes on your pauses | ${sync.snapped} of ${nar.length-1} |\n`;
+    if(sync.chantSpeed) md+=`| Shloka chanting | ${sync.chantSpeed.toFixed(1)}x slower than your narration (measured from this recording) |\n`; }
   if(extra) md+=extra;
   md+='\n';
   const warn=[];
@@ -70,6 +81,7 @@ function writeReport(topic,A,extra){
   else if(sync.mode==='sentences'){
     if(sync.steadiness>0.35) warn.push(`Your pace changes a lot in places (up to ${Math.round((Math.exp(sync.steadiness)-1)*100)}% from your average), so a few "by sentence pace" cuts may be up to a second off. Watch those shots; if one is wrong, say e.g. "shot 7 should start at 0:31.8".`); }
   else if(sync.snapped < (nar.length-1)*0.6) warn.push('Only a few shot changes landed on a real pause. Leave a short pause (about half a second) at the end of every line.');
+  if(sync && sync.unused && sync.unused.length) warn.push(`Long pauses with no shot change on them: ${sync.unused.map(p=>`${mmss(p.s)} (${p.len.toFixed(2)} s)`).join(', ')}. Usually fine (a pause inside a line or a shloka); if the picture changes late or early near one of these, say e.g. "shot 15 should start at 0:52.1".`);
   if(warn.length) md+='## Things to check\n\n'+warn.map(w=>'- '+w).join('\n')+'\n\n';
   if(sync){
     md+=`## Shots against your voice\n\n"Starts at" is the time in YOUR recording. "How": *at your pause* = the cut sits on your pause after that line; *by sentence pace* = no pause there, so the cut is placed from your steady pace between the nearest pauses that match sentence ends in the script (breaths inside a sentence are ignored); *by pace, on a gap* = the same, then moved onto the nearest tiny gap between two words so it never cuts through a word.${sync.mode==='sentences'?` Pace steadiness: ${sync.steadiness<=0.2?'very steady':sync.steadiness<=0.35?'steady':'uneven'} (largest change ${Math.round((Math.exp(sync.steadiness)-1)*100)}%).`:''}\n\n| Shot | Starts at | Your length | Plan | How | Line begins |\n|---|---|---|---|---|---|\n`;
@@ -77,7 +89,7 @@ function writeReport(topic,A,extra){
     md+=`\nIf one shot starts at the wrong moment, tell Kiro e.g. "shot 7 should start at 0:31.8" (Kiro adds \`rec:'0:31.8'\` to that shot).\n\n## Your pauses\n\n${sync.pauses.slice(0,120).map(p=>`${mmss(p.s)} (${p.len.toFixed(2)} s)`).join(' · ')||'none'}\n`; }
   fs.writeFileSync(out,md); return out; }
 
-module.exports={loadPlan, findVoice, analyse, writeReport, textWeights};
+module.exports={loadPlan, findVoice, analyse, writeReport, textWeights, chantLearned, syncInputs};
 
 if(require.main===module){
   const args=process.argv.slice(2), topic=(args.find(a=>!a.startsWith('--'))||'').replace(/\/$/,'');

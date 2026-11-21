@@ -57,8 +57,9 @@ function probe(file,nShots){
 
 /* nar = planned lengths (s) of the narration shots. Returns null if the recording has no clear speech.
    -> {durs[], speech[][] (speech parts inside each shot, relative to the shot start), cuts[], start, end, snapped, report[]} */
-function planSync({silences,total,nar,forced,weights,words,micro}){   // words[i] = word strings of narration shot i (enables sentence alignment)
+function planSync({silences,total,nar,forced,weights,words,micro,chant}){   // words[i] = word strings of narration shot i (enables sentence alignment)
    // weights[i] = how much text shot i has (seconds at the plan pace); default = nar   // forced[i] = time (s) in the recording where narration shot i must start
+   // chant[i] = true: shot i is a verse whose chanting speed is learned from the recording (its weights[i] is at normal pace)
   const n=nar.length; if(!n) return null;
   const first=silences[0], last=silences[silences.length-1];
   const start = first && first.s<=0.08 ? first.e : 0;
@@ -71,10 +72,10 @@ function planSync({silences,total,nar,forced,weights,words,micro}){   // words[i
   const quietBefore=x=>{ let q=0; for(const p of P){ if(p.e<=x) q+=p.len; else if(p.s<x) q+=x-p.s; else break; } return q; };
   const SPT=x=>(x-start)-quietBefore(x);
   const textW=(weights||nar.map(d=>d-0.45)).map(d=>Math.max(0.5,d)), sumW=textW.reduce((a,b)=>a+b,0), kS=SPT(end)/sumW;
-  let aligned=null;
+  let aligned=null, chantSpeed=null;
   if(n>1 && words && words.length===n && P.length){
-    const S=scriptBreaks(words,weights||null), al=alignSentences({P,start,end,br:S.br,total:S.total});
-    if(al){ aligned=al;
+    const W=alignWithChant({P,start,end,words,weights:weights||null,chant}), S=W&&W.S, al=W&&W.al;
+    if(al){ aligned=al; if(chant&&chant.some(Boolean)) chantSpeed=W.f;
       const onPause={}; al.anchors.forEach(a=>{ const b=S.br[a.b]; if(b.shot) onPause[b.shot]=a; });   // shot ends that have their own pause
       for(let i=0;i<n-1;i++){ const a=onPause[i+1];
         if(a){ const len=a.t1-a.t0; cuts[i]=Math.max(a.t0+len*0.5, a.t1-0.25); how[i]='at your pause'; }
@@ -122,7 +123,9 @@ function planSync({silences,total,nar,forced,weights,words,micro}){   // words[i
     segs=segs.filter(([x,y])=>y-x>0.12).map(([x,y])=>[+(x-a).toFixed(3),+(y-a).toFixed(3)]);
     speech.push(segs.length?segs:[[0.18,Math.max(0.6,b-a-0.3)]]);
     if(i>0){ if(how[i-1]==='at your pause') snapped++; report.push({shot:i+1, at:B[i], how:how[i-1]}); } }
-  return {durs, speech, cuts:B, start, end, snapped, pauses:P, report, steadiness, mode:aligned?'sentences':'pauses'}; }
+  // long pauses (0.4 s+) that no cut sits on: almost always a sentence end, so these are the first places to check if a cut is off
+  const unused=P.filter(p=>p.len>=0.4 && !B.some(c=>c>=p.s-0.05 && c<=p.e+0.3));
+  return {durs, speech, cuts:B, start, end, snapped, pauses:P, report, steadiness, chantSpeed, unused, mode:aligned?'sentences':'pauses'}; }
 
 /* A cut placed by pace (no pause of its own) can land in the middle of a word. Move it to the nearest tiny dip
    (gap between words) within SNAP seconds, as long as it keeps 0.8 s from its neighbours. */
@@ -166,7 +169,10 @@ function scriptBreaks(words,weights){
 
 function alignSentences({P,start,end,br,total}){
   const m=P.length, nb=br.length; if(!m||!nb||total<=0) return null;
-  const quiet=(a,b)=>P.reduce((q,p)=>q+Math.max(0,Math.min(b,p.e)-Math.max(a,p.s)),0);
+  // quiet time between a and b (P is sorted and non-overlapping): prefix sums + binary search, so the search below stays fast
+  const qpre=[0]; P.forEach((p,i)=>qpre.push(qpre[i]+(p.e-p.s)));
+  const qUpTo=x=>{ let lo=0, hi=m; while(lo<hi){ const md=(lo+hi)>>1; if(P[md].e<=x) lo=md+1; else hi=md; } return qpre[lo]+(lo<m&&P[lo].s<x?x-P[lo].s:0); };
+  const quiet=(a,b)=>b>a?qUpTo(b)-qUpTo(a):0;
   const K=((end-start)-quiet(start,end))/total;            // seconds of speech per unit of text (whole recording)
   // anchor = {t0: speech stops, t1: speech resumes, c: text position}
   const A0={t0:start,t1:start,c:0}, AE={t0:end,t1:end,c:total};
@@ -197,9 +203,23 @@ function alignSentences({P,start,end,br,total}){
     const sp=(b.t0-a.t1)-quiet(a.t1,b.t0), want=(b.c>a.c?(c-a.c)/(b.c-a.c):0)*sp;
     let t=a.t1, left=want; for(const p of P){ if(p.e<=a.t1||p.s>=b.t0) continue; const run=p.s-t; if(run>=left) break; left-=Math.max(0,run); t=p.e; }
     return Math.min(b.t0,t+left); };
-  return {anchors, timeAt, worst, K}; }
+  return {anchors, timeAt, worst, K, cost:bestV}; }
 
-module.exports={snapToDips, spokenLen, AUDIO_EXT, parseSilences, probe, planSync, scriptBreaks, alignSentences};
+/* CHANT SPEED, learned from the recording.
+   Why: a verse (shloka) was counted a fixed 1.7x slower than narration. The owner chanted the Parshuram shlokas only about
+   1.35x slower, so the verse was given ~3 s too much text-time; its end was put mid-"अर्थात", his real pauses after it
+   (0:51.6, 2:01.9 ...) were called breaths, and every later cut came 1-2 shots late (Parshuram long video, Nov 2026).
+   How: try a range of chant speeds for all verse shots together and keep the one whose alignment fits the pauses best
+   (lowest cost). One speed for the whole recording: the same person chants every verse in a similar way. */
+const CHANT_TRY=[1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.2,2.4];
+function alignWithChant({P,start,end,words,weights,chant}){
+  const learn=chant&&chant.some(Boolean);
+  const run=f=>{ const w=weights?weights.map((x,i)=>learn&&chant[i]?x*f:x):null, S=scriptBreaks(words,w), al=alignSentences({P,start,end,br:S.br,total:S.total}); return al&&{S,al,f,w}; };
+  if(!learn||!weights) return run(1);
+  let best=null; CHANT_TRY.forEach(f=>{ const r=run(f); if(r&&(!best||r.al.cost<best.al.cost)) best=r; });
+  return best; }
+
+module.exports={snapToDips, spokenLen, AUDIO_EXT, parseSilences, probe, planSync, scriptBreaks, alignSentences, alignWithChant, CHANT_TRY};
 
 /* self-test:  node tools/voicesync.js */
 if(require.main===module){
