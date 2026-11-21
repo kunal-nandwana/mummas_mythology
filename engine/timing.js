@@ -60,6 +60,25 @@ function planTiming(cfg){
   return {shots, duration:T+outro+ending, ending, intro, outro, narrEnd:T, voiceAt: shots[Math.min(OPEN,shots.length-1)] ? shots[Math.min(OPEN,shots.length-1)].start : 0};
 }
 
+/* SPEECH CLOCK for one shot: story.js times (acts, cam keys, pop/draw/slide delays, chainW/avatarMontage steps ...) are written for the
+   PLANNED pace. With the owner's recording the shot is shorter or longer and he pauses in his own places, so a reveal timed to a word
+   came late (Parshuram long video, Nov 2026: he spoke 24% faster than the plan; in shot 54 "सीता से विवाह" appeared ~1.5 s after he
+   said it, and the last node of the chain never appeared). speechClock maps REAL time inside the shot to the PLANNED time at which the
+   same part of the line is spoken, so everything timed in story.js lands on the same word in the real voice.
+   Knots: each real speech part starts where the planned speech had reached the same share of the line; the planned speech end = his
+   real speech end; the shot end = the planned shot end; after that 1:1. Pauses are spread over the stretch before them (no freezing).
+   Returns null when there is nothing to follow (no recording). planDur = the shot's planned length, sc = {dur, speech}. */
+function speechClock(sc,planDur){
+  const D=sc.dur, SP=(sc.speech||[]).map(([a,b])=>[Math.max(0,a),Math.min(D,b)]).filter(([a,b])=>b-a>0.01);
+  if(!SP.length || !(planDur>0) || !(D>0)) return null;
+  const lead=0.18, speakP=Math.max(0.6,planDur-0.5), tot=SP.reduce((x,[a,b])=>x+b-a,0);
+  const K=[[0,0]]; const add=(r,p)=>{ const l=K[K.length-1]; if(r>l[0]+1e-3 && p>l[1]+1e-3) K.push([r,p]); };
+  let acc=0; SP.forEach(([a,b])=>{ add(a, lead+speakP*acc/tot); acc+=b-a; });
+  add(SP[SP.length-1][1], lead+speakP); add(D, Math.max(planDur, lead+speakP+0.05));
+  const L=K[K.length-1];
+  return lt=>{ if(!(lt>0)) return 0; if(lt>=L[0]) return L[1]+(lt-L[0]);
+    let i=1; while(K[i][0]<lt) i++; const a=K[i-1], b=K[i]; return a[1]+(b[1]-a[1])*(lt-a[0])/(b[0]-a[0]); }; }
+
 /* Split a line's words into caption chunks (<= maxChars letters each). */
 function captionChunks(words, maxChars){
   maxChars = maxChars || 26; const out=[]; let cur=[], n=0;
@@ -72,4 +91,4 @@ function captionChunks(words, maxChars){
   return out;
 }
 
-if(typeof module!=='undefined') module.exports={planTiming, captionChunks, tWords, tSpoken};
+if(typeof module!=='undefined') module.exports={planTiming, captionChunks, tWords, tSpoken, speechClock};
