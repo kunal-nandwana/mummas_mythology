@@ -53,7 +53,7 @@ Each video is one short file, `<topic>-short-form/story.js`. It lists the shots:
 Old stories keep working. New options, shown in `chandra-27-wives-short-form/story.js`:
 
 - **Depth layers:** give a shot `sky`, `far`, `mid`, `art`, `near` instead of one `art`. They move at different speeds when the camera moves (parallax), and soften when the camera zooms in close.
-- **Camera keys and face close-ups:** `cam:{keys:[[t,x,y,zoom],[t,x,y,zoom,'snap']]}`. The head is at about `(x, y-268*s)` for a character at `x,y` with scale `s`. Use `capTop` to move captions clear of the face.
+- **Camera keys and face close-ups:** `cam:{keys:[[t,x,y,zoom],[t,x,y,zoom,'snap']]}` (`'spring'` instead of `'snap'` overshoots a little and settles; `A('sscale:at',...)` and `A('spring:at:dx:dy',...)` do the same for objects). The head is at about `(x, y-268*s)` for a character at `x,y` with scale `s`. Use `capTop` to move captions clear of the face.
 - **Acting:** poses `lookAway`, `lookBack` (head turns), `explain`, `plead`, `accuse`, `rage`, `recoil`, `weep`, `grief`, `hold`; `tears:true`. Earrings, pendants, garlands, veils, sashes, skirts, hair and capes swing by themselves, and talking characters nod and gesture.
 - **Mood:** `mood:'calm'|'joy'|'hope'|'anger'|'sad'|'shock'|'divine'` sets the lighting, colour and rim light. Moods cross-fade between shots.
 - **Transitions into a shot:** `tr:'fade'|'glow'|'whip'|'zoom'|'iris'|'wipe'|'flash'|'dip'|'cut'` (`trAt:[x,y]` sets the iris centre).
@@ -76,7 +76,7 @@ URL options: `?shot=N` (jump to a shot), `?notext=1` (hide captions), `?clean=1`
 
 **For every video:** double-click **`make-video.command`**. It gets the latest videos from GitHub, asks which video, and makes the MP4 (about 3–6 minutes on an M1).
 
-**Rendering speed:** the picture is drawn by 3 browsers side by side (`--workers 4` for more, `--workers 1` if the Mac struggles), and ffmpeg uses a fast preset. Want a quick check first? `node tools/render.js <topic> --draft` makes a half-size `<topic>-draft.mp4` in a fraction of the time. Captions are now computed from the video time (smooth word glow, line cross-fade), and a word after a pause lights up when your voice resumes. Picture changes that fall between pauses are moved onto the nearest tiny gap between words.
+**Rendering speed:** the picture is drawn by 3 browsers side by side (`--workers 4` for more, `--workers 1` if the Mac struggles), and ffmpeg uses a fast preset. **Motion blur:** `node tools/render.js <topic> --blur` (4 sub-frames per frame, about 4x slower; `--blur 6` for more, `--shutter 0.5` = how long the shutter stays open) makes whips, arrows, camera snaps and shakes smooth. Use it for the final MP4 only; `--draft` ignores it. Want a quick check first? `node tools/render.js <topic> --draft` makes a half-size `<topic>-draft.mp4` in a fraction of the time. Captions are now computed from the video time (smooth word glow, line cross-fade), and a word after a pause lights up when your voice resumes. Picture changes that fall between pauses are moved onto the nearest tiny gap between words.
 
 **Your voice is cleaned automatically** (made for the Boya M1): rumble and hiss removed, mouth clicks removed, warmer and clearer tone, harsh "s" softened, even volume, and loudness set to YouTube's level (-14 LUFS). To skip it add `--raw`; for a noisy room add `--denoise 18`.
 

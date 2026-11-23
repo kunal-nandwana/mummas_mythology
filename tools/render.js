@@ -26,6 +26,9 @@
            the nearest pause (--nosync = use the planned pace instead). Music rises and falls with each scene's mood
            (--flatmusic = constant volume).
    Speed:  frames are drawn by several browsers side by side (--workers 3 default, 1-6; lower it if the Mac gets hot or slow).
+           --blur [N] = motion blur for the final render: every frame is the average of N sub-frames (default 4, 2-8) taken across half a frame
+           of time (180-degree shutter), so fast moves (whips, arrows, camera snaps, shakes) look smooth instead of steppy. Takes about N times longer,
+           so use it only for the final MP4. --shutter 0.5 = how much of a frame the shutter stays open (0.25-1). Ignored with --draft.
            --draft = quick half-size preview (<topic>-draft.mp4), much faster. --gpu = try the Mac graphics chip (experimental).
    Output: <topic-folder>/<topic-folder>.mp4
    ===================================================================== */
@@ -42,6 +45,8 @@ let chromium; try{ ({chromium}=require('playwright')); }catch(e){ console.error(
 const FPS=+opt('fps')||30, DRAFT=!!opt('draft'), SCALE=DRAFT?1:2;   // --draft = quick half-size preview render (about 4x faster)
 // parallel renderers: every one is its own browser, so frames are made side by side (the picture drawing is what takes the time)
 const os=require('os');
+// motion blur: B sub-frames per output frame, averaged by ffmpeg (tmix). Off for drafts.
+const BLUR=DRAFT||!opt('blur')?1:Math.max(2,Math.min(8,Math.round(opt('blur')===true?4:(+opt('blur')||4)))), SHUTTER=Math.max(0.25,Math.min(1,+opt('shutter')||0.5));
 const WORKERS=Math.max(1,Math.min(6,+opt('workers')||Math.min(3,Math.max(1,os.cpus().length-4)))), JQ=DRAFT?80:92;
 // 16:9 long videos (story.js format:'long') render 1920x1080; Shorts 1080x1920
 const LONG=/format\s*:\s*['"]long['"]/.test(fs.readFileSync(path.join(DIR,'story.js'),'utf8')), VW=LONG?960:540, VH=LONG?540:960;
@@ -103,7 +108,7 @@ function voiceFilter(file){ if(opt('raw')) return null; let chain=voiceChain(); 
   if(errs.length){ console.error('✗ Page error:', errs[0]); process.exit(1); }
   const R0=await pool[0].page.evaluate(()=>({duration:window.__ENGINE.duration, shots:window.__ENGINE.shots, music:window.__ENGINE.music, voiceAt:window.__ENGINE.voiceAt, sfx:window.__ENGINE.sfx, levels:window.__ENGINE.musicLevels}));
   const {duration, shots, music, voiceAt, sfx, levels}=R0;
-  const N=Math.ceil(duration*FPS), out=path.join(DIR,topic+(DRAFT?'-draft':'')+'.mp4');
+  const N=Math.ceil(duration*FPS), NT=N*BLUR, out=path.join(DIR,topic+(DRAFT?'-draft':'')+'.mp4');
 
   let shift=0, audioArgs=[], vf=null;
   if(A && A.ok){
@@ -168,22 +173,26 @@ function voiceFilter(file){ if(opt('raw')) return null; let chain=voiceChain(); 
   else if(sfxFile){ fc.push('[s]anull[a]'); }
   if(bedL||sfxFile) audioOut=['-filter_complex',fc.join(';'),'-map','0:v','-map','[a]','-c:a','aac','-b:a','192k'];
   const ff=spawn('ffmpeg',['-y','-hide_banner','-loglevel','error',
-    '-f','image2pipe','-framerate',String(FPS),'-c:v','mjpeg','-i','-', ...audioArgs, ...musicArgs, ...sfxArgs, ...audioOut,
+    '-f','image2pipe','-framerate',String(FPS*BLUR),'-c:v','mjpeg','-i','-', ...audioArgs, ...musicArgs, ...sfxArgs, ...audioOut,
+    ...(BLUR>1?['-vf',`tmix=frames=${BLUR},trim=start_frame=${BLUR-1},framestep=${BLUR},setpts=N/(${FPS}*TB)`]:[]),
     '-c:v','libx264','-preset',DRAFT?'ultrafast':'veryfast','-crf',DRAFT?'26':'18','-pix_fmt','yuv420p','-r',String(FPS),'-t',D,'-movflags','+faststart', out],{stdio:['pipe','inherit','inherit']});
   ff.stdin.on('error',()=>{});
   const ffDone=new Promise(r=>ff.on('close',code=>r(code)));
   const t0=Date.now();
+  // time of sub-frame i: output frame f = floor(i/BLUR); sub-frames are spread evenly across the open shutter, centred on the frame time
+  const subT=i=>{ if(BLUR===1) return i/FPS; const f=Math.floor(i/BLUR), j=i%BLUR; return Math.max(0,Math.min(duration-0.001,f/FPS+((j+0.5)/BLUR-0.5)*SHUTTER/FPS)); };
+  if(BLUR>1) console.log(`▶ motion blur: ${BLUR} sub-frames per frame, shutter ${Math.round(SHUTTER*360)}° (about ${BLUR}x slower)`);
   // every renderer takes the next free frame; finished frames are handed to ffmpeg strictly in order
-  let next=0, written=0, failure=null; const done=new Map(), AHEAD=WORKERS*4;
+  let next=0, written=0, failure=null; const done=new Map(), AHEAD=WORKERS*4*BLUR;
   let chain=Promise.resolve();
   const flush=()=>chain=chain.then(async()=>{
-    while(done.has(written)){ const buf=done.get(written); done.delete(written); const i=written++;
+    while(done.has(written)){ const buf=done.get(written); done.delete(written); const i=written++, fr=Math.floor(i/BLUR);
       if(!ff.stdin.write(buf)) await new Promise(r=>ff.stdin.once('drain',r));
-      if(i%FPS===0||i===N-1){ const p=(i+1)/N, el=(Date.now()-t0)/1000; process.stdout.write(`\r▶ frame ${i+1}/${N}  ${(p*100).toFixed(0)}%  ~${Math.max(0,el/p-el).toFixed(0)}s left   `); } } });
+      if(i%(FPS*BLUR)===0||i===NT-1){ const p=(i+1)/NT, el=(Date.now()-t0)/1000; process.stdout.write(`\r▶ frame ${fr+1}/${N}  ${(p*100).toFixed(0)}%  ~${Math.max(0,el/p-el).toFixed(0)}s left   `); } } });
   await Promise.all(pool.map(async w=>{
-    try{ for(;;){ const i=next++; if(i>=N||failure) break;
+    try{ for(;;){ const i=next++; if(i>=NT||failure) break;
         while(i-written>=AHEAD && !failure) await new Promise(r=>setTimeout(r,4));   // do not run far ahead of ffmpeg (memory)
-        await w.page.evaluate(t=>window.__ENGINE.seek(t), i/FPS);
+        await w.page.evaluate(t=>window.__ENGINE.seek(t), subT(i));
         done.set(i, await w.page.screenshot({type:'jpeg', quality:JQ}));
         await flush(); }
     }catch(e){ failure=failure||e; } }));
