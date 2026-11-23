@@ -34,6 +34,8 @@ engine/            shared code for every video
 tools/build.js     turns <topic>/story.js into <topic>/index.html + <topic>/script.md
 tools/check.js     instant checker for story.js (poses, characters, art, exact Hindi words, timing)
 tools/contact-sheet.js  one picture with every shot, for a single review round
+tools/strip-qc.js       finds blank, dark, washed-out or frozen shots in the real picture (writes <topic>/preview/qc.md)
+tools/variety-audit.js  compares a story.js with the last videos: copied helper art, same opening, same transition/mood/colour mix
 tools/story-brief-template.md  fill this in before starting a new story
 ```
 
@@ -43,7 +45,7 @@ Each video is one short file, `<topic>-short-form/story.js`. It lists the shots:
 
 1. **Story.** Start a new Kiro session (fill in `tools/story-brief-template.md` first: it saves credits). Say: "Make `<topic>-short-form`, about N seconds, story: ...". Kiro writes `story.js` with a Hindi line for every shot.
 2. **Build.** Run `node tools/build.js <topic>-short-form`. This writes `index.html` (the video) and `script.md` (your recording script).
-3. **Check.** Run `node tools/check.js <topic>` (instant: finds typos, unknown poses, words that differ from your script) and `node tools/contact-sheet.js <topic>` (one picture of every shot, saved in `<topic>/preview/`). Then open `index.html` in Chrome. If something is wrong, send all the fixes in **one** message, using shot numbers (for example: "shot 4: Krishna should smile; shot 6 needs 1 more second").
+3. **Check.** Run `node tools/check.js <topic>` (instant: finds typos, unknown poses, words that differ from your script) and `node tools/contact-sheet.js <topic>` (one picture of every shot, saved in `<topic>/preview/`). Also run `node tools/strip-qc.js <topic>` (finds blank, dark, washed-out or frozen shots) and `node tools/variety-audit.js <topic>` (finds repeats of earlier videos). Then open `index.html` in Chrome. If something is wrong, send all the fixes in **one** message, using shot numbers (for example: "shot 4: Krishna should smile; shot 6 needs 1 more second").
 4. **Record your voice.** Open `index.html?prompter=1`. Start your phone or Mac recorder, press **Start**, and after the 3-2-1 count read each line as it appears. `script.md` has the same lines with their timings.
 5. **Render the MP4.** Save your recording as `voice.m4a` in the topic folder, then double-click `make-video.command`. It produces a 1080×1920 MP4 with your voice, and the silence before your first word is cut automatically.
 6. **Upload** to YouTube.

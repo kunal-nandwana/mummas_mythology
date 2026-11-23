@@ -7,6 +7,7 @@ The owner noticed that new videos can look like old ones (same scenes, same vill
 
 1. **Read `engine/STAGING.md` first** (one small file). It lists the opening, villain, climax, palette and signature art of every finished video.
 2. **Write a 6-line "difference plan" in chat before building** (the owner can answer yes/no): opening idea, villain/threat design, climax idea, place + palette, and one new signature visual. Each must differ from the rows in STAGING.md. Prefer the "Options not used yet" list there.
+   Once `story.js` exists, run `node tools/variety-audit.js <topic>`: it flags copied helper art, an opening built like the last videos, and the same transition / mood / colour mix. Fix or justify every WARN line.
 3. **Never copy helper art from another video's story.js** (giant shadow, glowing eyes, trishul thrust, impact rings, clock, buffalo, etc.). If a helper is truly general, move it into `engine/` and make it configurable; otherwise draw something new.
 4. **Every new villain or major character gets a new design**: new silhouette (head type, horns / crown / hair), new colour family, new weapon. Never just recolour an old one. Add the preset to `engine/characters.js` and `engine/API.md`.
 5. **Different structure of the first 3 seconds** from the last 3 videos (see STAGING.md). The start must be striking without hook text or an intro (owner rule): use a dramatic close-up, a reveal, strong colour and motion.
