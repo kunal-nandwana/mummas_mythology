@@ -324,3 +324,29 @@ function nandiBack(x,y,s){ s=s||1; const cream='#f6f1e6', shade='#dcd2c0', deep=
    <path d="M-24 -192 C-48 -214 -50 -240 -30 -250 C-40 -232 -34 -214 -18 -200Z" fill="#efe2bc"/><path d="M24 -192 C48 -214 50 -240 30 -250 C40 -232 34 -214 18 -200Z" fill="#efe2bc"/>
    <path d="M-34 -150 Q0 -128 34 -150" fill="none" stroke="#ffc83a" stroke-width="9" stroke-linecap="round" stroke-dasharray="1 9"/>
    ${A('rock:6:1.2:0:-60','<path d="M0 -60 C6 -40 6 -18 0 -4" fill="none" stroke="'+cream+'" stroke-width="7" stroke-linecap="round"/><path d="M-5 -8 q5 12 10 0Z" fill="#a89a84"/>')}</g>`; }
+
+/* ---- Meghnad video: Garuda piece (new) ----
+   garuda(x,y,s,{flap:1, glow:true}) = huge golden-red eagle seen from the front with outspread wings, white head, gold crown, hooked beak,
+   fanned tail and talons. (x,y) = centre of the body; s=1 is about 560 wide x 520 tall. Wings beat slowly by themselves (flap:0 = still). */
+function garuda(x,y,s,o){ o=o||{}; const fl=o.flap===undefined?1:o.flap;
+  const wing=(sg)=>{ let f=''; for(let i=0;i<9;i++){ const tx=sg*(80+i*27), ty=-200+i*30+(i>6?(i-6)*14:0), w=15+i*.5;
+      f+=`<path d="M${sg*16} ${-46+i*3} Q${sg*(tx*.5)} ${ty*.55-20} ${tx} ${ty} Q${sg*(tx*.55)} ${ty*.55+w} ${sg*30} ${-26+i*5}Z" fill="${i%2?'#e8a21e':'#d0521c'}" stroke="#7a2412" stroke-width="1.2"/>`; }
+    let c=''; for(let i=0;i<5;i++) c+=`<path d="M${sg*(24+i*10)} ${-70+i*14} q${sg*(40+i*8)} ${-60+i*6} ${sg*(90+i*20)} ${-46+i*18} q${sg*-40} 36 ${sg*(-66-i*20)} ${50-i*4}Z" fill="${i%2?'#ffd25e':'#f0b030'}" stroke="#a8561a" stroke-width="1"/>`;
+    return f+c; };
+  const wl=wing(-1), wr=wing(1);
+  const rock=(deg,inner,sg)=>fl?A(`rock:${deg}:1.1:${sg*20}:-46`,inner):inner;
+  let tail=''; for(let i=-3;i<=3;i++) tail+=`<path d="M0 90 Q${i*14} 140 ${i*26} 190 Q${i*26+9} 150 ${i*8+8} 92Z" fill="${i%2?'#e8a21e':'#c8321e'}" stroke="#7a2412" stroke-width="1"/>`;
+  return `<g transform="translate(${r1(x)} ${r1(y)}) scale(${r1(s)})">`+
+    (o.glow===false?'':`<circle r="320" cy="-40" fill="url(#gw)" opacity=".75"/>`)+
+    rock(5,wl,-1)+rock(-5,wr,1)+tail+
+    `<path d="M-34 -50 Q-44 40 -20 100 Q0 116 20 100 Q44 40 34 -50 Q0 -70 -34 -50Z" fill="#d0521c" stroke="#7a2412" stroke-width="1.5"/>`+
+    `<path d="M-22 -40 Q-28 30 -12 86 Q0 94 12 86 Q28 30 22 -40Z" fill="#ffc83c"/>`+
+    [0,1,2,3,4].map(i=>`<path d="M-18 ${-26+i*22} q18 12 36 0" stroke="#c8761a" stroke-width="2" fill="none"/>`).join('')+
+    `<path d="M-14 98 L-22 140 M-6 100 L-8 146 M10 100 L14 146 M18 98 L28 140" stroke="#f0b030" stroke-width="5" stroke-linecap="round"/>`+
+    `<circle cy="-96" r="34" fill="#fbf7ee" stroke="#d8d0c0" stroke-width="1.4"/>`+
+    `<path d="M-30 -80 Q0 -60 30 -80 L24 -56 Q0 -44 -24 -56Z" fill="#fffdf6"/>`+
+    `<path d="M-8 -98 Q0 -80 8 -98 Q10 -64 0 -50 Q-10 -64 -8 -98Z" fill="#f0a020" stroke="#a8561a" stroke-width="1.2"/>`+
+    `<circle cx="-15" cy="-104" r="6.5" fill="#fff"/><circle cx="15" cy="-104" r="6.5" fill="#fff"/><circle cx="-15" cy="-103" r="3.6" fill="#a8180c"/><circle cx="15" cy="-103" r="3.6" fill="#a8180c"/>`+
+    `<path d="M-24 -112 L-6 -106 M24 -112 L6 -106" stroke="#b8821a" stroke-width="3" stroke-linecap="round"/>`+
+    `<path d="M-24 -122 L-22 -156 L-12 -138 L0 -168 L12 -138 L22 -156 L24 -122Z" fill="url(#gold)" stroke="#a8741a" stroke-width="1.2"/><circle cy="-134" r="5" fill="#d63a2a" stroke="#ffd25e"/></g>`;
+}

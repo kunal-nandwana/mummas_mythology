@@ -140,3 +140,15 @@ Verses: shots with `calli` (or a `॥` line) count as chanted. With a recording,
 
 
 **Captions (Nov 2026):** word glow/size/colour and line fade are computed per frame from the video time in `core.js drawCaptions` (never CSS transitions: they run on the wall clock and are not deterministic when rendering). A word after a pause starts when the voice resumes (`timing.js atStart`). **Render:** `tools/render.js` uses `--workers 3` parallel browsers, `--draft` for a fast half-size check.
+
+## v5 (Meghnad video, Nov 2026)
+- **MEGHNAD** (new, `engine/characters.js`): young lean warrior, bronze-purple skin, tall dark crown with a glowing crescent (`head:'meghnad'`), flowing dark cloak, glowing violet eyes (`eyeCol` + new `pupilCol` key), bracers, quiver. Use `props:{front:'bow'}`. Silhouette (violet eyes stay): `with:{skin:'#08030f',top:'#08030f',bottom:'#08030f',shin:'#08030f',foot:'#08030f',cape:'#08030f',sash:'#08030f',pads:'#08030f',belt:'#08030f',kundal:false,earring:false}`.
+- **LAKSHMAN** (new): RAMA body type, golden-tan skin, gold-yellow dhoti, gold crown, green sash, bracers. `props:{front:'bow'}`.
+- **GARUDA** is a scene piece, not a rig character: `garuda(x,y,s,{flap:1,glow:true})` (scenes.js) = huge golden-red eagle, outspread wings that beat slowly, white head, gold crown, fanned tail. s=1 is about 560 wide. Put it in `art`.
+- **Cast `lie`**: `lie:{deg:86, at:1, dur:.8, from:0}` rotates the whole body about the feet so it lies on the ground (deg + = head to the right, - = head to the left). `from:84,deg:0` = rises/sits up. Feet y must be about 850-950 so the body stays inside the frame (the camera cannot show below y 960).
+- **Cast `eyes:'closed'` + `openAt:secs`**: eyes open at that time.
+- **New costume key** `pupilCol` (pupil colour when `eyeCol` is set; default dark red).
+- **New head type** `meghnad`.
+- **New sounds** (`sfx:[[t,'name',vol]]` or `focus:{sound}`): `bowshot` (bowstring snap + soft arrow hiss), `wings` (three soft wing beats), `brahma` (glowing-weapon hum), `herb` (rising chimes), `hiss` (soft snake hiss), `twang` (bowstring only).
+- **Camera note:** the camera is clamped to the picture, so a key such as `[t,270,1000,2]` shows the bottom edge only. Keep centre y below about 800 at zoom 1.5.
+
