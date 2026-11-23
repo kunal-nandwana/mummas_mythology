@@ -257,6 +257,7 @@ function makeRig(cast){
   if(c.head==='band') head+=`<path d="M-16 -282 Q2 -292 20 -284 L20 -277 Q2 -285 -16 -275Z" fill="url(#gold)"/><circle cx="4" cy="-286" r="2.6" fill="#d63a2a"/>`;
   if(c.head==='kirita') head+=`<path d="M-20 -283 C-19 -300 -12 -326 2 -352 C16 -326 23 -300 24 -284Z" fill="url(#gold)" stroke="#a8741a" stroke-width="1"/><path d="M-15 -298 Q2 -291 20 -298 M-10 -314 Q2 -308 15 -314 M-5 -332 Q2 -327 10 -332" stroke="#a8741a" stroke-width="1.7" fill="none"/><path d="M2 -352 V-362" stroke="#ffd25e" stroke-width="2"/><circle cx="2" cy="-363" r="2.6" fill="#ffd25e"/><path d="M-19 -285 Q2 -277 23 -286 L23 -280 Q2 -272 -19 -279Z" fill="url(#gold)"/><circle cx="3" cy="-297" r="3.8" fill="#d63a2a" stroke="#ffd25e" stroke-width="1"/><path d="M-9 -303 l3.2 4.4 l-3.2 4.4 l-3.2 -4.4Z M15 -303 l3.2 4.4 l-3.2 4.4 l-3.2 -4.4Z" fill="#2ec28a"/>`;
   if(c.head==='ravan') head+=RCROWN;
+  if(c.head==='meghnad') head+=`<path d="M-22 -283 C-23 -310 -15 -342 -6 -376 L1 -354 L8 -388 L15 -354 L23 -372 C25 -336 27 -308 26 -284Z" fill="#160c28" stroke="#b79cff" stroke-width="1.3"/><path d="M-18 -300 Q2 -292 24 -300 M-14 -318 Q2 -311 20 -318" stroke="#8a62ff" stroke-width="1.6" fill="none" opacity=".8"/><path d="M-21 -285 Q2 -277 25 -286 L25 -279 Q2 -271 -21 -278Z" fill="#6a46c8"/><circle cx="3" cy="-298" r="3.6" fill="#d6b8ff" stroke="#fff" stroke-width=".8"/><path d="M-7 -398 A17 17 0 0 0 23 -398 A14 11 0 0 1 -7 -398Z" fill="#efe4ff" style="filter:drop-shadow(0 0 7px #c8a4ff)"/>`;
   if(c.head==='big') head+=`<path d="M-18 -284 L-16 -326 L-6 -308 L2 -340 L10 -308 L20 -324 L20 -284Z" fill="url(#gold)"/><circle cx="2" cy="-300" r="4" fill="#d63a2a"/><circle cx="-8" cy="-292" r="2" fill="#2ec28a"/><circle cx="12" cy="-292" r="2" fill="#2ec28a"/>`;
   if(c.veil) head+=`<path d="M-20 -290 C0 -306 22 -300 24 -284 C14 -290 0 -290 -12 -278 C-16 -270 -18 -262 -16 -250 L-24 -250 C-26 -270 -26 -284 -20 -290Z" fill="${c.veil}"/><path d="M-20 -290 C0 -306 22 -300 24 -284" stroke="url(#gold)" stroke-width="2.4" fill="none"/>`;
   if(c.earring && c.head!=='turban') head+=`<g ${J('ear')}><circle cx="-4" cy="-256" r="3" fill="none" stroke="#e8b83a" stroke-width="1.6"/>`+
@@ -412,7 +413,9 @@ function updateRig(r, lt, t, talking){
   if(!cast.walk){ const K=r.keys; let ki=0; while(ki+1<K.length && K[ki+1].t<=lt) ki++; if(ki>0){ const u=(lt-K[ki].t)/0.32; if(u>=0&&u<1) bob+=Math.sin(Math.PI*u)*3.2; } }
   // breathing
   const br=Math.sin(t*2.1+sd)*1.1;
-  setT(q.root, `translate(${r1(x)} ${r1(y)}) scale(${s*flip} ${s})`); q.root.setAttribute('opacity', op.toFixed(3));
+  // lie:{deg:88,at:1,dur:.8,from:0} = the whole body rotates about the feet and lies on the ground (deg + = head to the right, - = head to the left); from:88,deg:0 = sits/rises up
+  let lieA=0, lieY=0; if(cast.lie){ const L=cast.lie, k=easeIO(clamp01((lt-(L.at||0))/(L.dur||.8))); lieA=(L.from||0)+(L.deg-(L.from||0))*k; lieY=Math.abs(Math.sin(lieA*Math.PI/180))*20*s; }
+  setT(q.root, `translate(${r1(x)} ${r1(y-lieY)}) rotate(${r1(lieA)}) scale(${s*flip} ${s})`); q.root.setAttribute('opacity', op.toFixed(3));
   setT(q.body, `translate(0 ${r1(P.drop+bob+nod*0.25)})`);
   const up=`rotate(${r1(P.lean)} 0 -150) translate(0 ${r1(br*0.6)})`;
   setT(q.upper, up); setT(q.upperB, up);
@@ -467,13 +470,13 @@ function updateRig(r, lt, t, talking){
   setT(q.snk,`rotate(${r1(Math.sin(t*2.2+sd)*2.5 + gk(-dLean*0.8,8))} 6 -236)`);
   /* ---- face: expression, blink, talk, tears ---- */
   const bt=(t+sd*2.3)%3.7; let lid = bt<0.16 ? Math.sin(Math.PI*bt/0.16) : 0;
-  if(cast.eyes==='closed') lid=1; else if(ex==='serene') lid=Math.max(lid,0.35); else if(ex==='sad') lid=Math.max(lid,0.22+0.08*Math.sin(t*1.7)); else if(ex==='angry') lid=Math.max(lid,0.16);
+  if(cast.eyes==='closed' && !(cast.openAt!==undefined && lt>=cast.openAt)) lid=1; else if(ex==='serene') lid=Math.max(lid,0.35); else if(ex==='sad') lid=Math.max(lid,0.22+0.08*Math.sin(t*1.7)); else if(ex==='angry') lid=Math.max(lid,0.16);
   const widen = ex==='surprise' ? 1.22 : 1;
   const ey=(1-lid)*widen; setT(q.eye, `translate(15 -270.5) scale(1 ${Math.max(0.05,ey).toFixed(3)}) translate(-15 270.5)`);
   show(q.eye, ey>0.2); show(q.lid, ey<=0.2);
   if(cast.look==='up' && q.pupil) q.pupil.setAttribute('cy','-271.6');
   if(q.sclera) q.sclera.setAttribute('fill', r.c.eyeCol || (ex==='angry'?'#f0c8b8':'#f3ead8'));
-  if(r.c.eyeCol && q.pupil) q.pupil.setAttribute('fill','#8a0a0a');
+  if(r.c.eyeCol && q.pupil) q.pupil.setAttribute('fill',r.c.pupilCol||'#8a0a0a');
   setT(q.brow, ex==='angry'?'rotate(14 15 -278) translate(0 2)': ex==='sad'?'rotate(-12 15 -278) translate(0 -1)': ex==='surprise'?'translate(0 -3.5)':'');
   show(q.furrow, ex==='angry');
   const open = talking>0 ? (0.35+0.65*Math.abs(Math.sin(t*15.5+Math.sin(t*4))))*talking : (ex==='surprise'?0.8:0);
