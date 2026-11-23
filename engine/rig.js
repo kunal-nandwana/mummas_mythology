@@ -143,6 +143,8 @@ function makeRig(cast){
         `<path d="M-30 0 q12 -6 26 2 M-28 10 q12 -5 24 2 M30 0 q-12 -6 -26 2 M28 10 q-12 -5 -24 2" stroke="#cbbfa6" stroke-width="2" fill="none"/></g>`;
       /* mallet: craftsman's wooden mallet (in the hand) + chisel */
       case 'mallet': return `<line x1="0" y1="10" x2="0" y2="-62" stroke="#6b4424" stroke-width="6" stroke-linecap="round"/><rect x="-17" y="-92" width="34" height="34" rx="5" fill="#8a5a2c" stroke="#5a3a1a" stroke-width="2"/><line x1="14" y1="-10" x2="52" y2="-10" stroke="#5a3a20" stroke-width="5" stroke-linecap="round"/><line x1="52" y1="-10" x2="80" y2="-10" stroke="#b8bcc4" stroke-width="4"/>`;
+      /* kudal: village digging hoe (long wooden haft, iron collar, flat iron blade turned forward) */
+      case 'kudal': return `<line x1="-6" y1="128" x2="5" y2="-112" stroke="#6b4424" stroke-width="7" stroke-linecap="round"/><line x1="-2" y1="30" x2="1" y2="6" stroke="#4a2e16" stroke-width="9" opacity=".55"/><rect x="-3" y="-122" width="16" height="12" rx="3" fill="#5a606a" stroke="#2a2e36" stroke-width="1.2" transform="rotate(4)"/><path d="M6 -118 L52 -102 Q58 -92 52 -80 L6 -96Z" fill="#9aa2ae" stroke="#4a505a" stroke-width="1.6"/><path d="M12 -112 L46 -100" stroke="#fff" stroke-width="2" opacity=".6"/>`;
       case 'chakra': { let t=''; for(let i=0;i<16;i++) t+=`<path d="M0 -30 L4 -36 L-4 -36Z" transform="rotate(${i*22.5})" fill="#ffd25e"/>`;
         return `<g transform="translate(0 -40)">${A('spin:1.2:0:0',`<circle r="40" fill="url(#gw)" opacity=".7"/><circle r="28" fill="none" stroke="#ffd25e" stroke-width="4"/>${t}<circle r="6" fill="#ffd25e"/>`)}</g>`; }
       case 'flute': return `<g transform="rotate(-80)"><rect x="-3" y="-60" width="6" height="110" rx="3" fill="#a8742a"/><circle cx="0" cy="-30" r="1.6" fill="#3a2010"/><circle cx="0" cy="-15" r="1.6" fill="#3a2010"/><circle cx="0" cy="0" r="1.6" fill="#3a2010"/></g>`;
@@ -156,7 +158,7 @@ function makeRig(cast){
       case 'axe': return `<line x1="-4" y1="46" x2="6" y2="-150" stroke="#3a2a22" stroke-width="9" stroke-linecap="round"/><g transform="translate(6 -128)"><path d="M0 -8 C-34 -26 -62 -4 -56 40 C-38 20 -16 14 0 18Z" fill="#6a7078" stroke="#d4d8de" stroke-width="2"/><path d="M0 -8 C34 -26 62 -4 56 40 C38 20 16 14 0 18Z" fill="#585e66" stroke="#d4d8de" stroke-width="2"/><path d="M-4 -8 L0 -34 L4 -8Z" fill="#d4d8de"/><path d="M-50 30 C-34 14 -16 8 -2 12 M50 30 C34 14 16 8 2 12" stroke="#ff5a2a" stroke-width="2" fill="none" opacity=".8"/>${A('pulse:3','<circle cy="14" r="46" fill="url(#gr)" opacity=".5"/>')}</g>`;
       default: return '';
     } }
-  const UPRIGHT={gada:1,shankh:1,kamandalu:1,veda:1,parashu:1,axe:1,bow:1,mace:1,staff:1,lantern:1,diya:1,lotus:1,trishul:1,orb:1,chakra:1,arrows3:1,heartCloth:1,cloth:1,mallet:1};
+  const UPRIGHT={gada:1,shankh:1,kamandalu:1,veda:1,parashu:1,axe:1,bow:1,mace:1,staff:1,lantern:1,diya:1,lotus:1,trishul:1,orb:1,chakra:1,arrows3:1,heartCloth:1,cloth:1,mallet:1,kudal:1};
 
   /* ---- head ---- */
   /* ravan crown: tall gold band with five jewelled spires, red centre stone, emeralds (c.head==='ravan') */
