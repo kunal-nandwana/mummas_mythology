@@ -135,6 +135,10 @@ function VIDEO(cfg){
         case 'glint':{ const u=(lt-a[0])/a[1], k=easeIO(clamp01(u)); e.setAttribute('transform',`translate(${(a[2]+(a[3]-a[2])*k).toFixed(1)} 0)`); op=(u<0||u>=1)?0:Math.min(1,Math.min(u,1-u)*8); break; }
         /* bolt:period:offset  lightning: a quick double flash once per `period` s (bolts, sky flashes) */
         case 'bolt':{ const u=(((lt+(a[1]||0))/a[0])%1+1)%1; op=u<.035?1:u<.06?.1:u<.1?.9:u<.2?.55*(1-(u-.1)/.1):0; break; }
+        /* spring:at:dx:dy  slides in from (dx,dy) away and settles with a small overshoot (a spring, not an ease) */
+        case 'spring':{ const k=springK((lt-a[0])/(a[3]||.6),.62,11); tr=`translate(${r1((1-k)*a[1])} ${r1((1-k)*(a[2]||0))})`; op=lt<a[0]?0:1; break; }
+        /* sscale:at[:dur]  grows from nothing around the group's own (0,0) with a springy overshoot (burst-outs: snakes, sparks, rays) */
+        case 'sscale':{ const k=springK((lt-a[0])/(a[1]||.5),.55,11); tr=`scale(${Math.max(0.001,k).toFixed(3)})`; op=lt<a[0]?0:Math.min(1,k*3); break; }
         case 'fadeout':{ op=1-clamp01((lt-a[0])/a[1]); break; }
         /* draw:at:dur  lines inside (paths with pathLength="1" stroke-dasharray="1") are drawn in; used by famTree/timeline/mapRoute */
         case 'draw':{ const k=easeIO(clamp01((lt-a[0])/a[1])); e.querySelectorAll('[pathLength]').forEach(q=>q.style.strokeDashoffset=(1-k).toFixed(4)); op=k>0?1:0; break; }
@@ -157,13 +161,16 @@ function VIDEO(cfg){
     panL:{from:[CX+16*KX,CY,1.08],to:[CX-16*KX,CY,1.08]}, panR:{from:[CX-16*KX,CY,1.08],to:[CX+16*KX,CY,1.08]},
     up:{from:[CX,CY+20*KY,1.06],to:[CX,CY-10*KY,1.06]}, down:{from:[CX,CY-20*KY,1.06],to:[CX,CY+10*KY,1.06]}, still:{from:[CX,CY,1.02],to:[CX,CY,1.02]}, fit:{from:[CX,CY,1],to:[CX,CY,1]} };
   const easeSnap=k=>{ k=clamp01(k); return k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2; };
+  /* damped spring, closed form (no stepping, so seek(t) stays exact): 0 -> 1 with a small overshoot, settled at k=1.
+     z = damping (below 1 = overshoot: .5 bouncy, .7 soft, 1 none), w = stiffness over the unit interval (about 11: settles by the end). */
+  const springK=(k,z,w)=>{ if(k<=0) return 0; if(k>=1) return 1; z=z||.68; w=w||11; const wd=w*Math.sqrt(1-z*z); return 1-Math.exp(-z*w*k)*(Math.cos(wd*k)+(z*w/wd)*Math.sin(wd*k)); };
   const HAND = cfg.handheld===undefined ? 0.6 : cfg.handheld;
   function camState(sc,lt,t,et){   // et = speech clock (keys and shake are timed in story.js); lt = real time in the shot
     if(et===undefined) et=lt;
     const c=typeof sc.cam==='object'?sc.cam:(CAMS[sc.cam]||CAMS.in); let x,y,z;
     if(c.keys){ const K=c.keys; let i=0; while(i+1<K.length && K[i+1][0]<=et) i++;
       if(i+1>=K.length||et<=K[0][0]){ const k0=K[Math.min(i,K.length-1)]; [x,y,z]=[k0[1],k0[2],k0[3]]; }
-      else { const a=K[i], b=K[i+1], u=(et-a[0])/(b[0]-a[0]), k=(b[4]==='snap'?easeSnap:easeIO)(u); x=lerp(a[1],b[1],k); y=lerp(a[2],b[2],k); z=lerp(a[3],b[3],k); } }
+      else { const a=K[i], b=K[i+1], u=(et-a[0])/(b[0]-a[0]), k=(b[4]==='snap'?easeSnap:b[4]==='spring'?springK:easeIO)(u); x=lerp(a[1],b[1],k); y=lerp(a[2],b[2],k); z=lerp(a[3],b[3],k); } }
     else { const k=easeIO(clamp01(lt/sc.dur)); x=lerp(c.from[0],c.to[0],k); y=lerp(c.from[1],c.to[1],k); z=lerp(c.from[2],c.to[2],k); }
     if(sc.shake){ const [st,du,amp]=sc.shake; const e=clamp01((et-st)/du); if(e>0&&e<1){ const f=(1-e)*amp; x+=Math.sin(lt*70)*f; y+=Math.cos(lt*57)*f; } }
     if(HAND){ x+=Math.sin(t*0.83)*HAND*1.4+Math.sin(t*2.1)*HAND*0.35; y+=Math.cos(t*0.67)*HAND*1.1+Math.sin(t*1.9)*HAND*0.3; }

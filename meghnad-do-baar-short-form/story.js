@@ -37,19 +37,21 @@ function CLOUD(x,y,s,eyes){ let b='';
 function SNAKE(x,y,len,ang,col,delay,w,ar){ w=w||7; const n=6, sg=len/n; let d='M0 0'; for(let i=0;i<n;i++) d+=` q${r1(sg/2)} ${(i%2?-1:1)*r1(len*.11)} ${r1(sg)} 0`;
   const head=`<ellipse cx="${r1(len+4)}" cy="0" rx="${r1(w*1.5)}" ry="${r1(w*1.1)}" fill="${col}"/><circle cx="${r1(len+7)}" cy="${r1(-w*.4)}" r="${r1(w*.32)}" fill="#fff"/><path d="M${r1(len+w*2)} 0 l${r1(w*1.6)} ${r1(-w*.45)} M${r1(len+w*2)} 0 l${r1(w*1.6)} ${r1(w*.45)}" stroke="#ff4a6a" stroke-width="1.8"/>`;
   const tail=ar?`<polygon points="0,0 ${-w*3.4},${-w*1.7} ${-w*2.2},0 ${-w*3.4},${w*1.7}" fill="#fff6c0"/>`:'';
-  return A('pop:'+(delay||0),`<g transform="translate(${r1(x)} ${r1(y)}) rotate(${ang})"><path d="${d}" fill="none" stroke="${col}" stroke-width="${w*2.4}" opacity=".3" filter="url(#b4)" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#fff6c0" stroke-width="${r1(w*.28)}" opacity=".75" stroke-linecap="round" stroke-dasharray="6 9"/>${tail}${head}</g>`); }
+  return `<g transform="translate(${r1(x)} ${r1(y)}) rotate(${ang})">`+A('sscale:'+(delay||0)+':.45',`<path d="${d}" fill="none" stroke="${col}" stroke-width="${w*2.4}" opacity=".3" filter="url(#b4)" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#fff6c0" stroke-width="${r1(w*.28)}" opacity=".75" stroke-linecap="round" stroke-dasharray="6 9"/>${tail}${head}`)+`</g>`; }
 const SNAKE_COLS = ['#7dffb0','#d6ff6a','#9a7aff','#7dffb0'];
 /* snakes bursting out of one point */
 const BURST = (cx,cy,n,len,delay)=>{ let s=''; for(let i=0;i<n;i++){ const a=(i/n)*360+(i%2)*14; s+=SNAKE(cx,cy,len*(.7+(i%3)*.2),a,SNAKE_COLS[i%4],delay+i*.06,6.5); } return s; };
 /* an arrow flying straight at the camera: gold head, glow, speed lines */
-const ARROW_FRONT = (cx,cy,s,glow)=>`<g transform="translate(${cx} ${cy}) scale(${s})">`+A('pulse:3',`<circle r="${glow||230}" fill="url(#gw)"/>`)+RAYS(0,0,22,330,'#fff0c0',.14)+
-  `<path d="M0 -118 L44 0 L0 128 L-44 0Z" fill="#fff6d8" stroke="#ffd25e" stroke-width="4"/><path d="M0 -118 L0 128 M-44 0 H44" stroke="#c8902a" stroke-width="3" opacity=".6"/><circle r="22" fill="#ffffff"/>`+`</g>`;
+const ARROW_FRONT = (cx,cy,s,glow,spr)=>{ const body=A('pulse:3',`<circle r="${glow||230}" fill="url(#gw)"/>`)+RAYS(0,0,22,330,'#fff0c0',.14)+
+  `<path d="M0 -118 L44 0 L0 128 L-44 0Z" fill="#fff6d8" stroke="#ffd25e" stroke-width="4"/><path d="M0 -118 L0 128 M-44 0 H44" stroke="#c8902a" stroke-width="3" opacity=".6"/><circle r="22" fill="#ffffff"/>`;
+  return `<g transform="translate(${cx} ${cy}) scale(${s})">`+(spr?A('sscale:0:.7',body):body)+`</g>`; };   // spr=true: springs in from nothing (the hook arrow)
 /* the glowing snake net around the two brothers */
 function NET(x,y,w,h,delay){ let s=''; const n=6; for(let i=0;i<n;i++){ const px=x+i*w/(n-1); s+=SNAKE(px,y,h*1.15,60+(i%2)*6,SNAKE_COLS[i%4],delay+i*.1,5.5)+SNAKE(px,y,h*1.15,120-(i%2)*6,SNAKE_COLS[(i+1)%4],delay+.05+i*.1,5.5); }
   return A('pulse:2.2',s); }
 /* the Brahmastra: white-gold arrow, huge halo, slow rays */
-const BRAHMASTRA = (x,y,s,rot)=>`<g transform="translate(${x} ${y}) rotate(${rot||0}) scale(${s})">`+A('pulse:2',`<circle r="270" fill="url(#gw)"/>`)+A('ripple:2.2:0:0',`<circle r="210" fill="none" stroke="#fff6d0" stroke-width="5"/>`)+A('ripple:2.2:0:0',`<circle r="270" fill="#fff0b0" opacity=".3"/>`)+RAYS(0,0,18,320,'#fff6d0',.2)+
-  `<line x1="-180" y1="0" x2="150" y2="0" stroke="#ffe08a" stroke-width="30" opacity=".5" filter="url(#b10)"/><line x1="-180" y1="0" x2="150" y2="0" stroke="#fffdf0" stroke-width="10" stroke-linecap="round"/><polygon points="150,-28 222,0 150,28" fill="#fffdf0"/><polygon points="-180,0 -218,-26 -198,0 -218,26" fill="#ffe08a"/><polygon points="-150,0 -184,-20 -166,0 -184,20" fill="#fffdf0"/></g>`;
+const BRAHMASTRA = (x,y,s,rot,spr)=>{ const body=A('pulse:2',`<circle r="270" fill="url(#gw)"/>`)+A('ripple:2.2:0:0',`<circle r="210" fill="none" stroke="#fff6d0" stroke-width="5"/>`)+A('ripple:2.2:0:0',`<circle r="270" fill="#fff0b0" opacity=".3"/>`)+RAYS(0,0,18,320,'#fff6d0',.2)+
+  `<line x1="-180" y1="0" x2="150" y2="0" stroke="#ffe08a" stroke-width="30" opacity=".5" filter="url(#b10)"/><line x1="-180" y1="0" x2="150" y2="0" stroke="#fffdf0" stroke-width="10" stroke-linecap="round"/><polygon points="150,-28 222,0 150,28" fill="#fffdf0"/><polygon points="-180,0 -218,-26 -198,0 -218,26" fill="#ffe08a"/><polygon points="-150,0 -184,-20 -166,0 -184,20" fill="#fffdf0"/>`;
+  return `<g transform="translate(${x} ${y}) rotate(${rot||0}) scale(${s})">`+(spr?A('sscale:0:.8',body):body)+`</g>`; };   // spr=true: springs in from nothing
 /* the herb mountain (Sanjeevani): green rock, golden-glowing herbs, huge warm halo */
 function MOUNTAIN(x,y,s){ let g=''; [[-110,-10],[-60,-80],[-8,-150],[40,-80],[84,-120],[120,-20],[-30,-30],[20,-10],[70,-50],[-90,-50]].forEach(([dx,dy],i)=>{ g+=A(`flick:${(2+i%4).toFixed(1)}`,`<circle cx="${dx}" cy="${dy}" r="9" fill="#fff0a0" filter="url(#b4)"/>`)+sparkle(dx,dy,1.1,i%2?'#ffe9a0':'#b8ffa0'); });
   return `<g transform="translate(${x} ${y}) scale(${s})">`+A('pulse:2.2',`<circle cy="-90" r="360" fill="url(#gw)"/>`)+`<path d="M-200 50 L-120 -80 L-72 -52 L-10 -200 L52 -108 L92 -150 L200 50 Q0 108 -200 50Z" fill="#3f7a2a" stroke="#ffe08a" stroke-width="3"/><path d="M-200 50 L-120 -80 L-72 -52 L-10 -200 L-30 -40 L-60 60Z" fill="#6cae38" opacity=".8"/><path d="M-170 56 Q0 120 170 56 L120 100 Q0 160 -120 100Z" fill="#4a3220"/>`+g+`</g>`; }
@@ -71,7 +73,7 @@ VIDEO({
     { line:'मेघनाद ने श्रीराम को', scene:'battle', mood:'anger', fx:'sparks', capTop:130, shake:[.9,1.4,6],
       focus:{at:.05, sound:'bowshot', dur:2.2, duck:.3}, sfx:[[1.0,'hiss',.6]],
       cam:{keys:[[0,270,520,1.0],[1.0,270,500,1.3],[2.2,270,480,1.75]]},
-      sky:()=>NIGHT()+VIOLET(270,470,280,.35), far:()=>FORT(640), art:()=>GROUND(890)+ARROW_FRONT(300,470,1.0)+BURST(300,470,9,170,.95),
+      sky:()=>NIGHT()+VIOLET(270,470,280,.35), far:()=>FORT(640), art:()=>GROUND(890)+ARROW_FRONT(300,470,1.0,230,true)+BURST(300,470,9,170,.95),
       near:()=>TORCH(470,960,1.2)+WARM(470,830,150),
       cast:[{...MEG, x:105, y:945, s:1.35, expr:'angry', props:{front:'bow'}, acts:[[0,'bowDraw'],[.9,'bowReady',.25]]}] },
 
@@ -128,7 +130,7 @@ VIDEO({
 
     /* 8 — the snake net tightens (close-ups of both faces, no wounds) */
     { line:'दोनों भाई बाणों में जकड़ गए और बहुत घायल हो गए,', scene:'snake-net', mood:'sad', fx:'embers', tr:'flash', capTop:130, sfx:[[.4,'hiss',.5],[2.2,'hiss',.5]],
-      cam:{keys:[[0,270,700,1.1],[1.4,200,650,2.1],[2.8,200,650,2.4],[3.0,345,660,2.4,'snap'],[4.4,345,660,2.7]]},
+      cam:{keys:[[0,270,700,1.1],[1.4,200,650,2.1],[2.8,200,650,2.4],[3.0,345,660,2.4,'spring'],[4.4,345,660,2.7]]},
       sky:()=>NIGHT()+VIOLET(270,640,300,.5), far:()=>FORT(860), art:()=>GROUND(960),
       front:()=>NET(60,440,420,480,.2)+WARM(270,950,200),
       cast:[{c:RAMA, x:200, y:960, s:1.45, expr:'sad', acts:[[0,'kneel'],[1.2,'kneel+grief',.5]]},
@@ -145,7 +147,7 @@ VIDEO({
 
     /* 10 — Garuda's wings sweep the snakes away, then the brothers are free */
     { line:'आकर उन्हें आजाद नहीं कर दिया।', scene:'garuda', mood:'divine', fx:'sparks', tr:'whip', capTop:130,
-      cam:{keys:[[0,270,520,1.05],[1.5,270,470,1.25],[1.7,270,640,2.0,'snap'],[3.2,270,630,2.2]]},
+      cam:{keys:[[0,270,520,1.05],[1.5,270,470,1.25],[1.7,270,640,2.0,'spring'],[3.2,270,630,2.2]]},
       sky:()=>NIGHT()+A('pulse:2.4',`<circle cx="270" cy="330" r="420" fill="url(#gw)" opacity=".45"/>`), far:()=>FORT(900),
       art:()=>GROUND(960)+garuda(270,330,1.2)+[0,1,2,3,4,5].map(i=>A(`drift:${i%2?-300:300}:-${60+i*10}:${1.6+i*.15}`,SNAKE(270,640,130,i%2?170:10,SNAKE_COLS[i%4],0,6))).join(''),
       front:()=>[0,1,2,3,4,5].map(i=>A(`drift:${i%2?20:-20}:-120:${3+i%3}`,sparkle(120+i*60,760,1.6,'#fff0c0'))).join(''),
@@ -163,7 +165,7 @@ VIDEO({
     { line:'मेघनाद ने ब्रह्मास्त्र चलाया।', scene:'brahmastra', mood:'shock', fx:'stars', tr:'flash', capTop:130,
       focus:{at:.2, sound:'brahma', dur:3.4, duck:.1},
       cam:{keys:[[0,300,500,1.0],[3.2,330,500,1.6]]},
-      sky:()=>NIGHT()+VIOLET(270,500,300,.4), far:()=>FORT(900), art:()=>GROUND(990)+BRAHMASTRA(330,470,1.15,-4),
+      sky:()=>NIGHT()+VIOLET(270,500,300,.4), far:()=>FORT(900), art:()=>GROUND(990)+BRAHMASTRA(330,470,1.15,-4,true),
       cast:[{...MEG, with:SIL, x:90, y:1000, s:1.45, expr:'angry', props:{front:'bow'}, acts:[[0,'bowDraw']]}] },
 
     /* 13 — Rama tells Lakshman (steady two-shot) */
@@ -176,7 +178,7 @@ VIDEO({
 
     /* 14 — close-up on Rama's eyes, then Lakshman accepts */
     { line:'कहा कि वे इस वार को सह लें।', scene:'brahmastra', mood:'calm', fx:'embers', tr:'cut', capTop:130,
-      cam:{keys:[[0,185,580,3.0],[1.5,185,580,3.2],[1.6,372,590,2.9,'snap'],[3,372,590,3.1]]},
+      cam:{keys:[[0,185,580,3.0],[1.5,185,580,3.2],[1.6,372,590,2.9,'spring'],[3,372,590,3.1]]},
       sky:()=>NIGHT()+A('pulse:3',`<circle cx="270" cy="400" r="320" fill="url(#gw)" opacity=".5"/>`), far:()=>FORT(900), art:()=>GROUND(990),
       cast:[{c:RAMA, x:170, y:990, s:1.4, expr:'serene', talk:true, acts:[[0,'hold']]},
             {...LAKS, x:380, y:990, s:1.4, flip:true, expr:'serene', acts:[[0,'stand'],[1.8,'hold',.5]]}] },

@@ -54,12 +54,14 @@ bow (+arrow with bowDraw) kudal(village digging hoe; stays upright in the hand, 
 - Text: `big(x,y,size,col,text,delay)`, `parchment(x,y,w,h)`, `verse(x,y,[lines],size,col,delay,gap)`, `pothi(x,y,s)`
 - Gradients: `url(#skyN|skyW|skyDiv|gnd|fog|saf|gw|gg|gold|moonG|heartG)` (heartG = golden-pink glow).
 - **Own gradients in a story:** Chrome only paints a gradient whose FIRST `id` in the page is visible, and hidden shots are `display:none`. If a story defines its own `<defs>`, give every shot its own ids (see `withDefs` in `jagannath-heart-short-form/story.js`), or the gradient is invisible in all later shots.
+- **Spring animations (Nov 2026):** `A('sscale:at[:dur]', svg)` grows from nothing around the group's own (0,0) with a springy overshoot (burst-outs: snakes, arrows, sparks; put the group's `translate()` outside it). `A('spring:at:dx:dy[:dur]', svg)` slides in from (dx,dy) away and settles with a small overshoot.
 - Animate any group: `A('spec', svg)`: flick:spd pulse:spd bob:amp:spd spin:period:cx:cy rock:deg:spd:cx:cy pop:delay rise:dy:dur:delay slide:dx:dy:dur:delay walk:dx:dur:delay fadeout:at:dur fadein:at:dur orbit:rx:ry:cx:cy:period drift:dx:dy:period (looping slide+fade: clouds, smoke, rising embers, floating lamps) ripple:period:cx:cy (looping growing ring/glow: shock-waves, holy light) beat:cx:cy:amp[:bpm] (heartbeat lub-dub, default 60 bpm on whole video seconds: scales around cx,cy by amp and brightens; for a living light / heart)
 
 ## Camera `cam`
 - Presets: `'in' 'out' 'panL' 'panR' 'up' 'down' 'still'`
 - Blend: `{from:[x,y,zoom], to:[x,y,zoom]}` (x,y = centre point)
 - **Keyframed (new):** `{keys:[[t,x,y,zoom],[t,x,y,zoom,'snap']]}` (push-ins, whip to a face; zoom ≥1.5 = face close-up, background blurs)
+- **Spring keys (Nov 2026):** a key can end in `'spring'` instead of `'snap'`: the move overshoots about 5% and settles (a damped spring, not an ease). Best for quick whips between faces and push-ins that should "land". Same timing rules as `'snap'`; use `'snap'` when you want no overshoot.
 
 ## fx
 dust embers sparks stars flies petals
