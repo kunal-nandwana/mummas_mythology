@@ -25,10 +25,10 @@ const E=(m)=>errors.push(m), W=(m)=>warns.push(m);
 const ctx={ console:{log(){},warn(m){ if(String(m).startsWith('unknown pose')) E('engine: '+m); },error(){}}, Math, Object, Array, String, Number, JSON };
 vm.createContext(ctx);
 try{
-  vm.runInContext(['timing.js','scenes.js','wide.js','rig.js','characters.js'].map(f=>read(path.join(ENG,f))).join('\n'), ctx);
+  vm.runInContext(['timing.js','scenes.js','wide.js','rig.js','frontrig.js','characters.js'].map(f=>read(path.join(ENG,f))).join('\n'), ctx);
 }catch(e){ console.error('engine failed to load: '+e.message); process.exit(2); }
 const known=(expr,def)=>{ try{ return vm.runInContext(expr,ctx); }catch(e){ return def; } };
-const POSES=known('POSES',{}), CHARS=known('Object.keys({})',[]);
+const POSES=known('POSES',{}), FPOSES=known('FPOSES',{}), CHARS=known('Object.keys({})',[]);
 /* characters are `const NAME = {...}`: list every UPPERCASE const in characters.js */
 const charNames=[...read(path.join(ENG,'characters.js')).matchAll(/^const\s+([A-Z_0-9]+)\s*=/gm)].map(m=>m[1]);
 const coreSrc=read(path.join(ENG,'core.js'));
@@ -96,7 +96,7 @@ shots.forEach((s,i)=>{
     if(c.expr && !EXPRS.includes(c.expr)) E(P(`${who}: unknown expr "${c.expr}" (${EXPRS.join(', ')})`));
     (c.acts||[]).forEach(a=>{
       if(!Array.isArray(a)||typeof a[0]!=='number'){ E(P(`${who}: acts must look like [seconds,'pose']`)); return; }
-      if(typeof a[1]==='string') a[1].split('+').forEach(p=>{ if(!POSES[p]) E(P(`${who}: unknown pose "${p}"`)); });
+      if(typeof a[1]==='string') a[1].split('+').forEach(p=>{ if(!(c.facing==='front'?FPOSES:POSES)[p]) E(P(`${who}: unknown pose "${p}"`)); });
     });
   });
 });
