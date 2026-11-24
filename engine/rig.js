@@ -377,7 +377,9 @@ function updateRig(r, lt, t, talking){
   let P=Object.assign({}, poseAt(r, lt));
   const PL=poseAt(r, Math.max(0,lt-0.16));            // the pose a moment ago (for lag / swing)
   let x=cast.x||270, y=cast.y||840, s=cast.s||1, flip=cast.flip?-1:1, bob=0, op=1;
-  const ex=cast.expr||'calm', sd=r.seed, TT=cast.talk?1:0;
+  let ex=cast.expr||'calm', exT=0;   // exprKeys:[[secs,'expr'],..] changes the expression during the shot (planned seconds)
+  if(cast.exprKeys) for(const k of cast.exprKeys) if(lt>=k[0]){ ex=k[1]; exT=k[0]; }
+  const sd=r.seed, TT=cast.talk?1:0;
 
   // walk cycle
   if(cast.walk){ const w=cast.walk, k=clamp01((lt-(w.delay||0))/(w.dur||2)); const kk=1-Math.pow(1-k,1.7);
@@ -393,7 +395,7 @@ function updateRig(r, lt, t, talking){
   if(cast.exit){ const e=cast.exit; op*=1-clamp01((lt-e.at)/(e.fade||0.8)); }
 
   // attitude from expression (eases in over the first half second of the shot)
-  const at=ATTITUDE[ex], ak=smooth01(lt/0.6);
+  const at=ATTITUDE[ex], ak=smooth01((lt-exT)/0.6);
   if(at){ P.head+=(at.head||0)*ak; P.lean+=(at.lean||0)*ak; }
 
   // talking: gentle nods + hand gestures (arms that are "free" drift and open up)

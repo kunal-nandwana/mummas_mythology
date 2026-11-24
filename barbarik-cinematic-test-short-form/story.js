@@ -48,17 +48,28 @@ ${clouds}`;
 
 /* ---- far: mountains, temple-tower silhouettes, haze ---- */
 function tower(x, base, h, w, col, rim) {
-  const tw = w * .26, mid = base - h * .62;
-  const body = `M${n1(x - w / 2)} ${base} L${n1(x - w * .36)} ${n1(base - h * .4)} L${n1(x - tw)} ${n1(base - h * .78)} L${n1(x - tw * .45)} ${n1(base - h * .9)} L${x} ${n1(base - h)} L${n1(x + tw * .45)} ${n1(base - h * .9)} L${n1(x + tw)} ${n1(base - h * .78)} L${n1(x + w * .36)} ${n1(base - h * .4)} L${n1(x + w / 2)} ${base}Z`;
-  return `<path d="${body}" fill="${col}"/><ellipse cx="${x}" cy="${n1(mid)}" rx="${n1(w * .56)}" ry="${n1(w * .2)}" fill="${col}"/>`
-    + `<path d="M${n1(x + w * .5)} ${base} L${n1(x + w * .36)} ${n1(base - h * .4)} L${n1(x + tw)} ${n1(base - h * .78)} L${x} ${n1(base - h)}" fill="none" stroke="${rim}" stroke-width="1.6" opacity=".55"/>`
-    + `<line x1="${x}" y1="${n1(base - h)}" x2="${x}" y2="${n1(base - h - 14)}" stroke="${col}" stroke-width="1.6"/>`;
+  // shikhara: plinth, curved tapering body with stepped tiers, amalaka disc, kalash and flag
+  const hw = w / 2, tiers = 5; let L = '', R = '';
+  for (let k = 0; k <= tiers; k++) {
+    const t = k / tiers, y = base - h * .08 - h * .68 * t, half = hw * (1 - .62 * Math.pow(t, 1.25));
+    const notch = k < tiers ? half * .14 : 0;
+    L += ` L${n1(x - half - notch)} ${n1(y)} L${n1(x - half)} ${n1(y - h * .02)}`;
+    R = ` L${n1(x + half)} ${n1(y - h * .02)} L${n1(x + half + notch)} ${n1(y)}` + R;
+  }
+  const topY = base - h * .76, am = hw * .34, kal = base - h * .86;
+  const body = `M${n1(x - hw * 1.25)} ${base} L${n1(x - hw * 1.25)} ${n1(base - h * .05)} L${n1(x - hw)} ${n1(base - h * .05)}${L} L${n1(x - am * .5)} ${n1(topY)} L${n1(x + am * .5)} ${n1(topY)}${R} L${n1(x + hw)} ${n1(base - h * .05)} L${n1(x + hw * 1.25)} ${n1(base - h * .05)} L${n1(x + hw * 1.25)} ${base}Z`;
+  return `<path d="${body}" fill="${col}"/>`
+    + `<ellipse cx="${x}" cy="${n1(topY)}" rx="${n1(am)}" ry="${n1(am * .3)}" fill="${col}"/>`
+    + `<path d="M${n1(x - am * .45)} ${n1(topY)} Q${x} ${n1(kal - 10)} ${n1(x + am * .45)} ${n1(topY)}Z" fill="${col}"/>`
+    + `<line x1="${x}" y1="${n1(kal - 4)}" x2="${x}" y2="${n1(kal - 26)}" stroke="${col}" stroke-width="2"/>`
+    + `<path d="M${x} ${n1(kal - 26)} l14 4 l-14 4Z" fill="${rim}" opacity=".8"/>`
+    + `<path d="M${n1(x + hw * 1.25)} ${base} L${n1(x + hw * 1.25)} ${n1(base - h * .05)} L${n1(x + hw)} ${n1(base - h * .05)} L${n1(x + hw * .62)} ${n1(base - h * .3)} L${n1(x + hw * .3)} ${n1(base - h * .55)} L${n1(x + am * .5)} ${n1(topY)}" fill="none" stroke="${rim}" stroke-width="1.6" opacity=".55"/>`;
 }
 function ridge(seed, y, amp, step, fill) { const r = rg(seed); let d = `M-20 ${HZ + 4} L-20 ${y}`; for (let x = -20; x <= 580; x += step) d += ` L${n1(x + step * .5)} ${n1(y - amp * (.3 + r() * .7))} L${n1(x + step)} ${n1(y - amp * .1 * r())}`; return `<path d="${d} L580 ${HZ + 4}Z" fill="${fill}"/>`; }
 function farLayer(i) {
   const P = `cn${i}_`;
   let t = '';
-  [[20, 330, 34, '#4a2250'], [70, 250, 30, '#4a2250'], [118, 200, 26, '#4a2250'], [430, 280, 30, '#4a2250'], [490, 340, 36, '#4a2250'], [380, 190, 24, '#4a2250']].forEach(a => t += tower(a[0], HZ, a[1], a[2], a[3], '#f6a04a'));
+  [[24, 300, 64, '#4a2250'], [92, 220, 54, '#4a2250'], [446, 260, 58, '#4a2250'], [500, 320, 66, '#4a2250'], [372, 170, 46, '#4a2250']].forEach(a => t += tower(a[0], HZ, a[1], a[2], a[3], '#f6a04a'));
   return ridge(7, HZ - 6, 46, 70, '#7a3560') + ridge(11, HZ, 30, 46, '#5a2552') + t + `<rect y="${HZ - 150}" width="540" height="154" fill="url(#${P}haze)"/>`;
 }
 
@@ -70,7 +81,7 @@ function midLayer(i, sunX) {
   for (let x = -900; x <= 1440; x += 110) g += `<line x1="270" y1="${HZ}" x2="${x}" y2="960" stroke="#f6a04a" stroke-width="1" opacity=".1"/>`;
   for (let j = 1; j <= 10; j++) { const y = HZ + 348 * Math.pow(j / 10, 2); g += `<line x1="0" y1="${n1(y)}" x2="540" y2="${n1(y)}" stroke="#f6a04a" stroke-width="1" opacity=".09"/>`; }
   g += `<defs><g id="${P}sol"><circle cy="-34" r="6"/><path d="M-7 -28 L7 -28 L9 0 L-9 0Z"/><path d="M-6 -41 L0 -52 L6 -41Z"/><line x1="12" y1="2" x2="14" y2="-64" stroke-width="2"/></g></defs>`;
-  const R = 13, blocks = [-250, -135, 0, 135, 250], far = [90, 42, 80], near = [26, 10, 34];
+  const R = 13, blocks = [-250, -135, 0, 135, 250], far = [52, 20, 60], near = [18, 8, 28];
   for (let k = 0; k < R; k++) {
     const d = Math.pow((k + 1) / R, 1.7), y = HZ + 6 + d * 176, s = .075 + d * .62, f = 1 - d;
     const col = `rgb(${Math.round(far[0] * f + near[0] * (1 - f))},${Math.round(far[1] * f + near[1] * (1 - f))},${Math.round(far[2] * f + near[2] * (1 - f))})`;
@@ -81,10 +92,11 @@ function midLayer(i, sunX) {
       for (let c = 0; c < cols; c++) { const x = cx + (c - (cols - 1) / 2) * sp + (r() - .5) * s * 3; if (x < -30 || x > 570) continue;
         row += `<use href="#${P}sol" transform="translate(${n1(x)} ${n1(y + (r() - .5) * s * 2)}) scale(${n1(s * 100) / 100})"/>`; }
     });
-    g += `<g fill="${col}" stroke="${col}">${row}</g>`;
+    g += A(`bob:${n1(.5 + d * 2.2)}:${n1(1.1 + k * .13)}`, `<g fill="${col}" stroke="${col}">${row}</g>`);
     // long soft shadows toward the viewer, away from the sun
     if (k > 3) g += `<path d="M0 ${n1(y + 2)} L540 ${n1(y + 2)} L540 ${n1(y + 6 + s * 10)} L0 ${n1(y + 6 + s * 10)}Z" fill="#1a0c28" opacity=".22"/>`;
   }
+  for (let k = 0; k < 4; k++) g += A(`drift:${k % 2 ? -90 : 90}:0:${5 + k}`, `<ellipse cx="${120 + k * 110}" cy="${HZ + 40 + k * 38}" rx="${70 + k * 20}" ry="${5 + k * 2}" fill="#ffc878" opacity=".16"/>`);
   const bn = (x, y, s, c, fl) => `<g transform="translate(${x} ${y}) scale(${s})">${banner(0, 0, 110, c, fl)}</g>`;
   g += bn(60, HZ + 70, .55, '#e4572e') + bn(210, HZ + 52, .4, '#e4572e') + bn(330, HZ + 52, .4, '#d9a05b', true) + bn(480, HZ + 70, .55, '#d9a05b', true);
   return g;
@@ -115,19 +127,25 @@ VIDEO({
   shots: [
     /* 1: wide, sunset over the Kurukshetra field, slow push-in */
     { line: 'कुरुक्षेत्र में महाभारत का युद्ध शुरू होने वाला था।', capTop: 120, mood: 'calm', fx: 'dust',
-      cam: { from: [270, 470, 1.0], to: [270, 560, 1.32] }, ...SK(0, 270, 548, 30) },
+      cam: { from: [270, 470, 1.0], to: [270, 560, 1.32] }, ...SK(0, 270, 548, 30),
+      cast: [{ c: BARBARIK, x: 640, y: 862, s: .5, expr: 'calm', with: { skin: '#2a1630', top: '#2a1630', bottom: '#2a1630', cape: '#4a2040' }, walk: { from: -800, dur: 4.6 }, acts: [[0, 'stand']] }] },
     /* 2: Barbarik on the terrace looking over the army, camera drifts right to reveal it */
-    { line: 'दोनों तरफ़ लाखों सैनिक खड़े थे।', capTop: 120, mood: 'hope', fx: 'embers', tr: 'fade',
-      cam: { from: [175, 610, 1.3], to: [330, 590, 1.3] }, ...SK(1, 380, 540, 30),
-      cast: [HERO({ x: 130, acts: [[0, 'stand'], [1.4, 'lookUp'], [2.4, 'stand', .5]] })] },
+    { line: 'दोनों तरफ़ लाखों सैनिक खड़े थे।', dur: 4, capTop: 120, mood: 'hope', fx: 'embers', tr: 'fade',
+      cam: { keys: [[0, 120, 610, 1.3], [1.9, 200, 600, 1.3], [4, 335, 590, 1.3]] }, ...SK(1, 380, 540, 30),
+      cast: [HERO({ x: 150, walk: { from: -270, dur: 1.9 }, acts: [[0, 'stand'], [1.9, { lean: 5, head: -6, drop: 4 }, .5], [2.7, { lean: -3, head: 9 }, .9]] }),
+        { c: KRISHNA, x: 455, y: 892, s: 1.15, expr: 'calm', acts: [[0, 'stand'], [2.4, 'lookBack', .6]] }] },
     /* 3: close-up of his face against the blurred sunset */
     { line: 'तभी वहाँ एक वीर योद्धा पहुँचा, बर्बरीक।', capTop: 120, mood: 'hope', fx: 'embers', tr: 'glow',
       cam: { keys: [[0, 215, 600, 1.55], [3.4, 188, 562, 2.35, 'spring']] }, ...SK(2, 400, 470, 36),
-      cast: [HERO({ x: 130, acts: [[0, 'stand'], [1.8, 'fist', .6]] })] },
+      cast: [HERO({ x: 130, exprKeys: [[0, 'serene'], [2.4, 'angry']], acts: [[0, 'lookUp', .01], [1.2, 'stand', .9], [2.5, 'fist', .5]] })] },
     /* 4: three arrows, drawn bow, pull back to wide */
     { line: 'उसके पास सिर्फ़ तीन तीर थे, पर वही काफ़ी थे।', capTop: 120, mood: 'divine', fx: 'sparks', tr: 'whip',
-      cam: { from: [215, 600, 1.25], to: [270, 520, 1.0] }, ...SK(3, 330, 520, 32),
-      cast: [HERO({ x: 150, s: 1.05, props: { front: 'bow' }, acts: [[0, 'stand'], [.8, 'bowDraw', .9]] })] }
+      cam: { keys: [[0, 215, 610, 1.3], [1.0, 205, 595, 1.4], [3.0, 200, 590, 1.5], [3.6, 335, 570, 1.15, 'spring']] }, ...SK(3, 330, 520, 32),
+      shake: [3.0, .35, 3], sfx: [[3.0, 'bowshot', .6]],
+      front: () => `<g transform="translate(330 640)">${A('sscale:3.0:.5', sparkle(0, 0, 3.2, '#fff3c4'))}</g>` + A('slide:-440:0:.4:3.0', A('fadeout:3.5:.4', `<g transform="translate(570 640)"><line x1="-70" y1="0" x2="0" y2="0" stroke="#ffe29a" stroke-width="7" opacity=".35"/><line x1="-70" y1="0" x2="0" y2="0" stroke="#fff4c4" stroke-width="3" stroke-linecap="round"/><polygon points="0,-6 18,0 0,6" fill="#fff4c4"/></g>`)),
+      cast: [HERO({ x: 150, s: 1.05, props: { front: 'bow' }, acts: [[0, 'bowReady', .4], [1.0, 'bowDraw', 1.2], [3.0, { a: [78, 0], b: [18, 40], lean: -5, head: 5 }, .1], [3.5, 'bowReady', .7]] }),
+        { c: SOLDIER, x: 405, y: 806, s: .6, flip: true, expr: 'calm', acts: [[0, 'stand'], [3.2, 'recoil', .25]] },
+        { c: SOLDIER, x: 478, y: 814, s: .66, flip: true, expr: 'surprise', acts: [[0, 'stand'], [3.4, 'recoil', .25]] }] }
   ]
 });
 })();
