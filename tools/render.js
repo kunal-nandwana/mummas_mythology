@@ -12,7 +12,7 @@
            warmth + presence EQ, de-esser, compressor, loudness -14 LUFS (YouTube), peak limiter.
            --raw = no clean-up.  --denoise 12 = noise reduction in dB (default 12; try 18 for a noisy room, 0 = off).
    Cinema voice (trailer style, default for every video): deep chest, body, clarity, tighter compression and a dark hall reverb (about 1.6 s).
-           --nocinema = off, --cinemawet 0.35 = more hall (default 0.22, 0 = none).
+           --nocinema = off, --cinemawet 0.2 = more hall (default 0.09, 0 = none).
    Music:  YOUR track from the music/ folder (first file, or story.js music:'part-of-file-name'). music:false = none.
            'score' = music composed scene by scene (changes with each mood, own volume per scene); 'calm'|'dark'|'bright' = generated loops. --music name / --nomusic / --musicvol 0.5 (default; 0.8 = louder, 0.3 = softer).
            It fades in and out and gets quieter whenever you speak.
@@ -50,7 +50,7 @@ const BLUR=DRAFT||!opt('blur')?1:Math.max(2,Math.min(8,Math.round(opt('blur')===
 const WORKERS=Math.max(1,Math.min(6,+opt('workers')||Math.min(3,Math.max(1,os.cpus().length-4)))), JQ=DRAFT?80:92;
 // 16:9 long videos (story.js format:'long') render 1920x1080; Shorts 1080x1920
 const LONG=/format\s*:\s*['"]long['"]/.test(fs.readFileSync(path.join(DIR,'story.js'),'utf8')), VW=LONG?960:540, VH=LONG?540:960;
-// cinematic "trailer" voice grade: ON for every video (--nocinema = off, --cinemawet 0.3 = more hall, default 0.22)
+// cinematic "trailer" voice grade: ON for every video (--nocinema = off, --cinemawet 0.2 = more hall, default 0.09)
 const CINEMA=!opt('nocinema');
 // ---- find the voice file ----
 const VS=require('./voicesync'), VR=require('./voice-report');
@@ -77,7 +77,7 @@ function voiceChain(){ const dn=opt('denoise')===null?12:+opt('denoise');
       'equalizer=f=5200:t=q:w=1.2:g=1.2',                    //   a little more clarity
       'acompressor=threshold=-24dB:ratio=4:attack=15:release=250:makeup=2']:[])].join(','); }   //   second, closer compression: the voice sounds big and steady
 // trailer reverb: a dark hall (about 1.6 s, 30 ms pre-delay) built from many jittered echo taps. It is a separate "wet" path (in_gain=0), mixed in under the dry voice.
-function hallVerb(){ const wet=opt('cinemawet')===null?0.22:+opt('cinemawet'); let seed=11; const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+function hallVerb(){ const wet=opt('cinemawet')===null?0.09:+opt('cinemawet'); let seed=11; const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
   const dl=[], dc=[]; for(let d=30; d<1700; d+=14+d*0.045){ const t=d+rnd()*10; dl.push(Math.round(t)); dc.push((0.55*Math.exp(-3.2*t/1600)*(0.6+0.8*rnd())).toFixed(3)); }
   const norm=1/Math.sqrt(dc.reduce((a,x)=>a+x*x,0));
   return `aecho=0:1:${dl.join('|')}:${dc.join('|')},lowpass=f=3800,highpass=f=180,volume=${(wet*norm).toFixed(3)}`; }
