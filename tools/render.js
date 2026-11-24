@@ -11,8 +11,8 @@
    Voice clean-up: ON by default (made for a Boya BY-M1 lapel mic): rumble cut, hiss/noise reduction, mouth-click removal,
            warmth + presence EQ, de-esser, compressor, loudness -14 LUFS (YouTube), peak limiter.
            --raw = no clean-up.  --denoise 12 = noise reduction in dB (default 12; try 18 for a noisy room, 0 = off).
-   Cinema voice: long videos (format:'long') also get a cinematic grade on the voice: warmer chest, a touch of clarity and a very short room tail.
-           --nocinema = off, --cinema = on for a Short too.
+   Cinema voice (trailer style, default for every video): deep chest, body, clarity, tighter compression and a dark hall reverb (about 1.6 s).
+           --nocinema = off, --cinemawet 0.35 = more hall (default 0.22, 0 = none).
    Music:  YOUR track from the music/ folder (first file, or story.js music:'part-of-file-name'). music:false = none.
            'score' = music composed scene by scene (changes with each mood, own volume per scene); 'calm'|'dark'|'bright' = generated loops. --music name / --nomusic / --musicvol 0.5 (default; 0.8 = louder, 0.3 = softer).
            It fades in and out and gets quieter whenever you speak.
@@ -50,8 +50,8 @@ const BLUR=DRAFT||!opt('blur')?1:Math.max(2,Math.min(8,Math.round(opt('blur')===
 const WORKERS=Math.max(1,Math.min(6,+opt('workers')||Math.min(3,Math.max(1,os.cpus().length-4)))), JQ=DRAFT?80:92;
 // 16:9 long videos (story.js format:'long') render 1920x1080; Shorts 1080x1920
 const LONG=/format\s*:\s*['"]long['"]/.test(fs.readFileSync(path.join(DIR,'story.js'),'utf8')), VW=LONG?960:540, VH=LONG?540:960;
-// cinematic voice grade: ON for long videos (--nocinema = off, --cinema = on for a Short too)
-const CINEMA=opt('nocinema')?false:(opt('cinema')||LONG);
+// cinematic "trailer" voice grade: ON for every video (--nocinema = off, --cinemawet 0.3 = more hall, default 0.22)
+const CINEMA=!opt('nocinema');
 // ---- find the voice file ----
 const VS=require('./voicesync'), VR=require('./voice-report');
 const voice=VR.findVoice(topic,opt('voice'));
@@ -72,9 +72,15 @@ function voiceChain(){ const dn=opt('denoise')===null?12:+opt('denoise');
     'highshelf=f=9000:g=2',                                  // air
     'deesser=i=0.4:m=0.5:f=0.5',                             // soften harsh "s" sounds
     'acompressor=threshold=-20dB:ratio=3:attack=10:release=150:makeup=3',   // even volume
-    ...(CINEMA?['lowshelf=f=130:g=2.5',                      // cinematic: chest and warmth (documentary narrator)
+    ...(CINEMA?['lowshelf=f=140:g=4',                        // trailer voice: deep chest (documentary / trailer narrator)
+      'equalizer=f=200:t=q:w=1:g=1.5',                       //   body (the -2 dB cut at 250 Hz above keeps it from turning boxy)
       'equalizer=f=5200:t=q:w=1.2:g=1.2',                    //   a little more clarity
-      'aecho=0.9:0.9:42|97|171:0.14|0.09|0.05']:[])].join(','); }   //   very short room tail: the voice sits in the picture, not on top of it
+      'acompressor=threshold=-24dB:ratio=4:attack=15:release=250:makeup=2']:[])].join(','); }   //   second, closer compression: the voice sounds big and steady
+// trailer reverb: a dark hall (about 1.6 s, 30 ms pre-delay) built from many jittered echo taps. It is a separate "wet" path (in_gain=0), mixed in under the dry voice.
+function hallVerb(){ const wet=opt('cinemawet')===null?0.22:+opt('cinemawet'); let seed=11; const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  const dl=[], dc=[]; for(let d=30; d<1700; d+=14+d*0.045){ const t=d+rnd()*10; dl.push(Math.round(t)); dc.push((0.55*Math.exp(-3.2*t/1600)*(0.6+0.8*rnd())).toFixed(3)); }
+  const norm=1/Math.sqrt(dc.reduce((a,x)=>a+x*x,0));
+  return `aecho=0:1:${dl.join('|')}:${dc.join('|')},lowpass=f=3800,highpass=f=180,volume=${(wet*norm).toFixed(3)}`; }
 function measureLoud(file,chain){ const r=spawnSync('ffmpeg',['-hide_banner','-i',file,'-af',chain+',loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json','-f','null','-'],{encoding:'utf8'});
   const m=/\{[^{}]*"input_i"[^{}]*\}/.exec(r.stderr||''); try{ return m?JSON.parse(m[0]):null; }catch(e){ return null; } }
 function voiceFilter(file){ if(opt('raw')) return null; let chain=voiceChain(); let L=measureLoud(file,chain);
@@ -156,7 +162,11 @@ function voiceFilter(file){ if(opt('raw')) return null; let chain=voiceChain(); 
   const musicArgs = musicFile ? (scoreMade ? ['-i',musicFile] : ['-stream_loop','-1','-i',musicFile]) : [], sfxArgs = sfxFile ? ['-i',sfxFile] : [];
   const vChain = hasVoice ? [vf, shift<0?`adelay=${Math.round(-shift*1000)}:all=1`:null, 'apad'].filter(Boolean).join(',') : null;
   const fc=[], bed=[];
-  if(hasVoice){ fc.push(musicFile?`[1:a]${vChain},asplit=2[v][vs]`:`[1:a]${vChain}[v]`); bed.push('v'); }
+  if(hasVoice){
+    if(CINEMA && !opt('raw')){ // dry voice (also drives the music ducking) + reverb tail mixed under it
+      fc.push(`[1:a]${vChain},asplit=${musicFile?3:2}[vd][vr]${musicFile?'[vs]':''}`, `[vr]${hallVerb()}[vw]`, `[vd][vw]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[v]`);
+    } else fc.push(musicFile?`[1:a]${vChain},asplit=2[v][vs]`:`[1:a]${vChain}[v]`);
+    bed.push('v'); }
   let envExpr='1';
   if(musicFile && !scoreMade && levels && levels.length && !opt('flatmusic')){ const g0=levels[0].g; const terms=[];
     for(let k=1;k<levels.length;k++){ const dg=levels[k].g-levels[k-1].g; if(Math.abs(dg)<0.005) continue; const b=levels[k].start; terms.push(`${dg.toFixed(3)}*min(1,max(0,(t-${(b-0.6).toFixed(2)})/1.2))`); }
