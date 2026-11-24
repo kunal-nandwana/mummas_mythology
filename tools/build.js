@@ -37,7 +37,7 @@ fs.writeFileSync(path.join(dir,'script.md'), md);
 /* 2) standalone index.html */
 const font=(fam,file,w)=>`@font-face{font-family:'${fam}';font-weight:${w};font-display:block;src:url(data:font/ttf;base64,${fs.readFileSync(path.join(ENG,'fonts',file)).toString('base64')}) format('truetype')}`;
 const fonts=[font('Mukta','Mukta-Medium.ttf',500),font('Mukta','Mukta-Bold.ttf',700),font('Mukta','Mukta-ExtraBold.ttf',800),font('Tiro','TiroDevanagariHindi-Regular.ttf',400)].join('\n');
-const js=['timing.js','scenes.js','wide.js','rig.js','characters.js','core.js'].map(f=>`/* ---- engine/${f} ---- */\n`+read(path.join(ENG,f))).join('\n');
+const js=['timing.js','scenes.js','wide.js','rig.js','frontrig.js','characters.js','core.js'].map(f=>`/* ---- engine/${f} ---- */\n`+read(path.join(ENG,f))).join('\n');
 const html=`<!DOCTYPE html>
 <html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${(CFG.title||topic).replace(/</g,'')}</title>
