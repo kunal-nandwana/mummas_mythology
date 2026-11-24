@@ -35,7 +35,7 @@ const BARRIER = x => A('pulse:2.2',`<rect x="${x-8}" y="60" width="16" height="3
 const ORBS3 = () => [[300,'#8cd0ff'],[480,'#ffd98a'],[660,'#c49aff']].map(([x,c],i)=>A(`pop:${.4+i*.5}`,A(`bob:4:${.2+i*.05}`,`<g transform="translate(${x} 90)">${wglow(0,0,80,c,.5)}<circle r="30" fill="#241446" stroke="${c}" stroke-width="3"/><circle r="18" fill="${c}" opacity=".5"/></g>`))).join('');
 const ORBPASS = (x1,x2,y,delay) => A(`fadein:${delay}:.4`,`<g>${A(`slide:${x2-x1}:0:2.4:${delay}`,A('pulse:1.4',wglow(x1,y,70,'#ffe7a8',.9)+`<circle cx="${x1}" cy="${y}" r="16" fill="#fff3c4"/>`))}</g>`);
 
-VIDEO({
+VIDEO({ rig:'side',
   title: 'परशुराम जी ने रावण का वध क्यों नहीं किया?',
   format: 'long', target: 495,
   keywords: ['परशुराम','रावण','श्रीराम','सहस्त्रबाहु','विष्णु','ब्रह्मा','तपस्या','अवतार','मर्यादा','वाल्मीकि'],

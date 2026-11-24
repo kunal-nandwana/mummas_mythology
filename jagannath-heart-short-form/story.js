@@ -97,7 +97,7 @@ const PRIEST = (x, y, s, prop, extra = {}) => Object.assign({ c: PUJARI, with: {
 /* Chrome only paints a gradient whose FIRST definition is visible, and hidden shots are display:none, so every shot gets its own ids (jg -> jg<shot>_). */
 const withDefs = list => list.map((s, i) => { ['sky', 'far', 'mid', 'art', 'near', 'front'].forEach(k => { const fn = s[k]; if (typeof fn === 'function') s[k] = () => { let v = fn(); if (!v.includes('url(#jg')) return v; if (!v.includes('id="jgSky"')) v = DEFS + v; return v.replace(/(id="|url\(#)jg/g, `$1jg${i}_`); }; }); return s; });
 
-VIDEO({
+VIDEO({ rig:'side',
   title: 'जगन्नाथ जी का धड़कता हृदय', format: 'short', target: 85,
   music: 'scenes',  // scene sound library; no drums except the soft heartbeat cues at the end
   handheld: .4,

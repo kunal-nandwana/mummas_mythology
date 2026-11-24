@@ -64,7 +64,7 @@ const ORB = (x,y,s)=>A('pop:.4',A('bob:5:.5',`<g transform="translate(${x} ${y})
 const LAKS = {c:LAKSHMAN};
 const MEG  = {c:MEGHNAD};
 
-VIDEO({
+VIDEO({ rig:'side',
   title:'मेघनाद ने श्रीराम को दो बार हराया', format:'short', target:65,
   music:'scenes', handheld:0.9, minShot:2.1,
   keywords:['मेघनाद','श्रीराम','लक्ष्मण','गरुड़','ब्रह्मास्त्र','हनुमान','लंका','साँप','बाणों','दो','बार','पहाड़','जड़ी-बूटियों','वाल्मीकि','युद्धकांड','गिरे','आजाद'],

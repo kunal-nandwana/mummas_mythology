@@ -51,6 +51,28 @@ const FPOSES = {
   heroic:{lArmOut:40, lElbow:100, rArmOut:16, rElbow:62, headTilt:-1},
   offer:{lArmOut:34, lArmFwd:40, lElbow:70, rArmOut:34, rArmFwd:40, rElbow:70, lHand:'open', rHand:'open', lean:3},
 };
+/* aliases so stories written with the side-view pose names still read well face-on */
+const _N={lHand:'namaste',rHand:'namaste',lArmOut:2,lArmFwd:0,lElbow:138,rArmOut:2,rArmFwd:0,rElbow:138};
+Object.assign(FPOSES,{
+  armUp:{rArmOut:165, rHand:'open', headTilt:-3},
+  pranam:Object.assign({}, _N, {lean:14, headTilt:-12}),
+  think:{rArmOut:14, rElbow:135, headTilt:-4},
+  explain:{rArmOut:38, rElbow:-35, rHand:'open', lean:2},
+  plead:{lArmOut:30, lElbow:70, rArmOut:30, rElbow:70, lHand:'open', rHand:'open', lean:6, headTilt:-4},
+  accuse:{rArmOut:95, rArmFwd:70, rElbow:4, rHand:'open', lean:4},
+  shock:{lArmOut:40, lElbow:-50, rArmOut:40, rElbow:-50, lHand:'open', rHand:'open', lean:-4},
+  recoil:{lArmOut:40, lElbow:-50, rArmOut:40, rElbow:-50, lHand:'open', rHand:'open', lean:-9},
+  weep:{rArmOut:10, rElbow:150, headTilt:-16, lean:6},
+  grief:{lArmOut:2, lElbow:130, rArmOut:2, rElbow:130, lHand:'open', rHand:'open', lean:8, headTilt:-14},
+  hold:{lArmOut:34, lArmFwd:40, lElbow:70, rArmOut:34, rArmFwd:40, rElbow:70, lHand:'open', rHand:'open', lean:2},
+  give:{rArmOut:50, rArmFwd:40, rElbow:20, rHand:'open', lean:3},
+  fist:{lArmOut:55, lArmFwd:14, lElbow:70, rArmOut:55, rArmFwd:14, rElbow:70},
+  lookUp:{headTilt:6}, lookDown:{headTilt:-10}, lookAway:{headYaw:26}, lookBack:{headYaw:-26},
+  bowReady:{rArmOut:16, rElbow:62}, bowDraw:{rArmOut:16, rElbow:62},
+  kneel:{drop:46, lean:3, lKnee:30, rKnee:30}, kneelPray:Object.assign({}, _N, {drop:46, lKnee:30, rKnee:30}),
+  kneelBow:Object.assign({}, _N, {drop:46, lean:30, headTilt:-18, lKnee:30, rKnee:30}),
+  kneelOffer:{drop:46, lArmOut:34, lArmFwd:40, lElbow:70, rArmOut:34, rArmFwd:40, rElbow:70, lHand:'open', rHand:'open', lKnee:30, rKnee:30},
+});
 function poseOfFront(p){
   if(!p) return Object.assign({},FPOSE0);
   if(typeof p==='object') return Object.assign({},FPOSE0,p);

@@ -96,7 +96,7 @@ shots.forEach((s,i)=>{
     if(c.expr && !EXPRS.includes(c.expr)) E(P(`${who}: unknown expr "${c.expr}" (${EXPRS.join(', ')})`));
     (c.acts||[]).forEach(a=>{
       if(!Array.isArray(a)||typeof a[0]!=='number'){ E(P(`${who}: acts must look like [seconds,'pose']`)); return; }
-      if(typeof a[1]==='string') a[1].split('+').forEach(p=>{ if(!(c.facing==='front'?FPOSES:POSES)[p]) E(P(`${who}: unknown pose "${p}"`)); });
+      if(typeof a[1]==='string') a[1].split('+').forEach(p=>{ if(!((c.facing||CFG.rig||'front')==='front'?FPOSES:POSES)[p]) E(P(`${who}: unknown pose "${p}"`)); });
     });
   });
 });

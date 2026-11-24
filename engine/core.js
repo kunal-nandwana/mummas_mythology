@@ -27,6 +27,7 @@
    ===================================================================== */
 const LAYER_F={sky:.3,far:.6,mid:.85,art:1,near:1.4};
 function VIDEO(cfg){
+  RIG_DEFAULT = cfg.rig==='side' ? 'side' : 'front';   // new videos use the front-facing rig; old ones are pinned with rig:'side'
   const LONG=cfg.format==='long';            // 'long' = 16:9 design space 960x540; otherwise 9:16 = 540x960
   const W=LONG?960:540, H=LONG?540:960;
   document.documentElement.style.setProperty('--W',W+'px'); document.documentElement.style.setProperty('--H',H+'px');

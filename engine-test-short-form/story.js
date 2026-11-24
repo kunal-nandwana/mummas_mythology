@@ -1,5 +1,5 @@
 /* Engine test: one shot per rig feature. Build: node tools/build.js engine-test-short-form */
-VIDEO({
+VIDEO({ rig:'side',
   title:'Engine test — rig & captions', format:'short',
   keywords:['बर्बरीक','कृष्ण','देवी','बाण','भीम','अर्जुन','महादेव','माँ'],
   shots:[

@@ -74,7 +74,7 @@ const impact=(t0,x,y)=>{ let r=''; for(let i=0;i<14;i++) r+=`<path d="M${x} ${y}
 const shlokaFrame=(x,y,w,h)=>{ const lotus=(cx,cy)=>`<g transform="translate(${cx} ${cy})">${[-60,-30,0,30,60].map(r=>`<ellipse rx="5" ry="15" transform="rotate(${r}) translate(0 -14)" fill="url(#gold)"/>`).join('')}<circle r="5" fill="#d63a2a"/></g>`;
   return A('fadein:0:.8',`<rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="22" fill="#14081c" opacity=".55"/><rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="22" fill="none" stroke="url(#gold)" stroke-width="4"/><rect x="${x-w/2+10}" y="${y-h/2+10}" width="${w-20}" height="${h-20}" rx="16" fill="none" stroke="#e8b83a" stroke-width="1.5" stroke-dasharray="3 6"/>`+lotus(x-w/2,y-h/2)+lotus(x+w/2,y-h/2)+lotus(x-w/2,y+h/2)+lotus(x+w/2,y+h/2)+lotus(x,y-h/2)+lotus(x,y+h/2)); };
 
-VIDEO({
+VIDEO({ rig:'side',
   title:'महादेव ने यमराज का वध क्यों किया',
   format:'short',
   target:70,

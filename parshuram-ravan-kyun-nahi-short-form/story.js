@@ -96,7 +96,7 @@ function NARASIMHA(x,y,s){ let mane=''; for(let i=0;i<14;i++) mane+=`<ellipse tr
 const GOLD_SIL = {skin:'#f0bf55', top:'#f0bf55', bottom:'#f0bf55', shin:'#f0bf55', foot:'#f0bf55', sash:'#f0bf55', cape:'#f0bf55', pads:'#f0bf55', belt:'#f0bf55', mala:['#f0bf55'], studs:'#f0bf55', beard:'#f0bf55', ash:false, rudra:false, tilak:false, trim:null, aura:'gw'};   // Parshuram as a golden silhouette (same character, recoloured)
 const VISH_SHADOW = {skin:'#1d5668', top:'#1d5668', bottom:'#1d5668', shin:'#1d5668', sash:'#1d5668', cape:'#1d5668', pads:'#1d5668', belt:'#1d5668', mala:['#1d5668'], studs:'#1d5668', tilak:false, aura:'gw'};   // Vishnu's faint shadow behind Parshuram (shot 2)
 
-VIDEO({
+VIDEO({ rig:'side',
   title:'परशुराम जी ने रावण का वध क्यों नहीं किया?', format:'short', target:85,
   music:'scenes',
   ending:3.2,

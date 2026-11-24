@@ -112,7 +112,7 @@ const SCRIPTURE = (bg,name,loc)=>({ sky:bg,
   title:{text:name, y:200, size:62, delay:.3},
   front:()=>big(270,290,32,'#f6ecd2',loc,1.3) });
 
-VIDEO({
+VIDEO({ rig:'side',
   title:'रावण और माँ सीता का सच', format:'short', target:75,
   music:'scenes',
   handheld:0.7,
