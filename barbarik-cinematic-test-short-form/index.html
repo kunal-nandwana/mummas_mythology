@@ -1145,7 +1145,9 @@ function updateRig(r, lt, t, talking){
   let P=Object.assign({}, poseAt(r, lt));
   const PL=poseAt(r, Math.max(0,lt-0.16));            // the pose a moment ago (for lag / swing)
   let x=cast.x||270, y=cast.y||840, s=cast.s||1, flip=cast.flip?-1:1, bob=0, op=1;
-  const ex=cast.expr||'calm', sd=r.seed, TT=cast.talk?1:0;
+  let ex=cast.expr||'calm', exT=0;   // exprKeys:[[secs,'expr'],..] changes the expression during the shot (planned seconds)
+  if(cast.exprKeys) for(const k of cast.exprKeys) if(lt>=k[0]){ ex=k[1]; exT=k[0]; }
+  const sd=r.seed, TT=cast.talk?1:0;
 
   // walk cycle
   if(cast.walk){ const w=cast.walk, k=clamp01((lt-(w.delay||0))/(w.dur||2)); const kk=1-Math.pow(1-k,1.7);
@@ -1161,7 +1163,7 @@ function updateRig(r, lt, t, talking){
   if(cast.exit){ const e=cast.exit; op*=1-clamp01((lt-e.at)/(e.fade||0.8)); }
 
   // attitude from expression (eases in over the first half second of the shot)
-  const at=ATTITUDE[ex], ak=smooth01(lt/0.6);
+  const at=ATTITUDE[ex], ak=smooth01((lt-exT)/0.6);
   if(at){ P.head+=(at.head||0)*ak; P.lean+=(at.lean||0)*ak; }
 
   // talking: gentle nods + hand gestures (arms that are "free" drift and open up)
@@ -1860,10 +1862,11 @@ function midLayer(i, sunX) {
       for (let c = 0; c < cols; c++) { const x = cx + (c - (cols - 1) / 2) * sp + (r() - .5) * s * 3; if (x < -30 || x > 570) continue;
         row += `<use href="#${P}sol" transform="translate(${n1(x)} ${n1(y + (r() - .5) * s * 2)}) scale(${n1(s * 100) / 100})"/>`; }
     });
-    g += `<g fill="${col}" stroke="${col}">${row}</g>`;
+    g += A(`bob:${n1(.5 + d * 2.2)}:${n1(1.1 + k * .13)}`, `<g fill="${col}" stroke="${col}">${row}</g>`);
     // long soft shadows toward the viewer, away from the sun
     if (k > 3) g += `<path d="M0 ${n1(y + 2)} L540 ${n1(y + 2)} L540 ${n1(y + 6 + s * 10)} L0 ${n1(y + 6 + s * 10)}Z" fill="#1a0c28" opacity=".22"/>`;
   }
+  for (let k = 0; k < 4; k++) g += A(`drift:${k % 2 ? -90 : 90}:0:${5 + k}`, `<ellipse cx="${120 + k * 110}" cy="${HZ + 40 + k * 38}" rx="${70 + k * 20}" ry="${5 + k * 2}" fill="#ffc878" opacity=".16"/>`);
   const bn = (x, y, s, c, fl) => `<g transform="translate(${x} ${y}) scale(${s})">${banner(0, 0, 110, c, fl)}</g>`;
   g += bn(60, HZ + 70, .55, '#e4572e') + bn(210, HZ + 52, .4, '#e4572e') + bn(330, HZ + 52, .4, '#d9a05b', true) + bn(480, HZ + 70, .55, '#d9a05b', true);
   return g;
@@ -1894,19 +1897,25 @@ VIDEO({
   shots: [
     /* 1: wide, sunset over the Kurukshetra field, slow push-in */
     { line: 'कुरुक्षेत्र में महाभारत का युद्ध शुरू होने वाला था।', capTop: 120, mood: 'calm', fx: 'dust',
-      cam: { from: [270, 470, 1.0], to: [270, 560, 1.32] }, ...SK(0, 270, 548, 30) },
+      cam: { from: [270, 470, 1.0], to: [270, 560, 1.32] }, ...SK(0, 270, 548, 30),
+      cast: [{ c: BARBARIK, x: 640, y: 862, s: .5, expr: 'calm', with: { skin: '#2a1630', top: '#2a1630', bottom: '#2a1630', cape: '#4a2040' }, walk: { from: -800, dur: 4.6 }, acts: [[0, 'stand']] }] },
     /* 2: Barbarik on the terrace looking over the army, camera drifts right to reveal it */
-    { line: 'दोनों तरफ़ लाखों सैनिक खड़े थे।', capTop: 120, mood: 'hope', fx: 'embers', tr: 'fade',
-      cam: { from: [175, 610, 1.3], to: [330, 590, 1.3] }, ...SK(1, 380, 540, 30),
-      cast: [HERO({ x: 130, acts: [[0, 'stand'], [1.4, 'lookUp'], [2.4, 'stand', .5]] })] },
+    { line: 'दोनों तरफ़ लाखों सैनिक खड़े थे।', dur: 4, capTop: 120, mood: 'hope', fx: 'embers', tr: 'fade',
+      cam: { keys: [[0, 120, 610, 1.3], [1.9, 200, 600, 1.3], [4, 335, 590, 1.3]] }, ...SK(1, 380, 540, 30),
+      cast: [HERO({ x: 150, walk: { from: -270, dur: 1.9 }, acts: [[0, 'stand'], [1.9, { lean: 5, head: -6, drop: 4 }, .5], [2.7, { lean: -3, head: 9 }, .9]] }),
+        { c: KRISHNA, x: 455, y: 892, s: 1.15, expr: 'calm', acts: [[0, 'stand'], [2.4, 'lookBack', .6]] }] },
     /* 3: close-up of his face against the blurred sunset */
     { line: 'तभी वहाँ एक वीर योद्धा पहुँचा, बर्बरीक।', capTop: 120, mood: 'hope', fx: 'embers', tr: 'glow',
       cam: { keys: [[0, 215, 600, 1.55], [3.4, 188, 562, 2.35, 'spring']] }, ...SK(2, 400, 470, 36),
-      cast: [HERO({ x: 130, acts: [[0, 'stand'], [1.8, 'fist', .6]] })] },
+      cast: [HERO({ x: 130, exprKeys: [[0, 'serene'], [2.4, 'angry']], acts: [[0, 'lookUp', .01], [1.2, 'stand', .9], [2.5, 'fist', .5]] })] },
     /* 4: three arrows, drawn bow, pull back to wide */
     { line: 'उसके पास सिर्फ़ तीन तीर थे, पर वही काफ़ी थे।', capTop: 120, mood: 'divine', fx: 'sparks', tr: 'whip',
-      cam: { from: [215, 600, 1.25], to: [270, 520, 1.0] }, ...SK(3, 330, 520, 32),
-      cast: [HERO({ x: 150, s: 1.05, props: { front: 'bow' }, acts: [[0, 'stand'], [.8, 'bowDraw', .9]] })] }
+      cam: { keys: [[0, 215, 610, 1.3], [1.0, 205, 595, 1.4], [3.0, 200, 590, 1.5], [3.6, 335, 570, 1.15, 'spring']] }, ...SK(3, 330, 520, 32),
+      shake: [3.0, .35, 3], sfx: [[3.0, 'bowshot', .6]],
+      front: () => `<g transform="translate(330 640)">${A('sscale:3.0:.5', sparkle(0, 0, 3.2, '#fff3c4'))}</g>` + A('slide:-440:0:.4:3.0', A('fadeout:3.5:.4', `<g transform="translate(570 640)"><line x1="-70" y1="0" x2="0" y2="0" stroke="#ffe29a" stroke-width="7" opacity=".35"/><line x1="-70" y1="0" x2="0" y2="0" stroke="#fff4c4" stroke-width="3" stroke-linecap="round"/><polygon points="0,-6 18,0 0,6" fill="#fff4c4"/></g>`)),
+      cast: [HERO({ x: 150, s: 1.05, props: { front: 'bow' }, acts: [[0, 'bowReady', .4], [1.0, 'bowDraw', 1.2], [3.0, { a: [78, 0], b: [18, 40], lean: -5, head: 5 }, .1], [3.5, 'bowReady', .7]] }),
+        { c: SOLDIER, x: 405, y: 806, s: .6, flip: true, expr: 'calm', acts: [[0, 'stand'], [3.2, 'recoil', .25]] },
+        { c: SOLDIER, x: 478, y: 814, s: .66, flip: true, expr: 'surprise', acts: [[0, 'stand'], [3.4, 'recoil', .25]] }] }
   ]
 });
 })();

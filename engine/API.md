@@ -24,7 +24,7 @@ All scene fields are functions: `art:()=>svg`.
 
 **CAST**: `{c:CHAR, x, y, s, flip, expr, talk:true, acts:[[t,'pose',dur?]...], props:{front,back}, walk:{from,dur,delay}, enter:{fade,delay,rise}, exit:{at,fade}, eyes:'closed', look:'up', tears:true, aura, gesture:false, with:{costume overrides}}`
 - Feet at (x,y); head ≈ `(x, y-268*s)`. Faces right; `flip:true` faces left. Poses chain with `+`: `'kneel+namaste'`.
-- `expr`: calm, smile, serene, sad, angry, surprise.
+- `expr`: calm, smile, serene, sad, angry, surprise. `exprKeys:[[0,'serene'],[2.4,'angry']]` changes the expression during the shot (planned seconds; body attitude eases in again at each change). Pose objects work in `acts` too, e.g. `[2,{lean:5,head:-6,drop:4},.5]` for a settle / weight shift (keys: a b f k head lean drop turn draw hand).
 
 ## Characters (engine/characters.js)
 BARBARIK KRISHNA BRAHMIN ARJUNA BHIMA YUDHISHTHIRA NAKULA SAHADEVA GHATOTKACH MOTHER DEVI SITA RAMA SHIVA MAHAKAL DUSHAN ASURA RISHI SOLDIER VILLAGER DEVOTEE_F CHANDRA DAKSHA ROHINI NAKSHATRA (recolour: `{c:NAKSHATRA, with:{top,bottom,veil}}`) INDRA DEVA HANUMAN KARNA INDRADYUMNA VISHWAKARMA PUJARI NANDI NANDI_SADHAK.
