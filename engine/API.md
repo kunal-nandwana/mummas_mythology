@@ -159,3 +159,4 @@ Verses: shots with `calli` (or a `॥` line) count as chanted. With a recording,
 ## v6 (Hanuman-Ram milan video, Nov 2026)
 - New presets: **HANUMAN_BRAHMIN** (Hanuman disguised: human face, cream dhoti, shoulder cloth, tilak, hair knot), **SUGRIV** (golden-red vanara, ochre + green, silver crown), **VALI** (mighty vanara; use as silhouette with `with:{skin,face,furDark,top,bottom,shin,foot,crownCol,belt,pads all dark}`).
 - New costume key `crownCol:'#colour'` (front rig): solid-colour crown (e.g. silver `#dfe4ee`) instead of the gold gradient, for `head:'crown'|'big'|'kirita'`.
+- **Front rig head (Nov 2026, owner request):** the head no longer rolls sideways. `headTilt` is scaled to 20% and expressions add no tilt; `headYaw` (lookL/lookR) is scaled to 45% so a glance reads as a turn, not a bend.

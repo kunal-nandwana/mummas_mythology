@@ -388,7 +388,7 @@ function updateFrontRigShot(r, lt, t, talking){
   let ex=cast.expr||'calm', exT=0;
   if(cast.exprKeys) for(const k of cast.exprKeys) if(lt>=k[0]){ ex=k[1]; exT=k[0]; }
   const at=ATTITUDE[ex], ak=smooth01((lt-exT)/0.6);
-  if(at){ P.headTilt+=(at.head||0)*ak*0.6; P.lean+=(at.lean||0)*ak; }
+  if(at){ P.lean+=(at.lean||0)*ak; }   // (expression no longer rolls the head: owner found the sideways bending ugly)
 
   const breathe=Math.sin(t*2.1+r.seed)*1.0;
   setT(q.root, `translate(${n1(x)} ${n1(y+P.drop)}) scale(${n1(s*flip)} ${n1(s)})`);
@@ -396,9 +396,10 @@ function updateFrontRigShot(r, lt, t, talking){
   if(q.cape) setT(q.cape, `translate(0 -272) scale(${n1(1+0.025*Math.sin(t*1.3+r.seed))} 1) translate(0 272)`);
 
   /* head: yaw slides the features toward the turn side and squeezes them (a turn cue on a front face) */
+  P.headYaw*=0.45;   // gentler turns: full yaw read as the head bending left/right
   const yawShift=P.headYaw*0.2;
-  setT(q.head, `translate(${n1(yawShift)} 0) rotate(${n1(P.headTilt)} 0 ${G.neckY})`);
-  const yk=clamp01(Math.abs(P.headYaw)/26), dir=P.headYaw>0?1:-1, toR=dir>0;
+  setT(q.head, `translate(${n1(yawShift)} 0) rotate(${n1(P.headTilt*0.2)} 0 ${G.neckY})`);
+  const yk=clamp01(Math.abs(P.headYaw)/12), dir=P.headYaw>0?1:-1, toR=dir>0;
   setT(q.feat, `translate(${n1(dir*yk*9)} 0) scale(${n1(1-0.12*yk)} 1)`);
   if(q.hair) setT(q.hair, `translate(${n1(dir*yk*4)} 0)`);
   const far=1-0.55*yk;
