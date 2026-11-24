@@ -81,10 +81,11 @@ function midLayer(i, sunX) {
       for (let c = 0; c < cols; c++) { const x = cx + (c - (cols - 1) / 2) * sp + (r() - .5) * s * 3; if (x < -30 || x > 570) continue;
         row += `<use href="#${P}sol" transform="translate(${n1(x)} ${n1(y + (r() - .5) * s * 2)}) scale(${n1(s * 100) / 100})"/>`; }
     });
-    g += `<g fill="${col}" stroke="${col}">${row}</g>`;
+    g += A(`bob:${n1(.5 + d * 2.2)}:${n1(1.1 + k * .13)}`, `<g fill="${col}" stroke="${col}">${row}</g>`);
     // long soft shadows toward the viewer, away from the sun
     if (k > 3) g += `<path d="M0 ${n1(y + 2)} L540 ${n1(y + 2)} L540 ${n1(y + 6 + s * 10)} L0 ${n1(y + 6 + s * 10)}Z" fill="#1a0c28" opacity=".22"/>`;
   }
+  for (let k = 0; k < 4; k++) g += A(`drift:${k % 2 ? -90 : 90}:0:${5 + k}`, `<ellipse cx="${120 + k * 110}" cy="${HZ + 40 + k * 38}" rx="${70 + k * 20}" ry="${5 + k * 2}" fill="#ffc878" opacity=".16"/>`);
   const bn = (x, y, s, c, fl) => `<g transform="translate(${x} ${y}) scale(${s})">${banner(0, 0, 110, c, fl)}</g>`;
   g += bn(60, HZ + 70, .55, '#e4572e') + bn(210, HZ + 52, .4, '#e4572e') + bn(330, HZ + 52, .4, '#d9a05b', true) + bn(480, HZ + 70, .55, '#d9a05b', true);
   return g;
@@ -117,17 +118,19 @@ VIDEO({
     { line: 'कुरुक्षेत्र में महाभारत का युद्ध शुरू होने वाला था।', capTop: 120, mood: 'calm', fx: 'dust',
       cam: { from: [270, 470, 1.0], to: [270, 560, 1.32] }, ...SK(0, 270, 548, 30) },
     /* 2: Barbarik on the terrace looking over the army, camera drifts right to reveal it */
-    { line: 'दोनों तरफ़ लाखों सैनिक खड़े थे।', capTop: 120, mood: 'hope', fx: 'embers', tr: 'fade',
-      cam: { from: [175, 610, 1.3], to: [330, 590, 1.3] }, ...SK(1, 380, 540, 30),
-      cast: [HERO({ x: 130, acts: [[0, 'stand'], [1.4, 'lookUp'], [2.4, 'stand', .5]] })] },
+    { line: 'दोनों तरफ़ लाखों सैनिक खड़े थे।', dur: 4, capTop: 120, mood: 'hope', fx: 'embers', tr: 'fade',
+      cam: { keys: [[0, 120, 610, 1.3], [1.9, 200, 600, 1.3], [4, 335, 590, 1.3]] }, ...SK(1, 380, 540, 30),
+      cast: [HERO({ x: 150, walk: { from: -270, dur: 1.9 }, acts: [[0, 'stand'], [2.0, 'lookAway', .7], [3.2, 'lookBack', .7]] })] },
     /* 3: close-up of his face against the blurred sunset */
     { line: 'तभी वहाँ एक वीर योद्धा पहुँचा, बर्बरीक।', capTop: 120, mood: 'hope', fx: 'embers', tr: 'glow',
       cam: { keys: [[0, 215, 600, 1.55], [3.4, 188, 562, 2.35, 'spring']] }, ...SK(2, 400, 470, 36),
-      cast: [HERO({ x: 130, acts: [[0, 'stand'], [1.8, 'fist', .6]] })] },
+      cast: [HERO({ x: 130, acts: [[0, 'lookBack', .01], [1.3, 'stand', .8], [2.6, 'fist', .5]] })] },
     /* 4: three arrows, drawn bow, pull back to wide */
     { line: 'उसके पास सिर्फ़ तीन तीर थे, पर वही काफ़ी थे।', capTop: 120, mood: 'divine', fx: 'sparks', tr: 'whip',
-      cam: { from: [215, 600, 1.25], to: [270, 520, 1.0] }, ...SK(3, 330, 520, 32),
-      cast: [HERO({ x: 150, s: 1.05, props: { front: 'bow' }, acts: [[0, 'stand'], [.8, 'bowDraw', .9]] })] }
+      cam: { keys: [[0, 215, 610, 1.3], [1.0, 205, 595, 1.4], [3.0, 200, 590, 1.5], [3.5, 270, 530, 1.0, 'spring']] }, ...SK(3, 330, 520, 32),
+      shake: [3.0, .35, 3], sfx: [[3.0, 'bowshot', .6]],
+      front: () => A('slide:-440:0:.4:3.0', A('fadeout:3.5:.4', `<g transform="translate(570 640)"><line x1="-70" y1="0" x2="0" y2="0" stroke="#ffe29a" stroke-width="7" opacity=".35"/><line x1="-70" y1="0" x2="0" y2="0" stroke="#fff4c4" stroke-width="3" stroke-linecap="round"/><polygon points="0,-6 18,0 0,6" fill="#fff4c4"/></g>`)),
+      cast: [HERO({ x: 150, s: 1.05, props: { front: 'bow' }, acts: [[0, 'bowReady', .4], [1.0, 'bowDraw', 1.2], [3.0, 'bowReady', .12]] })] }
   ]
 });
 })();
