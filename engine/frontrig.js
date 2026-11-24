@@ -119,20 +119,20 @@ function propF(p, c){
 }
 
 /* tiered gold crown: h = cone height, fl = side-flare size, tiers = decorated rows */
-function mukutF(h, fl, tiers, pearl){
-  const g='url(#gold)', top=-353-h;
+function mukutF(h, fl, tiers, pearl, metal){   // metal = solid colour (e.g. silver '#d9dee8') instead of the gold gradient
+  const g=metal||'url(#gold)', sk=metal?'#5a6272':'#8a5a14', top=-353-h;
   let s='';
-  const flare=`<path d="M27 -349 C${35+fl*3} -349 ${40+fl*4} ${-356-fl*3} ${36+fl*3} ${-364-fl*5} C33 ${-360-fl*3} 30 -358 25 -357Z" fill="${g}" stroke="#8a5a14" stroke-width="1.2"/>`;
+  const flare=`<path d="M27 -349 C${35+fl*3} -349 ${40+fl*4} ${-356-fl*3} ${36+fl*3} ${-364-fl*5} C33 ${-360-fl*3} 30 -358 25 -357Z" fill="${g}" stroke="${sk}" stroke-width="1.2"/>`;
   s+=flare+`<g transform="scale(-1 1)">${flare}</g>`;
-  s+=`<path d="M-26 -353 L-10 ${top} Q0 ${top-7} 10 ${top} L26 -353Z" fill="${g}" stroke="#8a5a14" stroke-width="1.2"/>`;
+  s+=`<path d="M-26 -353 L-10 ${top} Q0 ${top-7} 10 ${top} L26 -353Z" fill="${g}" stroke="${sk}" stroke-width="1.2"/>`;
   s+=`<path d="M-26 -353 L-10 ${top} L-4 ${top-4} L-8 -353Z" fill="#000" opacity=".13"/>`;
   for(let i=1;i<=tiers;i++){
     const f=i/(tiers+1), y=n1(-353-h*f), hw=n1(26-16*f);
-    s+=`<path d="M${-hw} ${y} H${hw}" stroke="#8a5a14" stroke-width="1.6"/>`;
+    s+=`<path d="M${-hw} ${y} H${hw}" stroke="${sk}" stroke-width="1.6"/>`;
     for(let x=-hw+5;x<hw-2;x+=7) s+=`<circle cx="${n1(x)}" cy="${n1(y+5)}" r="1.5" fill="#fff3c4"/>`;
   }
-  s+=`<circle cx="0" cy="${top-5}" r="3.6" fill="${g}" stroke="#8a5a14" stroke-width="1"/><path d="M0 ${top-8} Q-4.5 ${top-15} 0 ${top-23} Q4.5 ${top-15} 0 ${top-8}Z" fill="${g}" stroke="#8a5a14" stroke-width="1"/>`;
-  s+=`<rect x="-30" y="-355" width="60" height="16" rx="5" fill="${g}" stroke="#8a5a14" stroke-width="1.3"/>`;
+  s+=`<circle cx="0" cy="${top-5}" r="3.6" fill="${g}" stroke="${sk}" stroke-width="1"/><path d="M0 ${top-8} Q-4.5 ${top-15} 0 ${top-23} Q4.5 ${top-15} 0 ${top-8}Z" fill="${g}" stroke="${sk}" stroke-width="1"/>`;
+  s+=`<rect x="-30" y="-355" width="60" height="16" rx="5" fill="${g}" stroke="${sk}" stroke-width="1.3"/>`;
   for(let x=-24;x<=24;x+=8) if(Math.abs(x)>6) s+=`<circle cx="${x}" cy="-347" r="1.9" fill="#fff3c4"/>`;
   s+=`<circle cx="0" cy="-347" r="5.2" fill="${pearl||'#fff7e0'}" stroke="#b98428" stroke-width="1.4"/>`;
   return s;
@@ -288,9 +288,9 @@ function makeFrontRig(cast){
     const vanFur = c.vanara ? `<path d="M-27 -326 C-34 -312 -32 -296 -26 -286 L-22 -292 C-26 -302 -26 -316 -24 -326Z M27 -326 C34 -312 32 -296 26 -286 L22 -292 C26 -302 26 -316 24 -326Z" fill="${c.furDark||skinSh}"/><path d="M-26 -332 C-30 -350 -14 -358 0 -358 C14 -358 30 -350 26 -332 C14 -342 -14 -342 -26 -332Z" fill="${c.furDark||skinSh}"/>`:'';
     let gear='';
     const ht=c.head;
-    if(ht==='crown') gear=mukutF(34,.8,2,c.jewelPearl);
-    else if(ht==='big') gear=mukutF(46,1,3);
-    else if(ht==='kirita') gear=mukutF(62,1.1,4);
+    if(ht==='crown') gear=mukutF(34,.8,2,c.jewelPearl,c.crownCol);
+    else if(ht==='big') gear=mukutF(46,1,3,null,c.crownCol);
+    else if(ht==='kirita') gear=mukutF(62,1.1,4,null,c.crownCol);
     else if(ht==='ravan') gear=`<rect x="-30" y="-355" width="60" height="16" rx="4" fill="${gold}" stroke="${goldD}" stroke-width="1.3"/>`+
         [-26,-13,0,13,26].map((x,i)=>{ const h=i===2?44:(i%2?30:36); return `<path d="M${x-7} -353 L${x} ${-353-h} L${x+7} -353Z" fill="${gold}" stroke="${goldD}" stroke-width="1"/>`; }).join('')+
         `<circle cx="0" cy="-347" r="4.8" fill="#d63a2a" stroke="#ffe9b8" stroke-width="1.2"/>`+[-18,-9,9,18].map(x=>`<circle cx="${x}" cy="-347" r="2" fill="#2ec28a"/>`).join('');

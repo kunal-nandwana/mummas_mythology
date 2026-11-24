@@ -155,3 +155,7 @@ Verses: shots with `calli` (or a `॥` line) count as chanted. With a recording,
 - **New sounds** (`sfx:[[t,'name',vol]]` or `focus:{sound}`): `bowshot` (bowstring snap + soft arrow hiss), `wings` (three soft wing beats), `brahma` (glowing-weapon hum), `herb` (rising chimes), `hiss` (soft snake hiss), `twang` (bowstring only).
 - **Camera note:** the camera is clamped to the picture, so a key such as `[t,270,1000,2]` shows the bottom edge only. Keep centre y below about 800 at zoom 1.5.
 
+
+## v6 (Hanuman-Ram milan video, Nov 2026)
+- New presets: **HANUMAN_BRAHMIN** (Hanuman disguised: human face, cream dhoti, shoulder cloth, tilak, hair knot), **SUGRIV** (golden-red vanara, ochre + green, silver crown), **VALI** (mighty vanara; use as silhouette with `with:{skin,face,furDark,top,bottom,shin,foot,crownCol,belt,pads all dark}`).
+- New costume key `crownCol:'#colour'` (front rig): solid-colour crown (e.g. silver `#dfe4ee`) instead of the gold gradient, for `head:'crown'|'big'|'kirita'`.
