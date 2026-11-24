@@ -83,8 +83,14 @@ const COSTUME0 = {skin:'#8c6248', top:'#1f2640', bottom:'#8e1d24', shin:null, fo
 
 let RIG_ID=0;
 /* Build one character. cast = {c:COSTUME, x, y, s, flip, acts:[[t,pose,dur?],...], expr, eyes, talk,
-   props:{front:'bow'|'mace'|..., back:...}, walk:{from:dx, dur, delay}, enter:{fade,delay}, aura, glow} */
+   props:{front:'bow'|'mace'|..., back:...}, walk:{from:dx, dur, delay}, enter:{fade,delay}, aura, glow,
+   facing:'front'} -- facing:'front' switches this one cast member to the FRONT-FACING rig (frontrig.js)
+   instead of the default side-profile rig below. Everything else about cast/acts/walk/talk still applies. */
 function makeRig(cast){
+  if(cast.facing==='front') return makeFrontRig(cast);
+  return makeSideRig(cast);
+}
+function makeSideRig(cast){
   const c=Object.assign({}, COSTUME0, cast.c||{}, cast.with||{});
   const id='r'+(RIG_ID++), J=n=>`data-j="${id}:${n}"`;
   const skin=c.skin, skinB=shade(skin,-.22), dark='#0d0a10';
@@ -93,9 +99,12 @@ function makeRig(cast){
   const props=Object.assign({}, c.holds||{}, cast.props||{});
 
   const leg=(n,back)=>{ const lc=back?shade(legC,-.25):legC, sc=back?shade(shinC,-.25):shinC, fc=back?shade(footC,-.2):footC;
-    return `<g ${J(n)}><rect x="${-14*legW}" y="-8" width="${28*legW}" height="88" rx="${13*legW}" fill="${lc}"/>`+
+    const W1=14*legW, W1b=10*legW, W2=11.5*legW, W2b=8*legW;   // thigh/shin taper slightly toward the knee/ankle
+    return `<g ${J(n)}><path d="M${-W1} -8 Q0 -11 ${W1} -8 L${W1b} 80 Q0 86 ${-W1b} 80Z" fill="${lc}"/>`+
+      (back?'':`<path d="M${-W1} -8 Q0 -11 ${W1} -8 L${W1b} 80 Q0 86 ${-W1b} 80Z" fill="url(#limbSh)"/>`)+
       (c.tiger?`<path d="M-13 6 l9 3 M5 14 l9 -2 M-13 26 l10 2 M4 36 l10 -3 M-13 46 l9 3 M5 56 l9 -2" stroke="#2a1608" stroke-width="3.2" stroke-linecap="round" opacity="${back?.6:.85}"/>`:'')+
-      `<g ${J(n+'K')}><rect x="${-11.5*legW}" y="-6" width="${23*legW}" height="80" rx="${10*legW}" fill="${sc}"/>`+
+      `<g ${J(n+'K')}><path d="M${-W2} -6 Q0 -9 ${W2} -6 L${W2b} 72 Q0 78 ${-W2b} 72Z" fill="${sc}"/>`+
+      (back?'':`<path d="M${-W2} -6 Q0 -9 ${W2} -6 L${W2b} 72 Q0 78 ${-W2b} 72Z" fill="url(#limbSh)"/>`)+
       (c.skirt?'':`<rect x="-11.5" y="62" width="23" height="5" fill="url(#gold)" opacity=".85"/>`)+
       `<g ${J(n+'F')}><path d="M-10 -9 L12 -9 Q26 -6 27 0 L-10 0Z" fill="${fc}"/></g></g></g>`; };
 
@@ -104,12 +113,15 @@ function makeRig(cast){
     `<g ${J(n+'_namaste')} style="display:none"><ellipse cx="0" cy="9" rx="5" ry="12" fill="${col}"/></g>`;
 
   const arm=(n,back)=>{ const col=back?skinB:skin, sl=c.sleeve?(back?shade(c.sleeve,-.25):c.sleeve):col;
-    return `<g ${J(n)}><line x1="0" y1="0" x2="0" y2="50" stroke="${sl}" stroke-width="${13*wide}" stroke-linecap="round"/>`+
+    const AW1=7.2*wide, AW1b=5.4*wide, AW2=6*wide, AW2b=4.4*wide;  // upper-arm/forearm taper toward the joint
+    return `<g ${J(n)}><path d="M${-AW1} -4 Q0 -7 ${AW1} -4 L${AW1b} 48 Q0 53 ${-AW1b} 48Z" fill="${sl}"/>`+
+      (back?'':`<path d="M${-AW1} -4 Q0 -7 ${AW1} -4 L${AW1b} 48 Q0 53 ${-AW1b} 48Z" fill="url(#limbSh)"/>`)+
       (c.pads?`<rect x="${-9.5*wide}" y="-3" width="${19*wide}" height="23" rx="6" fill="${c.pads}" stroke="#e8b83a" stroke-width="1.6"/><path d="M${-6*wide} 2 h${12*wide}" stroke="#fff" stroke-opacity=".25" stroke-width="1.6"/>`:'')+
       (c.jewel?`<line x1="${-6.5*wide}" y1="16" x2="${6.5*wide}" y2="16" stroke="#d9a73a" stroke-width="3"/>`:'')+
       (c.rudra?`<line x1="${-7*wide}" y1="15" x2="${7*wide}" y2="15" stroke="${c.rudra===true?'#6a3a18':c.rudra}" stroke-width="5" stroke-dasharray="3 2"/>`:'')+
       (c.fem?`<rect x="-7.4" y="9" width="14.8" height="7" rx="3" fill="url(#gold)" stroke="#8a5a14" stroke-width=".8"/><circle cx="0" cy="12.5" r="2.2" fill="#d63a2a"/>`:'')+
-      `<g ${J(n+'E')}><line x1="0" y1="0" x2="0" y2="46" stroke="${col}" stroke-width="${11*wide}" stroke-linecap="round"/>`+
+      `<g ${J(n+'E')}><path d="M${-AW2} -3 Q0 -6 ${AW2} -3 L${AW2b} 44 Q0 49 ${-AW2b} 44Z" fill="${col}"/>`+
+      (back?'':`<path d="M${-AW2} -3 Q0 -6 ${AW2} -3 L${AW2b} 44 Q0 49 ${-AW2b} 44Z" fill="url(#limbSh)"/>`)+
       (c.bangles?c.bangles.map((bc,bi)=>`<line x1="-5.8" y1="${30+bi*3.6}" x2="5.8" y2="${30+bi*3.6}" stroke="${bc}" stroke-width="2.6" stroke-linecap="round"/>`).join('')+`<line x1="-5.6" y1="${30+c.bangles.length*3.6}" x2="5.6" y2="${30+c.bangles.length*3.6}" stroke="#ffd25e" stroke-width="1.2" opacity=".8"/>`:'')+
       (c.bracer?`<rect x="${-7.6*wide}" y="14" width="${15.2*wide}" height="26" rx="4" fill="url(#gold)" stroke="#8a5a14" stroke-width="1.3"/><path d="M${-7*wide} 22 h${14*wide} M${-7*wide} 31 h${14*wide}" stroke="#8a5a14" stroke-width="1.2"/><circle cx="0" cy="27" r="2.6" fill="#d63a2a" stroke="#ffd25e" stroke-width=".8"/>`:'')+
       (c.jewel?`<line x1="-5.5" y1="38" x2="5.5" y2="38" stroke="#e8b83a" stroke-width="2.5"/>`:'')+
@@ -351,6 +363,10 @@ function makeRig(cast){
 
 /* After the SVG is in the DOM, grab joint elements. */
 function bindRig(r, root){
+  if(r.frontRig) return bindFrontRig(r, root);
+  return bindSideRig(r, root);
+}
+function bindSideRig(r, root){
   const q={}; root.querySelectorAll(`[data-j^="${r.id}:"]`).forEach(e=>{ q[e.getAttribute('data-j').split(':')[1]]=e; });
   r.q=q;
   // keyframes, sorted
@@ -373,6 +389,10 @@ const smooth01=k=>{ k=clamp01(k); return k*k*(3-2*k); };
 
 /* Called every frame. lt = time since shot start, t = global time, talking = 0..1 */
 function updateRig(r, lt, t, talking){
+  if(r.frontRig) return updateFrontRigShot(r, lt, t, talking);
+  return updateSideRig(r, lt, t, talking);
+}
+function updateSideRig(r, lt, t, talking){
   const q=r.q, cast=r.cast; if(!q) return;
   let P=Object.assign({}, poseAt(r, lt));
   const PL=poseAt(r, Math.max(0,lt-0.16));            // the pose a moment ago (for lag / swing)
