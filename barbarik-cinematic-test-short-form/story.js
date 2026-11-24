@@ -116,21 +116,25 @@ VIDEO({
   shots: [
     /* 1: wide, sunset over the Kurukshetra field, slow push-in */
     { line: 'कुरुक्षेत्र में महाभारत का युद्ध शुरू होने वाला था।', capTop: 120, mood: 'calm', fx: 'dust',
-      cam: { from: [270, 470, 1.0], to: [270, 560, 1.32] }, ...SK(0, 270, 548, 30) },
+      cam: { from: [270, 470, 1.0], to: [270, 560, 1.32] }, ...SK(0, 270, 548, 30),
+      cast: [{ c: BARBARIK, x: 640, y: 862, s: .5, expr: 'calm', with: { skin: '#2a1630', top: '#2a1630', bottom: '#2a1630', cape: '#4a2040' }, walk: { from: -800, dur: 4.6 }, acts: [[0, 'stand']] }] },
     /* 2: Barbarik on the terrace looking over the army, camera drifts right to reveal it */
     { line: 'दोनों तरफ़ लाखों सैनिक खड़े थे।', dur: 4, capTop: 120, mood: 'hope', fx: 'embers', tr: 'fade',
       cam: { keys: [[0, 120, 610, 1.3], [1.9, 200, 600, 1.3], [4, 335, 590, 1.3]] }, ...SK(1, 380, 540, 30),
-      cast: [HERO({ x: 150, walk: { from: -270, dur: 1.9 }, acts: [[0, 'stand'], [2.0, 'lookAway', .7], [3.2, 'lookBack', .7]] })] },
+      cast: [HERO({ x: 150, walk: { from: -270, dur: 1.9 }, acts: [[0, 'stand'], [1.9, { lean: 5, head: -6, drop: 4 }, .5], [2.7, { lean: -3, head: 9 }, .9]] }),
+        { c: KRISHNA, x: 455, y: 892, s: 1.15, expr: 'calm', acts: [[0, 'stand'], [2.4, 'lookBack', .6]] }] },
     /* 3: close-up of his face against the blurred sunset */
     { line: 'तभी वहाँ एक वीर योद्धा पहुँचा, बर्बरीक।', capTop: 120, mood: 'hope', fx: 'embers', tr: 'glow',
       cam: { keys: [[0, 215, 600, 1.55], [3.4, 188, 562, 2.35, 'spring']] }, ...SK(2, 400, 470, 36),
-      cast: [HERO({ x: 130, acts: [[0, 'lookBack', .01], [1.3, 'stand', .8], [2.6, 'fist', .5]] })] },
+      cast: [HERO({ x: 130, exprKeys: [[0, 'serene'], [2.4, 'angry']], acts: [[0, 'lookUp', .01], [1.2, 'stand', .9], [2.5, 'fist', .5]] })] },
     /* 4: three arrows, drawn bow, pull back to wide */
     { line: 'उसके पास सिर्फ़ तीन तीर थे, पर वही काफ़ी थे।', capTop: 120, mood: 'divine', fx: 'sparks', tr: 'whip',
-      cam: { keys: [[0, 215, 610, 1.3], [1.0, 205, 595, 1.4], [3.0, 200, 590, 1.5], [3.5, 270, 530, 1.0, 'spring']] }, ...SK(3, 330, 520, 32),
+      cam: { keys: [[0, 215, 610, 1.3], [1.0, 205, 595, 1.4], [3.0, 200, 590, 1.5], [3.6, 335, 570, 1.15, 'spring']] }, ...SK(3, 330, 520, 32),
       shake: [3.0, .35, 3], sfx: [[3.0, 'bowshot', .6]],
-      front: () => A('slide:-440:0:.4:3.0', A('fadeout:3.5:.4', `<g transform="translate(570 640)"><line x1="-70" y1="0" x2="0" y2="0" stroke="#ffe29a" stroke-width="7" opacity=".35"/><line x1="-70" y1="0" x2="0" y2="0" stroke="#fff4c4" stroke-width="3" stroke-linecap="round"/><polygon points="0,-6 18,0 0,6" fill="#fff4c4"/></g>`)),
-      cast: [HERO({ x: 150, s: 1.05, props: { front: 'bow' }, acts: [[0, 'bowReady', .4], [1.0, 'bowDraw', 1.2], [3.0, 'bowReady', .12]] })] }
+      front: () => `<g transform="translate(330 640)">${A('sscale:3.0:.5', sparkle(0, 0, 3.2, '#fff3c4'))}</g>` + A('slide:-440:0:.4:3.0', A('fadeout:3.5:.4', `<g transform="translate(570 640)"><line x1="-70" y1="0" x2="0" y2="0" stroke="#ffe29a" stroke-width="7" opacity=".35"/><line x1="-70" y1="0" x2="0" y2="0" stroke="#fff4c4" stroke-width="3" stroke-linecap="round"/><polygon points="0,-6 18,0 0,6" fill="#fff4c4"/></g>`)),
+      cast: [HERO({ x: 150, s: 1.05, props: { front: 'bow' }, acts: [[0, 'bowReady', .4], [1.0, 'bowDraw', 1.2], [3.0, { a: [78, 0], b: [18, 40], lean: -5, head: 5 }, .1], [3.5, 'bowReady', .7]] }),
+        { c: SOLDIER, x: 405, y: 806, s: .6, flip: true, expr: 'calm', acts: [[0, 'stand'], [3.2, 'recoil', .25]] },
+        { c: SOLDIER, x: 478, y: 814, s: .66, flip: true, expr: 'surprise', acts: [[0, 'stand'], [3.4, 'recoil', .25]] }] }
   ]
 });
 })();
