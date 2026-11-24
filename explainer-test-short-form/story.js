@@ -1,6 +1,6 @@
 /* Explainer templates test: family tree, timeline, map route. Build: node tools/build.js explainer-test-short-form */
 const exBg=()=>`<rect width="540" height="960" fill="url(#skyN)"/>`+stars(60,900)+`<circle cx="270" cy="470" r="330" fill="url(#saf)" opacity=".16"/>`;
-VIDEO({
+VIDEO({ rig:'side',
   title:'Explainer templates test', format:'short', target:36,
   keywords:['दशरथ','चार','युग','लंका'],
   shots:[

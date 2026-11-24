@@ -100,7 +100,7 @@ const THOUGHT = (x,y,s,inner,delay)=>A(`pop:${delay||.3}`,A('bob:5:3.2',`<g tran
 const VIS_PYRE = ()=>`<ellipse cx="0" cy="-6" rx="56" ry="40" fill="#ff9a3a" opacity=".22"/>`+A('flick:5',`<path d="M-14 22 Q-26 -10 -4 -34 Q-2 -10 10 -22 Q24 0 14 22Z" fill="#ffb450" opacity=".85"/><path d="M-6 22 Q-10 4 0 -12 Q8 4 6 22Z" fill="#ffe9a8"/>`)+WOODPILE(0,44,.95);
 const VIS_SEA = ()=>`<circle r="62" fill="#0a1230" opacity=".7"/>`+[0,1,2,3].map(i=>A(`drift:${i%2?-30:30}:0:${3+i}`,`<path d="M-62 ${-30+i*20} q15 -9 31 0 t31 0 t31 0 t31 0" fill="none" stroke="#a8c0f0" stroke-width="3" opacity=".7"/>`)).join('');
 
-VIDEO({
+VIDEO({ rig:'side',
   title:'हनुमान जी और आशा', format:'short', target:80,
   music:'scenes',
   handheld:0.9,

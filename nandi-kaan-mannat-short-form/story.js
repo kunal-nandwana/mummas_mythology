@@ -63,7 +63,7 @@ const DEV = o => ({ ...COMMON, x: 215, y: 812, s: .72, expr: 'serene', acts: [[0
 const NS = o => ({ c: NANDI, expr: 'smile', acts: [[0, 'stand']], ...o });                                  // Nandi the boy
 const SH = o => ({ ...SHILAD, expr: 'smile', acts: [[0, 'kneelPray']], ...o });                            // Shilad
 
-VIDEO({
+VIDEO({ rig:'side',
   title: 'नंदी के कान में मन्नत', format: 'short', target: 112,
   music: 'scenes', sfx: true, ending: 3.6, handheld: .6, minShot: 2.4, pace: 13,
   look: { rim: 1, bokeh: .9, motes: 1, warm: .1, vig: .12 },

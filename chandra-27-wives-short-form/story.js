@@ -11,7 +11,7 @@ const GND = (y)=> ground(y)+tufts(y-10,'#3a3a4a',50)+flowers(y,20);             
 const WIFE = (top,veil)=>({c:NAKSHATRA, with:{top, bottom:top, veil}});
 const W1=['#5a3a9a','#8a6ad0'], W2=['#2a7a6a','#5ac0a0'], W3=['#b8602a','#f0a050'], W4=['#2a4a9a','#6a8ae0'];
 
-VIDEO({
+VIDEO({ rig:'side',
   title:'चंद्रदेव की 27 पत्नियाँ', format:'short', target:72,
   music:'score',  // background music composed scene by scene (changes + louder/softer with each mood)
   handheld:0.6,   // no intro sting or end card (the owner does not want them)

@@ -86,8 +86,10 @@ let RIG_ID=0;
    props:{front:'bow'|'mace'|..., back:...}, walk:{from:dx, dur, delay}, enter:{fade,delay}, aura, glow,
    facing:'front'} -- facing:'front' switches this one cast member to the FRONT-FACING rig (frontrig.js)
    instead of the default side-profile rig below. Everything else about cast/acts/walk/talk still applies. */
+/* Which rig a cast member gets when it has no `facing`: set per video with VIDEO({rig:'side'|'front'}). New videos default to 'front'. */
+let RIG_DEFAULT='front';
 function makeRig(cast){
-  if(cast.facing==='front') return makeFrontRig(cast);
+  if((cast.facing||RIG_DEFAULT)==='front') return makeFrontRig(cast);
   return makeSideRig(cast);
 }
 function makeSideRig(cast){

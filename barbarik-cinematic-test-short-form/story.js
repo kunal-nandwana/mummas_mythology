@@ -121,7 +121,7 @@ function nearLayer(i) {
 const SK = (i, sx = 270, sy = 560, sr = 30) => ({ sky: () => skyLayer(i, sx, sy, sr), far: () => farLayer(i), mid: () => midLayer(i, sx), art: () => artLayer(i), near: () => nearLayer(i) });
 const HERO = (extra = {}) => Object.assign({ c: BARBARIK, x: 150, y: 892, s: 1.2, expr: 'serene' }, extra);
 
-VIDEO({
+VIDEO({ rig:'side',
   title: 'बर्बरीक: cinematic style test', format: 'short', target: 16,
   music: false, handheld: 0.5, keywords: ['कुरुक्षेत्र', 'महाभारत', 'बर्बरीक', 'तीन तीर'],
   shots: [
