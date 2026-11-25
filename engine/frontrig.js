@@ -278,6 +278,7 @@ function makeFrontRig(cast){
     else if(c.tilak) tilak=`<path d="M0 -337 V-328" stroke="#c81e1e" stroke-width="3.2" stroke-linecap="round"/>`;
     if(c.bindi) tilak+=`<circle cx="0" cy="-331" r="2.8" fill="#c41e2a"/>`;
     if(c.third) tilak+=`<ellipse cx="0" cy="-334" rx="2.2" ry="5.4" fill="#c82a1a" stroke="#ffd25e" stroke-width=".8"/>`;
+    if(c.gem) tilak+=A('pulse:2.2',`<circle cx="0" cy="-334" r="17" fill="url(#gr)"/><circle cx="0" cy="-334" r="9" fill="url(#gw)"/>`)+`<path d="M0 -341 L4.2 -334 L0 -327 L-4.2 -334Z" fill="${c.gem}" stroke="#ffe0a0" stroke-width=".9"/><path d="M0 -338.5 L1.9 -334 L0 -330 L-1.9 -334Z" fill="#fff2c8" opacity=".75"/>`;   // gem-shaped wound that never closes: soft red-gold glow, no blood
     const blind = c.blindfold?`<path d="M-27 -326 H27 L27 -311 H-27Z" fill="#f2ece0" stroke="#d9cfb8" stroke-width="1"/>`:'';
     const fx=`<g ${JJ('feat')}>${vanFace}${eye('eyeL',-11)}${eye('eyeR',11)}${brow('browL',-11)}${brow('browR',11)}${noseSvg}${must}${mouthSvg}${beard}${tilak}${blind}</g>`;
 
@@ -323,10 +324,11 @@ function makeFrontRig(cast){
     for(let j=n;j>=1;j--){ const side=j%2?1:-1, k=Math.ceil(j/2), sc=Math.max(.68,1-k*.06), x=side*k*sp, y=k*6*(n>=4?1.3:0.8), rot=side*k*(n>=4?8:5);
       extraHeads+=`<g transform="translate(${n1(x)} ${n1(y)}) rotate(${rot} 0 -300) translate(0 -300) scale(${n1(sc)}) translate(0 300)">${headSvg(J0,true)}</g>`; } }
 
-  const cape = c.cape? `<g ${J('cape')}><path d="M${-50*W} -272 L${50*W} -272 C${72*W} -200 ${84*W} -120 ${96*W} -46 Q0 -30 ${-96*W} -46 C${-84*W} -120 ${-72*W} -200 ${-50*W} -272Z" fill="${c.cape}" ${RIM}/><path d="M${-50*W} -272 C${-40*W} -190 ${-44*W} -110 ${-60*W} -42 L${-20*W} -40 C${-18*W} -120 ${-22*W} -200 ${-14*W} -270Z" fill="#000" opacity=".16"/><path d="M${40*W} -272 C${48*W} -190 ${60*W} -110 ${76*W} -42" stroke="#fff" stroke-opacity=".08" stroke-width="6" fill="none"/></g>`:'';
+  const cape = c.cape? `<g ${J('cape')}><path d="M${-50*W} -272 L${50*W} -272 C${72*W} -200 ${84*W} -120 ${96*W} -46 Q0 -30 ${-96*W} -46 C${-84*W} -120 ${-72*W} -200 ${-50*W} -272Z" fill="${c.cape}" ${RIM}/>${c.tatters?`<path d="M${-96*W} -46 L${-90*W} -22 L${-80*W} -40 L${-66*W} -14 L${-52*W} -38 L${-36*W} -18 L${-20*W} -40 L${-4*W} -12 L${12*W} -38 L${30*W} -16 L${46*W} -40 L${64*W} -20 L${80*W} -42 L${90*W} -26 L${96*W} -46Z" fill="${c.cape}"/>`:''}<path d="M${-50*W} -272 C${-40*W} -190 ${-44*W} -110 ${-60*W} -42 L${-20*W} -40 C${-18*W} -120 ${-22*W} -200 ${-14*W} -270Z" fill="#000" opacity=".16"/><path d="M${40*W} -272 C${48*W} -190 ${60*W} -110 ${76*W} -42" stroke="#fff" stroke-opacity=".08" stroke-width="6" fill="none"/></g>`:'';
   const quiver = c.quiver? `<g transform="rotate(-16 ${-36*W} -250)"><rect x="${-50*W}" y="-318" width="16" height="84" rx="5" fill="#5a3418" stroke="${gold}" stroke-width="1.2"/><g stroke="#e9e1c8" stroke-width="2.2"><path d="M${-46*W} -318 V-340 M${-42*W} -318 V-346 M${-38*W} -318 V-338"/></g><g fill="#fff"><path d="M${-46*W} -340 l-3 6 h6Z M${-42*W} -346 l-3 6 h6Z M${-38*W} -338 l-3 6 h6Z"/></g></g>`:'';
   const tail = c.tail? `<path d="M${30*W} -150 C${90*W} -140 ${110*W} -220 ${86*W} -270 C${100*W} -200 ${70*W} -160 ${30*W} -166Z" fill="${c.skin}" stroke="${c.furDark||skinSh}" stroke-width="2"/>`:'';
   const braid = c.braid? `<g ${J('braid')}><path d="M${-24*W} -300 C${-34*W} -270 ${-30*W} -230 ${-26*W} -188 L${-18*W} -188 C${-22*W} -230 ${-24*W} -270 ${-18*W} -300Z" fill="${c.braid}" ${RIM}/><path d="M${-30*W} -262 l10 4 M${-29*W} -244 l10 4 M${-28*W} -226 l10 4 M${-27*W} -208 l10 4" stroke="#fff" stroke-opacity=".2" stroke-width="1.4"/></g>`:'';
+  const matted = (c.matted && c.hair==='long') ? `<path d="M-27 -334 C-44 -312 -50 -276 -46 -236 L-40 -250 L-38 -224 L-32 -246 L-30 -230 L-26 -250 C-31 -276 -30 -304 -24 -322Z M27 -334 C44 -312 50 -276 46 -236 L40 -250 L38 -224 L32 -246 L30 -230 L26 -250 C31 -276 30 -304 24 -322Z" fill="${hairCol}" ${RIM}/><path d="M-26 -344 L-33 -352 L-24 -352 L-20 -366 L-14 -354 L-8 -372 L-2 -354 L6 -370 L10 -354 L18 -366 L22 -352 L32 -352 L26 -342Z" fill="${hairCol}"/><path d="M-40 -300 C-42 -276 -40 -256 -38 -240 M-44 -290 C-48 -270 -46 -250 -44 -240 M40 -300 C42 -276 40 -256 38 -240 M44 -290 C48 -270 46 -250 44 -240" stroke="#5a4a58" stroke-width="1.3" fill="none" opacity=".7"/>` : '';
   const hairFall = (c.hair==='long' && !c.braid && !c.veil && c.head!=='turban' && !c.vanara) ? `<path d="M-27 -332 C-38 -308 -42 -270 -40 -238 L-30 -236 C-31 -266 -29 -296 -24 -320Z M27 -332 C38 -308 42 -270 40 -238 L30 -236 C31 -266 29 -296 24 -320Z" fill="${hairCol}" ${RIM}/><path d="M-34 -300 C-36 -280 -35 -258 -34 -244 M34 -300 C36 -280 35 -258 34 -244" stroke="#4a3a52" stroke-width="1.4" fill="none" opacity=".6"/>`:'';
   const aura = (cast.aura||c.aura) ? `<g ${J('aura')}><circle cx="0" cy="-190" r="230" fill="url(#${cast.aura||c.aura})" opacity=".6"/></g>` : '';
 
@@ -340,7 +342,7 @@ function makeFrontRig(cast){
     <g ${J('upper')}>${cape}${quiver}${extraArms()}${extraHeads}${haloSvg}
       ${torso}${dhoti}${tigerSkin}${beltSvg}
       <g ${J('neckG')}>${neckSvg}</g>
-      ${braid}${hairFall}
+      ${braid}${hairFall}${matted}
       <g ${J('head')}>${headSvg(J,false)}</g>
       ${arms}</g></g>`;
 

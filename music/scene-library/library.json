@@ -3249,6 +3249,293 @@
         }
       ],
       "auto": false
+    },
+    "ash-wander-moon": {
+      "mood": "calm",
+      "desc": "Ashwatthama: lonely desert under a huge moon. Open drone, one slow far bansuri, a distant bell. Wonder with a little sadness.",
+      "level": [0.62, 0.7],
+      "pad": {
+        "chords": "open",
+        "seg": 10,
+        "amp": 0.45
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.13,
+        "note": [2.6, 4.2],
+        "rest": [1.8, 4.2],
+        "phrase": [2, 3],
+        "start": 2,
+        "lead": 0.6
+      },
+      "bells": {
+        "every": 6,
+        "notes": [19, 24],
+        "amp": 0.07,
+        "len": 5,
+        "start": 2
+      }
+    },
+    "ash-forehead": {
+      "mood": "sad",
+      "desc": "Close-up of the tired face and the glowing wound: soft bowed line over a quiet pad, one gentle bell like a pulse.",
+      "level": [0.55, 0.45],
+      "pad": {
+        "chords": "min",
+        "seg": 9,
+        "amp": 0.4
+      },
+      "melody": {
+        "kind": "bow",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.07,
+        "note": [2.8, 4],
+        "rest": [2, 4],
+        "phrase": [2, 3],
+        "start": 3,
+        "lead": 0.6
+      },
+      "bells": {
+        "every": 4.4,
+        "notes": [12],
+        "amp": 0.06,
+        "len": 4,
+        "start": 1
+      }
+    },
+    "ash-krishna": {
+      "mood": "divine",
+      "desc": "Krishna, calm and stern: warm divine pad, slow temple bells, a steady high flute. Not angry.",
+      "level": [0.7, 0.85],
+      "pad": {
+        "chords": "divine",
+        "seg": 9,
+        "amp": 0.5,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.6,
+        "notes": [24, 12, 19],
+        "amp": 0.1,
+        "len": 5,
+        "start": 0.4
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.1,
+        "note": [2, 3.4],
+        "rest": [1.6, 3],
+        "phrase": [2, 3],
+        "start": 2,
+        "lead": 0.6
+      }
+    },
+    "ash-camp-dark": {
+      "mood": "sad",
+      "desc": "Camp lamps go dark one by one: almost only a soft low pad and two far bells. Hush, never scary.",
+      "level": [0.45, 0.3],
+      "pad": {
+        "chords": "fifth",
+        "seg": 10,
+        "amp": 0.4
+      },
+      "bells": {
+        "every": 3.2,
+        "notes": [12, 19],
+        "amp": 0.07,
+        "len": 5,
+        "start": 0.8
+      }
+    },
+    "ash-lonely": {
+      "mood": "sad",
+      "desc": "A tired man walking alone, nobody speaks to him: thin bowed strings over an open drone, very sparse.",
+      "level": [0.5, 0.4],
+      "pad": {
+        "chords": "open",
+        "seg": 10,
+        "amp": 0.38
+      },
+      "melody": {
+        "kind": "bow",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.06,
+        "note": [3, 4.5],
+        "rest": [2.4, 4.5],
+        "phrase": [2, 3],
+        "start": 2,
+        "lead": 0.6
+      }
+    },
+    "ash-time-sky": {
+      "mood": "hope",
+      "desc": "Looking up at the stars: still shimmer, slow rising harp plucks, curious.",
+      "level": [0.6, 0.7],
+      "pad": {
+        "chords": "open",
+        "seg": 9,
+        "amp": 0.4
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 2, 5, 4],
+        "step": 0.7,
+        "amp": 0.09,
+        "ring": 2,
+        "lead": 0.3
+      }
+    },
+    "ash-timeline": {
+      "mood": "hope",
+      "desc": "The timeline puzzle: curious steady plucks over a warm pad; a soft flute answers when the curse ends.",
+      "level": [0.62, 0.72],
+      "pad": {
+        "chords": "maj",
+        "seg": 8,
+        "amp": 0.42
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 4, 2, 5, 4, 2, 3, 1],
+        "step": 0.5,
+        "amp": 0.09,
+        "ring": 1.4,
+        "lead": 0.2
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.08,
+        "note": [1.6, 2.8],
+        "rest": [2.4, 4],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      }
+    },
+    "ash-how": {
+      "mood": "calm",
+      "desc": "The quiet question: soft pad and one slow bansuri phrase.",
+      "level": [0.55, 0.6],
+      "pad": {
+        "chords": "open",
+        "seg": 9,
+        "amp": 0.4
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 0,
+        "amp": 0.1,
+        "note": [2.2, 3.6],
+        "rest": [2, 3.6],
+        "phrase": [2, 3],
+        "start": 1,
+        "lead": 0.6
+      }
+    },
+    "ash-shloka": {
+      "mood": "divine",
+      "desc": "The shloka book: temple air, slow bells, drone; nothing competes with the voice.",
+      "level": [0.65, 0.75],
+      "pad": {
+        "chords": "divine",
+        "seg": 9,
+        "amp": 0.5,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [12, 24, 19],
+        "amp": 0.1,
+        "len": 5,
+        "start": 0.3
+      }
+    },
+    "ash-seven": {
+      "mood": "divine",
+      "desc": "Seven lights rise: glowing choir pad, shimmering high bells and a rising harp line.",
+      "level": [0.8, 1],
+      "pad": {
+        "chords": "divine",
+        "seg": 9,
+        "amp": 0.55,
+        "rich": true
+      },
+      "bells": {
+        "every": 1.6,
+        "notes": [24, 19, 12],
+        "amp": 0.1,
+        "len": 4,
+        "start": 0.2
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 1, 2, 3, 4, 5, 6, 7],
+        "step": 0.4,
+        "amp": 0.08,
+        "ring": 2,
+        "lead": 0.3
+      }
+    },
+    "ash-choice": {
+      "mood": "calm",
+      "desc": "The choice: thoughtful pad with a gentle flute, a little open and unresolved.",
+      "level": [0.58, 0.65],
+      "pad": {
+        "chords": "open",
+        "seg": 9,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.1,
+        "note": [1.8, 3],
+        "rest": [1.4, 2.6],
+        "phrase": [2, 3],
+        "start": 1,
+        "lead": 0.6
+      }
+    },
+    "ash-farewell": {
+      "mood": "calm",
+      "desc": "He walks on under the moon: the opening tune returns, softer, and fades with the ending.",
+      "level": [0.55, 0.45],
+      "pad": {
+        "chords": "open",
+        "seg": 10,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.1,
+        "note": [2.6, 4.2],
+        "rest": [2.2, 4.2],
+        "phrase": [2, 3],
+        "start": 1,
+        "lead": 0.6
+      },
+      "bells": {
+        "every": 5,
+        "notes": [19],
+        "amp": 0.06,
+        "len": 5,
+        "start": 1
+      }
     }
   }
 }
