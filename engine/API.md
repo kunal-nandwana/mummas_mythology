@@ -160,3 +160,10 @@ Verses: shots with `calli` (or a `॥` line) count as chanted. With a recording,
 - New presets: **HANUMAN_BRAHMIN** (Hanuman disguised: human face, cream dhoti, shoulder cloth, tilak, hair knot), **SUGRIV** (golden-red vanara, ochre + green, silver crown), **VALI** (mighty vanara; use as silhouette with `with:{skin,face,furDark,top,bottom,shin,foot,crownCol,belt,pads all dark}`).
 - New costume key `crownCol:'#colour'` (front rig): solid-colour crown (e.g. silver `#dfe4ee`) instead of the gold gradient, for `head:'crown'|'big'|'kirita'`.
 - **Front rig head (Nov 2026, owner request):** the head no longer rolls sideways. `headTilt` is scaled to 20% and expressions add no tilt; `headYaw` (lookL/lookR) is scaled to 45% so a glance reads as a turn, not a bend.
+
+
+## v7 (Ashwatthama video, Nov 2026)
+- **ASHWATTHAMA** (new preset): ashen skin, wild matted hair (`matted`), short grey beard, torn faded-saffron dhoti, saffron sash, ragged grey cloak with torn hem (`tatters`), and a gem-shaped wound on the forehead (`gem:'#ff6a3a'`) with a soft pulsing red-gold glow (no blood). Works in front and side rig. Silhouette: `with:{skin,top,bottom,shin,foot,sash,cape all dark}`; the gem keeps glowing.
+- New costume keys: `gem:'#colour'` (glowing forehead gem), `matted:true` (ragged hair locks, needs `hair:'long'`), `tatters:true` (torn cape hem, front rig).
+- `timeline` items accept `at:<planned seconds>` to override when that item appears (so a diagram can follow the words, and a second shot can show the same diagram with earlier items already there).
+- `calli:{..., silent:true}`: the verse is shown in calligraphy while the narrator talks normally (not chanted); voice sync does not treat the shot as a verse.

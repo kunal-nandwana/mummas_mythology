@@ -202,7 +202,7 @@ function famTree(cx,top,tree,o){ o=Object.assign({gapY:190,leafW:128,r:40,delay:
    opts: gap 130, delay .3, step .7 */
 function timeline(cx,top,items,o){ o=Object.assign({gap:150,delay:.3,step:.7},o||{});
   const bot=top+o.gap*(items.length-1)+20; let s=_exDraw(`M${cx} ${top-20} L${cx} ${bot}`,o.delay,o.step*items.length*.9,'#f0d79a',3);
-  items.forEach((it,i)=>{ const y=top+i*o.gap, side=i%2?1:-1, dl=o.delay+i*o.step*.9+.2, tx=cx+side*40;
+  items.forEach((it,i)=>{ const y=top+i*o.gap, side=i%2?1:-1, dl=it.at!==undefined?it.at:o.delay+i*o.step*.9+.2, tx=cx+side*40;
     s+=A(`pop:${dl.toFixed(2)}`,(it.hi?A('pulse:1.6',`<circle cx="${cx}" cy="${y}" r="26" fill="url(#gw)"/>`):'')+`<circle cx="${cx}" cy="${y}" r="${it.hi?14:10}" fill="#24140c" stroke="#ffd25e" stroke-width="3.4"/>`+
       `<path d="M${cx+side*11} ${y} L${tx} ${y}" stroke="#f0d79a" stroke-width="2"/>`+
       `<text x="${tx+side*8}" y="${y-2}" text-anchor="${side>0?'start':'end'}" font-size="34" fill="${it.hi?'#ffd25e':'#ffe9b8'}" stroke="#120a06" stroke-width="5" stroke-linejoin="round" paint-order="stroke" style="font-weight:800">${it.t}</text>`+

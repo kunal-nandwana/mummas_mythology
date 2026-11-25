@@ -79,7 +79,7 @@ const COSTUME0 = {skin:'#8c6248', top:'#1f2640', bottom:'#8e1d24', shin:null, fo
   trim:'url(#gold)', hair:'long', head:'crown', beard:null, mus:false, cape:null, quiver:false, garland:null, sash:null,
   veil:null, turban:'#ece5d4', tilak:false, earring:true, big:false, aura:null, jewel:true,
   bare:false, ash:false, snake:false, tiger:false, rudra:false, third:false, tusks:false, spikes:false, eyeCol:null, fireHair:false, blindfold:false, faces:null, arms:0, armItems:null, beardLen:0, halo:null, mala:null, pads:null, belt:null, studs:null, holds:null,
-  fem:false, pallu:null, braid:null, bangles:null, bindi:false, nose:false, scarf:null, flowers:false, vanara:false, face:null, furDark:null, tail:false, armor:false, bracer:false, fierce:false, kundal:false, kilt:null, lips:null};
+  fem:false, pallu:null, braid:null, bangles:null, bindi:false, nose:false, scarf:null, flowers:false, vanara:false, face:null, furDark:null, tail:false, armor:false, bracer:false, fierce:false, kundal:false, kilt:null, lips:null, gem:null, matted:false, tatters:false};
 
 let RIG_ID=0;
 /* Build one character. cast = {c:COSTUME, x, y, s, flip, acts:[[t,pose,dur?],...], expr, eyes, talk,
@@ -249,6 +249,7 @@ function makeSideRig(cast){
   head+=`<path d="M18 -289 C22 -285 24 -278 24 -270 L32 -260 L24 -258 C24 -252 22 -248 16 -246" fill="none" style="stroke:var(--rimc,#fff);stroke-opacity:var(--rimo,0);stroke-width:1.6" stroke-linecap="round"/>`;
   if(c.tilak==='namam') head+=`<path d="M17 -290 v10 M24 -290 v9" stroke="#fff6e0" stroke-width="2.2" stroke-linecap="round"/><path d="M20.5 -289 v9" stroke="#d63a2a" stroke-width="2"/>`;
   else if(c.tilak) head+=`<path d="M20 -287 l1 7" stroke="#d63a2a" stroke-width="2.2"/>`;
+  if(c.gem) head+=A('pulse:2.2',`<circle cx="21" cy="-286" r="14" fill="url(#gr)"/><circle cx="21" cy="-286" r="7" fill="url(#gw)"/>`)+`<path d="M21 -292 L24 -286 L21 -280 L18 -286Z" fill="${c.gem}" stroke="#ffe0a0" stroke-width=".8"/>`;   // gem-shaped wound: soft red-gold glow
   if(c.head==='turban') head+=`<path d="M-22 -270 C-24 -296 2 -306 24 -290 C30 -284 28 -276 22 -276 C10 -280 -4 -282 -18 -264Z" fill="${c.turban}"/><circle cx="-22" cy="-286" r="9" fill="${c.turban}"/>`;
   if(c.crescent) head+=`<path d="M-17 -330 A19 19 0 0 0 21 -330 A16 12 0 0 1 -17 -330Z" fill="#f6f1dc" style="filter:drop-shadow(0 0 6px #fff6c8)"/>`;
   if(c.head==='mahadev'){

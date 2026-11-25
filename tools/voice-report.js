@@ -34,7 +34,7 @@ function findVoice(topic,given){
 const CHANT=1.7;
 /* Which verse shots get their chanting speed LEARNED from the recording (voicesync alignWithChant): every verse,
    unless story.js fixes it with shot.chant / shot.dur, or cfg.chant for the whole video. */
-const isVerse=sh=>!!sh.calli || /॥/.test(sh.line||'');
+const isVerse=sh=>(!!sh.calli && !sh.calli.silent) || /॥/.test(sh.line||'');   // calli.silent:true = verse shown on screen while the narrator talks normally (not chanted)
 function chantLearned(cfg,nar){
   return nar.map(s=>{ const sh=cfg.shots[s.i]||{}; return !sh.chapter && isVerse(sh) && sh.chant===undefined && !sh.dur && cfg.chant===undefined; }); }
 /* opts.learn: learned verses keep their normal-pace weight (planSync multiplies it by the learned chant speed) */
