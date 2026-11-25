@@ -2385,12 +2385,12 @@ VIDEO({
   handheld:0.7, music:'scenes',
   keywords:['श्रीकृष्ण','अश्वत्थामा','3,000','2,000','श्राप','श्लोक','सात','अमर','3102','3138','138','BCE','कमेंट्स'],
   shots:[
-    /* 1 — a lone silhouette walks a moonlit dune under a huge moon; the camera pushes in low. Only the gem glows. */
-    { line:'भगवान श्रीकृष्ण ने अश्वत्थामा को 3,000 साल तक भटकने का श्राप दिया था,', scene:'ash-wander-moon', mood:'calm', fx:'dust', capTop:130,
-      cam:{keys:[[0,270,700,1.0],[3.7,300,690,1.45,'spring']]},
-      sky:()=>NIGHT_SKY()+stars(70,520)+BIGMOON(330,400,122), far:()=>DUNES(700,50,'#34455e','#a8b2c0',.4)+WIND(660,5), mid:()=>DUNES(790,44,'#242f46','#8a96a8',2.1),
-      art:()=>DUNES(865,30,'#161c30','#6a7488',3.3)+PRINTS(20,200,886,8), near:()=>WIND(900,4,'#c8c0b8'),
-      cast:[{c:ASHWATTHAMA, with:SIL_A, facing:'side', x:290, y:872, s:1.18, expr:'sad', walk:{from:-240, dur:3.7}, acts:WALK(7,.62,7)}] },
+    /* 1 — HOOK: tight on his face and the glowing gem, a spring pull-back reveals him small under a huge moon on a windy dune */
+    { line:'भगवान श्रीकृष्ण ने अश्वत्थामा को 3,000 साल तक भटकने का श्राप दिया था,', scene:'ash-wander-moon', mood:'calm', fx:'dust', capTop:130, focus:{at:.9, sound:'arrive', dur:2.2, duck:.4},
+      cam:{keys:[[0,270,548,3.3],[.9,270,552,3.1],[2.3,270,700,1.3,'spring'],[3.8,270,680,1.12]]},
+      sky:()=>NIGHT_SKY()+stars(80,520)+BIGMOON(270,470,150)+SHOOT(380,170,2.0), far:()=>DUNES(740,50,'#34455e','#a8b2c0',.4)+WIND(690,6), mid:()=>DUNES(815,40,'#242f46','#8a96a8',2.1),
+      art:()=>DUNES(885,28,'#161c30','#6a7488',3.3)+PRINTS(30,230,912,7), near:()=>WIND(930,5,'#c8c0b8'),
+      cast:[{c:ASHWATTHAMA, x:270, y:925, s:1.15, expr:'sad', acts:[[0,'stand'],[1.6,{head:-3,lean:2,drop:1},1.2]]}] },
 
     /* 2 — time passes: the stars wheel over the same wanderer, tiny on a vast desert; the camera pulls back */
     { line:'और पुरानी तारीखों के हिसाब से वे 3,000 साल आज से 2,000 साल पहले ही पूरे हो चुके हैं।', scene:'ash-wander-moon', mood:'calm', fx:'stars', tr:'dissolve', capTop:130,
@@ -2482,12 +2482,12 @@ VIDEO({
       sky:()=>NIGHT_SKY()+stars(90,560)+BIGMOON(420,260,52), far:()=>DUNES(740,40,'#34455e','#a8b2c0',.9), art:()=>DUNES(870,26,'#161c30','#6a7488',2.8)+GLINTS(6),
       cast:[{c:ASHWATTHAMA, x:230, y:925, s:1.1, expr:'calm', acts:[[0,'stand'],[.9,'lookUp',.8],[2.2,'think',.7]]}] },
 
-    /* 14 — the shloka: an open book glows; the verse is written above it (calligraphy, shown while the narrator speaks normally) */
-    { line:'यह बात श्रीकृष्ण के श्राप से नहीं, बल्कि बाद के एक श्लोक से आती है,', scene:'ash-shloka', mood:'divine', fx:'sparks', tr:'dissolve', nocap:true,
+    /* 14 — an open book glows (no verse text on screen) */
+    { line:'यह बात श्रीकृष्ण के श्राप से नहीं, बल्कि बाद के एक श्लोक से आती है,', scene:'ash-shloka', mood:'divine', fx:'sparks', tr:'dissolve', capTop:130,
       cam:{keys:[[0,270,520,1.0],[4,270,560,1.15]]},
       sky:()=>skyBand([[0,'#0a0618'],[.55,'#1a1038'],[1,'#2e1c40']])+stars(60,700)+`<circle cx="270" cy="760" r="320" fill="url(#gw)" opacity=".28"/>`,
-      art:()=>OPENBOOK(270,780,1.3)+MOTES(270,740,12),
-      calli:{lines:['अश्वत्थामा बलिर्व्यासो','हनूमांश्च विभीषणः।','कृपः परशुरामश्च','सप्तैते चिरजीविनः॥'], source:'चिरंजीवी श्लोक', y:190, size:38, col:'#ffe9a8', delay:.3, gap:.7, write:.7, glow:true, scrim:true, silent:true} },
+      art:()=>OPENBOOK(270,720,1.4)+MOTES(270,680,14),
+      cast:[] },
 
     /* 15 — seven lights rise: the seven immortals, a soft chime for each */
     { line:'जिसमें उन सात अमर लोगों के नाम हैं जो कभी नहीं मरते।', scene:'ash-seven', mood:'divine', fx:'stars', tr:'dissolve', capTop:130,
