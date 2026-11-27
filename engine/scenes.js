@@ -352,3 +352,29 @@ function garuda(x,y,s,o){ o=o||{}; const fl=o.flap===undefined?1:o.flap;
     `<path d="M-24 -112 L-6 -106 M24 -112 L6 -106" stroke="#b8821a" stroke-width="3" stroke-linecap="round"/>`+
     `<path d="M-24 -122 L-22 -156 L-12 -138 L0 -168 L12 -138 L22 -156 L24 -122Z" fill="url(#gold)" stroke="#a8741a" stroke-width="1.2"/><circle cy="-134" r="5" fill="#d63a2a" stroke="#ffd25e"/></g>`;
 }
+
+/* ---------- Marut pieces (marut-49-short-form, Nov 2026) ----------
+   windSwirl(x,y,s,{face:'sleep'|'smile'|'cry'|null, col, hi, spin, glow}) = one tiny wind-baby: a pale-blue/silver swirl of three
+     turning arms round a soft cloud-and-light puff (no gradients, safe on any shot). s=1 is about 90 px wide. With `face` it gets
+     a tiny glowing face (sleep = closed arcs, smile = open eyes + smile, cry = squeezed eyes + open mouth); without it, a plain wind.
+   windField(cx,cy,r,s,{layout:'rings'|'grid', n:49, delay, step, face, squash, col, spin}) = n swirls (49 = 1+8+16+24 rings, or a 7x7 grid) that
+     appear one by one (`step` s apart from `delay`). r = radius of the outer ring (or half-width of the grid), squash = y/x ratio. */
+function windSwirl(x,y,s,o){ o=o||{}; const c=o.col||'#bfe0ff', w=o.hi||'#ffffff', f=o.face||null, g=o.glow===undefined?1:o.glow,
+  sp=o.spin||(3+(((x*7+y*3)|0)%11)/6);
+  const arm=(rot,sw,op)=>`<path transform="rotate(${rot})" d="M2 -2 C14 -10 30 -4 32 12 C34 30 12 40 -8 36 C-34 30 -42 4 -32 -16 C-20 -40 14 -48 40 -32" fill="none" stroke="${c}" stroke-width="${sw}" stroke-linecap="round" opacity="${op}"/>`;
+  let face='';
+  if(f==='sleep') face=`<path d="M-8 -2 q3 3 6 0 M2 -2 q3 3 6 0" stroke="#5a6a8a" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M-3 6 q3 2 6 0" stroke="#d98a8a" stroke-width="1.5" fill="none" stroke-linecap="round"/>`;
+  else if(f==='smile') face=`<circle cx="-6" cy="-2" r="2.4" fill="#33466a"/><circle cx="6" cy="-2" r="2.4" fill="#33466a"/><circle cx="-5.4" cy="-2.8" r=".8" fill="#fff"/><circle cx="6.6" cy="-2.8" r=".8" fill="#fff"/><path d="M-5 5 q5 5 10 0" stroke="#d96a7a" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+  else if(f==='cry') face=`<path d="M-9 -3 l5 2 M9 -3 l-5 2" stroke="#5a6a8a" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="0" cy="6" rx="3.4" ry="4" fill="#9a4a60"/>`;
+  const puff=f?`<circle r="17" fill="#eef7ff"/><circle cx="-11" cy="6" r="9" fill="#e4f1ff"/><circle cx="11" cy="6" r="9" fill="#e4f1ff"/><circle cx="-8" cy="-9" r="7" fill="#fff" opacity=".8"/>`+
+    `<circle cx="-9" cy="3" r="3" fill="#ffb3c0" opacity=".45"/><circle cx="9" cy="3" r="3" fill="#ffb3c0" opacity=".45"/>`+face
+    :`<circle r="5" fill="${w}" opacity=".9"/>`;
+  return `<g transform="translate(${r1(x)} ${r1(y)}) scale(${r1(s)})">`+
+    (g?`<circle r="52" fill="${c}" opacity=".10"/><circle r="36" fill="${w}" opacity=".14"/>`:'')+
+    A(`spin:${sp.toFixed(2)}:0:0`, arm(0,6,.9)+arm(120,5,.75)+arm(240,4,.6))+puff+`</g>`; }
+function windField(cx,cy,r,s,o){ o=Object.assign({layout:'rings',n:49,delay:0,step:.05,squash:1},o||{}); const pts=[];
+  if(o.layout==='grid'){ const gap=(2*r)/6; for(let j=0;j<7;j++) for(let i=0;i<7;i++) pts.push([cx-r+i*gap, cy-r*o.squash+j*gap*o.squash]); }
+  else { pts.push([cx,cy]); [[8,.34],[16,.67],[24,1]].forEach(([k,f])=>{ for(let i=0;i<k;i++){ const a=i/k*Math.PI*2+(k===16?.2:0); pts.push([cx+Math.cos(a)*r*f, cy+Math.sin(a)*r*f*o.squash]); } }); }
+  return pts.slice(0,o.n).map((p,i)=>A(`fadein:${(o.delay+i*o.step).toFixed(2)}:.35`, o.dot?windDot(p[0],p[1],s,o.dot):windSwirl(p[0],p[1],s,{face:o.face,col:o.col,spin:o.spin?o.spin+(i%5)*.3:undefined}))).join(''); }
+/* windDot(x,y,s,col) = one tiny glowing light (the 49 lights before they turn into babies); windField(..., {dot:'#ffe9a0'}) draws dots instead of swirls */
+function windDot(x,y,s,col){ col=col||'#ffe9a0'; return `<g transform="translate(${r1(x)} ${r1(y)}) scale(${r1(s)})"><circle r="30" fill="${col}" opacity=".14"/><circle r="17" fill="${col}" opacity=".3"/><circle r="8" fill="${col}" opacity=".85"/><circle r="3.4" fill="#fff"/></g>`; }
