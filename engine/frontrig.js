@@ -393,7 +393,8 @@ function updateFrontRigShot(r, lt, t, talking){
   if(at){ P.lean+=(at.lean||0)*ak; }   // (expression no longer rolls the head: owner found the sideways bending ugly)
 
   const breathe=Math.sin(t*2.1+r.seed)*1.0;
-  setT(q.root, `translate(${n1(x)} ${n1(y+P.drop)}) scale(${n1(s*flip)} ${n1(s)})`);
+  let lieA=0, lieY=0; if(cast.lie){ const L=cast.lie, k=easeIO(clamp01((lt-(L.at||0))/(L.dur||.8))); lieA=(L.from||0)+(L.deg-(L.from||0))*k; lieY=Math.abs(Math.sin(lieA*Math.PI/180))*20*s; }   // lie:{deg,at,dur,from} also works on the front rig (Marut video)
+  setT(q.root, `translate(${n1(x)} ${n1(y+P.drop-lieY)}) rotate(${n1(lieA)}) scale(${n1(s*flip)} ${n1(s)})`);
   setT(q.upper, `rotate(${n1(P.lean)} 0 ${G.lean}) translate(0 ${n1(breathe*0.5)})`);
   if(q.cape) setT(q.cape, `translate(0 -272) scale(${n1(1+0.025*Math.sin(t*1.3+r.seed))} 1) translate(0 272)`);
 

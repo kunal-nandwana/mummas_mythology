@@ -3536,6 +3536,379 @@
         "len": 5,
         "start": 1
       }
+    },
+    "marut-vajra": {
+      "mood": "shock",
+      "desc": "Auto-created for scene \"marut-vajra\" (shock): देवराज इंद्र ने अपनी मौसी के गर्भ में पल रहे भाई क. Edit this recipe in library.json to change it.",
+      "level": [0.946, 0.401],
+      "pad": {
+        "chords": "fifth",
+        "seg": 6,
+        "amp": 0.22
+      },
+      "hit": {
+        "drum": {
+          "f": -24,
+          "amp": 0.7,
+          "len": 0.9
+        },
+        "bell": {
+          "f": -12,
+          "amp": 0.22,
+          "len": 4.5
+        }
+      },
+      "auto": true
+    },
+    "marut-vajra-hold": {
+      "mood": "hope",
+      "desc": "Auto-created for scene \"marut-vajra-hold\" (hope): लेकिन उनमें से किसी की भी जान नहीं गई।. Edit this recipe in library.json to change it.",
+      "level": [0.842, 1.12],
+      "pad": {
+        "chords": "maj",
+        "seg": 8,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 99,
+        "notes": [12, 19],
+        "amp": 0.07,
+        "len": 3,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 1, 2, 3, 4, 2],
+        "step": 0.43,
+        "amp": 0.13,
+        "ring": 1.4,
+        "lead": 0.4
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.2,
+        "note": [1.206, 2.738],
+        "rest": [0.701, 1.452],
+        "phrase": [3, 4],
+        "rise": 0.7,
+        "lead": 0.9
+      },
+      "auto": true
+    },
+    "marut-tree": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"marut-tree\" (calm): असल में देवता और दैत्य आपस में सौतेले भाई थे,. Edit this recipe in library.json to change it.",
+      "level": [0.698, 0.739],
+      "pad": {
+        "chords": "maj",
+        "seg": 7,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.459, 2.695],
+        "rest": [1.678, 3.731],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "marut-ashram": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"marut-ashram\" (calm): जिनके पिता ऋषि कश्यप थे और माताएं दो सगी बहनें अदि. Edit this recipe in library.json to change it.",
+      "level": [0.713, 0.794],
+      "pad": {
+        "chords": "open",
+        "seg": 8,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.82, 3.285],
+        "rest": [1.882, 4.799],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "marut-indralok": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"marut-indralok\" (divine): स्वर्ग पर अदिति के पुत्रों का शासन था,. Edit this recipe in library.json to change it.",
+      "level": [0.711, 0.866],
+      "pad": {
+        "chords": "open",
+        "seg": 11,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [24, 12, 19],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 4, 2, 5, 4, 2],
+        "step": 0.833,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "marut-grief": {
+      "mood": "sad",
+      "desc": "Auto-created for scene \"marut-grief\" (sad): जबकि दिति के दोनों बेटों की बारी-बारी से मृत्यु हो. Edit this recipe in library.json to change it.",
+      "level": [0.536, 0.369],
+      "pad": {
+        "chords": "min",
+        "seg": 8,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "bow",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.075,
+        "note": [2.507, 4.595],
+        "rest": [2.216, 3.679],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "marut-wish": {
+      "mood": "hope",
+      "desc": "Auto-created for scene \"marut-wish\" (hope): केवल यही वरदान मांगा कि उन्हें इंद्र को हराने वाला. Edit this recipe in library.json to change it.",
+      "level": [0.803, 1.054],
+      "pad": {
+        "chords": "maj",
+        "seg": 8,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 99,
+        "notes": [24, 12, 19],
+        "amp": 0.07,
+        "len": 3,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 2],
+        "step": 0.485,
+        "amp": 0.13,
+        "ring": 1.4,
+        "lead": 0.4
+      },
+      "melody": {
+        "kind": "pluck",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.2,
+        "note": [1.052, 2.412],
+        "rest": [0.668, 1.684],
+        "phrase": [3, 4],
+        "rise": 0.7,
+        "lead": 0.9
+      },
+      "auto": true
+    },
+    "marut-vrat": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"marut-vrat\" (divine): लेकिन शर्त रखी कि दिति को पूरे एक साल तक तन, मन और. Edit this recipe in library.json to change it.",
+      "level": [0.721, 0.832],
+      "pad": {
+        "chords": "divine",
+        "seg": 8,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [12, 19],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 4, 2, 5, 4, 2],
+        "step": 0.928,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "marut-disguise": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"marut-disguise\" (calm): इसलिए खबर मिलते ही इंद्र रूप बदलकर. Edit this recipe in library.json to change it.",
+      "level": [0.703, 0.737],
+      "pad": {
+        "chords": "open",
+        "seg": 9,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.597, 3.342],
+        "rest": [1.883, 3.885],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "marut-year": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"marut-year\" (calm): अपनी मौसी की सेवा में लग गए और उनकी एक चूक का इंतज. Edit this recipe in library.json to change it.",
+      "level": [0.681, 0.789],
+      "pad": {
+        "chords": "maj",
+        "seg": 8,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.46, 2.585],
+        "rest": [1.624, 3.865],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "marut-dusk": {
+      "mood": "sad",
+      "desc": "Auto-created for scene \"marut-dusk\" (sad): तब एक शाम थकान की वजह से दिति बिना पैर धोए ही सो ग. Edit this recipe in library.json to change it.",
+      "level": [0.547, 0.359],
+      "pad": {
+        "chords": "min",
+        "seg": 9,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "bow",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.075,
+        "note": [2.089, 3.99],
+        "rest": [2.346, 3.74],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "marut-light": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"marut-light\" (divine): इंद्र छोटा रूप लेकर गर्भ के अंदर गए. Edit this recipe in library.json to change it.",
+      "level": [0.686, 0.807],
+      "pad": {
+        "chords": "divine",
+        "seg": 8,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [12, 19],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 4, 2, 5, 4, 2],
+        "step": 0.85,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "marut-awake": {
+      "mood": "hope",
+      "desc": "Auto-created for scene \"marut-awake\" (hope): लेकिन व्रत लगभग पूरा हो चुका था, इसलिए उसके असर से. Edit this recipe in library.json to change it.",
+      "level": [0.808, 1.089],
+      "pad": {
+        "chords": "open",
+        "seg": 6,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 99,
+        "notes": [24, 12, 19],
+        "amp": 0.07,
+        "len": 3,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 4, 2, 5, 4, 2],
+        "step": 0.551,
+        "amp": 0.13,
+        "ring": 1.4,
+        "lead": 0.4
+      },
+      "melody": {
+        "kind": "pluck",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.2,
+        "note": [1.292, 2.619],
+        "rest": [0.614, 1.328],
+        "phrase": [3, 4],
+        "rise": 0.7,
+        "lead": 0.9
+      },
+      "auto": true
+    },
+    "marut-lanka": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"marut-lanka\" (calm): सदियों बाद जब हनुमान जी ने लंका में आग लगाई,. Edit this recipe in library.json to change it.",
+      "level": [0.733, 0.776],
+      "pad": {
+        "chords": "open",
+        "seg": 7,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.427, 3.378],
+        "rest": [1.798, 4.53],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
     }
   }
 }

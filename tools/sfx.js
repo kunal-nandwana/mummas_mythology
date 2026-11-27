@@ -81,15 +81,20 @@ const SYN={
     for(let i=N(1.2);i<n;i++){ const t=(i-N(1.2))/SR; o[i]+=0.25*Math.exp(-t/1.4)*Math.min(1,t/0.01)*Math.sin(TAU*1318.5*t); } return o; },
   herb:()=>{ const n=N(3.4), o=new Float32Array(n);                                   // golden herb glow: soft rising pentatonic chimes
     [659.3,784,987.8,1174.7,1318.5,1568].forEach((f,k)=>{ const t0=k*0.2; for(let i=N(t0);i<n;i++){ const t=(i-N(t0))/SR; o[i]+=0.4*Math.exp(-t/1.2)*Math.min(1,t/0.003)*(Math.sin(TAU*f*t)+0.25*Math.sin(TAU*2*f*t)); } }); return o; },
+  /* ---- Marut video: wind + wind-chime (soft, dry, never scary) ---- */
+  wind:()=>{ const n=N(5.0), o=sweep(5.0,260,820,u=>Math.pow(Math.sin(Math.PI*u),1.6)*0.9,41,0.95);            // Lanka wind: one slow airy swell that opens up, with a few high chime motes
+    [1318.5,1760,2093,1568].forEach((f,k)=>{ const t0=1.3+k*.55; for(let i=N(t0);i<n;i++){ const t=(i-N(t0))/SR; o[i]+=0.1*Math.exp(-t/.5)*Math.min(1,t/0.004)*Math.sin(TAU*f*t); } }); return o; },
+  chimes:()=>{ const n=N(1.8), o=new Float32Array(n);                                   // baby cries as soft wind-chimes: a few tiny high notes, short tails
+    [1568,1975.5,1760,2349.3,1760,2093].forEach((f,k)=>{ const t0=k*0.2; for(let i=N(t0);i<n;i++){ const t=(i-N(t0))/SR; o[i]+=0.4*Math.exp(-t/.28)*Math.min(1,t/0.003)*(Math.sin(TAU*f*t)+0.2*Math.sin(TAU*2.76*f*t)); } }); return o; },
   hiss:()=>sweep(0.55,3200,6200,u=>Math.sin(Math.PI*u)*0.5,35,0.5),                  // soft snake hiss
   twang:()=>{ const n=N(0.5), o=new Float32Array(n); for(let i=0;i<n;i++){ const t=i/SR; o[i]=Math.exp(-t/0.09)*Math.sin(TAU*(210+40*Math.exp(-t*25))*t)*Math.min(1,t/0.002); } return o; },   // bowstring only
   tick:()=>{ const n=N(0.16), o=new Float32Array(n), R=rng(17);
     for(let i=0;i<n;i++){ const t=i/SR; o[i]=(Math.sin(TAU*1900*t)*0.8+(R()*2-1)*0.6)*Math.exp(-t*55); } return o; },
 };
-const GAIN={whoosh:.4,riser:.35,boom:.6,hit:.5,gong:.4,bell:.3,shimmer:.3,tick:.25, beep:.55,beepUp:.55,beepDown:.55, slay:.85,emerge:.85,arrive:.8,noose:.7,revive:.7,kaal:.85, bowshot:.85,wings:.8,brahma:.8,herb:.75,hiss:.3,twang:.45};
+const GAIN={whoosh:.4,riser:.35,boom:.6,hit:.5,gong:.4,bell:.3,shimmer:.3,tick:.25, beep:.55,beepUp:.55,beepDown:.55, slay:.85,emerge:.85,arrive:.8,noose:.7,revive:.7,kaal:.85, bowshot:.85,wings:.8,brahma:.8,herb:.75,hiss:.3,twang:.45,wind:.7,chimes:.4};
 // seconds into a sound where its main hit lands: render.js starts the sound earlier so the hit lands exactly on the picture
 const IMPACT={emerge:1.0};
-const LP={beep:4500,beepUp:4500,beepDown:4500,slay:3000,emerge:2500,arrive:1800,noose:3000,revive:4000,kaal:1500, bowshot:3500,wings:3000,brahma:3000,herb:4500,hiss:6500,twang:3500, whoosh:2200,riser:3000,boom:400,hit:500,gong:2500,bell:3500,shimmer:5000,tick:3500};   // gentle low-pass: nothing sharp or shrill
+const LP={beep:4500,beepUp:4500,beepDown:4500,slay:3000,emerge:2500,arrive:1800,noose:3000,revive:4000,kaal:1500, bowshot:3500,wings:3000,brahma:3000,herb:4500,hiss:6500,twang:3500,wind:3500,chimes:5500, whoosh:2200,riser:3000,boom:400,hit:500,gong:2500,bell:3500,shimmer:5000,tick:3500};   // gentle low-pass: nothing sharp or shrill
 function lowpass(a,fc){ const k=1-Math.exp(-TAU*fc/SR); const o=new Float32Array(a.length); let y=0,y2=0; for(let i=0;i<a.length;i++){ y+=k*(a[i]-y); y2+=k*(y-y2); o[i]=y2; } return o; }
 const cache={};
 function sound(name){ if(!cache[name]){ const s=lowpass(SYN[name](),LP[name]||3000); let pk=0; for(const v of s) pk=Math.max(pk,Math.abs(v)); const g=(GAIN[name]||.5)/(pk||1); const fi=N(0.02), o=s.map(v=>v*g); for(let i=0;i<fi&&i<o.length;i++) o[i]*=i/fi; const fo=N(0.05); for(let i=0;i<fo&&i<o.length;i++) o[o.length-1-i]*=i/fo; cache[name]=o; } return cache[name]; }
