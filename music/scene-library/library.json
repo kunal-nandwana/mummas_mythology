@@ -3909,6 +3909,348 @@
         "lead": 0.8
       },
       "auto": true
+    },
+    "mp-gate": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"mp-gate\" (divine): श्री कृष्ण के देहांत के बाद,. Edit this recipe in library.json to change it.",
+      "level": [0.761, 0.794],
+      "pad": {
+        "chords": "divine",
+        "seg": 9,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [24],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 1, 2, 3, 4, 2],
+        "step": 0.954,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "mp-ashram": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"mp-ashram\" (calm): अर्जुन वेद व्यास के पास गए।. Edit this recipe in library.json to change it.",
+      "level": [0.7, 0.805],
+      "pad": {
+        "chords": "open",
+        "seg": 9,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.461, 3.321],
+        "rest": [2.076, 4.632],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "mp-court": {
+      "mood": "hope",
+      "desc": "Auto-created for scene \"mp-court\" (hope): इसलिए युधिष्ठिर ने अर्जुन के पौत्र परीक्षित को हस्. Edit this recipe in library.json to change it.",
+      "level": [0.845, 1.177],
+      "pad": {
+        "chords": "maj",
+        "seg": 8,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 99,
+        "notes": [24],
+        "amp": 0.07,
+        "len": 3,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 1, 2, 3, 4, 2],
+        "step": 0.517,
+        "amp": 0.13,
+        "ring": 1.4,
+        "lead": 0.4
+      },
+      "melody": {
+        "kind": "pluck",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.2,
+        "note": [1.24, 2.244],
+        "rest": [0.718, 1.704],
+        "phrase": [3, 4],
+        "rise": 0.7,
+        "lead": 0.9
+      },
+      "auto": true
+    },
+    "mp-march": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"mp-march\" (calm): पाँचों भाई और द्रौपदी सब कुछ पीछे छोड़कर निकल पड़े. Edit this recipe in library.json to change it.",
+      "level": [0.669, 0.794],
+      "pad": {
+        "chords": "open",
+        "seg": 10,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.681, 3.123],
+        "rest": [1.903, 3.343],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "mp-climb": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"mp-climb\" (calm): और एक श्वान उनके पीछे-पीछे चलने लगा।. Edit this recipe in library.json to change it.",
+      "level": [0.741, 0.805],
+      "pad": {
+        "chords": "open",
+        "seg": 7,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.595, 2.864],
+        "rest": [1.72, 3.456],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "mp-fall": {
+      "mood": "sad",
+      "desc": "Auto-created for scene \"mp-fall\" (sad): सबसे पहले द्रौपदी गिर पड़ीं।. Edit this recipe in library.json to change it.",
+      "level": [0.524, 0.395],
+      "pad": {
+        "chords": "min",
+        "seg": 8,
+        "amp": 0.42
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MIN",
+        "oct": 0,
+        "amp": 0.075,
+        "note": [2.388, 4.186],
+        "rest": [2.066, 3.496],
+        "phrase": [2, 3],
+        "start": 4,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "mp-clouds": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"mp-clouds\" (divine): इंद्र ने युधिष्ठिर को स्वर्ग ले जाने का प्रस्ताव द. Edit this recipe in library.json to change it.",
+      "level": [0.68, 0.843],
+      "pad": {
+        "chords": "open",
+        "seg": 9,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [24, 12, 19],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 2],
+        "step": 0.799,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "mp-dog": {
+      "mood": "calm",
+      "desc": "Auto-created for scene \"mp-dog\" (calm): लेकिन उन्होंने उस श्वान को छोड़ने से. Edit this recipe in library.json to change it.",
+      "level": [0.659, 0.796],
+      "pad": {
+        "chords": "maj",
+        "seg": 8,
+        "amp": 0.5
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.17,
+        "note": [1.778, 3.401],
+        "rest": [1.859, 3.761],
+        "phrase": [3, 4],
+        "lead": 0.8
+      },
+      "auto": true
+    },
+    "mp-dharma": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"mp-dharma\" (divine): स्वयं धर्म, यानी उनके पिता थे।. Edit this recipe in library.json to change it.",
+      "level": [0.69, 0.849],
+      "pad": {
+        "chords": "open",
+        "seg": 9,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [24],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 5, 4, 2, 3, 1],
+        "step": 1.011,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
+    },
+    "mp-heaven": {
+      "mood": "hope",
+      "desc": "Auto-created for scene \"mp-heaven\" (hope): स्वर्ग पहुँचने पर उन्हें अपने भाई नहीं बल्कि. Edit this recipe in library.json to change it.",
+      "level": [0.831, 1.074],
+      "pad": {
+        "chords": "open",
+        "seg": 6,
+        "amp": 0.52,
+        "rich": true
+      },
+      "bells": {
+        "every": 99,
+        "notes": [24, 12, 19],
+        "amp": 0.07,
+        "len": 3,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 2, 4, 5, 4, 2, 3, 1],
+        "step": 0.552,
+        "amp": 0.13,
+        "ring": 1.4,
+        "lead": 0.4
+      },
+      "melody": {
+        "kind": "flute",
+        "scale": "MAJ",
+        "oct": 12,
+        "amp": 0.2,
+        "note": [1.369, 2.61],
+        "rest": [0.611, 1.76],
+        "phrase": [3, 4],
+        "rise": 0.7,
+        "lead": 0.9
+      },
+      "auto": true
+    },
+    "mp-throne": {
+      "mood": "shock",
+      "desc": "Auto-created for scene \"mp-throne\" (shock): दुर्योधन मिला।. Edit this recipe in library.json to change it.",
+      "level": [0.958, 0.42],
+      "pad": {
+        "chords": "deep",
+        "seg": 5,
+        "amp": 0.22
+      },
+      "hit": {
+        "drum": {
+          "f": -24,
+          "amp": 0.7,
+          "len": 0.9
+        },
+        "bell": {
+          "f": -12,
+          "amp": 0.22,
+          "len": 4.5
+        }
+      },
+      "auto": true
+    },
+    "mp-hell": {
+      "mood": "shock",
+      "desc": "Auto-created for scene \"mp-hell\" (shock): उन्हें नरक से उनकी आवाज़ें सुनाई दीं,. Edit this recipe in library.json to change it.",
+      "level": [0.975, 0.386],
+      "pad": {
+        "chords": "fifth",
+        "seg": 5,
+        "amp": 0.22
+      },
+      "hit": {
+        "drum": {
+          "f": -24,
+          "amp": 0.7,
+          "len": 0.9
+        },
+        "bell": {
+          "f": -12,
+          "amp": 0.22,
+          "len": 4.5
+        }
+      },
+      "auto": true
+    },
+    "mp-test": {
+      "mood": "divine",
+      "desc": "Auto-created for scene \"mp-test\" (divine): तभी वह दृश्य गायब हो गया—यह. Edit this recipe in library.json to change it.",
+      "level": [0.728, 0.873],
+      "pad": {
+        "chords": "open",
+        "seg": 10,
+        "amp": 0.6,
+        "rich": true
+      },
+      "bells": {
+        "every": 3.4,
+        "notes": [24, 12, 19],
+        "amp": 0.12,
+        "len": 5,
+        "start": 0.1
+      },
+      "arp": {
+        "scale": "MAJ",
+        "oct": 12,
+        "pattern": [0, 4, 2, 5, 4, 2],
+        "step": 0.877,
+        "amp": 0.08,
+        "ring": 2.2,
+        "lead": 0.6
+      },
+      "auto": true
     }
   }
 }

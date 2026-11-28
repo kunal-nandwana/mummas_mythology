@@ -177,3 +177,9 @@ Verses: shots with `calli` (or a `॥` line) count as chanted. With a recording,
 - **Voice reverb (Nov 27 2026, owner: too much reverb):** the trailer-style hall reverb in `tools/render.js` is now OFF by default (`--cinemawet` default 0 instead of 0.09). The voice keeps the deep/clear/compressed grade, but dry. Add it back with `--cinemawet 0.05`.
 - **Camera note:** a final `'spring'` key that lands on zoom 1.0 overshoots below 1.0 and shows black edges. End on zoom 1.0 with a plain key; use `'spring'` only when the zoom stays above ~1.15.
 - **Silent calligraphy on a normal line:** `calli:{lines:[..], silent:true, y, size, delay, write, hold, glow, scrim, source}` is used three times in the Marut video (the words `मा रुदः`, `मरुत`, Tulsidas's chaupai) while the narrator talks normally.
+
+
+## v9 (Mahaprasthan video, Nov 2026)
+- **New characters:** **DRAUPADI** (dark-blue saree with gold border, gold jewellery, loose open hair), **DURYODHAN** (tall gold crown, dark red + gold armour and cape, broad; poses `heroic`/`hip`, `props:{front:'gada'}`), **DHARMA** (golden skin, white-gold dhoti, kirita crown, halo, white beard).
+- **`shwan(x,y,s,{flip,walk,up,gold,glow})`** (scenes.js): plain brown village dog seen from the side, facing right. `walk:true` swings the legs, `up:true` raises the head, `gold:true` + `glow:0..1` gives the golden Dharma form with a halo and slow rays. Put it in `front`/`art`/`mid`; it is not a rig character. For moving it use `A('walk:dx:dur:delay', shwan(...))`.
+- Seated look without a sit pose: put the throne back in `art`, the seat front panel in `front`, and stand the character behind it (see shot 24 of `mahaprasthan-short-form/story.js`).
