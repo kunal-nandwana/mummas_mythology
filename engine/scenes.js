@@ -378,3 +378,28 @@ function windField(cx,cy,r,s,o){ o=Object.assign({layout:'rings',n:49,delay:0,st
   return pts.slice(0,o.n).map((p,i)=>A(`fadein:${(o.delay+i*o.step).toFixed(2)}:.35`, o.dot?windDot(p[0],p[1],s,o.dot):windSwirl(p[0],p[1],s,{face:o.face,col:o.col,spin:o.spin?o.spin+(i%5)*.3:undefined}))).join(''); }
 /* windDot(x,y,s,col) = one tiny glowing light (the 49 lights before they turn into babies); windField(..., {dot:'#ffe9a0'}) draws dots instead of swirls */
 function windDot(x,y,s,col){ col=col||'#ffe9a0'; return `<g transform="translate(${r1(x)} ${r1(y)}) scale(${r1(s)})"><circle r="30" fill="${col}" opacity=".14"/><circle r="17" fill="${col}" opacity=".3"/><circle r="8" fill="${col}" opacity=".85"/><circle r="3.4" fill="#fff"/></g>`; }
+
+/* ---- Mahaprasthan video (Nov 2026): the dog (shwan) ----
+   shwan(x,y,s,o): a plain brown village dog seen from the side, facing right (flip:true faces left). Ground at y, s=1 is about 150 px long and 105 px tall.
+   o = {flip, walk:true (legs swing, head bobs), up:true (head raised, looks up at someone), gold:true (golden body, used for Dharma), glow:0..1 (soft pulsing golden halo + slow rays)}.
+   The tail wags by itself. No gradients of its own (uses url(#gw)), so it is safe on any shot. */
+function shwan(x,y,s,o){ o=Object.assign({flip:false,walk:false,up:false,gold:false,glow:0},o||{}); s=s||1;
+  const body=o.gold?'#f4c860':'#9c6a3a', belly=o.gold?'#ffe8a8':'#c49a64', dark=o.gold?'#d9a23a':'#6e4524', far=o.gold?'#dca84a':'#7a4e2a', nose=o.gold?'#8a5a1a':'#1e1410';
+  const leg=(cx,cy,col,deg,spd)=>{ const inner=`<path d="M${cx-7} ${cy} L${cx-5} -8 Q${cx-8} -1 ${cx-1} -1 L${cx+9} -1 Q${cx+11} -6 ${cx+5} -9 L${cx+7} ${cy}Z" fill="${col}"/>`;
+    return o.walk?A(`rock:${deg}:${spd}:${cx}:${cy}`,inner):inner; };
+  const head=`<g transform="translate(0 ${o.up?-6:0}) rotate(${o.up?-12:0} 66 -96)">
+    <path d="M58 -112 C70 -128 94 -126 104 -112 C112 -102 126 -98 130 -90 C132 -82 124 -78 114 -78 C100 -76 84 -80 70 -84 C60 -90 56 -102 58 -112Z" fill="${body}"/>
+    <path d="M104 -106 C114 -100 126 -98 130 -90 C132 -82 124 -78 114 -78 C108 -86 106 -96 104 -106Z" fill="${belly}"/>
+    <ellipse cx="130" cy="-90" rx="6.5" ry="5" fill="${nose}"/><path d="M114 -80 q8 3 14 -1" stroke="${nose}" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <ellipse cx="98" cy="-108" rx="4.2" ry="4.6" fill="#1a100c"/><circle cx="99.4" cy="-109.6" r="1.4" fill="#fff"/>
+    ${A('rock:6:1.8:70:-122',`<path d="M66 -122 C54 -126 46 -108 52 -88 C60 -90 70 -100 72 -116Z" fill="${dark}"/>`)}</g>`;
+  const glow=o.glow>0?A('pulse:2.6',`<circle cx="10" cy="-60" r="150" fill="url(#gw)" opacity="${r1(o.glow*.95)}"/>`)+A('spin:26:10:-60',[...Array(10)].map((_,i)=>`<path d="M10 -60 L${r1(10+Math.cos(i*.628)*230)} ${r1(-60+Math.sin(i*.628)*230)} L${r1(10+Math.cos(i*.628+.12)*230)} ${r1(-60+Math.sin(i*.628+.12)*230)}Z" fill="#fff0b0" opacity="${r1(o.glow*.16)}"/>`).join('')):'';
+  return `<g transform="translate(${r1(x)} ${r1(y)}) scale(${o.flip?-s:s} ${s})">${glow}
+    <ellipse cx="6" cy="2" rx="86" ry="8" fill="#000" opacity=".25"/>
+    ${A(`rock:${o.walk?30:22}:${o.walk?3.6:2.8}:-72:-84`,`<path d="M-72 -84 C-92 -92 -100 -112 -92 -134 C-88 -122 -80 -108 -66 -98Z" fill="${dark}"/>`)}
+    ${leg(-50,-58,far,16,3.2)}${leg(40,-60,far,-16,3.2)}
+    <path d="M-76 -84 C-80 -108 -50 -118 -10 -114 C20 -112 40 -118 62 -112 C70 -96 66 -76 52 -62 C34 -52 6 -56 -20 -52 C-44 -48 -66 -56 -76 -84Z" fill="${body}"/>
+    <path d="M-40 -56 C-14 -48 20 -50 50 -62 C40 -48 6 -42 -24 -44Z" fill="${belly}" opacity=".9"/>
+    <path d="M-60 -98 C-30 -108 0 -104 20 -100" fill="none" stroke="${dark}" stroke-width="5" opacity=".35" stroke-linecap="round"/>
+    ${leg(-62,-60,body,-16,3.2)}${leg(52,-62,body,16,3.2)}
+    <path d="M50 -108 C58 -112 62 -104 62 -96" fill="${body}"/>${head}</g>`; }
